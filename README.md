@@ -1,7 +1,7 @@
-remove_regular_transients
+rptransient
 =========================
 
-Remove regularly-spaced transients from OBS data
+Remove periodic transient(s) from seismological data
 
 Based on Matlab code by E Wielandt, used in Deen et al., 2017
 
