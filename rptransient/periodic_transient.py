@@ -1,44 +1,46 @@
 #!env python3
-""" Model and remove glitches from BBOBS data"""
+""" Model and remove transients from BBOBS data"""
 
-#################################################
-# import obspy
-from obspy.core import UTCDateTime
-from obspy.core.stream import Stream
-import diracComb_v2 as dc
-import matplotlib.pyplot as plt
-import numpy as np
-# from scipy import signal
 # import math as M
 # import sys
 # import glob
+# import obspy
 
+from obspy.core import UTCDateTime
+from obspy.core import Stream, Trace
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import numpy as np
+# from scipy import signal
+
+from .dirac_comb import comb_calc, comb_remove
 from .utils import stack_data, input_float, input_float_tuple
 
 def_mag_limit = 5.85
 def_days_per_magnitude = 1.5
 
-class Periodic_Transient():
+
+class PeriodicTransient():
     """
     Information about one periodic transient
     """
     def __init__(self, name: str, period: float, dp: float, clips: tuple,
-                 starttimes: list=[]):
+                 transient_starttime: UTCDateTime):
         """
         :param name: name of this periodic transient (e.g., 'hourly')
         :param period: seconds between transients (seconds)
         :param dp: how many seconds to change the period by when testing for
                    better values
         :param clips: clip values outside of this range.  Should correspond to
-                      max range of glitch
+                      max range of transient
         :type clips: 2-tuple (lowest, highest)
-        :param starttimes: onset times of earliest glitch(es).  Multiple values
-                           allow for a change due to releveling, etc. It's
-                           better to be a few seconds too early than too late.
-                           The program will make transient slices starting
-                           between a starttime and 1/3 of a transient period
-                           earlier
-        :type starttimes:  list of ~class `obspy.core.UTCDateTime`
+        :param transient_starttime: onset time of earliest transient.
+        :type transient_starttime:  ~class `obspy.core.UTCDateTime`
+        
+        The program will make transient slices starting between
+        transient_starttime and 1/3 of self.period earlier
+        
+        transient_starttime must not be too late, a few seconds early is ok
         """
         self.name = name
         self.period = float(period)
@@ -46,39 +48,103 @@ class Periodic_Transient():
         self.clips = [None, None]
         self.clips[0] = float(clips[0])
         self.clips[1] = float(clips[1])
-        assert isinstance(starttimes, list)
-        for t in starttimes:
-            assert t is None or isinstance(t, UTCDateTime)
-        self.starttimes = starttimes
+        if isinstance(transient_starttime, str): 
+                transient_starttime = UTCDateTime(transient_starttime)
+        assert isinstance(transient_starttime, UTCDateTime)
+        self.transient_starttime = transient_starttime
+        # Values to be calculated
+        self.transient_model = None
+        self.dirac_comb = None
+        self.n_transients_used = 0
+        # These should probably just be dependent parameters based on
+        # self.transient_model
+        self.tm = None
+        self.tp = None
 
     def __str__(self):
-        s= '"{self.name}": {self.period}s+-{self.dp}, clips={self.clips}, '
-        s += 'starttimes={self.starttimes}'
+        s = f'"{self.name}": {self.period:.2f}s+-{self.dp}, clips={self.clips}, '
+        s += f'transient_starttime={self.transient_starttime}'
         return s
 
-    def verify(self, trace, template, ref_time):
+    def calc_timing(self, trace, eq_template):
+        """
+        Calculate transient time parameters
+
+        :param trace: data
+        :param eq_template: EQTemplate() object
+        """
+        self.verify(trace, eq_template)
+
+    def calc_transient(self, trace, eq_template, match=True, plots=False):
+        """
+        Calculate transient for a given trace and transient parameters
+
+        :param trace:      input data trace
+        :type trace: ~class `obspy.stream.Trace`
+        :param eq_template: template of good data (same size as trace,
+                            1 for good, 0 for bad
+        :type eq_template: ~class `EQTemplate` or `obspy.core.Trace`
+        :param match: match and cancel each pulse separately
+        :type match: bool
+        :param plots: plot results
+        :type plots: bool
+        :returns:  cleaned data
+        """
+        slice_starttime = self._calc_slice_starttime(trace)
+        if self.transient_starttime < trace.stats.starttime:
+            print("\tshifting transient startime to first within data")
+            self.transient_starttime = trace.stats.starttime + self._transient_offset(trace)
+        transient, dc, nG, tm, tp, cbuff = comb_calc(trace, self, plots,
+                                                     eq_template,
+                                                     slice_starttime)
+        transient.stats.channel = f'TR{trace.stats.channel[-1]}'
+        if plots:
+            transient.plot()
+        self.transient_model = transient
+        self.tm, self.tp = tm, tp
+        self.dirac_comb = dc
+        self.n_transients_used = nG
+        # print(f"calc_transient(): {cbuff=}")
+        self.comb_buffer = cbuff
+
+    def remove_transient(self, trace, match=True, plots=False):
+        """
+        Remove transient from trace
+
+        :param trace: data
+        :param match: match each transient individually
+        """
+        assert self.transient_model is not None
+
+        slice_starttime = self._calc_slice_starttime(trace)
+        out, synth = comb_remove(trace, self, match, slice_starttime)
+        if plots:
+            out.stats.channel = 'CLN'
+            synth.stats.channel = 'SYN'
+            Stream([trace, out, synth]).plot()
+        return out
+
+    def verify(self, trace, template):
         """
         Interactively verify transient parameters
-    
+
         :param trace:      input data trace
         :type trace: ~class `obspy.stream.Trace`
         :param template: template of good data (same size as trace,
                          1 for good, 0 for bad
         :type template: ~class `obspy.stream.Trace`
-        :param ref_time: start time of first glitch (or a few seconds before)
-        :type ref_time: ~class `obspy.core.UTCDateTime
         """
-        startoffset = self._calc_start_offset(ref_time, trace.stats.starttime)
+        slice_starttime = self._calc_slice_starttime(trace)
 
         # Set/verify clip levels
-        self._ask_clips(trace, template, startoffset)
+        self._ask_clips(trace, template, slice_starttime)
 
-        # SET/VERIFY GLITCH PERIOD
+        # SET/VERIFY TRANSIENT PERIOD
         cliptrace = trace.copy()
         cliptrace.data.clip(self.clips[0], self.clips[1], out=cliptrace.data)
-        self._ask_period(cliptrace, template, startoffset, ref_time)
+        self._ask_period(cliptrace, template, slice_starttime)
 
-    def _ask_clips(self, trace, template, st_off):
+    def _ask_clips(self, trace, template, slice_starttime):
         """
         Show clip levels and ask to update them until acceptable
 
@@ -87,170 +153,135 @@ class Periodic_Transient():
         :param template: signal of ones and zeros, with zeros where trace is to
                          be hidden
         :type template: obspy.core.stream.Trace
-        :param st_off: offset from start of trace to start slicing
+        :param slice_starttime: first slice starttime
         :param testper: length of each slice (seconds)
         :param clip: 2-tuple of default clip values (lo, hi)
         """
-        st = trace.stats.starttime
+        stt = trace.stats.starttime
         sps = trace.stats.sampling_rate
-        station = trace.stats.station
+        sta = trace.stats.station
+        
         stack_trace = trace.copy()
         stack_trace.data = stack_trace.data * template.data
-        if st_off > 0:
-            stack_trace = stack_trace.slice(starttime=st + st_off)
+        if slice_starttime > stt:
+            stack_trace = stack_trace.slice(starttime=slice_starttime)
         stack = stack_data(stack_trace.data, self.period*sps)
         nrows, ncols = stack.shape
         time = np.arange(nrows) / sps
         # slicenums = np.arange(ncols)
-        title = '{} sliced at {:g}s, stacked'.format(station, self.period)
+        title = '{} sliced at {:g}s, stacked'.format(sta, self.period)
+        
         # Show clip levels and verify that they are ok
+        fig, ax = plt.subplots(1,1, num="Select clip levels")
+        ax.plot(time, stack, linewidth=0.1)
+        c1, c2 = self.clips
+        llo = ax.axhline(c1, c='b', ls='--', label=f'clip_lo')
+        lhi = ax.axhline(c2, c='r', ls='--', label=f'clip_hi')
+        ax.set_xlabel('Time (seconds)')
+        ax.set_title(title)
+        ax.set_ylim((c1 - (c2-c1)*.3, c2 + (c2-c1)*.3))
+        ax.legend()
+        plt.ion()
+        plt.show()
         while True:
-            plt.plot(time, stack, linewidth=0.1)
-            plt.plot([time[0], time[-1]], [self.clips[0], self.clips[0]],
-                     'k--', label='clip_lo = {:g}'.format(self.clips[0]))
-            plt.plot([time[0], time[-1]], [self.clips[1], self.clips[1]],
-                     'k-.', label='clip_hi = {:g}'.format(self.clips[1]))
-            plt.xlabel('Time (seconds)')
-            clip_range = self.clips[1] - self.clips[0]
-            plt.ylim((self.clips[0] - clip_range*.3,
-                      self.clips[1] + clip_range*.3))
-            plt.legend()
-            plt.title(title)
-            plt.show()
-            # Ask for a new clip_lo,clip_hi tuple, continue if current value
-            # accepted
-            newval = input_float_tuple('Enter clip levels containing all '
-                                       'glitches (RETURN to accept current '
-                                       'value)', self.clips)
+            newval = input_float_tuple(
+                'Enter clip levels containing all transients', self.clips)
             if newval == self.clips:
                 break
             else:
                 self.clips = newval
+                c1, c2 = self.clips
+                llo.set_ydata([c1, c1])
+                lhi.set_ydata([c2, c2])
+                ax.set_ylim((c1 - (c2-c1)*.3, c2 + (c2-c1)*.3))
+                plt.draw()
+        plt.close(fig)
+        plt.ioff()
 
-    def _ask_test_period(self, trace, template, st_off, ref_time):
+    def _ask_period(self, trace, template, slice_starttime):
         """
-        Show glitch alignment and ask to update glitch period until acceptable
+        Show transient alignment and ask to update period until acceptable
 
-        Also allows to verify that the glitch_parm.starttime is ok, but not to
+        Also allows to verify that self.transient_starttime is ok, but not to
         modify it
 
         :param trace: seismological trace
         :type trace: obspy.core.stream.Trace
         :param template: signal of 1s and 0s, 0s where trace is to be hidden
         :type template: obspy.core.stream.Trace
-        :param st_off: offset from start of trace to start slicing
-        :param ref_time: time at start of (or just before) one of the glitches
-        :type ref_time: ~class `obspy.core.UTCDateTime`
+        :param slice_starttime: offset from start of trace to start slicing
         """
-        st = trace.stats.starttime
+        stt = trace.stats.starttime
         sps = trace.stats.sampling_rate
-        station = trace.stats.station
+        sta = trace.stats.station
+        
         stack_trace = trace.copy()
         stack_trace.data = stack_trace.data * template.data
-        if st_off > 0:
-            stack_trace = stack_trace.slice(starttime=st + st_off)
+        if slice_starttime > stt:
+            stack_trace = stack_trace.slice(starttime=slice_starttime)
+        fig, ax = plt.subplots(1,1, num="Select transient period")
+        ax.set_xlabel('Slice starttime')
+        ax.set_ylabel('Time (seconds)')
+        locator = mdates.AutoDateLocator()
+        ax.xaxis.set_major_locator(locator)
+        ax.xaxis.set_major_formatter(mdates.AutoDateFormatter(locator))
+        ax.grid(True, zorder=20)
+        hline = ax.axhline(0, c='k', ls='--')
+        fig.autofmt_xdate()
+        plt.ion()
+        plt.show()
         while True:
             stack = stack_data(stack_trace.data, self.period*sps)
             nrows, ncols = stack.shape
-            time = np.arange(nrows) / sps
+            timey = np.arange(nrows) / sps
+            x_offset  = np.arange(ncols)*self.period
+            timex = stack_trace.stats.starttime.matplotlib_date + x_offset/86400
             slicenums = np.arange(ncols)
-            if ref_time:
-                ref_offs = (ref_time-stack_trace.stats.starttime) % self.period
-            else:
-                ref_offs = 0
-            title = '{} sliced at {:g}s, clipped, stacked'.format(station,
-                                                                  self.period)
-
+            ref_offs = self._transient_offset(stack_trace)
+            title = '{}, transient, data start={},{}, period={:g}s'.format(
+                sta, self.transient_starttime.strftime('%Y%m%dT%H%M%S'),
+                stt.strftime('%Y%m%dT%H%M%S'), self.period)
             # plot as pcolor
-            plt.figure(1)
-            plt.pcolormesh(slicenums, time, stack)
-            plt.plot([0, ncols], [ref_offs, ref_offs], 'k--')
-            plt.xlabel('Period slice #')
-            plt.ylabel('Time (seconds)')
-            plt.title(title)
-            plt.grid(True, zorder=20)
-            plt.show()
+            ax.set_title(title, size='medium')
+            # ax.pcolormesh(slicenums, time, stack, shading='auto')
+            ax.pcolormesh(timex, timey, stack, shading='auto')
+            hline.set_ydata([ref_offs, ref_offs])
+            plt.draw()
 
             # Ask for new test period, continue if current value accepted
-            newval = input_float('Enter new test period (RETURN to accept '
-                                 'current value)', self.period)
+            newval = input_float('Enter new test period', self.period)
             if newval == self.period:
                 break
             else:
                 self.period = newval
+        plt.close(fig)
+        plt.ioff()
 
-    def _calc_start_offset(self, ref_time, starttime):
+    def _calc_slice_starttime(self, trace):
         """
-        Choose "slice" start time so that glitches will start no more than 1/3
-        of the way in
+        Choose first "slice" starttime so that transients start no more
+        than 1/3 of the way in
+        
+        :param trace: input data
         """
-        first_glitch_offset = (ref_time - starttime) % self.period
-        if first_glitch_offset <= self.period / 3:
-            offset = 0
-        else:
-            offset = first_glitch_offset - self.period/3.
-            print('='*72)
-            print('According to the first glitch time you specified, the '
-                  'first glitch starts\n {:g} seconds ({:.0f}%) into slices '
-                  'based on the {:g} second glitch period.\n Shifting forward by {:g} '
-                  'seconds so that it starts 1/3 of the way in'
-                  .format(first_glitch_offset,
-                          100. * first_glitch_offset / self.period,
-                          self.period, offset))
-            print('='*72)
-        return offset
+        slice_starttime = trace.stats.starttime
+        transient_offset = self._transient_offset(trace)
+        if transient_offset > self.period / 3:
+            shift = transient_offset - self.period/3.
+            slice_starttime += shift
+            print(f'\t{slice_starttime=}')
+            print(f'\t{self.transient_starttime=}')
+            print(f'\t{self.period=}')
+            print('\tFirst transient starts {:.0f}% of period into data'
+                  .format(100. * transient_offset / self.period))
+            print(f'\tReducing to 33% by shifting forward {shift:g}s')
+        return slice_starttime
 
-    def calcglitch(self, trace, template, ref_time, iTrans, match, plots):
+    def _transient_offset(self, trace):
         """
-        Calculate transient for a given trace and transient parameters
-
-        :param trace:      input data trace
-        :type trace: ~class `obspy.stream.Trace`
-        :param template: template of good data (same size as trace, 1 for good,
-                         0 for bad
-        :type template: ~class `obspy.stream.Trace`
-        :param ref_time: start time of first glitch (or a few seconds before)
-        :type ref_time: ~class `obspy.core.UTCDateTime
-        :param match: match and cancel each pulse separately
-        :type match: bool
-        :param iTrans: counter of which transient we are removing
-        :param plots: plot results
-        :type plots: bool
+        Return offset of first transient in the trace
         """
-        startoffset = self._calc_start_offset(ref_time, trace.stats.starttime)
-
-        # Calculate and Remove glitch
-        out, glit_1, glit_t, d_comb, nGlitch = dc.comb_clean(trace, self,
-                                                             match, plots,
-                                                             template,
-                                                             startoffset)
-        out.stats.channel = f'CC{iTrans:d}'
-        glit_t.stats.channel = f'GG{iTrans:d}'
-        if plots:
-            Stream([trace, out, glit_t]).plot()
-        trace = out
-        return (out, glit_1, d_comb, nGlitch)
-
-    def _get_transient_shifts(self, trace):
-        """
-        Search for glitch start corresponding to data start and
-        make a list of glitch start shifts within data
-        """
-        shifts = []
-        ref_time = self.starttime
-        if len(self.starttime) > 1:
-            for test_time in self.starttime[1:]:
-                if test_time < trace.stats.starttime:
-                    ref_time = test_time
-                elif test_time < trace.stats.endtime:
-                    # there is a break in glitch times within this data
-                    shifts.append(test_time)
-            return ref_time, shifts
-        elif self.starttime:
-            return self.starttime, shifts
-        else:
-            return trace.stats.starttime, shifts
-
+        return (self.transient_starttime - trace.stats.starttime) % self.period
 
 #########################################################################
 # if __name__ == "__main__":

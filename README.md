@@ -13,25 +13,33 @@ Example run:
 
 Prepare decimated and clean-rotated data:
 ```python
+from obspy import UTCDateTime
 from obspy.clients.filesystem.sds import Client
-from rrtrans import decimate, rotate_clean
+from rptransient import decimate, rotate_clean
 
-net = 'YV'
+net = 'XX'
 sta = 'I04D'
-noisys = []
+archive_dir = '/Volumes/Wayne_Data/_NoBackup/SDS_PILAB'
+archive_dir = '/Users/crawford/_Work/Parc_OBS/7_Missions/2016.PiLAB/7_DataExtraction/2021.lc2ms/test/SDS'
+eqfile = 'eqs_20160227-20170118.csv'
 
 # READ DATA, DECIMATE AND ROTATE
-starttime = UTCDateTime('2012-12-01T00:00:00')
-endtime = starttime + 86400
+starttime = UTCDateTime('2016-12-01T00:00:00')
+endtime = starttime + 10*86400
 decimates = [5, 5, 5]
-sds = Client('/SDS')
+sds = Client(archive_dir)
 
-stream = sds.get_waveforms(net, sta, "", "??Z", starttime, endtime)
+stream = sds.get_waveforms(net, sta, "*", "*", starttime, endtime)
+# stream.merge()
+print(endtime)
+print(stream.__str__(extended=True))
 
 dec_data = decimate(stream, decimates)
-rot_data = rotate_clean(dec_data, noisys)
-rot_fname = f'{station}_dec.mseed'
-rot_data.write(rot_fname, 'MSEED', encoding='STEIM1')
+rot_data, ang, azi = rotate_clean(dec_data, eqfile=eqfile, plot=True)
+print(f'{sta} Z rotated by {ang:.2f} degrees at azimuth {azi:.1f}')
+time_str = f'{starttime.strftime("%Y%m%d")}_{endtime.strftime("%Y%m%d")}'
+rot_fname = f'{sta}_dec_{time_str}.mseed'
+rot_data.write(rot_fname, 'MSEED')
 ```
 
 Calculate and remove transients
@@ -44,11 +52,14 @@ eqfile = 'earthquakes_201210-201310.csv'
 transients = [PT("1h", 3620.27, 0.05, [-300, 200], ['2016-04-01T00:28:30']),
              [PT("3h", 9519.14, 0.2,  []-110,  80], ['2016-04-01T00:00:00'])]
 
+rt = Transients(transients)
 stream = read(f'{station}_dec.mseed','MSEED')
-rt = Transient(transients)
-trans_times = rt.calc_times(rot_data.z, eq_file, delay)   # Interactive tuning of transient paramters
-trans = rt.calc_trans(rot_data, trans_times, eq_file, delay)
-cleaned = rt.clean_trans(rot_data, trans, trans_times)
+zdata = stream.select(channel='*Z')[0]
+eq_template = EQTemplate(zdata, eqfile)
+# Interactive tuning of transient parameters
+rt.calc_timing(zdata, eq_template)   
+trans = rt.calc_transient(zdata, eq_template)
+cleaned = rt.clean_transient(zdata, trans)
 cleaned.write(format='MSEED')
 ```
 
