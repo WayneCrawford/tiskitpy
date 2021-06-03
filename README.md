@@ -5,6 +5,17 @@ Remove periodic transient(s) from seismological data
 
 Based on Matlab code by E Wielandt, used in Deen et al., 2017
 
+Installation
+=========================
+
+Clone or download this repository, then from within the main repository directory, run:
+
+```pip install .```
+
+You can also install in editable mode (for developers), with:
+
+```pip install -e .```
+
 Overview
 ======================
 
