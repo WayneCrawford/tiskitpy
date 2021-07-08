@@ -3,50 +3,47 @@
 
 #################################################
 # import obspy
+from obspy.clients.fdsn import Client
 from obspy.core import UTCDateTime
 from obspy.core.stream import Stream, Trace
 import numpy as np
 import matplotlib.pyplot as plt
 
-def_mag_limit = 5.85
-def_days_per_magnitude = 1.5
-
 
 class EQTemplate(Trace):
     """
-    An obspy Trace with zeros after big EQs, ones elsewhere
+    A template for zeroing out data after big earthquakes
     """
-    def __init__(self, inp, eqfile, mag_limit=def_mag_limit,
-                 days_per_magnitude=def_days_per_magnitude,
-                 plot=False, verbose=True):
+    def __init__(self, inp, start_time, end_time, mag_limit=5.85,
+                 days_per_magnitude=1.5,
+                 plot=False, verbose=True, eqfile=None):
         """
         Make a template to cut out times after large EQs
 
-        :param inp: seismological channel (obspy.core.Trace)
-        :param eqfile: name of  csv file containing global earthquakes
-            (column 1 = time (ISO8601), column4=magnitude)
-            Can be downloaded from USGS website or using web services 
-            obspy example:
-                obspy.clients.fdsn.client.Client("IRIS").get_events())
-        :param mag_limit: EQ Magnitude above which to cut out times
-        :param days_per_magnitude: days to cut per magnitude above mag_limit
-        :param verbose: print out list of EQs and the time that will be cut
-        :param plot: plot traces with EQ cut out
+        Arguments:
+            start_time (obspy.core.UTCDateTime): earliest data that will be
+                presented
+            end_time (obspy.core.UTCDateTime): latest data that will be
+                presented
+            min_magnitude (float): EQ Magnitude above which to cut out times
+            days_per_magnitude (float): days to cut per magnitude above
+                min_magnitude
+            verbose: print out list of EQs and the time that will be cut
+            eqfile: name of  csv file containing global earthquakes
+                (column 1 = time (ISO8601), column4=magnitude)
+                If this is not provided, the program will download the data
+                based on starttime and endtime.  It will load early enough
+                before to cover an M9 EQ
         :returns: template (obspy.core.Trace)
         
         Here's an obspy example of downloading the eqfile:
-        from obspy.clients.fdsn import Client
         from obspy import UTCDateTime
-        Client("USGS").get_events(starttime=UTCDateTime('2016-02-27'),
-                                  endtime=UTCDateTime('2017-02-28'),
-                                  minmagnitude=5.5, format='csv', orderby='time-asc',
-                                  filename='eqs_20160227-20170228.csv')
         """
-        assert isinstance(inp, Trace)
-        super().__init__(np.ones(inp.data.shape), inp.stats)
-        self.stats.channel = 'TTT'
-        sps = inp.stats.sampling_rate
-
+        cat = Client("USGS").get_events(
+            starttime=start_time-86400*(9-mag_limit)*days_per_magnitude,
+            endtime=end_time,
+            minmagnitude=min_magnitude, 
+            orderby='time-asc')
         f = open(eqfile, 'r')
         for line in f:
             w = line.split(',')
@@ -79,6 +76,26 @@ class EQTemplate(Trace):
         if plot:
             self.plot_mask(inp)
             
+    def apply(self, inp, plot=False):
+        """
+        Zero out data in trace when it is too close to an eqfile
+        
+        Returns an error if the EQ catalog does not bound the Trace time
+        Returns a warning if the EQ catalog does not start far enough before
+        the trace to cover an M9 EQ.
+        
+        Arguments:
+            inp (obspy.core.Trace): seismological data
+            plot: plot traces with EQs cut out
+        """
+        if not isinstance(inp, Trace):
+            raise(ValueError, 'inp is not an obspy Trace object')
+        super().__init__(np.ones(inp.data.shape), inp.stats)
+        self.stats.channel = 'TTT'
+        sps = inp.stats.sampling_rate
+
+         
+
     def __mul__(self, val):
         """
         Return data multiplied by template

@@ -17,6 +17,7 @@ from obspy import UTCDateTime
 # from obspy.signal import rotate
 
 from .EQ_template import EQTemplate
+from .eq_remover import EQRemover
 
 DEBUG = True
 
@@ -26,29 +27,39 @@ def debug(s):
         print(s)
 
 
-def rotate_clean(stream, eqfile=None, excludes=[], horiz_too=False, plot=False,
-                 quickTest=False):
+def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
+                 quickTest=False, remove_eq=True, verbose=True):
     """
     Rotates vertical channel to minimize noise
 
-    :param stream: input data, must have a *Z, *[1|N] and *[2|E] channel
-    :type stream: ~class obspy.core.stream.Stream
-    :param eqfile: a FDSN CSV file listing global earthquakes (>M5.5 is usually
-                   enough) during the data period.  Used to remove noise
-                   from these earthquakes during the rotation angle calculation
-    :param excludes: list of dictionaries containing time periods to avoid,
+    Arguments:
+        stream (Stream): input data, must have a *Z, *[1|N] and *[2|E] channel
+        remove_eq (str, True or False): filename of catalog to use to remove
+            earthquakes, will download catalog from USGS if True, not remove
+            EQs if False
+        excludes: list of dictionaries containing time periods to avoid,
                      using "start" and "end" keys
-    :param horiz_too: rotate horizontals also (use True if you think
+        horiz_too: rotate horizontals also (use True if you think
                       the channels are truly orthogonal)
-    :param plot: Plot comparision of original and rotated vertical
-    :param quickTest: Only run one day's data and do not save results
+        plot: Plot comparision of original and rotated vertical
+        quickTest: Only run one day's data and do not save results
 
-    :returns: stream_rot (obspy.stream): rotated stream
-              (angle, azimuth) by which Z (or Z-X-Y) were rotated
+    Returns:
+        (tuple): 3-tuple containing:
+            (Stream): rotated stream
+            (float): angle by which Z (or Z-X-Y) was rotated
+            (float): azimuth by which Z (or Z-X-Y) was rotated
     """
-    eq_template = None
-    if eqfile is not None:
-        eq_template = EQTemplate(stream[0], eqfile)
+    if isinstance(remove_eq, str):
+        eq_remover = EQRemover(stream[0].stats.starttime,
+                               stream[0].stats.endtime, eqfile=remove_eq,
+                               quiet=not verbose)
+    if remove_eq is True:
+        eq_remover = EQRemover(stream[0].stats.starttime,
+                               stream[0].stats.endtime,
+                               quiet=not verbose)
+    else:
+        eq_remover = None
     # Filter data to tilt noise band for best Angle calc)
     filtstream = stream.copy()
     for interval in excludes:
@@ -59,19 +70,23 @@ def rotate_clean(stream, eqfile=None, excludes=[], horiz_too=False, plot=False,
     filtstream.filter('lowpass', freq=0.01, corners=4, zerophase=True)
     filtstream.filter('highpass', freq=0.001, corners=4, zerophase=True)
 
-    print('Creating seisRotate object')
+    if verbose:
+        print('Creating seisRotate object')
     srData = SeisRotate(filtstream)
 
-    print('Calculating rotation angle')
-    (bestAngle, bestAzimuth) = srData.calc_zrotate_opt(verbose=True,
-                                                       eq_template=eq_template)
-    print('Best angle,azimuth is ({:.2f},{:.2f}).  Rotating axes'
-          .format(bestAngle, bestAzimuth))
+    if verbose:
+        print('Calculating rotation angle')
+    (bestAngle, bestAzimuth) = srData.calc_zrotate_opt(verbose=verbose,
+                                                       eq_remover=eq_remover)
+    if verbose:
+        print('Best angle,azimuth is ({:.2f},{:.2f}).  Rotating axes'
+              .format(bestAngle, bestAzimuth))
 
     # Filter data (to make it easier to verify that rotation works
     # on low freq noise)
     viewstream = stream.copy()
-    print('Filtering data for viewing')
+    if verbose:
+        print('Filtering data for viewing')
     viewstream.filter('lowpass', freq=0.005, corners=4, zerophase=True)
     viewstream.filter('highpass', freq=0.001, corners=4, zerophase=True)
 
@@ -81,7 +96,8 @@ def rotate_clean(stream, eqfile=None, excludes=[], horiz_too=False, plot=False,
     srData.zrotate(bestAngle, bestAzimuth, horiz_too)
     viewData.zrotate(bestAngle, bestAzimuth)
 
-    print('Converting back to Stream')
+    if verbose:
+        print('Converting back to Stream')
     strm_rot = srData.stream()
     view_rot = viewData.stream()
 
@@ -92,15 +108,34 @@ def rotate_clean(stream, eqfile=None, excludes=[], horiz_too=False, plot=False,
         'R' + trace_view_rot_Z.stats.channel[2]
     compare_stream = obspy.core.stream.Stream([trace_view_Z,
                                                trace_view_rot_Z])
-    # PLOT TWO DAYS
-    # compare_stream.plot(equal_scale=True,
-    #                     starttime=trace_view_Z.stats.starttime,
-    #                     endtime=trace_view_Z.stats.starttime+2*86400,
-    #                     method='full')
     if plot:
         compare_stream.plot(equal_scale=True, method='full')
 
     return strm_rot, bestAngle, bestAzimuth
+
+
+def rot_tfs(angle, azimuth):
+    """
+    Return the Z-1 and Z-2 transfer functions equivalent to the given rotation
+    
+    Designed to be used with the output of rotate_clean()
+    I DID THIS ON THE FLY, HAVE NOT VERIFIED THE VALUES
+
+    Arguments:
+        angle: rotation angle (degrees)
+        azimuth: rotation azimuth (degrees)
+
+    Returns:
+        (tuple): 2-tuple containing:
+            (float): Z-1 ratio
+            (float): Z-2 ration
+    """
+    
+    # Calculate the horizontal to vertical ratio for the given angle
+    hratio = np.sin(np.radians(angle))
+    Z1_ratio = np.abs(hratio * np.cos(np.radians(azimuth)))
+    Z2_ratio = np.abs(hratio * np.sin(np.radians(azimuth)))
+    return Z1_ratio, Z2_ratio
 
 
 class SeisRotate:
@@ -110,7 +145,10 @@ class SeisRotate:
     """
     def __init__(self, stream):
         """
-        Create a seisRotate object from 3-component obsPy.stream.Stream data
+        Create a seisRotate object from a 3-component obsPy Stream
+        
+        Arguments:
+            stream (Stream): 3-component data stream
 
         Channel names must end in Z, N and E or Z, 1, and 2
         Z is up, 1 and 2 are horizontal orthogonal with 2 90° clockwise
@@ -160,23 +198,24 @@ class SeisRotate:
 
     def copy(self):
         """
-        :returns: Copy of seisRotate object.
+        Returns:
+            (SeisRotate): Copy of SeisRotate object.
         """
         return deepcopy(self)
 
     def stream(self):
-        """ Return obspy stream() """
+        """ Return obspy 3-component stream()"""
         return Stream(traces=[self.Z, self.N, self.E])
 
     def zrotate(self, angle, azimuth, horiz_also=True):
         """
         Rotate a seismometer's vertical component
-
-        :param angle: angle (towards vertical) by which to rotate (degrees)
-        :param azimuth: azimuth (CW from N) at which to rotate (degrees)
-        :param horiz_also: rotate horizontal components as well, to retain
-                           orthogonality
-        :type  horiz_also: boolean
+        
+        Arguments:
+            angle (float): angle (towards vertical) by which to rotate (degrees)
+            azimuth (float): azimuth (CW from N) at which to rotate (degrees)
+            horiz_also (bool): rotate horizontal components as well? (to retain
+                               orthogonality)
 
         I would set horiz_also to:
           False for the Guralp CMG-3T, which independently levels the three
@@ -204,20 +243,21 @@ class SeisRotate:
             self.N.data = N
             self.E.data = E
 
-    def calc_zrotate_opt(self, lowcut=0.001, hicut=0.005, eq_template=None,
+    def calc_zrotate_opt(self, lowcut=0.001, hicut=0.005, eq_remover=None,
                          verbose=False):
         """
         Calculate the Z channel rotation angle that minimizes tilt noise
 
-        :param lowfreq: low passband frequency in which to lood for energy
-                       reduction
-        :param hifreq:  high passpand frequency "" "" ""
-        :param eq_template: EQTemplate object
-        :param verbose: output information about the angles tested
+        Arguments:
+            lowcut (float): low passband frequency in which to lood for energy
+                             reduction
+            hicut (float): high passpand frequency "" "" ""
+            eq_remover (EQRemover): information on time spans to ignore
+            verbose (bool): output information about the angles tested?
 
-        The default values (0.001, 0.005) correspond to the band where
-        removing tilt noise generally has the greatest effect on the Z
-        signal (at the low frequency end of the noise notch)
+        The default (lowcut, hicut) values of (0.001, 0.005) correspond to the
+        band where removing tilt noise generally has the greatest effect on
+        the Z signal (at the low frequency end of the noise notch)
 
         You can input the returned angles to rotateSeis.zrotate() to get
         the properly rotated data
@@ -227,12 +267,10 @@ class SeisRotate:
         filt.Z.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
         filt.N.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
         filt.E.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
-        if eq_template is not None:
-            # eq_template.plot_mask(filt.Z)
-            filt.Z.data *= eq_template.data
-            filt.E.data *= eq_template.data
-            filt.N.data *= eq_template.data
-        # filt.Z.plot()
+        if eq_remover is not None:
+            filt.Z= eq_remover.zero(filt.Z)
+            filt.N= eq_remover.zero(filt.N)
+            filt.E= eq_remover.zero(filt.E)
 
         # Quick estimate of angles using Z/E and Z/N ratios. DOESN'T HELP: SKIP
         # (startAngle,startAzimuth)=filt._estimateAngles(verbose)
@@ -256,7 +294,8 @@ class SeisRotate:
         (transients, etc) for this to work.  Also doesn't account for any time
         lags: might work better if ratios calculated from cross-corellation
 
-        :param verbose: display extra information
+        Arguments:
+            verbose (bool): display extra information?
         """
         if verbose:
             print("Estimating preliminary angle based on signal ratios")
@@ -304,18 +343,20 @@ class SeisRotate:
         """
         Find best Z rotation angles
 
-        :param startAngle: starting guess for the angle (degrees)
-        :param startAzimuth: starting guess for the azimuth (degrees)
-        :param verbose: display extra information
-        :rtype: (angle, azimuth)
+        Arguments:
+            startAngle (float): starting guess for the angle (degrees)
+            startAzimuth (float): starting guess for the azimuth (degrees)
+            verbose (bool): display extra information?
 
-        Search for minimum Z energy as function of angle
+        Returns:
+            (tuple): 2-tuple containing:
+                angle (float): best angle (degrees)
+                azimuth (float): best azimuth (degrees)
+
+        Searches for minimum Z energy as function of angle
         """
         if verbose:
-            print("Calculating best angle based on variance minimization "
-                  "(uses sp.optimize.fmin)")
-        # s=obspy.core.stream.Stream([self.Z,self.N])
-        # s.plot()
+            print("Calculating best angle based on variance minimization")
         start_var = self._rotZ_variance([startAngle, startAzimuth])
 
         xopt, fopt, iter, funcalls, warnflag = sp.optimize.fmin(
@@ -337,15 +378,12 @@ class SeisRotate:
         """
         Calculate the variance for a given rotation
 
-        :param angles: 2 element list: angle and azimuth
-        :type angles: list
+        Arguments:
+            angles (list): angle, azimuth (in degrees)
 
         Assumes data are already filtered into relevant band
         """
         A = self.copy()
-        # A.Z.stats.channel='XXX'
         A.zrotate(angles[0], angles[1])
         var = np.sum(A.Z.data**2)
-        # print(angles[0], angles[1], var, A.Z.data[0:5], A.Z.data[0:5]**2,
-        #       sum(A.Z.data[0:5]**2))
         return var
