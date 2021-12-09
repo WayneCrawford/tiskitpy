@@ -91,22 +91,26 @@ decimate(stream, decimates, verbose=False):
 ```
 
 ```python
-rotate_clean(stream, excludes, horiz_too=False, plotit=False,
-             quickTest=False):
+def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
+                 quickTest=False, remove_eq=True, verbose=True):
     """
     Rotates vertical channel to minimize noise
-
-    :param stream: input data, must have a *Z, *[1|N] and *[2|E] channel
-    :type stream: ~class obspy.core.stream.Stream
-    :param excludes: list of dictionaries containing time periods to avoid,
+    Arguments:
+        stream (Stream): input data, must have a *Z, *[1|N] and *[2|E] channel
+        remove_eq (str, True or False): filename of catalog to use to remove
+            earthquakes, will download catalog from USGS if True, not remove
+            EQs if False
+        excludes: list of dictionaries containing time periods to avoid,
                      using "start" and "end" keys
-    :param horiz_too: rotate horizontals also (use True if you think
+        horiz_too: rotate horizontals also (use True if you think
                       the channels are truly orthogonal)
-    :param plotit: Plot comparision of original and rotated vertical
-    :param quickTest: Only run one day's data and do not save results
-
-    :returns: stream_rot (obspy.stream): rotated stream
-              (angle, azimuth) by which Z (or Z-X-Y) were rotated
+        plot: Plot comparision of original and rotated vertical
+        quickTest: Only run one day's data and do not save results
+    Returns:
+        (tuple): 3-tuple containing:
+            (Stream): rotated stream
+            (float): angle by which Z (or Z-X-Y) was rotated
+            (float): azimuth by which Z (or Z-X-Y) was rotated
     """
 ```
 
