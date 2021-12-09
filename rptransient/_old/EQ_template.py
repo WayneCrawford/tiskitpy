@@ -1,5 +1,8 @@
 #!env python3
-"""Create a template of time ranges to skip after earthquakes"""
+"""Create a template of time ranges to skip after earthquakes
+
+REPLACED BY EQRemover
+"""
 
 #################################################
 # import obspy
@@ -14,13 +17,14 @@ class EQTemplate(Trace):
     """
     A template for zeroing out data after big earthquakes
     """
-    def __init__(self, inp, start_time, end_time, mag_limit=5.85,
+    def __init__(self, inp, start_time, end_time, min_magnitude=5.85,
                  days_per_magnitude=1.5,
                  plot=False, verbose=True, eqfile=None):
         """
         Make a template to cut out times after large EQs
 
         Arguments:
+            inp: Input data (opspy.core.Trace)
             start_time (obspy.core.UTCDateTime): earliest data that will be
                 presented
             end_time (obspy.core.UTCDateTime): latest data that will be
@@ -40,7 +44,7 @@ class EQTemplate(Trace):
         from obspy import UTCDateTime
         """
         cat = Client("USGS").get_events(
-            starttime=start_time-86400*(9-mag_limit)*days_per_magnitude,
+            starttime=start_time-86400*(9-min_magnitude)*days_per_magnitude,
             endtime=end_time,
             minmagnitude=min_magnitude, 
             orderby='time-asc')
@@ -53,7 +57,7 @@ class EQTemplate(Trace):
             mag = float(w[4])
             if starttime >= inp.stats.endtime:
                 continue
-            cutdays = (mag-mag_limit) * days_per_magnitude
+            cutdays = (mag-min_magnitude) * days_per_magnitude
             # This is done before the magnitude limit check simply to allow
             #    printout of EQs within the acceptable time frame
             if cutdays < 0:
@@ -62,7 +66,7 @@ class EQTemplate(Trace):
             if endtime <= self.stats.starttime:
                 continue
             print('M{:.1f} EQ of {} ...'.format(mag, w[0]), end='')
-            if mag <= mag_limit:
+            if mag <= min_magnitude:
                 print('magnitude too small to worry about')
                 continue
             print('blanking {:.1f} days'.format(cutdays))
@@ -80,6 +84,8 @@ class EQTemplate(Trace):
         """
         Zero out data in trace when it is too close to an eqfile
         
+        Replaced by EQRemover.zero()
+
         Returns an error if the EQ catalog does not bound the Trace time
         Returns a warning if the EQ catalog does not start far enough before
         the trace to cover an M9 EQ.
@@ -99,6 +105,8 @@ class EQTemplate(Trace):
     def __mul__(self, val):
         """
         Return data multiplied by template
+        
+        Replaced by EQRemover.zero()
         
         :type val: Stream or Trace
         """

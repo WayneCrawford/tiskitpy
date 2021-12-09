@@ -25,5 +25,8 @@ v3:
 - Create classes
 - Put on github/pypi
 
-1.0a1
+0.1a
 - Add automatic read of global earthquakes in order to remove them from noise/transient models
+
+0.2a
+- Made it work, updated README

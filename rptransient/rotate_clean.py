@@ -12,12 +12,12 @@ import scipy as sp
 import matplotlib.pyplot as plt
 import obspy
 from obspy.signal.rotate import rotate2zne
-from obspy.core.stream import Stream, Trace
+from obspy.core.stream import Stream  # , Trace
 from obspy import UTCDateTime
 # from obspy.signal import rotate
 
-from .EQ_template import EQTemplate
-from .eq_remover import EQRemover
+# from .EQ_template import EQTemplate
+from .eq_spans import get_eq_spans
 
 DEBUG = True
 
@@ -28,7 +28,8 @@ def debug(s):
 
 
 def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
-                 quickTest=False, remove_eq=True, verbose=True):
+                 quickTest=False, remove_eq=True, uselogvar=False,
+                 verbose=True, filt_band=(0.001, 0.01)):
     """
     Rotates vertical channel to minimize noise
 
@@ -43,6 +44,9 @@ def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
                       the channels are truly orthogonal)
         plot: Plot comparision of original and rotated vertical
         quickTest: Only run one day's data and do not save results
+        uselogvar(bool): use logarithm of variance as metric
+        filt_band (tuple): lower, upper frequency limits of band to filter data
+            before calculating rotation
 
     Returns:
         (tuple): 3-tuple containing:
@@ -51,15 +55,15 @@ def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
             (float): azimuth by which Z (or Z-X-Y) was rotated
     """
     if isinstance(remove_eq, str):
-        eq_remover = EQRemover(stream[0].stats.starttime,
-                               stream[0].stats.endtime, eqfile=remove_eq,
-                               quiet=not verbose)
+        eq_spans = get_eq_spans(stream[0].stats.starttime,
+                                  stream[0].stats.endtime, eqfile=remove_eq,
+                                  quiet=not verbose)
     if remove_eq is True:
-        eq_remover = EQRemover(stream[0].stats.starttime,
-                               stream[0].stats.endtime,
-                               quiet=not verbose)
+        eq_spans = get_eq_spans(stream[0].stats.starttime,
+                                  stream[0].stats.endtime,
+                                  quiet=not verbose)
     else:
-        eq_remover = None
+        eq_spans = None
     # Filter data to tilt noise band for best Angle calc)
     filtstream = stream.copy()
     for interval in excludes:
@@ -67,8 +71,8 @@ def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
                           UTCDateTime(interval['end']))
     filtstream.detrend('demean')
     filtstream.detrend('linear')
-    filtstream.filter('lowpass', freq=0.01, corners=4, zerophase=True)
-    filtstream.filter('highpass', freq=0.001, corners=4, zerophase=True)
+    filtstream.filter('lowpass', freq=filt_band[1], corners=4, zerophase=True)
+    filtstream.filter('highpass', freq=filt_band[0], corners=4, zerophase=True)
 
     if verbose:
         print('Creating seisRotate object')
@@ -77,7 +81,8 @@ def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
     if verbose:
         print('Calculating rotation angle')
     (bestAngle, bestAzimuth) = srData.calc_zrotate_opt(verbose=verbose,
-                                                       eq_remover=eq_remover)
+                                                       eq_spans=eq_spans,
+                                                       uselogvar=uselogvar)
     if verbose:
         print('Best angle,azimuth is ({:.2f},{:.2f}).  Rotating axes'
               .format(bestAngle, bestAzimuth))
@@ -143,12 +148,14 @@ class SeisRotate:
     Class to clean tilt noise from OBS vertical channel through
     non-deforming rotation
     """
-    def __init__(self, stream):
+    def __init__(self, stream, uselogvar=False):
         """
         Create a seisRotate object from a 3-component obsPy Stream
         
         Arguments:
             stream (Stream): 3-component data stream
+            uselogvar(bool): use logarithmic variance when searching for
+                             best angles
 
         Channel names must end in Z, N and E or Z, 1, and 2
         Z is up, 1 and 2 are horizontal orthogonal with 2 90° clockwise
@@ -156,6 +163,7 @@ class SeisRotate:
         except that they are not necessarily aligned with geographic
         cardinals)
         """
+        self.uselogvar = uselogvar
         # Read in data
         try:
             self.Z = stream.select(component='Z')[0].copy()
@@ -243,8 +251,8 @@ class SeisRotate:
             self.N.data = N
             self.E.data = E
 
-    def calc_zrotate_opt(self, lowcut=0.001, hicut=0.005, eq_remover=None,
-                         verbose=False):
+    def calc_zrotate_opt(self, lowcut=0.001, hicut=0.005, eq_spans=None,
+                         uselogvar=None, verbose=False):
         """
         Calculate the Z channel rotation angle that minimizes tilt noise
 
@@ -252,7 +260,8 @@ class SeisRotate:
             lowcut (float): low passband frequency in which to lood for energy
                              reduction
             hicut (float): high passpand frequency "" "" ""
-            eq_remover (EQRemover): information on time spans to ignore
+            eq_spans (TimeSpans): information on time spans to ignore
+            uselogvar(bool): use logarithmic variance estimate
             verbose (bool): output information about the angles tested?
 
         The default (lowcut, hicut) values of (0.001, 0.005) correspond to the
@@ -262,22 +271,25 @@ class SeisRotate:
         You can input the returned angles to rotateSeis.zrotate() to get
         the properly rotated data
         """
+        if uselogvar is not None:
+            self.uselogvar = uselogvar
         # Filter data, cut off edge effects and detrend
         filt = self.copy()
         filt.Z.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
         filt.N.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
         filt.E.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
-        if eq_remover is not None:
-            filt.Z= eq_remover.zero(filt.Z)
-            filt.N= eq_remover.zero(filt.N)
-            filt.E= eq_remover.zero(filt.E)
+        if eq_spans is not None:
+            filt.Z= eq_spans.zero(filt.Z)
+            filt.N= eq_spans.zero(filt.N)
+            filt.E= eq_spans.zero(filt.E)
 
         # Quick estimate of angles using Z/E and Z/N ratios. DOESN'T HELP: SKIP
         # (startAngle,startAzimuth)=filt._estimateAngles(verbose)
         startAngle, startAzi = (0, 0)
 
         # Search for the best angles
-        angle, azimuth = filt._searchBestAngles(startAngle, startAzi, verbose)
+        angle, azimuth = filt._searchBestAngles(startAngle, startAzi,
+                                                verbose)
         return angle, azimuth
 
     def _estimateAngles(self, verbose=False):
@@ -339,7 +351,8 @@ class SeisRotate:
 
         return angle, azimuth
 
-    def _searchBestAngles(self, startAngle=0, startAzimuth=0, verbose=False):
+    def _searchBestAngles(self, startAngle=0, startAzimuth=0,
+                          verbose=False):
         """
         Find best Z rotation angles
 
@@ -358,20 +371,29 @@ class SeisRotate:
         if verbose:
             print("Calculating best angle based on variance minimization")
         start_var = self._rotZ_variance([startAngle, startAzimuth])
+        if verbose:
+            print(f'Starting variance = {start_var}')
 
-        xopt, fopt, iter, funcalls, warnflag = sp.optimize.fmin(
+        xopt, fopt, iter, funcalls, warnflag, allvecs = sp.optimize.fmin(
                                     func=self._rotZ_variance,
                                     x0=[startAngle, startAzimuth],
                                     disp=verbose,
                                     full_output=True,
-                                    retall=False)
+                                    retall=True)
         bestAngles = xopt
         if verbose:
-            print(xopt, fopt, iter, funcalls)
+            print(f'{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}')
             print("    best Angle,Azimuth = {:.2f},{:.2f}"
                   .format(bestAngles[0], bestAngles[1]))
-            print("    variance reduced from {:.2e} to {:.2e} ({:.1f}% lower)"
-                  .format(start_var, fopt, 100*(1 - fopt/start_var)))
+            if self.uselogvar is False:
+                print("    variance reduced from {:.2e} to {:.2e} ({:.1f}% lower)"
+                    .format(start_var, fopt, 100*(1 - fopt/start_var)))
+            if self.uselogvar is False:
+                print(" log variance reduced from {:.1f} to {:.1f} ({:.1f}% lower)"
+                    .format(start_var, fopt, 100*(1 - 10**(fopt-start_var))))
+        if warnflag:
+            print(f'{allvecs=}')
+            
         return (bestAngles[0], bestAngles[1])
 
     def _rotZ_variance(self, angles):
@@ -385,5 +407,8 @@ class SeisRotate:
         """
         A = self.copy()
         A.zrotate(angles[0], angles[1])
-        var = np.sum(A.Z.data**2)
+        if self.uselogvar is True:
+            var = np.log10(np.sum(A.Z.data**2))
+        else:
+            var = np.sum(A.Z.data**2)
         return var

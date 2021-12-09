@@ -13,22 +13,26 @@ def_days_per_magnitude = 1.5
 class Transients():
     """
     Periodic Transients class
+    
+    calcualates and stores a list of PeriodicTransents
     """
     def __init__(self, transients=[]):
         """
-        :param transients: list of PeriodicTransient
+        Args:
+            transients (list of PeriodicTransient): transients
         """
         self.transients = transients
         for transient in transients:
             assert isinstance(transient, PeriodicTransient)
 
-    def calc_timing(self, trace, eq_template, prep_filter=True):
+    def calc_timing(self, trace, eq_remover, prep_filter=True):
         """
         Calculate transient time parameters
 
-        :param trace: data
-        :param eq_template: EQTemplate() object
-        :param prep_filter: apply Wiedland prep filter before processing?
+        Args:
+            trace (:class ~obspy.core.Trace): data
+            eq_remover (:class ~EQRemover): periods to remove because of EQs
+            prep_filter (bool): apply Wiedland prep filter before processing?
         """
         if prep_filter:
             inp = prep_filt(trace)
@@ -36,17 +40,18 @@ class Transients():
             inp = trace.copy()
         for transient in self.transients:
             self._print_announce(f'Finding {transient} times')
-            transient.calc_timing(inp, eq_template)
+            transient.calc_timing(inp, eq_remover)
 
-    def calc_transients(self, trace, eq_template, plot=False,
+    def calc_transients(self, trace, eq_remover, plot=False,
                         prep_filter=True):
         """
-        Calculate transient
+        Calculate transients
 
-        :param trace: data
-        :param eq_template: EQTemplate() object
-        :param plot: make information plots
-        :param prep_filter: apply Wiedland prep filter before processing?
+        Args:
+            trace (~class `obspy.core.trace.Trace`): data
+            eq_remover (~class `.EQRemover`): time spans to zero out
+            plot (bool): make information plots
+            prep_filter (bool): apply Wieland prep filter before processing?
        """
         if prep_filter:
             inp = prep_filt(trace)
@@ -54,17 +59,18 @@ class Transients():
             inp = trace.copy()
         for transient in self.transients:
             self._print_announce(f'Fitting {transient}')
-            transient.calc_transient(inp, eq_template, plots=plot)
+            transient.calc_transient(inp, eq_remover, plots=plot)
 
     def remove_transients(self, trace, match=True, plot=False,
                           prep_filter=False):
         """
         Remove transient from data
 
-        :param stream: data (trace?)
-        :param match: individually match transients to data?
-        :param plot: make information plots
-        :param prep_filter: apply Wiedland prep filter before processing?
+        Args:
+            trace (~class `obspy.core.trace.Trace`): data
+            match (bool): individually match transients to data?
+            plot (bool): make information plots
+            prep_filter (bool): apply Wieland prep filter before processing?
         """
         if self.transients[0].transient_model is None:
             print(f'{self.transient_model=}, did you run calc_transients?')

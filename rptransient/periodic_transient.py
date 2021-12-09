@@ -7,7 +7,7 @@
 # import obspy
 
 from obspy.core import UTCDateTime
-from obspy.core import Stream, Trace
+from obspy.core import Stream  # , Trace
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
@@ -27,15 +27,15 @@ class PeriodicTransient():
     def __init__(self, name: str, period: float, dp: float, clips: tuple,
                  transient_starttime: UTCDateTime):
         """
-        :param name: name of this periodic transient (e.g., 'hourly')
-        :param period: seconds between transients (seconds)
-        :param dp: how many seconds to change the period by when testing for
+        Args:
+            name (str): name of this periodic transient (e.g., 'hourly')
+            period (float): seconds between each transient
+            dp (float): how many seconds to change the period by when testing for
                    better values
-        :param clips: clip values outside of this range.  Should correspond to
-                      max range of transient
-        :type clips: 2-tuple (lowest, highest)
-        :param transient_starttime: onset time of earliest transient.
-        :type transient_starttime:  ~class `obspy.core.UTCDateTime`
+            clips (tuple): clip values outside of this range (low, high).
+                Should contain the max range of the transient
+            transient_starttime (~class `obspy.core.UTCDateTime`): onset
+                time of earliest transient.
         
         The program will make transient slices starting between
         transient_starttime and 1/3 of self.period earlier
@@ -66,36 +66,34 @@ class PeriodicTransient():
         s += f'transient_starttime={self.transient_starttime}'
         return s
 
-    def calc_timing(self, trace, eq_template):
+    def calc_timing(self, trace, eq_remover):
         """
         Calculate transient time parameters
 
-        :param trace: data
-        :param eq_template: EQTemplate() object
+        Args:
+            trace (class obspy.core.Trace): data
+            eq_remover (class EQRemover):
         """
-        self.verify(trace, eq_template)
+        self._verify(trace, eq_remover)
 
-    def calc_transient(self, trace, eq_template, match=True, plots=False):
+    def calc_transient(self, trace, eq_remover, match=True, plots=False):
         """
         Calculate transient for a given trace and transient parameters
 
-        :param trace:      input data trace
-        :type trace: ~class `obspy.stream.Trace`
-        :param eq_template: template of good data (same size as trace,
-                            1 for good, 0 for bad
-        :type eq_template: ~class `EQTemplate` or `obspy.core.Trace`
-        :param match: match and cancel each pulse separately
-        :type match: bool
-        :param plots: plot results
-        :type plots: bool
-        :returns:  cleaned data
+        Args:
+            trace ( ~class `obspy.stream.Trace`): input data trace
+            eq_remover (class EQRemover):
+            match (bool): match and cancel each pulse separately
+            plots (bool): plot results
+        Returns:
+            ( ~class `obspy.stream.Trace`): cleaned data
         """
         slice_starttime = self._calc_slice_starttime(trace)
         if self.transient_starttime < trace.stats.starttime:
             print("\tshifting transient startime to first within data")
             self.transient_starttime = trace.stats.starttime + self._transient_offset(trace)
         transient, dc, nG, tm, tp, cbuff = comb_calc(trace, self, plots,
-                                                     eq_template,
+                                                     eq_remover,
                                                      slice_starttime)
         transient.stats.channel = f'TR{trace.stats.channel[-1]}'
         if plots:
@@ -121,48 +119,44 @@ class PeriodicTransient():
         if plots:
             out.stats.channel = 'CLN'
             synth.stats.channel = 'SYN'
-            Stream([trace, out, synth]).plot()
+            Stream([trace, out, synth]).plot(method='full')
         return out
 
-    def verify(self, trace, template):
+    def _verify(self, trace, eq_remover):
         """
         Interactively verify transient parameters
 
-        :param trace:      input data trace
-        :type trace: ~class `obspy.stream.Trace`
-        :param template: template of good data (same size as trace,
-                         1 for good, 0 for bad
-        :type template: ~class `obspy.stream.Trace`
+        Args:
+            trace (~class `obspy.stream.Trace`): input data trace
+            eq_remover (class EQRemover):
         """
         slice_starttime = self._calc_slice_starttime(trace)
 
         # Set/verify clip levels
-        self._ask_clips(trace, template, slice_starttime)
+        self._ask_clips(trace, eq_remover, slice_starttime)
 
         # SET/VERIFY TRANSIENT PERIOD
         cliptrace = trace.copy()
         cliptrace.data.clip(self.clips[0], self.clips[1], out=cliptrace.data)
-        self._ask_period(cliptrace, template, slice_starttime)
+        self._ask_period(cliptrace, eq_remover, slice_starttime)
 
-    def _ask_clips(self, trace, template, slice_starttime):
+    def _ask_clips(self, trace, eq_remover, slice_starttime):
         """
         Show clip levels and ask to update them until acceptable
 
-        :param trace: seismological trace
-        :type trace: obspy.core.stream.Trace
-        :param template: signal of ones and zeros, with zeros where trace is to
-                         be hidden
-        :type template: obspy.core.stream.Trace
-        :param slice_starttime: first slice starttime
-        :param testper: length of each slice (seconds)
-        :param clip: 2-tuple of default clip values (lo, hi)
+        Args:
+            trace (~class `obspy.core.stream.Trace``): seismological trace
+            eq_remover (class EQRemover):
+            slice_starttime (UTCDateTime): first slice starttime
+            testper (float): length of each slice (seconds)
+            clip (tuple): default clip values (lo, hi)
         """
         stt = trace.stats.starttime
         sps = trace.stats.sampling_rate
         sta = trace.stats.station
         
         stack_trace = trace.copy()
-        stack_trace.data = stack_trace.data * template.data
+        stack_trace = eq_remover.zero(stack_trace)
         if slice_starttime > stt:
             stack_trace = stack_trace.slice(starttime=slice_starttime)
         stack = stack_data(stack_trace.data, self.period*sps)
@@ -175,8 +169,8 @@ class PeriodicTransient():
         fig, ax = plt.subplots(1,1, num="Select clip levels")
         ax.plot(time, stack, linewidth=0.1)
         c1, c2 = self.clips
-        llo = ax.axhline(c1, c='b', ls='--', label=f'clip_lo')
-        lhi = ax.axhline(c2, c='r', ls='--', label=f'clip_hi')
+        llo = ax.axhline(c1, c='b', ls='--', label='clip_lo')
+        lhi = ax.axhline(c2, c='r', ls='--', label='clip_hi')
         ax.set_xlabel('Time (seconds)')
         ax.set_title(title)
         ax.set_ylim((c1 - (c2-c1)*.3, c2 + (c2-c1)*.3))
@@ -198,25 +192,24 @@ class PeriodicTransient():
         plt.close(fig)
         plt.ioff()
 
-    def _ask_period(self, trace, template, slice_starttime):
+    def _ask_period(self, trace, eq_remover, slice_starttime):
         """
         Show transient alignment and ask to update period until acceptable
 
         Also allows to verify that self.transient_starttime is ok, but not to
         modify it
 
-        :param trace: seismological trace
-        :type trace: obspy.core.stream.Trace
-        :param template: signal of 1s and 0s, 0s where trace is to be hidden
-        :type template: obspy.core.stream.Trace
-        :param slice_starttime: offset from start of trace to start slicing
+        Args:
+            trace (~class obspy.core.stream.Trace): seismological trace
+            eq_remover (class EQRemover): times to zero data
+            slice_starttime (UTCDateTime): first slice starttime
         """
         stt = trace.stats.starttime
         sps = trace.stats.sampling_rate
         sta = trace.stats.station
         
         stack_trace = trace.copy()
-        stack_trace.data = stack_trace.data * template.data
+        stack_trace = eq_remover.zero(stack_trace)
         if slice_starttime > stt:
             stack_trace = stack_trace.slice(starttime=slice_starttime)
         fig, ax = plt.subplots(1,1, num="Select transient period")
@@ -236,7 +229,7 @@ class PeriodicTransient():
             timey = np.arange(nrows) / sps
             x_offset  = np.arange(ncols)*self.period
             timex = stack_trace.stats.starttime.matplotlib_date + x_offset/86400
-            slicenums = np.arange(ncols)
+            # slicenums = np.arange(ncols)
             ref_offs = self._transient_offset(stack_trace)
             title = '{}, transient, data start={},{}, period={:g}s'.format(
                 sta, self.transient_starttime.strftime('%Y%m%dT%H%M%S'),

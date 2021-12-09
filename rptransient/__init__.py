@@ -1,6 +1,6 @@
 from .decimate import decimate
-from .EQ_template import EQTemplate
-from .eq_remover import EQRemover
+# from .EQ_template import EQTemplate
+from .eq_spans import get_eq_spans, eq_filename
 from .time_spans import TimeSpans
 from .read_mseed import readMSEED
 from .periodic_transient import PeriodicTransient

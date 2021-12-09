@@ -18,8 +18,7 @@ class TimeSpans:
     end_times: list
 
     def __post_init__(self):
-        if not self.validate():
-            self.organize()
+        self.organize()
 
     def __len__(self):
         return len(self.start_times)
@@ -34,20 +33,33 @@ class TimeSpans:
             if not eta == etb:
                 return False
         return True
+        
+    def __str__(self):
+        s = 'TimeSpans: start            |            end\n'
+        s += '===========================+===============================\n'
+        for st, et in zip(self.start_times, self.end_times):
+            s += f' {st} | {et}\n'
+        return s
 
     def validate(self):
         """
-        Returns false if start_times are not ordered or there are overlaps
+        Returns false if there is a problem
+        
+        Problems:
+            - start_times are not ordered
+            - there are overlaps
+            - len(start_times) ~= len(end_times)
+            - not every object in start_times and end_times is a UTCDateTime
         """
         if not len(self.start_times) == len(self.end_times):
             raise ValueError("starttimes[] and end_times[] are not the "
                              "same length")
         for x in self.start_times:
             if not isinstance(x, UTCDateTime):
-                return False
+                raise ValueError('There is a non-UTCDateTime starttime value')
         for x in self.end_times:
             if not isinstance(x, UTCDateTime):
-                return False
+                raise ValueError('There is a non-UTCDateTime endtime value')
         if not sorted(self.start_times) == self.start_times:
             return False
         for startafter, endbefore in zip(self.start_times[1:],
@@ -60,6 +72,9 @@ class TimeSpans:
         Order starttimes and endtimes by increasing starttime, and consolidate
         overlapping time spans
         """
+        if self.validate() is True:
+            return
+
         # sort by time
         self.end_times = [x for _, x in sorted(zip(self.start_times,
                                                    self.end_times))]
@@ -78,6 +93,19 @@ class TimeSpans:
         self.start_times = start_times
         self.end_times = end_times
 
+    def append(self, new_time_spans):
+        """
+        Appends TimeSpan object to self
+        
+        Args:
+            new_time_spans (~class `TimeSpans`): time spans to append
+        """
+        new_time_spans.validate()
+        self.validate()
+        self.start_times.extend(new_time_spans.start_times)
+        self.end_times.extend(new_time_spans.end_times)
+        self.organize()
+        
     def zero(self, inp, plot=False):
         """
         Zero out data in the time spans
@@ -99,8 +127,8 @@ class TimeSpans:
             tr.stats.channel = 'XX' + tr.stats.channel[2]
 
             for st, et in zip(self.start_times, self.end_times):
-                start_addr, end_addr = self._get_addrs(st, et, tr)
-                if start_addr == None:
+                start_addr, end_addr = self._get_addrs(st, et, tr.stats)
+                if start_addr is None:
                     continue
                 tr.data[start_addr:end_addr+1] = 0.
         if plot:
@@ -108,6 +136,24 @@ class TimeSpans:
         if isinstance(inp, Trace):
             return stream[0]
         return stream
+
+    def has_zeros(self, starttime, endtime):
+        """
+        Does a trace's time span intersect any of the TimeSpans?
+
+        Arguments:
+            starttime (UTCDateTime): start time
+            endtime (UTCDateTime): end time
+
+        Returns:
+            (bool):
+        """
+        for st, et in zip(self.start_times, self.end_times):
+            if st < starttime and et > starttime:
+                return True
+            elif st >= starttime and st < endtime:
+                return True
+        return False
 
     def interp(self, inp, plot=False):
         """
@@ -130,8 +176,8 @@ class TimeSpans:
             tr.stats.channel = 'XX' + tr.stats.channel[2]
 
             for st, et in zip(self.start_times, self.end_times):
-                start_addr, end_addr = self._get_addrs(st, et, tr)
-                if start_addr == None:
+                start_addr, end_addr = self._get_addrs(st, et, tr.stats)
+                if start_addr is None:
                     continue
                 tr.data[start_addr:end_addr+1] = np.linspace(
                     tr.data[start_addr], tr.data[end_addr],
@@ -142,13 +188,17 @@ class TimeSpans:
             return stream[0]
         return stream
 
-    def _get_addrs(self, start_time, end_time, trace):
-        if end_time < trace.stats.starttime or start_time > trace.stats.endtime:
+    def _get_addrs(self, starttime, endtime, stats):
+        if not isinstance(starttime, UTCDateTime):
+            raise TypeError(f'starttime is {type(starttime)}, not UTCDateTime')
+        if not isinstance(endtime, UTCDateTime):
+            raise TypeError(f'endtime is {type(endtime)}, not UTCDateTime')
+        if endtime < stats.starttime or starttime > stats.endtime:
             return None, None
-        start_addr = max(np.floor((start_time - trace.stats.starttime)
-                         * trace.stats.sampling_rate), 0)
-        end_addr = min(np.ceil((end_time - trace.stats.starttime)
-                       * trace.stats.sampling_rate), trace.stats.npts)
+        start_addr = max(np.floor((starttime - stats.starttime)
+                         * stats.sampling_rate), 0)
+        end_addr = min(np.ceil((endtime - stats.starttime)
+                       * stats.sampling_rate), stats.npts)
         # print(st, et, start_sample, end_sample)
         return int(start_addr), int(end_addr)
         

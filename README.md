@@ -56,22 +56,26 @@ rot_data.write(rot_fname, 'MSEED')
 Calculate and remove transients
 ```python
 from obspy.core import read
-from rrtrans import Transients, PeriodicTransient as PT
+from rptransient import EQRemover, Transients, PeriodicTransient as PT
 
-station = 'I04D'
-eqfile = 'earthquakes_201210-201310.csv'
-transients = [PT("1h", 3620.27, 0.05, [-300, 200], ['2016-04-01T00:28:30']),
-             [PT("3h", 9519.14, 0.2,  []-110,  80], ['2016-04-01T00:00:00'])]
+sta = 'I04D'
+datafile = f'Data/{sta}_20161202_20161222_dec_rot.mseed'
 
-rt = Transients(transients)
-stream = read(f'{station}_dec.mseed','MSEED')
+transients = {'I04D': [PT("1h", 3620.26, 0.05, [-250, 140], '2016-12-02T00:46:00')],
+              'I12D': [PT("1h", 3619.76, 0.05, [-320, 250], '2016-12-02T00:38:00')],
+              'I14D': [PT("1h", 3619.73, 0.05, [-250, 180], '2016-12-02T00:50:00')],
+              'I28D': [PT("1h", 3619.71, 0.05, [-450, 250], '2016-12-02T00:13:00')],
+              'I34D': [PT("1h", 3619.67, 0.05, [-350, 400], '2016-12-02T00:11:00')]}
+plot = True
+
+rt = Transients(transients[sta])
+stream = read(datafile,'MSEED')
 zdata = stream.select(channel='*Z')[0]
-eq_template = EQTemplate(zdata, eqfile)
-# Interactive tuning of transient parameters
-rt.calc_timing(zdata, eq_template)   
-trans = rt.calc_transient(zdata, eq_template)
-cleaned = rt.clean_transient(zdata, trans)
-cleaned.write(format='MSEED')
+eq_remover = EQRemover(zdata.stats.starttime, zdata.stats.endtime)
+rt.calc_timing(zdata, eq_remover)   
+rt.calc_transients(zdata, eq_remover, plot=plot)
+cleaned = rt.remove_transients(zdata, plot=plot, match=False, prep_filter=True)
+cleaned.write(datafile.split('.')[0] + '_cleaned.mseed', format='MSEED')
 ```
 
 Functions:
@@ -122,87 +126,131 @@ class Transients():
     """
     Periodic Transients class
     """
-    def __init__(trans_parms=[]]):
+    def __init__(self, transients=[]):
         """
-        :param trans_parms: list of transient parameters
+        Args:
+            transients (list of PeriodicTransient): transients
         """
-    def calc_times(stream, catalog=None):
-        """
-        Calculate transient times
 
-        :param stream: data (trace?)
-        :param catalog: earthquake catalog (to blank noisy times) 
+    def calc_timing(self, trace, eq_remover, prep_filter=True):
+        """
+        Calculate transient time parameters
+
+        Args:
+            trace (:class ~obspy.core.Trace): data
+            eq_remover (:class ~EQRemover): periods to remove because of EQs
+            prep_filter (bool): apply Wiedland prep filter before processing?
         """
         
-    def calc_trans(stream, times=[], catalog=None):
+    def calc_transients(self, trace, bad_times, plot=False,
+                        prep_filter=True):
         """
-        Return transient model
+        Calculate transients
 
-        :param stream: data (trace?)
-        :param times: list of transient times
-        :param catalog: earthquake catalog (to blank noisy times) 
-        """
+        Args:
+            trace (~class `obspy.core.trace.Trace`): data
+            bad_times (~class `.TimeSpans`): time spans to zero out
+            plot (bool): make information plots
+            prep_filter (bool): apply Wieland prep filter before processing?
+       """
         
-    def clean_trans(stream, trans_model, times):
+    def remove_transients(self, trace, match=True, plot=False,
+                          prep_filter=False):
         """
         Remove transient from data
 
-        :param stream: data (trace?)
-        :param trans_model: transient_model
-        :param times: list of transient times
-        :param catalog: earthquake catalog (to blank noisy times) 
+        Args:
+            trace (~class `obspy.core.trace.Trace`): data
+            match (bool): individually match transients to data?
+            plot (bool): make information plots
+            prep_filter (bool): apply Wieland prep filter before processing?
         """
 ```
 
 ```python
-class TransParms():
+class PeriodicTransient():
     """
-    Information about one type of periodic transient
+    Information about one periodic transient
     """
     def __init__(self, name: str, period: float, dp: float, clips: tuple,
-                 starttimes=[]):
+                 transient_starttime: UTCDateTime):
         """
-        :param name: name of this periodic transient (e.g., 'hourly')
-        :param period: seconds between transients (seconds)
-        :param dp: how many seconds to change the period by when testing for
+        Args:
+            name (str): name of this periodic transient (e.g., 'hourly')
+            period (float): seconds between each transient
+            dp (float): how many seconds to change the period by when testing for
                    better values
-        :param clips: clip values outside of this range.  Should correspond to
-                      max range of glitch
-        :type clips: 2-tuple (lowest, highest)
-        :param starttimes: onset times of earliest glitch(es).  Multiple values
-                           allow for a change due to releveling, etc. It's
-                           better to be a few seconds too early than too late.
-                           The program will make transient slices starting
-                           between a starttime and 1/3 of a transient period
-                           earlier
-        :type starttimes:  list of ~class `obspy.core.UTCDateTime`
-        """
-
-    def verify(self, trace, template, ref_time):
-        """
-        Interactively verify transient parameters
-    
-        :param trace:      input data trace
-        :type trace: ~class `obspy.stream.Trace`
-        :param template: template of good data (same size as inp, 1s for good,
-                         0s for bad
-        :type template: ~class `obspy.stream.Trace`
-        :param ref_time: start time of first glitch (or a few seconds before)
-        :type ref_time: ~class `obspy.core.UTCDateTime
+            clips (tuple): clip values outside of this range (low, high).
+                Should contain the max range of the transient
+            transient_starttime (~class `obspy.core.UTCDateTime`): onset
+                time of earliest transient.
+        
+        The program will make transient slices starting between
+        transient_starttime and 1/3 of self.period earlier
+        
+        transient_starttime must not be too late, a few seconds early is ok
         """
 ```
 
-Other Useful Functions:
-----------------------
-
-```
-decimate(): Decimates data in the most non-modifying fashion
-```
-
-```
-plot_EQ_template(trace, catalog, mag_limit, dpm):
+```python
+class EQRemover:
     """
-    plot data before and after applying EQ masking template with provided
-    maglimit and dpm
+    A class for zeroing out data after big earthquakes
+
+    Arguments:
+        start_time (UTCDateTime): earliest data that will be presented
+        end_time (UTCDateTime): latest data that will be presented
+        min_magnitude (float): EQ Magnitude above which to cut out times
+        days_per_magnitude (float): days to cut per magnitude above
+            min_magnitude
     """
+
+    def eq_filename(self, starttime, endtime, min_magnitude, format='quakeml'):
+        """
+        Create earthquake file filename
+        
+        Args:
+            starttime (UTCDateTime): start time
+            endtime (UTCDateTime): end time
+            min_magmitude (float): minimum magnitude saved
+            format (str): file format (only 'quakeml')
+        Returns:
+            filename (string):
+        """
+
+    def add_timespans(self, time_spans):
+        """
+        Add time spans to existing EQRemover object
+        
+        Args:
+            time_spans (~class `.TimeSpans`): time spans to add
+        """
+
+    def has_zeros(self, starttime, endtime):
+        """
+        Does the trace's time span intersect an EQ zero?
+
+        Arguments:
+            starttime (UTCDateTime): start time
+            endtime (UTCDateTime): end time
+
+        Returns:
+            (bool):
+        """
+
+    def zero(self, inp, plot=False):
+        """
+        Zero out data in trace  or stream when it is too close to an eq
+
+        Returns an error if the EQ catalog does not bound the Trace time
+        Returns a warning if the EQ catalog does not start far enough before
+        the trace to cover an M9 EQ.
+
+        Arguments:
+            inp (obspy.core.Trace): seismological data
+            plot: plot traces with EQs cut out
+
+        Returns:
+            trace with EQ-affected sections set to zero
+        """
 ```

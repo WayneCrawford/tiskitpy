@@ -16,42 +16,44 @@ from scipy.signal import convolve
 from scipy.fftpack import ifft
 
 from .utils import stack_data
+from .time_spans import TimeSpans
 
 DEBUG = False
 
 
-def comb_calc(inp, tp, plots, eq_template, slice_starttime):
+def comb_calc(inp, tp, plots, noise_spans, slice_starttime):
     """
     Calculate dirac comb and average transient
 
-    :param inp: the data to be cleaned
-    :type inp: ~class `obspy.core.stream.Trace`
-    :param tp: Transient parameters
-    :param plots: produce plots
-    :type plots: bool
-    :param eq_template: template of ones and zeros, zero where the
-                     comb should not use data for transient calculation
-                     (not used in diracComb_v0)
-    :type eq_template: ~class `obspy.core.stream.Trace`
-    :param slice_starttime: start of first transient "slice"
+    Args:
+        inp (~class `obspy.core.stream.Trace`): the data to be cleaned
+        tp: Transient parameters
+        plots (bool): produce plots
+        noise_spans (~class .TimeSpans):
+        slice_starttime (~class UTCDateTime): start of first transient "slice"
 
-    :returns: averaged transient, dirac comb, number of teeth in comb,
-              transient starting one sample earlier, starting one sample later,
-              dirac comb buffer
-    :rtype: obspy.Trace, obspy.Trace, int, np.array, np.array
-
+    Returns:
+        (tuple)
+            (obspy.Trace):averaged transient
+            (obspy.Trace): dirac comb
+            (int): number of teeth in comb,
+            (np.array): transient starting one sample earlier
+            (np.array): transient starting one sample later,
+            (?): )dirac comb buffer
     """
     print(f'Running comb_calc({tp}')
     # c1, c2 = tp.clips[0], tp.clips[1]
     sps = inp.stats.sampling_rate
     dt = 1/sps
-    eq_template = _remove_noisy(inp, eq_template, slice_starttime,
-                                tp.period, plot=plots)
-    tp.period = _refine_period(tp, inp, eq_template, slice_starttime)
+    noise_spans.append(_remove_noisy(inp, noise_spans, slice_starttime,
+                                     tp.period, plot=plots))
+    # eq_template = _remove_noisy(inp, eq_template, slice_starttime,
+    #                             tp.period, plot=plots)
+    tp.period = _refine_period(tp, inp, noise_spans, slice_starttime)
 
     # Calculate signal minus transients
     x, comb, cbuff, nt, xm, xp, xmm, xpp = comb_stack(
-        inp, tp.period, plots, eq_template, slice_starttime, tp.clips)
+        inp, tp.period, plots, noise_spans, slice_starttime, tp.clips)
     # print(f'comb_calc(): {cbuff=}')
 
     # Warn if the transient comes too late in the period (should not happen)
@@ -93,14 +95,15 @@ def comb_remove(inp, tp, match, slice_starttime, plots=False):
     return out, synth
 
 
-def _refine_period(tp, inp, eq_template, slice_starttime):
+def _refine_period(tp, inp, noise_spans, slice_starttime):
     """
     Find the best average period between transients (if tp.dp > 0)
 
-    :param tp: TransientParameter object
-    :param inp: input trace
-    :param eq_template: EQTemplate object
-    :slice_starttime: start time of first slice
+    Args:
+        tp (~class `.TransientParameter`):
+        inp (~class `obspy.core.stream.Trace`): input data
+        noise_spans (~class `TimeSpans`):
+        slice_starttime (~class `UTCDateTime`): start time of first slice
     """
     if not tp.dp > 0:
         return tp.period
@@ -110,13 +113,14 @@ def _refine_period(tp, inp, eq_template, slice_starttime):
         for i in range(3):
             per = tp.period + tp.dp*(i-1)
             yy[0, i] = per
-            x, c, cbuff, *_ = comb_stack(inp, per, False, eq_template,
+            x, c, cbuff, *_ = comb_stack(inp, per, False, noise_spans,
                                          slice_starttime, tp.clips)
             z, _ = _comb_remove_all(inp, c, x, cbuff)
-            # z, *_ = comb_stack(inp, tp, False, eq_template, slice_starttime,
+            # z, *_ = comb_stack(inp, tp, False, noise_spans, slice_starttime,
             #                    tp.clips)
-            yy[1, i] = np.sum((z.data*eq_template.data).clip(c1, c2)**2) /\
-                np.sum((inp.data*eq_template.data).clip(c1, c2)**2)
+            # print(noise_spans)
+            yy[1, i] = np.sum(noise_spans.zero(z).data.clip(c1, c2)**2) /\
+                np.sum(noise_spans.zero(inp).data.clip(c1, c2)**2)
         eps = (yy[1, 0]-yy[1, 2]) / (yy[1, 0]+yy[1, 2]-2*yy[1, 1])/2
         tp.period += eps*tp.dp
         print('\tbest period found={:g}'.format(tp.period))
@@ -127,7 +131,7 @@ def _refine_period(tp, inp, eq_template, slice_starttime):
 
 
 def _match_each(inp, out, synth, slice_starttime, tp,
-               adjust_limit=2, plots=False):
+                adjust_limit=2, plots=False):
     """
     Individually shift each transient to best match data
 
@@ -152,13 +156,13 @@ def _match_each(inp, out, synth, slice_starttime, tp,
     k = M.floor((out.stats.npts-start_addr)/(tp.period/dt))
     # data_clipped = inp.data.clip(tp.clips[0], tp.clips[1])
     for i in range(k):  # 0,1...k-1   =1:k
-        out = _match_one(out, i, synth, slice_starttime, tp, 
-                         adjust_limit, plots)
+        out = _match_one(out, i, synth, slice_starttime, tp, adjust_limit,
+                         plots)
 
     # I COULD (SHOULD?) RECALCULATE THE TRANSIENT USING THE IMPROVED COMB
     print('Done individually matching transients')
     if plots:
-        hours = np.arange(n) / (3600/dt)
+        hours = np.arange(inp.stats.npts) / (3600/dt)
         plt.figure(105)
         plt.plot(hours, inp.data, 'b', label='signal')
         plt.plot(hours, synth.data, 'r', label='synthetic')
@@ -242,37 +246,31 @@ def _match_one(out, i, synth, slice_starttime, tp, adjust_limit=2, plot=False):
     return out
 
 
-def comb_stack(inp, period, plots, eq_template, slice_starttime, clip):
+def comb_stack(inp, period, plots, noise_spans, first_slice_starttime, clip):
     """
     Calculate periodic transients and remove from signal
 
-    :param inp: the series to be cleaned
-    :type inp: ~obspy.core.Trace
-    :param period: the transient period (in seconds)
-    :type period: float
-    :param plots: produce plots
-    :type plots: bool
-    :param dt: sample interval (seconds)
-    :type dt: float
-    :param eq_template: 1s and 0s controlling which parts of inp will be used
-    :type eq_template: ~obspy.core.Trace
-    :param slice_starttime: start the dirac comb at this offset from the
-                            data start
-    :param slice_starttime: UTCDateTime
-    :param clip: low and high values to clip trace at when calculating
-                 average transient
-    :type clip: tuple or list
+    Args:
+        inp (~class `obspy.core.stream.Trace`): the series to be cleaned
+        period (float): the transient period (in seconds)
+        plots (bool): produce plots
+        noise_spans (~class `.TimeSpans`):
+        first_slice_starttime (~class `obspy.core.UTCDateTime`): start the
+            dirac comb at this time
+        clip (tuple): low and high values to clip trace at when calculating
+            average transient
 
-    :returns:
-        x   (np.array)   :  averaged transient
-        c  (np.array)    :  comb
-        cbuff: comb buffer
-        ng  (float)      :  number of transients used to make average
-        xm  (np.array)   :  x starting one sample earlier
-        xp  (np.array)   :  x starting one sample later
-        xmm  (np.array)   :  x starting two samples earlier
-        xpp  (np.array)   :  x starting two samples later
-        
+    Returns:
+        (tuple):
+            x   (np.array)   :  averaged transient
+            c  (np.array)    :  comb
+            cbuff: comb buffer
+            ng  (float)      :  number of transients used to make average
+            xm  (np.array)   :  x starting one sample earlier
+            xp  (np.array)   :  x starting one sample later
+            xmm  (np.array)   :  x starting two samples earlier
+            xpp  (np.array)   :  x starting two samples later
+
     xm, xp, xmm and xpp should probably be removed and replaced by in-place
     shifting of x (with simple padding at the ends)
     """
@@ -284,7 +282,8 @@ def comb_stack(inp, period, plots, eq_template, slice_starttime, clip):
 
     # -----------------------------------------
     # Create the Dirac comb, starting at slice_starttime
-    slice_startaddr = M.floor((slice_starttime - inp.stats.starttime)/dt)
+    slice_startaddr = M.floor((first_slice_starttime
+                               - inp.stats.starttime)/dt)
     assert slice_startaddr >= 0
     if DEBUG:
         print('COMB_STACK(): Creating Dirac comb')
@@ -295,20 +294,21 @@ def comb_stack(inp, period, plots, eq_template, slice_starttime, clip):
         c = np.hstack((np.zeros(slice_startaddr), c))
 
     # Create the broken Dirac comb (teeth missing for slices containing
-    # eq_template==0
     if DEBUG:
         print('COMB_STACK(): Creating broken Dirac comb...',
               flush=True, end='')
         tic = time.time()
     cb = c.copy()
     b_teeth = n_teeth
-    if plots:
-        eq_template.plot_mask(inp)
+    # if plots:
+    #    eq_template.plot_mask(inp)
     for i in range(n_teeth):
+        slice_starttime = first_slice_starttime + i*period
+        slice_endtime = slice_starttime + period
         n1 = int(slice_startaddr + M.floor(i*samps_per_period))
         n2 = n1 + rp
-        # print(np.any(eq_template.data[n1: n2] == 0))
-        if np.any(eq_template.data[n1: n2] == 0):
+        # if np.any(eq_template.data[n1: n2] == 0):
+        if noise_spans.has_zeros(slice_starttime, slice_endtime):
             cb[n1: n2] = 0
             b_teeth -= 1
     if DEBUG:
@@ -334,13 +334,19 @@ def _comb_remove_all(inp, dirac_comb, transient_model, comb_buffer,
     """
     Remove periodic transients from signal
 
-    :param inp: the Trace to be cleaned (obspy.core.Trace)
-    :param dirac_comb: dirac comb (one spike for each transient)
-    :param transient_model: averaged transient
-    :param comb_buffer: number of buffer samples inserted before true comb start
-    :param tp: Periodic_Transient object with dirac_comb and transient_model
-    :returns: cleaned series (inp - y), sythetic transient series (y)
-    :rtype: obspy.trace, obspy.trace
+    Args:
+        inp (obspy.core.Trace): the Trace to be cleaned
+        dirac_comb (obspy.core.Trace): dirac comb (one spike for each
+            transient)
+        transient_model (obspy.core.Trace): averaged transient
+        comb_buffer (int): number of buffer samples inserted before true
+            comb start
+        tp (Periodic_Transient): holds dirac_comb and transient_model
+
+    Returns:
+        (tuple):
+            (obspy.Trace): cleaned series (inp - y)
+            (obspy.Trce): sythetic transient series (y)
     """
     print('\tRunning _comb_remove_all', flush=True)
     n = inp.stats.npts
@@ -514,58 +520,63 @@ def comb(n, per):
     return n_teeth, cbuff, out
 
 
-def _remove_noisy(inp, eq_template, slice_starttime, period, plot=False):
+def _remove_noisy(inp, eq_spans, first_slice_starttime, period, plot=False):
     """
-    Sets eq_template to zero for sections of the data with anomalously high noise
+    Returns the time spans of data with anomalously high noise
 
     Affects indices corresponding to the middle half of a slice (based on
-    slice_starttime and period), to allow for subsequent small changes in period
+    first_slice_starttime and period), to allow for subsequent small changes
+    in period
 
-    Inputs:
+    Args:
         inp (obspy.trace): the original data
-        eq_template (obspy.trace): the existing eq_template (may already have zeros)
-        slice_starttime (float): the offset (seconds) of the first slice
+        eq_spans (TimeSpans): EQ time spans to remove
+        first_slice_starttime (UTCDateTime): the offset (seconds) of the first
+            slice
         period (float): the interval at which the data will be cut into slices
-    Output:
-        eq_template (obspy.trace): the new eq_template
+    Returns:
+        bad_spans (~class `.TimeSpans`): noisy time spans
   """
     dt = inp.stats.delta
-    start_addr = M.floor((slice_starttime-inp.stats.starttime) / dt)
+    start_addr = M.floor((first_slice_starttime-inp.stats.starttime) / dt)
     assert start_addr >= 0
     samp_per = period / dt
-    rp = np.round(samp_per)
+    # rp = np.round(samp_per)
     n = inp.stats.npts - start_addr
     n_slices = M.floor(n / samp_per)
-    # print(f'{start_addr=}, {n_slices=}, {inp.stats.npts=}, {n=}, {samp_per=}')
 
     # Calculate the variance of each data slice
     slices = list()
     for i in range(n_slices):
-        n1 = int(start_addr + M.floor(i*samp_per))
-        n2 = int(n1+rp)
-        # print(f'{n1=}, {n2=}')
+        slice_starttime = first_slice_starttime + i*period
+        slice_endtime = slice_starttime + period
+        # n1 = int(start_addr + M.floor(i*samp_per))
+        # n2 = int(n1+rp)
         # Don't go past end
-        if n2 >= inp.stats.npts:
+        # if slice_endtime >= inp.stats.npts:
+        if slice_endtime >= inp.stats.endtime:
             continue
         # Ignore the first & last 10 samples to accomodate small changes in
         # period
-        var = sum((inp.data[n1+10: n2-10] * eq_template.data[n1+10: n2-10])**2)
-        hz = np.any(eq_template.data[n1+10:n2-10] == 0)
-        slices.append({'var': var, "n1": n1, "n2": n2, 'hasZeros': hz})
+        # var = sum((inp.data[n1+10: n2-10] * eq_template.data[n1+10: n2-10])**2)
+        slice = inp.slice(slice_starttime + 10*dt,
+                          slice_endtime - 10*dt)
+        var = sum(eq_spans.zero(slice).data**2)
+        hz = eq_spans.has_zeros(slice_starttime, slice_endtime)
+        slices.append({'var': var, "st": slice_starttime,
+                       "et": slice_endtime, 'hasZeros': hz})
+        # slices.append({'var': var, "n1": n1, "n2": n2, 'hasZeros': hz})
 
     # Calculate the median and std of variances of slices without zeros
     variances = [x['var'] for x in slices if not x['hasZeros'] is True]
-    # print(f'{[x["hasZeros"] for x in slices]=}')
-    # print(f'{[x["hasZeros"] for x in slices if not x["hasZeros"] is True]=}')
-    # print(f'{variances=}')
     median = np.median(variances)
     sigma = np.std(variances)
-    # print(f'{median=}, {sigma=}')
 
     # For slices with abnormally high variance, set eq_template indices to zero
     print('\tRejecting high-variance slices (>{:.4g}+3*{:.4g})...'
           .format(var, sigma), end='')
     nRejected = 0
+    noise_start_times, noise_end_times = [], []
     for slice in slices:
         # print(f'{slice["var"]=}')
         if slice['var'] <= median + 3*sigma:
@@ -573,23 +584,20 @@ def _remove_noisy(inp, eq_template, slice_starttime, period, plot=False):
         else:
             nRejected += 1
             slice['muted'] = True
-            n1 = slice['n1']
-            n2 = slice['n2']
-            # quarter_slice = M.floor((n2-n1)/4)
-            # nStart = n1 + quarter_slice
-            # nEnd = n1 + 3*quarter_slice
-            # eq_template.data[nStart:nEnd] = 0
-            eq_template.data[n1+10:n2-10] = 0
-    if nRejected:
+            # n1 = slice['n1']
+            # n2 = slice['n2']
+            noise_start_times.append(slice['st'] + 10/dt)
+            noise_end_times.append(slice['et'] - 10/dt)
+            # eq_template.data[n1+10:n2-10] = 0
+    if nRejected > 0:
         print('{:d} of {:d} rejected'.format(nRejected, len(slices)))
     else:
         print('none rejected')
 
     if plot:
-        # print(f'{period=}, {dt=}')
         stack = stack_data(inp.data[start_addr:], samp_per)
         _plot_remove_noisy(stack, slices, dt)
-    return eq_template
+    return TimeSpans(noise_start_times, noise_end_times)
 
 
 def _plot_remove_noisy(stack, slices, dt):
