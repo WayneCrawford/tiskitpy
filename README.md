@@ -56,11 +56,12 @@ rot_data.write(rot_fname, 'MSEED')
 Calculate and remove transients
 ```python
 from obspy.core import read
-from rptransient import EQRemover, Transients, PeriodicTransient as PT
+from rptransient import get_eq_spans, Transients, PeriodicTransient as PT
 
 sta = 'I04D'
 datafile = f'Data/{sta}_20161202_20161222_dec_rot.mseed'
 
+#transients = [PT("1h", 3620.26, 0.05, [-300, 200], '2016-04-01T00:28:30')]
 transients = {'I04D': [PT("1h", 3620.26, 0.05, [-250, 140], '2016-12-02T00:46:00')],
               'I12D': [PT("1h", 3619.76, 0.05, [-320, 250], '2016-12-02T00:38:00')],
               'I14D': [PT("1h", 3619.73, 0.05, [-250, 180], '2016-12-02T00:50:00')],
@@ -71,12 +72,23 @@ plot = True
 rt = Transients(transients[sta])
 stream = read(datafile,'MSEED')
 zdata = stream.select(channel='*Z')[0]
-eq_remover = EQRemover(zdata.stats.starttime, zdata.stats.endtime)
-rt.calc_timing(zdata, eq_remover)   
-rt.calc_transients(zdata, eq_remover, plot=plot)
+# eq_remover = EQRemover(zdata.stats.starttime, zdata.stats.endtime)
+eq_spans = get_eq_spans(zdata.stats.starttime, zdata.stats.endtime)
+rt.calc_timing(zdata, eq_spans)   
+rt.calc_transients(zdata, eq_spans, plot=plot)
 cleaned = rt.remove_transients(zdata, plot=plot, match=False, prep_filter=True)
 cleaned.write(datafile.split('.')[0] + '_cleaned.mseed', format='MSEED')
 ```
+
+- `calc_timing()` plots two screens with parameters that you will have to
+  validate or change on the command line.
+
+- `calc_transients(plot=True)` plots a few screens that you need to close
+  by clicking on the close button.
+  
+- `remove_transients(plot=True)` plots a final screen comparing the signal
+  before and after the correction, plus the correction itself.  You need
+  to close this window.
 
 Functions:
 ----------------------
