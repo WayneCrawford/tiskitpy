@@ -130,6 +130,20 @@ def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
     """
 ```
 
+```python
+def get_eq_spans(starttime, endtime, minmag=5.85,
+                 days_per_magnitude=1.5, quiet=False):
+    """
+    Args:
+        starttime (UTCDateTime): earliest data that will be presented
+        endtime (UTCDateTime): latest data that will be presented
+        minmag (float): EQ Magnitude above which to cut out times
+        days_per_magnitude (float): days to cut per magnitude above
+            min_magnitude
+    Returns:
+        eq_spans (~class `.TimeSpans`): time spans covering EQ signal
+    """
+```
 Classes:
 ----------------------
 
@@ -201,68 +215,5 @@ class PeriodicTransient():
         transient_starttime and 1/3 of self.period earlier
         
         transient_starttime must not be too late, a few seconds early is ok
-        """
-```
-
-```python
-class EQRemover:
-    """
-    A class for zeroing out data after big earthquakes
-
-    Arguments:
-        start_time (UTCDateTime): earliest data that will be presented
-        end_time (UTCDateTime): latest data that will be presented
-        min_magnitude (float): EQ Magnitude above which to cut out times
-        days_per_magnitude (float): days to cut per magnitude above
-            min_magnitude
-    """
-
-    def eq_filename(self, starttime, endtime, min_magnitude, format='quakeml'):
-        """
-        Create earthquake file filename
-        
-        Args:
-            starttime (UTCDateTime): start time
-            endtime (UTCDateTime): end time
-            min_magmitude (float): minimum magnitude saved
-            format (str): file format (only 'quakeml')
-        Returns:
-            filename (string):
-        """
-
-    def add_timespans(self, time_spans):
-        """
-        Add time spans to existing EQRemover object
-        
-        Args:
-            time_spans (~class `.TimeSpans`): time spans to add
-        """
-
-    def has_zeros(self, starttime, endtime):
-        """
-        Does the trace's time span intersect an EQ zero?
-
-        Arguments:
-            starttime (UTCDateTime): start time
-            endtime (UTCDateTime): end time
-
-        Returns:
-            (bool):
-        """
-
-    def zero(self, inp, plot=False):
-        """
-        Zero out data in trace  or stream when it is too close to an eq
-
-        Returns an error if the EQ catalog does not bound the Trace time
-        Returns a warning if the EQ catalog does not start far enough before
-        the trace to cover an M9 EQ.
-
-        Arguments:
-            inp (obspy.core.Trace): seismological data
-            plot: plot traces with EQs cut out
-
-        Returns:
-            trace with EQ-affected sections set to zero
         """
 ```
