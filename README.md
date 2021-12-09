@@ -200,10 +200,6 @@ decimate(): Decimates data in the most non-modifying fashion
 ```
 
 ```
-rotate_clean(): Rotate the vertical axis to minimize current noise
-```
-
-```
 plot_EQ_template(trace, catalog, mag_limit, dpm):
     """
     plot data before and after applying EQ masking template with provided
