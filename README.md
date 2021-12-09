@@ -46,7 +46,7 @@ print(endtime)
 print(stream.__str__(extended=True))
 
 dec_data = decimate(stream, decimates)
-rot_data, ang, azi = rotate_clean(dec_data, eqfile=eqfile, plot=True)
+rot_data, ang, azi = rotate_clean(dec_data, remove_eq=True, plot=True)
 print(f'{sta} Z rotated by {ang:.2f} degrees at azimuth {azi:.1f}')
 time_str = f'{starttime.strftime("%Y%m%d")}_{endtime.strftime("%Y%m%d")}'
 rot_fname = f'{sta}_dec_{time_str}.mseed'
