@@ -1,4 +1,4 @@
-v0: straight implementation of Wielandt's Matlab routines
+v0: straight translation of Wielandt's Matlab routines
   
 v1: Add features to handle earthquakes and noisy data:
 - Remove "teeth" from the Dirac comb wherever the "eq_template" time series
@@ -24,3 +24,6 @@ v3:
 - Remove parameters from code (now arguments to calls)
 - Create classes
 - Put on github/pypi
+
+1.0a1
+- Add automatic read of global earthquakes in order to remove them from noise/transient models
