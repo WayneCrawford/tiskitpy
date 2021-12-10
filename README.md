@@ -30,9 +30,7 @@ from rptransient import decimate, rotate_clean
 
 net = 'XX'
 sta = 'I04D'
-archive_dir = '/Volumes/Wayne_Data/_NoBackup/SDS_PILAB'
-archive_dir = '/Users/crawford/_Work/Parc_OBS/7_Missions/2016.PiLAB/7_DataExtraction/2021.lc2ms/test/SDS'
-eqfile = 'eqs_20160227-20170118.csv'
+archive_dir = '/Volumes/Wayne_Data/_NoBackup/SDS_PILAB_uncorrected'
 
 # READ DATA, DECIMATE AND ROTATE
 starttime = UTCDateTime('2016-12-01T00:00:00')
@@ -61,7 +59,6 @@ from rptransient import get_eq_spans, Transients, PeriodicTransient as PT
 sta = 'I04D'
 datafile = f'Data/{sta}_20161202_20161222_dec_rot.mseed'
 
-#transients = [PT("1h", 3620.26, 0.05, [-300, 200], '2016-04-01T00:28:30')]
 transients = {'I04D': [PT("1h", 3620.26, 0.05, [-250, 140], '2016-12-02T00:46:00')],
               'I12D': [PT("1h", 3619.76, 0.05, [-320, 250], '2016-12-02T00:38:00')],
               'I14D': [PT("1h", 3619.73, 0.05, [-250, 180], '2016-12-02T00:50:00')],
@@ -72,7 +69,6 @@ plot = True
 rt = Transients(transients[sta])
 stream = read(datafile,'MSEED')
 zdata = stream.select(channel='*Z')[0]
-# eq_remover = EQRemover(zdata.stats.starttime, zdata.stats.endtime)
 eq_spans = get_eq_spans(zdata.stats.starttime, zdata.stats.endtime)
 rt.calc_timing(zdata, eq_spans)   
 rt.calc_transients(zdata, eq_spans, plot=plot)
