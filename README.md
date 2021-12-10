@@ -22,7 +22,7 @@ Overview
 Example run:
 ----------------------
 
-Prepare decimated and clean-rotated data:
+### Prepare decimated and clean-rotated data:
 ```python
 from obspy import UTCDateTime
 from obspy.clients.filesystem.sds import Client
@@ -51,7 +51,7 @@ rot_fname = f'{sta}_dec_{time_str}.mseed'
 rot_data.write(rot_fname, 'MSEED')
 ```
 
-Calculate and remove transients
+### Calculate and remove transients
 ```python
 from obspy.core import read
 from rptransient import get_eq_spans, Transients, PeriodicTransient as PT
@@ -78,13 +78,27 @@ cleaned.write(datafile.split('.')[0] + '_cleaned.mseed', format='MSEED')
 
 - `calc_timing()` plots two screens with parameters that you will have to
   validate or change on the command line.
+  - `Select clip levels` presents the stacked glitches (using the glitch
+    period you provided in `transients`) and the clip levels you provided in
+    `transients`.  These should cover the min and max glitch levels, but not
+    more.  If they do, hit <RETURN> on the command line.  If they don't, enter
+    the clip levels, separated by a comma, on the command line.  The plot will
+    be redisplayed with the new levels and you can validate or readjust, and
+    so on (if you changed the clip levels, you should enter the new levels
+    in `transients`, so you don't have to re-change next time)
+  - `Select transient period` presents the stacked glitches and a dotted line
+    that represents the glitch start time.  If the glitches are not aligned with
+    the dotted line, then enter a new transient period on the command line, if
+    they are, hit return.  Once the glitches are aligned, they should start just
+    after (above) the dotted line.  If they aren't, you will need to change
+    the start time in `transients` and rerun
 
-- `calc_transients(plot=True)` plots a few screens that you need to close
-  by clicking on the close button.
+- `calc_transients()` calculates the transients.  If `plot=True`, it will
+  plot a few screens that you will need to close once you've looked at them.
   
-- `remove_transients(plot=True)` plots a final screen comparing the signal
-  before and after the correction, plus the correction itself.  You need
-  to close this window.
+- `remove_transients(plot=True)` removes the transients from the data.
+  If `plot=True`, it plots a final screen comparing the signal
+  before and after the correction, plus the correction itself. 
 
 Functions:
 ----------------------
