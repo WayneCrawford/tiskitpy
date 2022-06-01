@@ -1,0 +1,19 @@
+The data files sgn.bhz and sgn.hhz are two examples for 
+the same earthquake in two different sampling rates,
+namely 20 and 80 Hz.  They have been recorded at station
+SGN of the Freesia project (courtesy of E. Fukuyama).
+Both contain FIR filter related precursory signals,
+which can be removed nicely.
+
+The calling sequence to correct the 20 Hz data stream is:
+corr_quanterra sgn.bhz 20
+ 
+The calling sequence to correct the 80 Hz data stream is:
+corr_quanterra sgn.hhz 80
+
+The corrected files obtain the extension .corr
+
+The performance of the correction can be seen in the 
+two postscript files sgn.bhz.ps and sgn.hhz.ps which
+compare uncorrected and corrected traces in two different
+amplifications.

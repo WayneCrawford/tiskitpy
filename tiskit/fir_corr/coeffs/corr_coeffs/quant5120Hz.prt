@@ -1,0 +1,67 @@
+#METHOD: POLYNOMIAL ROOTING
+#FIRNAME file name effective FIR filter coefficients: 
+stage1.fir
+#NO_EFF: (no. of points for effective FIR filter)
+64
+#FDIG_EFF: (digitization frequency in Hz)
+5120.
+#FIRDATA_EFF: 
+-0.00111328112        -0.00100800209        -0.00135286082        -0.00173045369        -0.00208418001
+-0.00238537718        -0.0026095563         -0.00273352256        -0.0027331619         -0.00258472445
+-0.00226411712        -0.00174846814        -0.0010140331         -0.0000351681737      0.00123782025
+0.003159831739999999  0.006999449800000001  0.00909959897         0.0125423642          0.0163123012
+0.0202632397          0.0243172608          0.02840510940000001   0.0324604138          0.0364142842
+0.0401987396          0.04374504830000001   0.04698732490000001   0.0498572923          0.05227957290000001
+0.05411395800000001   0.0543902851          0.0543902851          0.05411395800000001   0.05227957290000001
+0.0498572923          0.04698732490000001   0.04374504830000001   0.0401987396          0.0364142842
+0.0324604138          0.02840510940000001   0.0243172608          0.0202632397          0.0163123012
+0.0125423642          0.00909959897         0.006999449800000001  0.003159831739999999  0.00123782025
+-0.0000351681737      -0.0010140331         -0.00174846814        -0.00226411712        -0.00258472445
+-0.0027331619         -0.00273352256        -0.0026095563         -0.00238537718        -0.00208418001
+-0.00173045369  -0.00135286082  -0.00100800209  -0.00111328112
+ 
+#CORRECTION FILTER:
+#CORR_AR: (No. of AR coefficients := mx)
+5
+#CORR_AR_DATA: (AR coeficients a[k] for k = 1 to mx)
+4.519586549134558  -8.47823046668585  8.21143318688304  -4.100018875947934  0.843231737671846
+ 
+#CORR_MA: (no. of MA coefficients := mx+1)
+6
+#CORR_MA_DATA: (MA coefficients b[l] for l = 0 to mx)
+-0.843231737671846  4.100018875947934  -8.21143318688304  8.47823046668585  -4.519586549134558
+1
+ 
+#TIMETAG (time tag correction in no. of samples): 
+31.5
+ 
+#                                                      
+#----------------------------------------------------------------------------
+#                                                      
+# How to remove the noncausal FIR filter response from a digital record x[n]:
+# 1. Reverse sequence x[n] in time to obtain sequence x'[n]
+# 2. Filter reversed input sequence x'[] using the     
+#    difference equation:                              
+#                                                       
+#            mx                mx                       
+#            --                --                       
+#    y'[i] =  > a[k]*y'[i-k]   + > b[l] x'[i-l]         
+#            __                __                       
+#            k=1               l=0                      
+#                                                       
+#    This corresponds to equ. (8.15) in 'Scherbaum, F: Of poles and zeros,
+#    Fundamentals of Digital Seismology, Kluwer Academic Publ., 1996' 
+#    mx = number of AR coefficients 
+#    b[l] = MA coefficients for l = 0, mx
+#    a[k] = AR coefficients for k = 1, mx
+#    y'[] = output sequence                                   
+# 3. Reverse the output sequence y'[] in time again to obtain the corrected 
+#    sequence y[n]! 
+# 4. Apply the time tag correction! Since the correction procedure works on
+#    the time inverted trace (cf. step 1), a signal front (onset) will appear
+#    TIMETAG samples (= TIMETAG/FDIG_EFF secs) too early in the corrected 
+#    sequence. In contrast, the envelope of a bandlimited signal, will not be 
+#    advanced quite as much. The amount is given by the negative group delay
+#    of the correction filter. For a discussion of onset properties and how 
+#    they are affected by filters, see Scherbaum, F: Of poles and zeros.
+#    

@@ -1,0 +1,43 @@
+#! /bin/csh -f
+# REFTEK 72-08 FIR filter correction 
+# USAGE: corr_reftek08 <input file> <fdig>
+# input file: single colummn ASCII format (1 value per line)
+# fdig: digitization frequency of the input file in Hz 
+#
+#
+# There are 2 different REF TEK instruments which use the 24 bit part
+# from Crystal.  The 72A-08 is the 6 channel unit.  In this unit the
+# part is always run at 1000 sps and the output fed into the DSP
+# for filtering to the final sample rate.  In this part the initial
+# sample rate is 128,000 sps and this is then filtered and decimated
+# to the final sample rate as shown below:
+# 
+# 72A-08 1000 sps 
+#        Stage   Dec     Input SR        Filter
+#        1       8       128000          cfir1.out
+#        2       2       16000           cfir2a.out
+#        3       2       8000            cfir2a.out
+#        4       2       4000            cfir2a.out
+#        5       2       2000            cfir3.out
+#
+# TEST VERSION!!: Correction back up to the 2000 Hz datastream
+# currently supported values for fdig are only: 100
+#
+#
+
+echo $2 > tmp764995
+awk '{printf("%d", $1)}' tmp764995 > tmp956723
+set fdig = `cat tmp956723`
+if ($fdig == 100) then
+interpolate -i $1 -o $1.200 -f 2
+fir2caus -c reftekfir2.f.prt -i $1.200 -o $1.200c -f 200
+interpolate -i $1.200c -o $1.1000 -f 5
+fir2caus -c reftekfir5.s.prt -i $1.1000 -o $1.1000c -f 1000
+interpolate -i $1.1000c -o $1.2000 -f 2
+fir2caus -c reftekcfir3.prt -i $1.2000 -o $1.2000c -f 2000
+decimate -i $1.2000c -o $1.corr -f 0 -d 20
+# In case you want to look at the intermediate results you
+# have to comment out the next line
+rm $1.200 $1.200c $1.1000 $1.1000c $1.2000 $1.2000c
+endif
+rm tmp764995 tmp956723

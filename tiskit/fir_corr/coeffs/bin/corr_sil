@@ -1,0 +1,11 @@
+#! /bin/csh -f
+# SIL FIR filter correction 
+# USAGE: corr_sil <input file> 
+# input file: single colummn ASCII format (1 value per line)
+# fdig: digitization frequency of the input file in Hz asumed to be 100Hz
+#
+#
+interpolate -i $1 -o $1.ipl -f 4
+fir2caus -c sil400Hz.prt -i $1.ipl -o $1.ipl.c -f 400
+decimate -i $1.ipl.c -o $1.corr -f 0 -d 4
+rm $1.ipl $1.ipl.c 

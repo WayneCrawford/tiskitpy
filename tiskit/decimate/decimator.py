@@ -1,0 +1,419 @@
+#!env python3
+""" Decimate data to a lower rate"""
+
+###############################################################################
+# Note: resample() takes too long, even on 1.25 sps data
+#       Could (should?) write:
+#         -  resample extension that uses FIR filter (min phase or zero phase,
+#            use scipy.signal.firwin to calculate FIR)
+#         - decimate extension that uses FIR filter (min or zero phase,
+#           scipy.signal.firwin)
+#       Both should return the FIR filter, which could be stuffed into the
+#       instruments' response information
+#       scipy doesn't seem to have a minimum phase FIR method: could use
+#       Scherbaum method to convert zero phase to minimum phase
+###############################################################################
+# import obspy
+# from obspy.clients.filesystem import sds
+import time
+from dataclasses import dataclass
+from inspect import getfile, currentframe
+from pathlib import Path
+import warnings
+import fnmatch
+# import glob
+
+from numpy import prod
+from obspy.core.stream import Stream, Trace
+from obspy.core.inventory import FIRResponseStage, CoefficientsTypeResponseStage
+# from matplotlib import pyplot as plt
+
+from .fir_filter import FIRFilter
+
+
+@dataclass
+class Decimator:
+    """ Decimate obspy stream in some intelligent way """
+    decimates: list
+    verbose: bool=False
+
+    @property
+    def decimation_factor(self):
+        return prod(self.decimates)
+
+    def run(self, data):
+        """
+        Apply decimator to data
+        
+        Arguments:
+            data (obspy Stream or Trace): waveform data
+        """
+        if isinstance(data, Stream):
+            return self._run_stream(data)
+        if isinstance(data, Trace):
+            return self._run_stream(Stream([data]))[0]
+        else:
+            raise TypeError('data is not a Stream or Trace')
+
+    def update_inventory(self, inv, st, normalize_firs=False):
+        """
+        Update inventory for channels found in stream
+
+        Args:
+            inv (:class:`obspy.core.events.inventory.Inventory`): inventory
+            st (:class:`obspy.core.stream.Stream`): date stream (used to
+                determine net/sta/chan/loc codes)
+            normalize_firs (bool): normalizes any FIR channel that isn't already
+
+        : returns: obspy inventory with new channels
+        """
+        inv = inv.copy()    # Don't overwrite input inventory
+        for tr in st:
+            s = tr.stats
+            new_cha = self._duplicate_channel(inv, network=s.network,
+                                              station=s.station,
+                                              location=s.location,
+                                              channel=s.channel,
+                                              normalize_firs=normalize_firs)
+            if not new_cha.sample_rate == s.sampling_rate:
+                raise ValueError('data and metadata sampling rates are '
+                                 'different!')
+            self._modify_chan(new_cha)
+        return inv
+
+    def update_inventory_from_nslc(self, inv, network='*', station='*',
+                                   channel='*', location='*', quiet=False,
+                                   normalize_firs=False):
+        """
+        Update inventory based on network, station, channel and location codes
+
+        Args:
+            inv (:class:`obspy.core.events.inventory.Inventory`): inventory
+            network (str): FDSN network code
+            station (str): station code
+            channel (str): channel code
+            location (str): FDSN location code
+            quiet (bool): Do not say what channel(s) was changed
+            normalize_firs (bool): normalizes any FIR channel that isn't already
+
+        Returns:
+            newinv: inv (:class:`obspy.core.events.inventory.Inventory`):
+                updated inventory
+
+        network, station, channel and location codes are '*' by default,
+        may include wildcards as specified in obspy.core.stream.Stream.select
+        """
+        inv = inv.copy()    # Don't overwrite input inventory
+        inv_selected = inv.select(network=network,
+                                  station=station,
+                                  location=location,
+                                  channel=channel)
+        for net in inv_selected:
+            for sta in net:
+                old_sta = sta.copy()
+                for cha in old_sta:
+                    new_cha = self._duplicate_channel(
+                        inv, net.code, sta.code, cha.location_code, cha.code,
+                        normalize_firs=normalize_firs)
+                    self._modify_chan(new_cha, quiet=quiet)
+        return inv
+
+    def _modify_chan(self, cha, normalize_firs=False, quiet=False):
+        """
+        modify reponse and name of a channel to correspond to decimation
+
+        Args:
+            cha (:class:`obspy.core.inventory.channel`): original channel
+            normalize_firs (bool): normalizes any FIR channel that isn't already
+        """
+        # By setting this here, no need to worry about order of the two methods
+        if not quiet:
+            print('channel modified from {}.{} ({:g}sps)'
+              .format(cha.location_code, cha.code, cha.sample_rate),
+              end = ' ')
+        input_sample_rate = cha.sample_rate  
+        self._add_response(cha, input_sample_rate)
+        self._change_chan_loc(cha, input_sample_rate)
+        cha.sample_rate /= self.decimation_factor
+        if not quiet:
+            print('to {}.{} ({:g}sps) '
+              .format(cha.location_code, cha.code, cha.sample_rate))
+
+    @staticmethod
+    def _normalize_firs(cha):
+        """
+        Verifies and, if necessary, normalizes channel's FIR or Coefficients coeffs
+        
+        Args:
+            cha (:class:`obspy.core.inventory.channel`): channel
+        """
+        for stg in cha.response.response_stages:
+            if isinstance(stg, FIRResponseStage):
+                if stg.symmetry == "NONE":
+                    coeff_sum = sum(stg.coefficients)
+                elif stg.symmetry == 'EVEN':
+                    coeff_sum = 2 * sum(stg.coefficients)
+                elif stg.symmetry == 'ODD':
+                    coeff_sum = 2*sum(stg.coefficients[:-1]) + stg.coefficients[-1]
+                else:
+                    raise ValueError(f'Unknown FIR coefficient symmetry: {stg.symmetry}')
+                if abs(coeff_sum - 1) > 0.01:
+                    print(f'DECIMATOR: Sum of FIR coeffs = {coeff_sum}, normalizing')
+                    stg.coefficients = [x/coeff_sum for x in stg.coefficients]
+            elif isinstance(stg, CoefficientsTypeResponseStage):
+                if sum(stg.denominator) == 0:
+                    coeff_sum = sum(stg.numerator)
+                    if coeff_sum == 0:
+                        continue
+                else:
+                    coeff_sum = sum(stg.numerator) / sum(stg.denominator)
+                descriptor = 'Coeff numerator'
+                if abs(coeff_sum - 1) > 0.01:
+                    print(f'DECIMATOR: Sum(numerator coeffs)/sum(denom coeffs) = {coeff_sum}, normalizing')
+                    stg.numerator = [x/coeff_sum for x in stg.numerator]
+
+    def _change_chan_loc(self, cha, in_sr, avoid_codes=[]):
+        """
+        Change channel (or location) code in place, according to decimation
+
+        Arguments:
+            cha (Inventory.Channel) channel to be modified (in place)
+            in_sr (float): input sample rate
+            avoid_codes (list): channel:location codes to avoid
+        """
+        cha.code, cha.location_code = self._get_chan_loc(
+            cha.code, cha.location_code, in_sr, avoid_codes)
+
+    def _get_chan_loc(self, cha_code, loc_code, in_sr, avoid_codes=[]):
+        """
+        Get new channel (or location) codes based on old codes and decimation factor
+
+        Arguments:
+            cha_code: input channel code
+            loc_code: input location code
+            in_sr: input sampling rate
+            avoid_codes (list): channel:location codes to avoid
+        
+        Returns:
+            tuple:
+                new_chan_code (str)
+                new_loc_code (str)
+        """
+        if self.decimation_factor == 1:
+            raise ValueError("Decimation == 1!")
+        out_sr = in_sr / self.decimation_factor
+        new_band_code = _get_new_band_code(cha_code[0], in_sr, out_sr)
+        new_cha_code = new_band_code + cha_code[1:]
+        if new_cha_code == cha_code:
+            # Have to change location code
+            try:
+                new_loc_code = f'{int(loc_code) + 1:02d}'
+            except Exception:
+                new_loc_code = '01'
+        else:
+            new_loc_code = loc_code
+        # If chan_loc exists, increment loc_code until we find an empty one
+        while True:
+            for c in avoid_codes:
+                if new_cha_code == c.split(':')[0] and new_loc_code == c.split(':')[1]:
+                    new_loc_code = f'{int(new_loc_code) + 1:02d}'
+                    continue
+            break
+        return new_cha_code, new_loc_code
+
+
+    def _add_response(self, cha, input_sample_rate):
+        """
+        Append  decimation object's response to an existing channel's response
+        """
+        stage_number = cha.response.response_stages[-1].stage_sequence_number
+        for d in self.decimates:
+            fir_filter = FIRFilter.from_SAC(d)
+            stage_number += 1
+            cha.response.response_stages.append(
+                fir_filter.to_obspy(input_sample_rate, stage_number))
+            input_sample_rate /= d
+        try:
+            cha.response.recalculate_overall_sensitivity()
+        except Exception:
+            pass
+
+    def _run_stream(self, stream):
+        """
+        Return decimated obspy stream
+        """
+        if not isinstance(stream, Stream):
+            raise ValueError("input stream is not an obspy Stream!")
+        st = stream.copy()
+        newtr = []
+        for tr in st.traces:
+            newtr.append(self._run_trace(tr))
+        st.traces = newtr
+        if self.verbose:
+            print('New data has {} samples'.
+                  format([tr.data.size for tr in st]))
+        st.verify()
+        return st
+
+    def _run_trace(self, trace):
+        """
+        Decimate obspy trace
+        """
+        if not isinstance(trace, Trace):
+            raise ValueError("input trace is not an obspy Trace!")
+        tr = trace.copy()
+        sr = tr.stats.sampling_rate
+        if self.verbose:
+            print('Decimating data from {:g} to {:g} Hz ({:d}x)... '
+                  .format(sr, sr/self.decimation_factor,
+                          self.decimation_factor))
+        tic = time.time()
+        for d in self.decimates:
+            fir_filter = FIRFilter.from_SAC(d)
+            tr.data = fir_filter.convolve(tr.data)
+            tr.decimate(d, no_filter=True)
+        tr.stats.channel, tr.stats.location = self._get_chan_loc(
+            tr.stats.channel, tr.stats.location,
+            tr.stats.sampling_rate * self.decimation_factor)
+        if self.verbose:
+            print('Took {:.1f} seconds'.format(time.time()-tic))
+        return tr
+
+    def _read_FIR_SAC(decimation):
+        """
+        Returns a SAC FIR filter
+        """
+        base_dir = Path(getfile(currentframe())).resolve().parent
+        fbase = f'dec{decimation:d}'
+        filename = base_dir.glob(fbase)
+        if not len(filename) == 1:
+            raise NameError('SAC filter file "{fbase}" not found')
+        with open(filename) as f:
+            f.readline()
+            A = f.readline().split()
+            divisor = float(A[0])
+            nCoeffs = int(A[1])
+            coeffs = []
+            for line in f.readlines():
+                coeffs = coeffs + [float(x)/divisor for x in line.split()]
+        if not len(coeffs) == nCoeffs:
+            raise RuntimeError('FIR length is different from that stated: '
+                               '{} != {}'.format(len(coeffs), nCoeffs))
+        # SAC only saves right half of symmetrical odd filter
+        delay = len(coeffs) - 1
+        coeffs = coeffs[-1:0:-1] + coeffs
+        return FIRFilter(coeffs, delay, 1, "")
+
+    # The following is a combo of obspy's inventory, Network and Station select
+    # methods, but which returns the chosen station and channel, not a copy
+    def _duplicate_channel(self, inv, network, station, location, channel,
+                           normalize_firs=False):
+        """
+        Return Station & Channel matching network, station, location, channel
+    
+        Arguments:
+            network (str): network code
+            station (str): station code
+            location (str): location code
+            channel (str): channel code
+            normalize_firs (bool): normalizes any FIR channel that isn't already
+        
+        Returns:
+            (Channel): duplicate of found channel, ready to modify
+        """
+        stations = []
+        channels = []
+        for net in inv.networks:
+            # skip if any given criterion is not matched
+            if not fnmatch.fnmatch(net.code.upper(), network.upper()):
+                continue
+            for sta in net.stations:
+                if not fnmatch.fnmatch(sta.code.upper(), station.upper()):
+                    continue
+                for cha in sta.channels:
+                    if not fnmatch.fnmatch(cha.location_code.upper(),
+                                           location.upper()):
+                        continue
+                    if not fnmatch.fnmatch(cha.code.upper(), channel.upper()):
+                        continue
+                    stations.append(sta)
+                    channels.append(cha)
+        if len(stations) == 0:
+            raise ValueError(
+                f'trace waveformid "{network}.{station}.{location}'
+                '.{channel}" not found in inventory')
+            return None, None
+        if len(stations) > 1:
+            raise ValueError('{:d} station-channels matched {}.{}.{}.{}'
+                             .format(len(stations), network, station, location,
+                                     channel))
+        if normalize_firs==True:
+            self._normalize_firs(channels[0])
+        new_cha = channels[0].copy()
+        stations[0].channels.append(new_cha)
+        return new_cha
+
+def _get_new_band_code(in_band_code, in_sample_rate, out_sample_rate):
+    """
+    Return the channel band code
+
+    :param in_band_code: input band code
+    :param in_sample_rate: input sample rate (sps)
+    :param out_sample_rate: output sample rate (sps)
+    """
+    if in_band_code != _get_band_code(in_band_code, in_sample_rate):
+        raise ValueError(f'Input band code (in_band_code) is inconsistent '
+                         f'with input sampling rate ({in_sample_rate})')
+    return _get_band_code(in_band_code, out_sample_rate)
+
+
+def _get_band_code(in_band_code, sample_rate):
+    """
+    Return the channel band code based on an input band_code
+
+    :param in_band_code: input band code
+    :param sample_rate: input sample rate (sps)
+    """
+    if len(in_band_code) != 1:
+        raise ValueError(f'Band base code "{in_band_code}" not a single char')
+
+    if in_band_code in "FCHBMLVURPTQ":
+        if sample_rate >= 1000:
+            return "F"
+        elif sample_rate >= 250:
+            return "C"
+        elif sample_rate >= 80:
+            return "H"
+        elif sample_rate >= 10:
+            return "B"
+        elif sample_rate > 1:
+            return "M"
+        elif sample_rate > 0.3:
+            return "L"
+        elif sample_rate > 0.03:
+            return "V"
+        elif sample_rate > 0.003:
+            return "U"
+        elif sample_rate >= 0.0001:
+            return "R"
+        elif sample_rate >= 0.00001:
+            return "P"
+        elif sample_rate >= 0.000001:
+            return "T"
+        else:
+            return "Q"
+    elif in_band_code in "GDES":
+        if sample_rate >= 1000:
+            return "G"
+        elif sample_rate >= 250:
+            return "D"
+        elif sample_rate >= 80:
+            return "E"
+        elif sample_rate >= 10:
+            return "S"
+        else:
+            warnings.warn("Short period sensor sample rate < 10 sps")
+    else:
+        raise TypeError(f'Unknown band base code: "{in_band_code}"')
+        
+

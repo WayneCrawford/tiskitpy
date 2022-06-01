@@ -1,0 +1,60 @@
+#! /bin/csh -f
+# QUANTERRA FIR filter correction 
+# The correction is performed for the last filter steps including 
+# the 320Hz stage. The 5120 Hz stage is NOT corrected for!
+#
+# USAGE: corr_quanterra <input file> <fdig>
+# input file: single colummn ASCII format (1 value per line)
+# fdig: digitization frequency of the input file in Hz 
+# supported values for fdig are: 1,10, 20, 40, 80
+#
+echo $2 > tmp764995
+awk '{printf("%d", $1)}' tmp764995 > tmp956723
+set fdig = `cat tmp956723`
+if ($fdig == 1) then
+interpolate -i $1 -o $1.10 -f 10
+fir2caus -c quant10Hz.prt -i $1.10 -o $1.10c -f 10
+interpolate -i $1.10c -o $1.20 -f 2
+fir2caus -c quant20Hz.prt -i $1.20 -o $1.20c -f 20
+interpolate -i $1.20c -o $1.40 -f 2
+fir2caus -c quant40Hz.prt -i $1.40 -o $1.40c -f 40
+interpolate -i $1.40c -o $1.80 -f 2
+fir2caus -c quant80Hz.prt -i $1.80 -o $1.80c -f 80
+interpolate -i $1.80c -o $1.320 -f 4
+fir2caus -c quant320Hz.prt -i $1.320 -o $1.320c -f 320
+decimate -i $1.320c -o $1.corr -f 0 -d 320
+rm $1.20 $1.20c $1.40 $1.40c $1.80 $1.80c $1.320 $1.320c
+else if ($2 == 10) then
+interpolate -i $1 -o $1.20 -f 2
+fir2caus -c quant20Hz.prt -i $1.20 -o $1.20c -f 20
+interpolate -i $1.20c -o $1.40 -f 2
+fir2caus -c quant40Hz.prt -i $1.40 -o $1.40c -f 40
+interpolate -i $1.40c -o $1.80 -f 2
+fir2caus -c quant80Hz.prt -i $1.80 -o $1.80c -f 80
+interpolate -i $1.80c -o $1.320 -f 4
+fir2caus -c quant320Hz.prt -i $1.320 -o $1.320c -f 320
+decimate -i $1.320c -o $1.corr -f 0 -d 32
+rm $1.20 $1.20c $1.40 $1.40c $1.80 $1.80c $1.320 $1.320c
+else if ($2 == 20) then
+interpolate -i $1 -o $1.40 -f 2
+fir2caus -c quant40Hz.prt -i $1.40 -o $1.40c -f 40
+interpolate -i $1.40c -o $1.80 -f 2
+fir2caus -c quant80Hz.prt -i $1.80 -o $1.80c -f 80
+interpolate -i $1.80c -o $1.320 -f 4
+fir2caus -c quant320Hz.prt -i $1.320 -o $1.320c -f 320
+decimate -i $1.320c -o $1.corr -f 0 -d 16
+rm $1.40 $1.40c $1.80 $1.80c $1.320 $1.320c
+else if ($2 == 40) then
+interpolate -i $1 -o $1.80 -f 2
+fir2caus -c quant80Hz.prt -i $1.80 -o $1.80c -f 80
+interpolate -i $1.80c -o $1.320 -f 4
+fir2caus -c quant320Hz.prt -i $1.320 -o $1.320c -f 320
+decimate -i $1.320c -o $1.corr -f 0 -d 8
+rm $1.80 $1.80c $1.320 $1.320c
+else if ($2 == 80) then
+interpolate -i $1 -o $1.320 -f 4
+fir2caus -c quant320Hz.prt -i $1.320 -o $1.320c -f 320
+decimate -i $1.320c -o $1.corr -f 0 -d 4
+rm $1.320 $1.320c
+endif
+rm tmp764995 tmp956723

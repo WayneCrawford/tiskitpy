@@ -1,0 +1,15 @@
+#! /bin/csh -f
+# TITAN FIR filter correction for last filter stage
+# USAGE: corr_titan <input file> <fdig>
+# input file: single colummn ASCII format (1 value per line)
+# fdig: digitization frequency of the input file in Hz 
+# supported values for fdig are: 
+#
+echo $2 > tmp764995
+awk '{print $1 * 2}' tmp764995 > tmp956723
+set fdig = `cat tmp956723`
+# echo $fdig
+interpolate -i $1 -o $1.ipl -f 2
+fir2caus -c titan.prt -i $1.ipl -o $1.ipl.c -f $fdig
+decimate -i $1.ipl.c -o $1.corr -f 0 -d 2
+rm $1.ipl $1.ipl.c tmp764995 tmp956723

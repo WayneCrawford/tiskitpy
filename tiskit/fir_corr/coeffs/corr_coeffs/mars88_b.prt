@@ -1,0 +1,64 @@
+#METHOD: POLYNOMIAL ROOTING
+#FIRNAME file name effective FIR filter coefficients: 
+mars88.b
+#NO_EFF: (no. of points for effective FIR filter)
+45
+#FDIG_EFF: (digitization frequency in Hz)
+8000.
+#FIRDATA_EFF: 
+-0.0000111118           -0.0000388189           -0.000097158         -0.000196131            -0.000335214
+-0.0004908160000000001  -0.0006017680000000001  -0.00055592          -0.000182202            0.0007473710000000001
+0.00250157              0.005358450000000001    0.00956017           0.0152597               0.0224687
+0.0310166               0.0405331               0.05045980000000001  0.06009510000000001     0.06866870000000001
+0.0754351               0.07977180000000001     0.0812656            0.07977180000000001     0.0754351
+0.06866870000000001     0.06009510000000001     0.05045980000000001  0.0405331               0.0310166
+0.0224687               0.0152597               0.00956017           0.005358450000000001    0.00250157
+0.0007473710000000001   -0.000182202            -0.00055592          -0.0006017680000000001  -0.0004908160000000001
+-0.000335214            -0.000196131            -0.000097158         -0.0000388189           -0.0000111118
+ 
+#CORRECTION FILTER:
+#CORR_AR: (No. of AR coefficients := mx)
+1
+#CORR_AR_DATA: (AR coeficients a[k] for k = 1 to mx)
+
+0.6277839286276232
+ 
+#CORR_MA: (no. of MA coefficients := mx+1)
+2
+#CORR_MA_DATA: (MA coefficients b[l] for l = 0 to mx)
+
+-0.6277839286276232  1
+ 
+#TIMETAG (time tag correction in no. of samples): 
+22.
+ 
+#                                                      
+#----------------------------------------------------------------------------
+#                                                      
+# How to remove the noncausal FIR filter response from a digital record x[n]:
+# 1. Reverse sequence x[n] in time to obtain sequence x'[n]
+# 2. Filter reversed input sequence x'[] using the     
+#    difference equation:                              
+#                                                       
+#            mx                mx                       
+#            --                --                       
+#    y'[i] =  > a[k]*y'[i-k]   + > b[l] x'[i-l]         
+#            __                __                       
+#            k=1               l=0                      
+#                                                       
+#    This corresponds to equ. (8.15) in 'Scherbaum, F: Of poles and zeros,
+#    Fundamentals of Digital Seismology, Kluwer Academic Publ., 1996' 
+#    mx = number of AR coefficients 
+#    b[l] = MA coefficients for l = 0, mx
+#    a[k] = AR coefficients for k = 1, mx
+#    y'[] = output sequence                                   
+# 3. Reverse the output sequence y'[] in time again to obtain the corrected 
+#    sequence y[n]! 
+# 4. Apply the time tag correction! Since the correction procedure works on
+#    the time inverted trace (cf. step 1), a signal front (onset) will appear
+#    TIMETAG samples (= TIMETAG/FDIG_EFF secs) too early in the corrected 
+#    sequence. In contrast, the envelope of a bandlimited signal, will not be 
+#    advanced quite as much. The amount is given by the negative group delay
+#    of the correction filter. For a discussion of onset properties and how 
+#    they are affected by filters, see Scherbaum, F: Of poles and zeros.
+#    
