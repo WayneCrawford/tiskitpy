@@ -14,7 +14,6 @@ from obspy import read_inventory
 from obspy.core.stream import read as obspy_read
 from matplotlib import pyplot as plt
 import numpy as np
-from obstools.atacr import DayNoise
 
 from crawtools.spectral import PSD
 
