@@ -28,26 +28,6 @@ class TestMethods(unittest.TestCase):
             inspect.currentframe())).resolve().parent
         self.test_path = self.path / "data"
 
-    # def assertTextFilesEqual(self, first, second, msg=None):
-    #     with open(first) as f:
-    #         str_a = f.read()
-    #     with open(second) as f:
-    #         str_b = f.read()
-    #     if str_a != str_b:
-    #         first_lines = str_a.splitlines(True)
-    #         second_lines = str_b.splitlines(True)
-    #         delta = difflib.unified_diff(
-    #             first_lines, second_lines,
-    #             fromfile=first, tofile=second)
-    #         message = ''.join(delta)
-    #         if msg:
-    #             message += " : " + msg
-    #         self.fail("Multi-line strings are unequal:\n" + message)
-
-    # def assertBinFilesEqual(self, first, second, msg=None):
-    #     """ Compares two binary files """
-    #     self.assertTrue(filecmp.cmp(first, second))
-
     def test_PSD_calc(self):
         stream = obspy_read(str(self.test_path / 'XS.S10D..LHZ.mseed'),
                             'MSEED')
@@ -57,7 +37,6 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(psd.units, 'dB ref 1 (m/s^2)^2/Hz')
         self.assertAlmostEqual(psd.data[0], 9.50923118876e-12)
         
-
 
 def suite():
     return unittest.makeSuite(TestMethods, 'test')
