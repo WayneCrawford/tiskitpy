@@ -71,9 +71,6 @@ class DataCleaner():
             tf = TransferFunctions(sdfs[-1], ic, out_chans, noise_channel,
                                    n_to_reject, min_freq, max_freq,
                                    show_progress=show_progress)
-#             if show_progress:
-#                 print(f'Showing transfer functions for input channel = "{ic}"')
-#                 tf.plot()
             # Apply data cleaner and update channel names with removed channels
             remove_new = remove_str(in_chan, remove_seq)
             remove_seq += remove_new
@@ -167,14 +164,12 @@ class DataCleaner():
             ic = strip_remove_str(in_chan)
             for out_chan in tfs.output_channels:
                 oc = strip_remove_str(out_chan)
-                self._verify_untransformed(tfs, out_chan)
                 in_trace = out_stream.select(id=ic)[0]
                 out_trace = out_stream.select(id=oc)[0]
                 out_stream.remove(out_trace)
-                out_trace = self._correct_trace(in_trace, out_trace,
-                                                tfs.freqs,
-                                                tfs.values(out_chan),
-                                                in_time_domain)
+                out_trace = self._correct_trace(
+                    in_trace, out_trace, tfs.freqs,
+                    tfs.values_wrt_counts(out_chan), in_time_domain)
                 remove_seqs[out_chan] = dctf.remove_sequence
                 out_stream += out_trace
         if stuff_locations:
@@ -188,16 +183,6 @@ class DataCleaner():
         """
         self.DCTFs.plot()
         
-    @staticmethod
-    def _verify_untransformed(tfs, out_chan):
-        """Verify that the input and output channels are untransformed"""
-        if not tfs.input_units.lower() == 'counts':
-            raise ValueError(f"input units are {tfs.input_units}, not counts")
-        if not tfs.output_units(out_chan).lower() == 'counts':
-            raise ValueError("output units are {}, not counts"
-                             .format(tfs.output_units(out_chan)))
-        return True
-
     def _correct_trace(self, in_trace, out_trace, f, tf, in_time_domain=True):
         """
         Correct a trace using an input trace and a transfer function
@@ -209,7 +194,7 @@ class DataCleaner():
             out_trace (:class: `obspy.core.trace.Trace`): original output trace
             f (:class:`numpy.ndarray`): frequencies
             tf (:class:`numpy.ndarray`): transfer function between the input
-                and output traces
+                and output traces (counts/count)
             in_time_domain (bool): do correction in time domain
 
         Returns:
@@ -228,7 +213,15 @@ class DataCleaner():
 
     @staticmethod
     def _correct_trace_time(in_trace, out_trace, f, tf):
-        """Correct trace in the time domain"""
+        """
+        Correct trace in the time domain
+        
+        Args:
+            in_trace (:class:`obspy.core.trace.Trace`): input (noise) trace
+            out_trace (:class:`obspy.core.trace.Trace`): trace to correct
+            f (:class:`numpy.ndarray`): frequencies
+            tf (:class:`numpy.ndarray`): out_trace/in_trace transfer function
+        """
         print('Correcting trace in time domain')
         if not 2*f[-1] == in_trace.stats.sampling_rate:
             raise ValueError('different tf ({}) & trace ({}) sample rates'
@@ -242,7 +235,15 @@ class DataCleaner():
 
     @staticmethod
     def _correct_trace_freq(in_trace, out_trace, f, tf):
-        """Correct trace in the frequency domain"""
+        """
+        Correct trace in the frequency domain
+        
+        Args:
+            in_trace (:class:`obspy.core.trace.Trace`): input (noise) trace
+            out_trace (:class:`obspy.core.trace.Trace`): trace to correct
+            f (:class:`numpy.ndarray`): frequencies
+            tf (:class:`numpy.ndarray`): out_trace/in_trace transfer function
+        """
         print('Correcting trace in frequency domain')
         npts = in_trace.stats.npts
         trace_sr = in_trace.stats.sampling_rate
@@ -356,10 +357,13 @@ class DataCleaner():
             ValueError("len(sdfs) isn't len(self.DCTFs)+1")
         remove_seqs = [""] + [t.remove_sequence for t in self.DCTFs]
         inputs = [""] + [t.remove_channel for t in self.DCTFs]
+        n_channels = len(sdfs[0].channels)
+        rows = int(np.floor(np.sqrt(n_channels)))
+        cols = int(np.ceil(n_channels / rows))
+        fig, axs = plt.subplots(rows, cols)
+        irow, icol = 0, 0
         for chan in sdfs[0].channels:
-            # if chan == inputs[0]:
-            #     break
-            fig, ax = plt.subplots(1, 1)
+            ax = axs[irow, icol]
             # make one line for each input
             inputs_base = [strip_remove_str(i) for i in inputs]
             ch_base = strip_remove_str(chan)
@@ -372,9 +376,14 @@ class DataCleaner():
                 for sdf, rs in zip(sdfs, remove_seqs):
                     ax.loglog(sdf.freqs, np.abs(sdf.autospect(ch_base+rs)),
                               alpha=0.75, label=ch_base + rs)
-            ax.set_xlabel('Frequency (Hz)')
+            if  irow==rows-1:
+                ax.set_xlabel('Frequency (Hz)')
             ax.legend()
-            plt.show()
+            icol += 1
+            if icol >= cols:
+                irow += 1
+                icol = 0
+        plt.show()
 
 
 def _list_match_pattern(pattern, chan_list):

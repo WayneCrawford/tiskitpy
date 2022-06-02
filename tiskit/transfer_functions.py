@@ -1,7 +1,4 @@
 # Copyright 2021 Wayne Crawford
-#
-# This file is based on OBStools:TFNoise.
-
 import pickle
 import fnmatch  # Allows Unix filename pattern matching
 
@@ -69,8 +66,9 @@ class TransferFunctions(object):
             # Set properties
             dims = ('input', 'output', 'f')
             shape = (1, len(out_chans), len(f))
-            # Xfer funcs are stored in terms of raw data, divide by response
-            # to get values w.r.t. input, output units
+            # tf units are out_chan_units/in_chan_units
+            # response units are in_chan_units/out_chan_units
+            # tf * response gives tf w.r.t. data counts
             self._ds = xr.Dataset(
                 data_vars=dict(
                     value=(dims, np.zeros(shape, dtype='complex')),
@@ -154,13 +152,31 @@ class TransferFunctions(object):
         oc = self._match_out_chan(output_channel)
         return str(self._ds.sel(output=oc).coords['noise_chan'].values)
 
-    def values(self, output_channel, zero_as_none=False):
-        """Return transfer function for the given output channel"""
+    def values(self, output_channel, zero_as_none=False, wrt_counts=False):
+        """
+        Return transfer function for the given output channel
+        
+        Args:
+            output_channel (str): output channel name
+            zero_as_none (bool): return non-calculated values as Nones instead
+                of zeros
+        """
         oc = self._match_out_chan(output_channel)
         xf = np.squeeze(self._ds["value"].sel(output=oc).values)
         if zero_as_none:
             xf[xf == 0] = None
         return xf
+
+    def values_wrt_counts(self, output_channel, zero_as_none=False):
+        """
+        Return transfer function with respect to raw data counts
+        
+        Args:
+            output_channel (str): output channel name
+            zero_as_none (bool): return non-calculated values as Nones instead
+                of zeros
+        """
+        return self.values(output_channel) * self.response(output_channel)
 
     def response(self, output_channel, zero_as_none=False):
         """
@@ -170,14 +186,6 @@ class TransferFunctions(object):
         """
         oc = self._match_out_chan(output_channel)
         x = np.squeeze(self._ds["response"].sel(output=oc).values)
-        return x
-
-    def values_counts(self, output_channel, zero_as_none=False):
-        """Return transfer function for the given output channel, wrt counts"""
-        oc = self._match_out_chan(output_channel)
-        x = self.values(oc) / self.response(oc)
-        if zero_as_none:
-            x[x == 0] = None
         return x
 
     def uncert(self, output_channel):

@@ -35,9 +35,9 @@ class SpectralDensity:
             windpw_type (str): type of window used
             starttimes (list of UTCDateTime): starttime for each window
             data (len(chan_list)xlen(chan_list) np.ndarray)):
-                one-sided spectral density functions
+                one-sided spectral density functions in channel in_units
             responses (2d np.ndarray)): instrument response for each channel
-                (n_spects x n_freqs)
+                (counts/in_units) (n_spects x n_freqs)
         """
         # Validate Dimensions
         n_ch = len(chan_names)
@@ -997,6 +997,8 @@ def _subtract_tfs(fts, subtract_tfs):
 
 def _correct_response(ft, f, id, stats, inv=None):
     """
+    Convert fourier transform into channel in_units
+    
     Args:
         ft (:class:`numpy.ndarray`): fourier transforms for one channel
         f (:class:`numpy.ndarray`): frequencies
