@@ -180,13 +180,13 @@ class TransferFunctions(object):
 
     def response(self, output_channel, zero_as_none=False):
         """
-        Return transfer function response
-
-        (conversion from counts/counts to used units)
+        Return tf response (output_channel_response/input_channel_response)
+        
+        Divide count-based response by this to get unit-based response
+        Multiply unit-based response by this to get count-based response
         """
         oc = self._match_out_chan(output_channel)
-        x = np.squeeze(self._ds["response"].sel(output=oc).values)
-        return x
+        return np.squeeze(self._ds["response"].sel(output=oc).values)
 
     def uncert(self, output_channel):
         """Return transfer function uncertainty for the given output channel"""
@@ -195,15 +195,11 @@ class TransferFunctions(object):
                  np.squeeze(self._ds["response"].sel(output=oc).values))
         return xferr
 
-    def uncert_counts(self, output_channel):
+    def uncert_wrt_counts(self, output_channel):
         """
-        Return transfer function uncertainty for the given output channel
-
-        With respect to counts
+        Return transfer function uncertainty with respect to counts
         """
-        oc = self._match_out_chan(output_channel)
-        x = self.uncert(oc) / self.response(oc)
-        return x
+        return self.uncert(output_channel) * self.response(output_channel)
 
     @staticmethod
     def _check_chans(sdm, in_chan, out_chans):

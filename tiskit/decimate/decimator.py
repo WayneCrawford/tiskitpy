@@ -25,6 +25,7 @@ import fnmatch
 
 from numpy import prod
 from obspy.core.stream import Stream, Trace
+from obspy.core.trace import Stats
 from obspy.core.inventory import FIRResponseStage, CoefficientsTypeResponseStage
 # from matplotlib import pyplot as plt
 
@@ -55,30 +56,40 @@ class Decimator:
         else:
             raise TypeError('data is not a Stream or Trace')
 
-    def update_inventory(self, inv, st, normalize_firs=False):
+    def update_inventory(self, inv, st=None, normalize_firs=False):
         """
         Update inventory for channels found in stream
 
         Args:
             inv (:class:`obspy.core.events.inventory.Inventory`): inventory
-            st (:class:`obspy.core.stream.Stream`): date stream (used to
-                determine net/sta/chan/loc codes)
+            st (:class:`obspy.core.stream.Stream`): data stream (used to
+                determine net/sta/chan/loc codes).  If None, will update
+                every channel
             normalize_firs (bool): normalizes any FIR channel that isn't already
 
         : returns: obspy inventory with new channels
         """
         inv = inv.copy()    # Don't overwrite input inventory
-        for tr in st:
-            s = tr.stats
-            new_cha = self._duplicate_channel(inv, network=s.network,
-                                              station=s.station,
-                                              location=s.location,
-                                              channel=s.channel,
+        if st is not None:
+            stats_list = [tr.stats for tr in st]
+        else:
+            stats_list = [Stats(header=dict(network=net.code,
+                                            station=sta.code,
+                                            location=ch.location_code,
+                                            channel=ch.code,
+                                            sampling_rate=ch.sample_rate))
+                           for net in inv for sta in net for ch in sta]
+        for stats in stats_list:
+            new_cha = self._duplicate_channel(inv,
+                                              network=stats.network,
+                                              station=stats.station,
+                                              location=stats.location,
+                                              channel=stats.channel,
                                               normalize_firs=normalize_firs)
-            if not new_cha.sample_rate == s.sampling_rate:
+            if not new_cha.sample_rate == stats.sampling_rate:
                 raise ValueError('data and metadata sampling rates are '
                                  'different!')
-            self._modify_chan(new_cha)
+            self._modify_chan(new_cha, net=stats.network, sta=stats.station)
         return inv
 
     def update_inventory_from_nslc(self, inv, network='*', station='*',
@@ -115,21 +126,25 @@ class Decimator:
                     new_cha = self._duplicate_channel(
                         inv, net.code, sta.code, cha.location_code, cha.code,
                         normalize_firs=normalize_firs)
-                    self._modify_chan(new_cha, quiet=quiet)
+                    self._modify_chan(new_cha, net=network, sta=station, quiet=quiet)
         return inv
 
-    def _modify_chan(self, cha, normalize_firs=False, quiet=False):
+    def _modify_chan(self, cha, net='', sta='', normalize_firs=False, quiet=False):
         """
         modify reponse and name of a channel to correspond to decimation
 
         Args:
             cha (:class:`obspy.core.inventory.channel`): original channel
+            net (str): network code (just for clearer progress printout)
+            sta (str): station code (just for clearer progress printout)
             normalize_firs (bool): normalizes any FIR channel that isn't already
         """
         # By setting this here, no need to worry about order of the two methods
+        seed_id = '.'.join([net, sta, cha.location_code, cha.code])
+        print(f'{seed_id=}')
         if not quiet:
-            print('channel modified from {}.{} ({:g}sps)'
-              .format(cha.location_code, cha.code, cha.sample_rate),
+            print('channel modified from {} ({:g}sps)'
+              .format(seed_id, cha.sample_rate),
               end = ' ')
         input_sample_rate = cha.sample_rate  
         self._add_response(cha, input_sample_rate)
@@ -362,8 +377,8 @@ def _get_new_band_code(in_band_code, in_sample_rate, out_sample_rate):
     :param out_sample_rate: output sample rate (sps)
     """
     if in_band_code != _get_band_code(in_band_code, in_sample_rate):
-        raise ValueError(f'Input band code (in_band_code) is inconsistent '
-                         f'with input sampling rate ({in_sample_rate})')
+        warnings.warn(f'Input band code ({in_band_code}) does not match '
+                      f' input sampling rate ({in_sample_rate})')
     return _get_band_code(in_band_code, out_sample_rate)
 
 
@@ -413,6 +428,7 @@ def _get_band_code(in_band_code, sample_rate):
             return "S"
         else:
             warnings.warn("Short period sensor sample rate < 10 sps")
+            return "X"
     else:
         raise TypeError(f'Unknown band base code: "{in_band_code}"')
         

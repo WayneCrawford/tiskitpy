@@ -103,7 +103,7 @@ class SpectralDensity:
     def autospect(self, channel):
         """Returns an auto-spectral_density"""
         self._verify_channel(channel, "in_channel")
-        return self._ds["spectra"].sel(input=channel, output=channel).values.flatten()
+        return np.abs(self._ds["spectra"].sel(input=channel, output=channel).values.flatten())
 
     def crossspect(self, in_channel, out_channel):
         """Returns a cross-spectral_density"""

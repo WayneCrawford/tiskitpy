@@ -158,6 +158,11 @@ class DataCleaner():
         seed_ids = [tr.id for tr in out_stream]
         remove_seqs = {k: "" for k in seed_ids}
 
+        if in_time_domain is True:
+            print('Correcting traces in the time domain')
+        else:
+            print('Correcting traces in the frequency domain')
+            
         for dctf in self.DCTFs:
             tfs = dctf.tfs
             in_chan = tfs.input_channel
@@ -169,7 +174,8 @@ class DataCleaner():
                 out_stream.remove(out_trace)
                 out_trace = self._correct_trace(
                     in_trace, out_trace, tfs.freqs,
-                    tfs.values_wrt_counts(out_chan), in_time_domain)
+                    tfs.values_wrt_counts(out_chan),
+                    in_time_domain)
                 remove_seqs[out_chan] = dctf.remove_sequence
                 out_stream += out_trace
         if stuff_locations:
@@ -222,12 +228,12 @@ class DataCleaner():
             f (:class:`numpy.ndarray`): frequencies
             tf (:class:`numpy.ndarray`): out_trace/in_trace transfer function
         """
-        print('Correcting trace in time domain')
         if not 2*f[-1] == in_trace.stats.sampling_rate:
             raise ValueError('different tf ({}) & trace ({}) sample rates'
                              .format(2*f[-1], in_trace.stats.sampling_rate))
         # Time domain transform of transfer function
-        itf = np.fft.ifftshift(np.fft.irfft(np.conj(tf)))  
+        # Why don't we need to use the complex conjugate of tf?
+        itf = np.fft.ifftshift(np.fft.irfft(tf))  
         out_trace_corr = out_trace.copy()
         corr_data = np.convolve(in_trace.data.copy(), itf, mode="same")
         out_trace_corr.data -= signal.detrend(corr_data)
@@ -244,7 +250,6 @@ class DataCleaner():
             f (:class:`numpy.ndarray`): frequencies
             tf (:class:`numpy.ndarray`): out_trace/in_trace transfer function
         """
-        print('Correcting trace in frequency domain')
         npts = in_trace.stats.npts
         trace_sr = in_trace.stats.sampling_rate
         fft_len = 2**int(np.ceil(npts)).bit_length()
@@ -253,9 +258,10 @@ class DataCleaner():
         in_rfft = np.fft.rfft(np.concatenate((in_trace.data, buff)))
         out_rfft = np.fft.rfft(np.concatenate((out_trace.data, buff)))
         f_rfft = np.fft.rfftfreq(fft_len, 1./trace_sr)
-        tf_interp = np.interp(f_rfft, f, np.conj(tf))
+        tf_interp = np.interp(f_rfft, f, tf)
         # Subract coherent part and convert to time domain
-        new_out = np.fft.irfft(out_rfft - in_rfft * tf_interp)
+        # Why isn't the complex conjugate of the tf used?
+        new_out = np.fft.irfft(out_rfft - in_rfft * np.conj(tf_interp))
         # Stuff into new trace
         out_trace_corr = out_trace.copy()
         out_trace_corr.data = new_out[:npts]
