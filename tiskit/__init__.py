@@ -22,16 +22,16 @@ classes, but should work for non-seismology datasets as well
 - `rptransient`: calculate and remove periodic transient (VERY manual!)
 - `PetersonNoiseModel``: return the Peterson High and Low Noise Models
 
-## `seismo_tools` submodule: seismology-specific functions
-- plot_response`: plot instrument response (command line?)
-- plot_sensitivity: plot instrument sensitivity (command line?)
 """
 from .data_cleaner import DataCleaner
 from .decimate import Decimator
 from .read_mseed import read_MSEED
 from .clean_rotator import CleanRotator
 from .rptransient import PeriodicTransient
-from .seismo_tools import plot_response, plot_sensitivity
+# from .seismo_tools import plot_response, plot_sensitivity
 from .spectral_density import SpectralDensity, Peterson_noise_model
 from .time_spans import TimeSpans
 from .transfer_functions import TransferFunctions
+## `seismo_tools` submodule: seismology-specific functions
+# - plot_response`: plot instrument response (command line?)
+# - plot_sensitivity: plot instrument sensitivity (command line?)
