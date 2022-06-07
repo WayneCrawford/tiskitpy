@@ -81,7 +81,7 @@ class DataCleaner():
                     sdfs[-1], tf, show_progress, add_suffix=remove_new))
             else:
                 sdfs.append(SpectralDensity.from_stream(stream,
-                                                        dctfs=self.DCTFs,
+                                                        data_cleaner=self,
                                                         window_s=window_s))
             out_chans = [x + remove_new for x in out_chans]
         if show_progress:
@@ -261,7 +261,8 @@ class DataCleaner():
         tf_interp = np.interp(f_rfft, f, tf)
         # Subract coherent part and convert to time domain
         # Why isn't the complex conjugate of the tf used?
-        new_out = np.fft.irfft(out_rfft - in_rfft * np.conj(tf_interp))
+        new_out = np.fft.irfft(out_rfft - in_rfft * tf_interp)
+        # new_out = np.fft.irfft(out_rfft - in_rfft * np.conj(tf_interp))
         # Stuff into new trace
         out_trace_corr = out_trace.copy()
         out_trace_corr.data = new_out[:npts]

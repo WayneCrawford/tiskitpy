@@ -294,7 +294,7 @@ class SpectralDensity:
 
     @classmethod
     def from_stream(cls, stream, window_s=1000, windowtype='prol1pi',
-                    inv=None, dctfs=None):
+                    inv=None, data_cleaner=None):
         """
         Calculate spectral density functions from the provided stream
 
@@ -308,8 +308,8 @@ class SpectralDensity:
             inv (:class:`obspy.core.inventory.Inventory`): inventory containing
                 instrument responses.  If none is found for the given channel,
                 will look in the channel's stats.response object
-            dctfs (list of :class:`DCTF``): DataCleaner transfer functions to
-                subtract from channels as ffts are calculated
+            data_cleaner (:class:`DataCleaner`): Data cleaner to
+                apply to channels as ffts are calculated
             subtract_tf_suffix (str): suffix to add to channel names if tf
                 is subtracted
         """
@@ -338,7 +338,8 @@ class SpectralDensity:
             evalresps[id] = evalresp
             if resp is not None:
                 tr.stats.response = resp
-        if dctfs is not None:  # clean data using correlated noise
+        if data_cleaner is not None:  # clean data using correlated noise
+            dctfs = data_cleaner.DCTFs
             old_ids = ids
             ft = dctfs.ft_subtract_tfs(ft)
             ids = dctfs.update_channel_names(old_ids)
@@ -388,6 +389,7 @@ class SpectralDensity:
         return coherence_significance_level(self.n_windows, prob)
 
     def plot(self, **kwargs):
+        """Shortcut for plot_autospectra"""
         self.plot_autospectra(**kwargs)
 
     def plot_autospectra(self, x=None, overlay=False, plot_peterson=True,
@@ -481,11 +483,24 @@ class SpectralDensity:
             plt.show()
         return ax_array
 
+    def plot_one_autospectra(self, key, **kwargs):
+        """
+        Plot one autospectral density
+        
+        Args:
+            key (str): channel
+            
+        all other arguments are the same as for plot_one_spectra(), except
+            there is no `subkey` argument and `show_phase` is ignored
+        """
+        kwargs['show_phase'] = False
+        self.plot_one_spectra(key, key, **kwargs)
+        
     def plot_one_spectra(self, key, subkey, fig=None, fig_grid=(1, 1),
                          plot_spot=(0, 0), show_xlabel=True, show_ylabel=None,
                          ax_a=None, ax_p=None, ylabel=None, label=None,
                          title=None, show_coherence=False,
-                         show_phase=True, plot_peterson=True):
+                         show_phase=True, plot_peterson=True, outfile=None):
         """
         Plot one spectral density
 
@@ -511,6 +526,7 @@ class SpectralDensity:
             show_phase (bool): show phase as well as amplitude
             plot_peterson(bool): plot Peterson Noise model if channel has
                 units of (m/s^2)^2/Hz
+            outfile (str): save figure to this filename
 
         Returns:
             (tuple): tuple containing
@@ -598,6 +614,8 @@ class SpectralDensity:
             bottom_axis.set_xlabel('Frequency (Hz)')
         else:
             bottom_axis.set_xticklabels([])
+        if outfile:
+            plt.savefig(outfile)
         return ax_a, ax_p
 
     def plot_coherences(self, x=None, y=None, overlay=False, show=True,
