@@ -1,7 +1,7 @@
 """
 Calculate spectra and coherences for a given station/time period
 """
-from tiskit import SpectralDensity  # , PetersonNoiseModel
+from crawtools.spectral import SpectralDensity, PetersonNoiseModel
 from matplotlib import pyplot as plt
 import numpy as np
 import scipy.signal as ssig
@@ -17,14 +17,16 @@ def main():
         spect = SpectralDensity.from_stream(BHZstream, inv=inv,
                                             windowtype=windowtype)
         f_sp, s_sp = scipy_spect(BHZstream[0], windowtype)
-        #  lownoise, highnoise = PetersonNoiseModel(spect.freqs, as_freqs=True)
+        # psd = PSD().calc(stream.select(channel='BHZ')[0],
+        #                  window_type=windowtype)
+        lownoise, highnoise = PetersonNoiseModel(spect.freqs, as_freqs=True)
         plt.semilogx(spect.freqs,
                      10*np.log10(np.abs(spect.autospect('XE.CC06..BHZ'))),
                      label='SpectralDensity')
         plt.semilogx(f_sp, 10*np.log10(np.abs(s_sp)),
                      label='scipy.signal.welch)')
-        # plt.plot(spect.freqs, highnoise, 'g--')
-        # plt.plot(spect.freqs, lownoise, 'r--')
+        plt.plot(spect.freqs, highnoise, 'g--')
+        plt.plot(spect.freqs, lownoise, 'r--')
         plt.ylabel('Autospectral density')
         plt.ylabel('Frequencies (Hz)')
         plt.title(f'{windowtype} window')

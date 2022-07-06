@@ -393,7 +393,7 @@ class SpectralDensity:
         self.plot_autospectra(**kwargs)
 
     def plot_autospectra(self, x=None, overlay=False, plot_peterson=True,
-                         show=True, outfile=None):
+                         show=True, outfile=None, title=None):
         """
         Plot autospectra
 
@@ -404,6 +404,7 @@ class SpectralDensity:
                 units of (m/s^2)^2/Hz
             show (bool): show on desktop
             outfile (str): save figure to this filename
+            title (str): custom plot title
         Returns:
             axes (:class:`numpy.ndarray`): array of axis pairs (amplitude,
                 phase)
@@ -415,7 +416,9 @@ class SpectralDensity:
             rows, cols = 1, 1
         ax_array = np.ndarray((rows, cols), dtype=tuple)
         fig, axs = plt.subplots(rows, cols, sharex=True)
-        fig.suptitle('Auto-spectra')
+        if title is None:
+            title = 'Auto-spectra'
+        fig.suptitle(title)
         if not overlay:
             for key, i in zip(x, range(len(x))):
                 i_row = int(i/cols)
