@@ -13,7 +13,8 @@ TiSKit` documentation
   :glob:
   
   intro
-  code  
+  code
+  api  
 
 Indices and tables
 ==================

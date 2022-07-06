@@ -11,10 +11,9 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 import sphinx.ext.autodoc
-import os
+import pathlib
 import sys
-sys.path.insert(0, os.path.abspath('../../tiskit/'))
-# sys.path.insert(0, os.path.abspath('../../obsinfo/'))
+sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
 
 
 # -- Project information -----------------------------------------------------
@@ -33,7 +32,9 @@ release = '0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosectionlabel',
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.autosectionlabel',
               'sphinx.ext.napoleon']
 
 # Make sure the target is unique
