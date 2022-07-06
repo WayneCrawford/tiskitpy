@@ -1,4 +1,4 @@
-API haha
+API
 =============================
 
 .. autosummary::
