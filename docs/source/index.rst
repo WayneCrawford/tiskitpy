@@ -14,7 +14,6 @@ TiSKit` documentation
   
   intro
   code
-  api  
 
 Indices and tables
 ==================
