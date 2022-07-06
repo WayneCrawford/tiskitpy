@@ -22,6 +22,8 @@ np.seterr(all='ignore')
 class SpectralDensity:
     """
     Class for spectral density functions.
+    
+    No public attributes, access data through provided methods
     """
     def __init__(self, chan_names: list, freqs: np.ndarray, chan_units: list,
                  n_windows: int, window_type: str, starttimes: list = None,
@@ -34,10 +36,13 @@ class SpectralDensity:
             n_windows (int): of windows used to calculate spectra
             windpw_type (str): type of window used
             starttimes (list of UTCDateTime): starttime for each window
-            data (len(chan_list)xlen(chan_list) np.ndarray)):
-                one-sided spectral density functions in channel in_units
-            responses (2d np.ndarray)): instrument response for each channel
-                (counts/in_units) (n_spects x n_freqs)
+            data (:class:`np.ndarray`): one-sided spectral density
+	    		functions.
+				shape = (len(chan_names), len(chan_names), len(freqs)
+				units = chan_units(i)*chan_units(j)/Hz
+            responses (:class:`np.ndarray`): instrument response for each channel.
+                shape=(n_spects,n_freqs)
+		        units=(counts/in_units) 
         """
         # Validate Dimensions
         n_ch = len(chan_names)
@@ -332,9 +337,10 @@ class SpectralDensity:
             tr = stream.select(id=id)[0]
             ft[id], f = _calculate_windowed_rfft(tr, ws, ws, windowtype)
             n_winds = ft[id].shape[0]
-            ft[id], resp, evalresp, u = _correct_response(ft[id], f, id,
-                                                          tr.stats, inv)
-            units.append(u)
+	    	# Transform fft to physical units
+            ft[id], resp, evalresp, ft_units = _correct_response(
+				ft[id], f, id, tr.stats, inv)
+            units.append(ft_units)
             evalresps[id] = evalresp
             if resp is not None:
                 tr.stats.response = resp
@@ -344,16 +350,17 @@ class SpectralDensity:
             ft = dctfs.ft_subtract_tfs(ft)
             ids = dctfs.update_channel_names(old_ids)
             evalresps = dctfs.update_channel_keys(evalresps)
-        # Create and fill DataArray
+        # Create DataArray
         obj = cls(ids, f, units, n_winds, windowtype,
                   starttimes=[stream[0].stats.starttime])
+        # Fill DataArray
         for inp in ids:
             if evalresps[inp] is not None:
                 obj.put_channel_response(inp, evalresps[inp])
             for outp in ids:
                 # This also puts the autospectra
-                obj.put_crossspect(inp, outp,
-                                   np.mean(ft[inp]*np.conj(ft[outp]), axis=0)*multfac)
+                obj.put_crossspect(
+					inp, outp, np.mean(ft[inp]*np.conj(ft[outp]), axis=0)*multfac)
         return obj
 
     def coherence(self, in_chan, out_chan):
