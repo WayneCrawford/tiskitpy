@@ -14,7 +14,7 @@ import sphinx.ext.autodoc
 import pathlib
 import sys
 sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
-sys.path.insert(0, pathlib.Path(__file__).parents[2].join('tiskit').resolve().as_posix())
+sys.path.insert(0, pathlib.Path(__file__).parents[2].joinpath('tiskit').resolve().as_posix())
 
 
 # -- Project information -----------------------------------------------------
