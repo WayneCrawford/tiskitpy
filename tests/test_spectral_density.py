@@ -3,17 +3,12 @@
 """
 Functions to test spectral functions
 """
-# from os import system
 import unittest
-# import filecmp
 import inspect
-# import difflib
 from pathlib import Path
 
 from obspy import read_inventory
 from obspy.core.stream import read as obspy_read
-from matplotlib import pyplot as plt
-import numpy as np
 
 from crawtools.spectral import PSD
 
@@ -25,7 +20,7 @@ class TestMethods(unittest.TestCase):
     def setUp(self):
         self.path = Path(inspect.getfile(
             inspect.currentframe())).resolve().parent
-        self.test_path = self.path / "data"
+        self.test_path = self.path / "data" / "spectral_density"
 
     def test_PSD_calc(self):
         stream = obspy_read(str(self.test_path / 'XS.S10D..LHZ.mseed'),
@@ -35,7 +30,7 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(psd.freqs[0], 0.0009765625)
         self.assertEqual(psd.units, 'dB ref 1 (m/s^2)^2/Hz')
         self.assertAlmostEqual(psd.data[0], 9.50923118876e-12)
-        
+
 
 def suite():
     return unittest.makeSuite(TestMethods, 'test')

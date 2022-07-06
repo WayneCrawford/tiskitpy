@@ -5,20 +5,14 @@ Functions to test the lcheapo functions
 """
 # from os import system
 import unittest
-import filecmp
 import inspect
-import difflib
 from pathlib import Path
-import pickle
-import datetime
 
 from obspy.core import UTCDateTime
-from obspy import read_inventory
 from obspy.core.stream import read as stream_read
-from matplotlib import pyplot as plt
-import numpy as np
 
-from rptransient import TimeSpans, rotate_clean
+from tiskit import TimeSpans
+
 
 class TestMethods(unittest.TestCase):
     """
@@ -27,30 +21,7 @@ class TestMethods(unittest.TestCase):
     def setUp(self):
         self.path = Path(inspect.getfile(
             inspect.currentframe())).resolve().parent
-        self.test_path = self.path / "data"
-
-    def assertTextFilesEqual(self, first, second, msg=None):
-        with open(first) as f:
-            str_a = f.read()
-        with open(second) as f:
-            str_b = f.read()
-
-        if str_a != str_b:
-            first_lines = str_a.splitlines(True)
-            second_lines = str_b.splitlines(True)
-            delta = difflib.unified_diff(
-                first_lines, second_lines,
-                fromfile=first, tofile=second)
-            message = ''.join(delta)
-
-            if msg:
-                message += " : " + msg
-
-            self.fail("Multi-line strings are unequal:\n" + message)
-
-    def assertBinFilesEqual(self, first, second, msg=None):
-        """ Compares two binary files """
-        self.assertTrue(filecmp.cmp(first, second))
+        self.test_path = self.path / "data" / "time_spans"
 
     def test_time_spans(self):
         """
@@ -84,16 +55,6 @@ class TestMethods(unittest.TestCase):
             interped.select(component='Z')[0].trim(st, et).data[0], 213.70,
             delta=0.01)
 
-    def test_rotate_clean(self):
-        """
-        Test rotate_clean function.
-        """
-        # this file only has 3 minutes and an EQ, is it enough?
-        stream = stream_read(str(self.test_path / 'XS.S10D.LH.mseed'))
-        rot_stream, bestAngle, bestAzimuth = rotate_clean(stream, verbose=False) 
-        self.assertAlmostEqual(bestAngle, -0.18, delta=0.01)       
-        self.assertAlmostEqual(bestAzimuth, 61.67, delta=0.01)       
-        
 
 def suite():
     return unittest.makeSuite(TestMethods, 'test')

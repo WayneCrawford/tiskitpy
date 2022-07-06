@@ -4,15 +4,14 @@
 Functions to test spectral functions
 """
 # from os import system
-import sys
 import unittest
 from pathlib import Path
 
 from obspy.core import Stream, Trace
 
-sys.path.append("..")
+# sys.path.append("..")
 
-from seis_rotate import SeisRotate as SR
+from tiskit.utils.seis_rotate import SeisRotate as SR
 
 
 class TestMethods(unittest.TestCase):
@@ -21,7 +20,7 @@ class TestMethods(unittest.TestCase):
     """
     def setUp(self):
         self.path = Path(__file__).resolve().parent
-        self.test_path = self.path / "data"
+        self.test_path = self.path / "data" / "utils"
 
     def _quick_stream(self, chan_list):
         "Stream with given channels"
@@ -49,10 +48,13 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(E.stats.channel, 'BH2')
 
     def test_separate_streams(self):
-        seis, other = SR.separate_streams(self._quick_stream(['BH1', 'BH2', 'BH3', 'BHZ', 'BHP']))
+        seis, other = SR.separate_streams(self._quick_stream(['BH1', 'BH2',
+                                                              'BH3', 'BHZ',
+                                                              'BHP']))
         self.assertEqual(len(seis), 3)
         self.assertEqual(len(other), 2)
-        seis, other = SR.separate_streams(self._quick_stream(['BHE', 'BHN', 'BHZ']))
+        seis, other = SR.separate_streams(self._quick_stream(['BHE', 'BHN',
+                                                              'BHZ']))
         self.assertEqual(len(seis), 3)
         self.assertIsNone(other)
         # Stream with missing component should raise IndexError

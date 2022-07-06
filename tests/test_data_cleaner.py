@@ -57,7 +57,7 @@ class TestMethods(unittest.TestCase):
         new_channel_names = dctfs.update_channel_names(channel_names)
         self.assertTrue(new_channel_names == ['A.BH1-H', 'A.BH2-H-1',
                                               'A.BHZ-H-1-2', 'A.BDH'])
-        channel_names = ['A.BH1', 'A.BH2', 'A.BDH'] # no BHZ
+        channel_names = ['A.BH1', 'A.BH2', 'A.BDH']  # no BHZ
         self.assertRaises(ValueError, dctfs.update_channel_names,
                           channel_names)
 

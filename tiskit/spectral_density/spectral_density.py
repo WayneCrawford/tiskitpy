@@ -36,13 +36,14 @@ class SpectralDensity:
             n_windows (int): of windows used to calculate spectra
             windpw_type (str): type of window used
             starttimes (list of UTCDateTime): starttime for each window
-            data (:class:`np.ndarray`): one-sided spectral density
-	    		functions.
-				shape = (len(chan_names), len(chan_names), len(freqs)
-				units = chan_units(i)*chan_units(j)/Hz
-            responses (:class:`np.ndarray`): instrument response for each channel.
+            data (:class:`np.ndarray`):
+                one-sided spectral density functions.
+                shape = (len(chan_names), len(chan_names), len(freqs)
+                units = chan_units(i)*chan_units(j)/Hz
+            responses (:class:`np.ndarray`):
+                instrument response for each channel.
                 shape=(n_spects,n_freqs)
-		        units=(counts/in_units) 
+                units=(counts/chan_units) 
         """
         # Validate Dimensions
         n_ch = len(chan_names)

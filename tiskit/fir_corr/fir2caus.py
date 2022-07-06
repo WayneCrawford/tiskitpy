@@ -1,13 +1,15 @@
 #!/usr/bin/python3
-""" Convert an obsPy data stream from zero phase to minimum phase
-    
-    Duplicates Scherbaum C programs "interpolate", "fir2caus" and "decimate"
+"""
+Convert an obsPy data stream from zero phase to minimum phase
 
-    Uses a precalculated FIR "correction" file made using the Matlab code
-    makeFIRcorrFile.m (or imported from Scherbaum FIR_CORR directory) and then 
-    converted to JSON using my conv_ScherbaumParm2JSON.py code
+Duplicates Scherbaum C programs "interpolate", "fir2caus" and "decimate"
 
-    Author: Wayne Crawford"""
+Uses a precalculated FIR "correction" file made using the Matlab code
+makeFIRcorrFile.m (or imported from Scherbaum FIR_CORR directory) and then 
+converted to JSON using my conv_ScherbaumParm2JSON.py code
+
+Author: Wayne Crawford
+"""
 
 import numpy as np
 import json as json
@@ -16,11 +18,15 @@ import scipy.signal as sig
 import matplotlib.pyplot as plt
 
 def fir2caus(stream,firCorrFileName, FIRdecim):
-    """Main conversion routine, calls all others
+    """
+    Main conversion routine, calls all others
     
-    stream=obsPy stream object
-    firCorrFileName = name of JSON file containing FIR corrections
-    FIRdecim = decimation factor associated with FIR to correct
+    Args:
+        stream (:class:`obspy.core.stream.Stream`): input waveforms
+        firCorrFileName (str): name of JSON file containing FIR corrections
+        FIRdecim (int): decimation factor associated with FIR to correct
+    Returns:
+        s (:class:`obspy.core.stream.Stream`): output waveforms
     """
     ##################################################
     
@@ -33,7 +39,7 @@ def fir2caus(stream,firCorrFileName, FIRdecim):
         data=tr.data
 
         # INTERPOLATE
-        data_interp = interpolate(data, FIRdecim,False)
+        data_interp = _interpolate(data, FIRdecim,False)
         # CHANGE FIR FROM CAUSAL TO MIN PHASE
         data_interp_corr,offset_npts = fir2caus_subr(data_interp, firCorrFileName,False)
         # RESAMPLE TO ORIGINAL
@@ -43,14 +49,15 @@ def fir2caus(stream,firCorrFileName, FIRdecim):
         tr.stats.starttime += offset_npts/(sample_frequency_out*FIRdecim)
     return s
 
-##################################################################################    
-def interpolate(trace,ipol_fac,returnOrigDType=True):
-    """Interpolate data by an integer factor that is a multiple of 2,3, and/or 5
+def _interpolate(trace, ipol_fac, returnOrigDType=True):
+    """
+    Interpolate data by an integer factor that is a multiple of 2,3, and/or 5
     
-    trace = numpy.ndarray containing data
-    ipol_fac = integer factor to interpolate by
-    returnOrigDType = return output trace as same type as input trace (True, default)
-                            or as float double (False)
+    Args:
+        trace (:class:`numpy.ndarray`): data to interpolate
+        ipol_fac (int): factor to interpolate by
+        returnOrigDType (bool): return output trace as same type as input
+            trace (True) or as float double (False)
     """
     
     if ipol_fac == 1:
@@ -87,19 +94,20 @@ def interpolate(trace,ipol_fac,returnOrigDType=True):
         conv_fac = 5*conv_fac/pow5
    
     if conv_fac != 1 :
-        print.format("Factor {#d} cannot be separated in factors 2, 3, and 5\n",ipol_fac)
+        print("Factor {:d} cannot be separated in factors 2, 3, and 5\n"
+              .format(ipol_fac))
         exit(1)
 
     data_type=trace.dtype
     # interpolations by factors of  2
     for k in range(0,no_it2) : # (k=0;k<no_it2;k++) :
-        trace=ipol2(trace)
+        trace=_ipol2(trace)
     # interpolations by factors of 3
     for k in range(0,no_it3) : # (k=0;k<no_it3;k++) :
-        trace=ipol3(trace)
+        trace=_ipol3(trace)
     # interpolations by factors of  5
     for k in range(0,no_it5): # (k=0;k<no_it5;k++)
-        trace=ipol5(trace)
+        trace=_ipol5(trace)
         
     if returnOrigDType:
         trace=np.array(trace,dtype=data_type)   # Force back to original data type:
@@ -115,7 +123,7 @@ def interpolate(trace,ipol_fac,returnOrigDType=True):
 ## g5_1 RMS rel. error for k_rel <0.8: 0.006% */
 ## g5_2 RMS rel. error for k_rel <0.8: 0.009% */
 
-def  ipol2(xin,debug=False) :
+def  _ipol2(xin, debug=False) :
     "interpolation by factor 2"
 
     g2_1 = np.array([ -0.0002616,  0.0009302, -0.0023258,  0.0049142, -0.0092537,
@@ -139,7 +147,7 @@ def  ipol2(xin,debug=False) :
     return xout
 
 
-def  ipol3(xin) :
+def  _ipol3(xin) :
     """interpolation by factor 3"""
     ifac = 3    # interpolation factor
     g3_1 = np.array([ -0.0002324,  0.0008256, -0.0020654,  0.0043684, -0.0082410,  
@@ -162,7 +170,7 @@ def  ipol3(xin) :
     # Should verify that xout[0]==xin[0] and that xout[-1]==xin[-1]
     return xout
 
-def  ipol5(xin) :
+def  __ipol5(xin) :
     """interpolation by factor 5"""
     ifac = 5    # interpolation factor
     g5_1 = np.array([ -0.0001611,  0.0005720, -0.0014316,  0.0030307, -0.0057263,
