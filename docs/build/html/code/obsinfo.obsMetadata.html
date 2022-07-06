@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>obsinfo.obsMetadata package &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="obsinfo.tests package" href="obsinfo.tests.html" />
+    <link rel="prev" title="obsinfo.network package" href="obsinfo.network.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer’s Corner</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Technical Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="obsinfo.html">Code Documentation: obsinfo package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="obsinfo.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.addons.html">obsinfo.addons package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.instrumentation.html">obsinfo.instrumentation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.main.html">obsinfo.main package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.misc.html">obsinfo.misc package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.network.html">obsinfo.network package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">obsinfo.obsMetadata package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.tests.html">obsinfo.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.print_version">obsinfo.print_version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.version">obsinfo.version module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Technical Documentation</a> &raquo;</li>
+          <li><a href="obsinfo.html">Code Documentation: obsinfo package</a> &raquo;</li>
+      <li>obsinfo.obsMetadata package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/obsinfo.obsMetadata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="obsinfo-obsmetadata-package">
+<h1>obsinfo.obsMetadata package<a class="headerlink" href="#obsinfo-obsmetadata-package" title="Permalink to this headline"></a></h1>
+<section id="module-obsinfo.obsMetadata.obsmetadata">
+<span id="obsinfo-obsmetadata-obsmetadata-module"></span><h2>obsinfo.obsMetadata.obsmetadata module<a class="headerlink" href="#module-obsinfo.obsMetadata.obsmetadata" title="Permalink to this headline"></a></h2>
+<p>obsinfo information file routines, contained in superclass ObsMetadata for
+generality</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.obsMetadata.obsmetadata.</span></span><span class="sig-name descname"><span class="pre">ObsMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor, simply create a dict with positional and keyword arguments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – dictionary of positional arguments</p></li>
+<li><p><strong>kwars</strong> – dictionary of keyword arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.convert_to_obsmetadata">
+<span class="sig-name descname"><span class="pre">convert_to_obsmetadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.convert_to_obsmetadata" title="Permalink to this definition"></a></dt>
+<dd><p>Make all contained dictionaries objects of :class: <cite>.ObsMetadata</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.get_configured_element">
+<span class="sig-name descname"><span class="pre">get_configured_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modification</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.get_configured_element" title="Permalink to this definition"></a></dt>
+<dd><p>Substitute an ObsMetadata element with selected or modification values</p>
+<p>This is the heart of <em>obsinfo</em> flexibility, which permits changes in
+configuration or even in individual attributes via channel
+modifications.</p>
+<p>First converts any possible dictionary into an ObsMetadata object to
+be able to use this method recursively</p>
+<p>Returns the value corresponding to key in the following way:</p>
+<ol class="loweralpha simple">
+<li><p>If key present in channel_modification, return the corresponding
+value</p></li>
+<li><p>Else if key present in selected_configuration, return the
+corresponding value</p></li>
+<li><p>Else if key present in self, return the corresponding value</p></li>
+<li><p>Else if key not present in either, return default</p></li>
+</ol>
+<p>Thus, channel_modifications override selected_configuration which
+overrides self (usually the attributes <strong>read</strong> from an information
+file, which, if not present, are substituted by a default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – key to values from the respective dictionaries</p></li>
+<li><p><strong>channel_modification</strong> (dict or <a class="reference internal" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – modifications
+specified at station level</p></li>
+<li><p><strong>selected_configuration</strong> (dict or <a class="reference internal" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – configuration specified at component level</p></li>
+<li><p><strong>default</strong> (<em>str</em>) – default value if none is found</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.get_information_file_format">
+<span class="sig-name descname"><span class="pre">get_information_file_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.get_information_file_format" title="Permalink to this definition"></a></dt>
+<dd><p>Determines if the information file is in JSON or YAML format.</p>
+<blockquote>
+<div><p>Assumes that the filename is “<em>.{FORMAT}</em></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – filename to determine the type of</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>format</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>(</strong><strong>ValueError</strong><strong>)</strong> – on unknown format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.get_information_file_type">
+<span class="sig-name descname"><span class="pre">get_information_file_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.get_information_file_type" title="Permalink to this definition"></a></dt>
+<dd><p>Determines the type of a file.</p>
+<p>Assumes that the filename is “<em>.{TYPE}.{SOMETHING}</em></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – filename to determine the type of</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>file type</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(str)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.is_valid_type">
+<span class="sig-name descname"><span class="pre">is_valid_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.is_valid_type" title="Permalink to this definition"></a></dt>
+<dd><p>Returns true if input is a valid schema type</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.list_valid_types">
+<span class="sig-name descname"><span class="pre">list_valid_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.list_valid_types" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of valid information file types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of valid information file types</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_info_file">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">read_info_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_info_file" title="Permalink to this definition"></a></dt>
+<dd><p>Reads an information file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename</p></li>
+<li><p><strong>datapath</strong> (<a class="reference internal" href="obsinfo.misc.html#obsinfo.misc.discoveryfiles.Datapath" title="obsinfo.misc.discoveryfiles.Datapath"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code></a>) – stores list of directories to
+search info files</p></li>
+<li><p><strong>validate</strong> (<em>bool</em>) – validate before reading</p></li>
+<li><p><strong>remote</strong> (<em>bool</em>) – whether to use absolute/relative path locally
+or OBSINFO_DATAPATH</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – format type (“YAML” or “JSON”)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>JSON or YAML parsed info files</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_json_yaml">
+<span class="sig-name descname"><span class="pre">read_json_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_json_yaml" title="Permalink to this definition"></a></dt>
+<dd><p>Reads a JSON or YAML file. Does NOT use jsonReference  DEPRECATED.</p>
+<p>DEPRECATED. Not being used by any obsinfo method or function. Kept
+for compatibility</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – format type, either “YAML” or “JSON”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>JSON or YAML parsed information files</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>(</strong><strong>JSONDecodeError</strong><strong>)</strong> – problem with JSON read</p></li>
+<li><p><strong>(</strong><strong>FileNotFoundError</strong><strong>)</strong> – file not found</p></li>
+<li><p><strong>(</strong><strong>IOError</strong><strong>)</strong> – File input/output erre</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_json_yaml_ref">
+<span class="sig-name descname"><span class="pre">read_json_yaml_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_json_yaml_ref" title="Permalink to this definition"></a></dt>
+<dd><p>Reads a JSON or YAML file using jsonReference</p>
+<p>Like read_json_yaml_ref, but does not look for files in
+OBSINFO_DATAPATH
+$ref within the data files without absolute or relative path will be
+still looked for in OBSINFO_DATAPATH</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename</p></li>
+<li><p><strong>datapath</strong> (<a class="reference internal" href="obsinfo.misc.html#obsinfo.misc.discoveryfiles.Datapath" title="obsinfo.misc.discoveryfiles.Datapath"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code></a>) – object to store list of</p></li>
+<li><p><strong>dummy.</strong> (<em>directories to search info files. Used as a</em>) – </p></li>
+<li><p><strong>format</strong> (<em>str</em>) – format type, either “YAML” or “JSON”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>JSON or YAML parsed information files</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>(</strong><strong>JSONDecodeError</strong><strong>)</strong> – problem with JSON read</p></li>
+<li><p><strong>(</strong><strong>FileNotFoundError</strong><strong>)</strong> – file not found</p></li>
+<li><p><strong>(</strong><strong>IOError</strong><strong>)</strong> – File input/output erre</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_json_yaml_ref_datapath">
+<span class="sig-name descname"><span class="pre">read_json_yaml_ref_datapath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.read_json_yaml_ref_datapath" title="Permalink to this definition"></a></dt>
+<dd><p>Reads a JSON or YAML file using jsonReference using OBSINFO_DATAPATH</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename</p></li>
+<li><p><strong>datapath</strong> (<a class="reference internal" href="obsinfo.misc.html#obsinfo.misc.discoveryfiles.Datapath" title="obsinfo.misc.discoveryfiles.Datapath"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code></a>) – list of directories to search
+for info files</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – format type, either “YAML” or “JSON”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>JSON or YAML parsed information files</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>(</strong><strong>JSONDecodeError</strong><strong>)</strong> – problem with JSON read</p></li>
+<li><p><strong>(</strong><strong>FileNotFoundError</strong><strong>)</strong> – file not found</p></li>
+<li><p><strong>(</strong><strong>IOError</strong><strong>)</strong> – File input/output erre</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.validate" title="Permalink to this definition"></a></dt>
+<dd><p>Validates a YAML or JSON file against schema</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema_path</strong> (<em>str</em>) – schema path</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em> or </em><em>path-like</em>) – name of file to validate</p></li>
+<li><p><strong>remote</strong> (<em>bool</em>) – whether to search for filename in a remote
+repository</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – format of information file:  “JSON” or “YAML”</p></li>
+<li><p><strong>type</strong> (<em>str</em>) – type of info file: “network”, “station”,
+“instrumentation”, “datalogger”, “preamplifier”, “sensor”,
+“stage”, “filter”</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Print progression of validation steps with
+filenames</p></li>
+<li><p><strong>schema_file</strong> (<em>str</em>) – name of schema file</p></li>
+<li><p><strong>quiet</strong> (<em>bool</em>) – Deprecated. Conserved for compatibility. Cancels
+verbose.</p></li>
+<li><p><strong>dp</strong> (<a class="reference internal" href="obsinfo.misc.html#obsinfo.misc.discoveryfiles.Datapath" title="obsinfo.misc.discoveryfiles.Datapath"><em>Datapath</em></a>) – datapath for information files.  If None,
+defaults to values stored in .obsinforc</p></li>
+</ul>
+</dd>
+</dl>
+<p>If type and/or format are not provided, tries to figure them out from
+the filename, which should be “<em>{TYPE}.{FORMAT}</em></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.validate_date">
+<span class="sig-name descname"><span class="pre">validate_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.validate_date" title="Permalink to this definition"></a></dt>
+<dd><p>Reformats an individual date</p>
+<p>Uses regular expressions to match known dates, either in UTC date
+format, in UTC date and time format or in regular dd-mm-yyyy format.
+If only two digits of year specified, assumes 21st century.
+The separator can be either “/” or “-”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>date</strong> (<em>str</em>) – a date in a given format</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a reformatted date as string or None if no value</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(str)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>(</strong><strong>ValueError</strong><strong>) </strong><strong>if date is unrecognizable</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.obsMetadata.obsmetadata.ObsMetadata.validate_dates">
+<span class="sig-name descname"><span class="pre">validate_dates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.obsMetadata.obsmetadata.ObsMetadata.validate_dates" title="Permalink to this definition"></a></dt>
+<dd><p>Converts dates to a standard format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dates</strong> (<em>list</em>) – dates as strings</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>formatted dates as strings</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="obsinfo.network.html" class="btn btn-neutral float-left" title="obsinfo.network package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="obsinfo.tests.html" class="btn btn-neutral float-right" title="obsinfo.tests package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

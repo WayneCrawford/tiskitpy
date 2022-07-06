@@ -1,0 +1,97 @@
+.. _SeedCodes11:
+
+****************
+SeedCodes
+****************
+
+===============
+ Description
+===============
+
+Seed Codes are defined by the FDSN to characterize :ref:`channels <Channel>` according to their data sources and signal treatment characteristics.
+ 
+---------------------
+Python class:
+---------------------
+
+SeedCodes
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+seed_codes
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*Channel.code*
+
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Belongs to an :ref:`Sensor <Sensor>`
+
+==============================
+Attributes
+==============================
+
+.. _band-code: http://docs.fdsn.org/projects/source-identifiers/en/v1.0/channel-codes.html#band-code
+.. _instrument-code: http://docs.fdsn.org/projects/source-identifiers/en/v1.0/channel-codes.html#source-and-subsource-codes
+.. _orientation-code: http://docs.fdsn.org/projects/source-identifiers/en/v1.0/channel-codes.html#source-and-subsource-codes
+
+
+======================== ================================== ============ ================= ================================== =================================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**            **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------
+band_base                 string with restrictions (1 char)       Y           *None*           *None*                            For a complete explanation of codes, click on `band-code`_  .
+                                                                                                                                 Called band code in the new FDSN nomenclature.    
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------
+instrument_code           string with restrictions (1 char)       Y           *None*           *None*                            For a complete explanation of codes, click on `instrument-code`_ .
+                                                                                                                                 Called source code in the new FDSN nomenclature.
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------
+orientation_code          string with restrictions (1 char)       N           *None*           *None*                            For a complete explanation of codes, click `orientation-code`_ .   
+                                                                                                                                 See subsection *Geographic orientation subsource codes*.
+                                                                                                                                 This code is assigned at the channel level.
+                                                                                                                                 Called subsource orientation code  in the new FDSN nomenclature.
+                                                                                                                                 While part of the seed code, it is assigned at the channel level.                   
+======================== ================================== ============ ================= ================================== =================================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/sensor.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+
+==================
+Class Navigation
+==================
+
+:ref:`Sensor` \<\=\=

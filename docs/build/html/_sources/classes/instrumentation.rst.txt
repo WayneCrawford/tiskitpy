@@ -1,0 +1,141 @@
+.. _Instrumentation:
+
+*************************
+Instrumentation
+*************************
+
+
+===============
+ Description
+===============
+
+An OBS instrumentation is an ensemble of `instruments <Instrument>`_ associated with specific `channels <Channel>`_ constitute a physical unity that will be launched and recovered as a unit. While *obsinfo* is concerned only with the signal processing aspects of the instrumentation, an OBS instrumentation also includes the physical parts of the OBS frame, ballast elements, recovery devices, communication and power supply.
+
+Channels in the instrumentation all have string labels, which are usually channel numbers. They must specify an orientation. Default chann properties can be specified with a label ``default``. These properties are common to all channels *unless* overridden by attributes present in specific channels. For example, if a sensor **X**  appears under the label ``default`` but a sensor **Y**  appears under the label "2" then for channel 2  the selected sensor will be **Y**. If a preamplifier **Z**  is specified under the label ``default`` and no preamplifier is specified under the label "2", then channel 2 will have preamplifier **Z**. All attributes can be specified under the default label.
+
+---------------------
+Python class:
+---------------------
+
+Instrumentation
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+instrumentation
+   Contained in an instrumentation file
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+  At the Station level StationXML documents the total number of channels and the selected number of channels. Both are equal in OBS and are calculated implicitly.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is used in a :ref:`Station <Station>`
+* Has one or several :ref:`Channels <Channel>`
+* Has one or specifications defined in :ref:`Equipment <Equipment>`
+
+==============================
+Attributes
+==============================
+
+
+======================== ================================== ============ ================= ============================= =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**           **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ----------------------------- -------------------------------------------------------------
+  equipment                       :ref:`Equipment`                 Y           *None*            *None*                    
+------------------------ ---------------------------------- ------------ ----------------- ----------------------------- -------------------------------------------------------------
+  channels                        Array of :ref:`Channel`          Y           *None*            Channel            
+------------------------ ---------------------------------- ------------ ----------------- ----------------------------- -------------------------------------------------------------
+  channel_modifications           Array of :ref:`Channel`           Y           *None*            Channel                     See :ref:`AdvancedTopics` for details 
+   
+======================== ================================== ============ ================= ============================= =============================================================
+
+The attribute channel_modifications is used to modify the attributes of a channel. In particular, instruments are supposed to be a rather static database of components and their configurations, but occasionally it is necessary to change some 
+of the attributes for particular campaigns. 
+
+Under this keyword the user can specify a complete hierarchy down to the filter level. 
+Only the value(s) specified will be modified. So if a "leaf" value is changed, such as gain value, 
+only the gain value for a particular stage will be changed. But if a complete sensor is specified,
+the whole component along with its stages and filters will be modified. For more details, 
+see :ref:`AdvancedTopics`.
+
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/instrumentation.schema.json>`_
+
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+YAML code for instrumentation information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/BBOBS1_2012%2B.instrumentation.yaml>`_ with the ``channel_template`` and ``das_channels`` parts elided.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision: 
+    date: "2019-12-19"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+        - {$ref: "authors/Romuald_Daniel.author.yaml#author"}
+ instrumentation:
+    operator: {$ref: "operators/INSU-IPGP.operator_info.yaml#operator_info"}
+    equipment:
+        model: "BBOBS1"
+        type: "Broadband Ocean Bottom Seismometer"
+        description: "LCHEAPO 2000 BBOBS 2012-present" 
+        manufacturer: "Scripps Inst. Oceanography - INSU"
+        vendor: "Scripps Inst. Oceanography - UNSU"
+            
+    channels:
+        default:           
+              ...
+                
+        "1":           
+              ...
+           
+        "2": 
+              ...
+           
+        "3": 
+              ...
+         
+        "4":
+               ...
+
+==================
+Class Navigation
+==================
+
+:ref:`Station` \<\=\=\> :ref:`Channel`
+
+

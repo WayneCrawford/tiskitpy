@@ -1,0 +1,93 @@
+
+.. _Digital11:
+
+***************
+Digital
+***************
+
+===============
+ Description
+===============
+
+StationXML does not have a class for digital stages which are not filters.
+They are therefore implemented as a Coefficients filter with one numerator
+coefficient, equal to 1.
+
+
+---------------------
+Python class:
+---------------------
+
+Digital
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+DIGITAL
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Coefficients (with no coefficients)
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`Coefficients <Coefficients11>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is nested in :ref:`Stage <Stage>`
+
+==============================
+Attributes
+==============================
+
+======================== ================================== ============ ================= ========================== =========================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**                   **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+*None*
+                                                                                             
+======================== ================================== ============ ================= ========================== =========================================
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+ Example
+==============================
+
+No existing file for this example.
+
+.. code-block:: yaml
+
+ 
+ filter:
+    type: "Digital"
+    
+==================
+Class Navigation
+==================
+
+:ref:`Filter11` \<\=\= 
+

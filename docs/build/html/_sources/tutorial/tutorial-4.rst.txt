@@ -1,0 +1,296 @@
+.. _Tutorial4:
+
+************************************************************
+Building a simple instrumentation file with channels
+************************************************************
+
+As seen in the last section, instrumentation are usually referred to with ``$ref`` from a network / station information file. This is a best practice, but it is not mandatory. It does allow for easier reuse.
+
+The file starts as usual:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2019-12-19"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+        - {$ref: "authors/Romuald_Daniel.author.yaml#author"}
+
+Observe that we have added an author to the list of authors, and that lists are separated by dashes.
+
+Equipment
+-------------
+
+The main part of the file is the instrumentation section. First, we have the ``equipment`` section, which details the manufacturer, model and serial number of the whole instrumentation, and which can be overridden for individual components.
+
+.. code-block:: yaml
+
+ instrumentation:
+
+    equipment:
+        model: "BBOBS1"
+        type: "Broadband Ocean Bottom Seismometer"
+        description: "LCHEAPO 2000 BBOBS 2012-present"
+        manufacturer: "Scripps Inst. Oceanography - INSU"
+        vendor: "Scripps Inst. Oceanography - UNSU"
+
+As most OBS are assembled with parts from different manufacturers, the only required fields of the equipment section are the type (a free-form text field) and the description.
+
+Channels and channel default
+-------------------------------
+
+In second place, we have channels. Channels are the most relevant part of the instrumentation. A channel is the ensemble of the three instrument components (called an instrument): sensor, optionally a preamplifier and a datalogger, plus an orientation. Orientation codes are explained `here <http://docs.fdsn.org/projects/source-identifiers/en/v1.0/channel-codes.html#source-and-subsource-codes>`_ in the *Geographic orientation subsource codes* section. They are dictated by FDSN standards.
+
+The ``channels`` are the actual channels in the instrumentation. They all have string labels, which are usually channel numbers. These must be in quotes as they are not keys in the *obsinfo* syntax. They must specify an orientation.
+
+However, to avoid duplication, a wildcard, default channel identified with label ``default`` is used to declare common elements to all channels. This is not an actual channel. It's just a place to hold default attributes. If an attribute is not specified in an actual channel but exists in the default channel then it will be added to the final configuration of the channel.
+
+Let's see an example:
+
+.. code-block:: yaml
+
+   channels:
+       default:
+           sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+           preamplifier:
+               {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+           datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+        "1": {orientation_code: "2": {azimuth.deg: [90, 0],  dip.deg: [0, 0]}}  +
+        "2":
+             orientation_code:
+                     "1":
+                         azimuth.deg: [0, 9]
+                         dip.deg: [0, 0]
+
+This code specifies two channels as a dictionary. Each channel specifies the two or three instrument components and the ``orientation_code``. The orientation_code will become the third character in the SEED code identification 
+(see :ref:`SeedCodes11`, and thus must follow FDSN standards.
+
+Again, these are real, physical channels. But the default specifies three instrument components: ``sensor``, ``preamplifier`` and ``datalogger``. The preamplifier is optional. All three files reference an information file in separate directory, which, in the example, are just under the directory ``Information_Files``. All fields in the ``default`` are applied to each one of the ``channels`` *unless* the channel already has one of those components. In other words, fields in the individual ``channels`` override fields in the default. So this is the same as typing:
+
+.. code-block:: yaml
+
+ channels:
+        "1": {
+            sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+            preamplifier:
+                 {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+            datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+            orientation_code: {"2": {azimuth.deg: [9, 0], dip.deg: [0, 0]}}
+        }
+        "2": {
+            sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+            preamplifier:
+                 {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+            datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+            orientation_code:
+                    "1":
+                        azimuth.deg: [90, 0]
+                        dip.deg: [0, 0]
+        }
+
+Observe that in this case we have used curly parentheses to specify elements in a dictionary. They can be left out, letting simple indentation do the job of determining the items in the dictionary.
+
+Now, if a channel specifies any of the fields in the default, it will override that field. Let's assume we have a channel 4 with a different sensor and preamplifier:
+
+.. code-block:: yaml
+
+        "4":
+            orientation_code : {"H": {{azimuth.deg: [0, 0],  dip.deg: [90, 0]}}
+            preamplifier: {$ref: "preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier"}
+            sensor: {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+
+Then, assuming the same default field as above, the result of channel 4 would be:
+
+.. code-block:: yaml
+
+        "4":
+            orientation_code : {"H": {azimuth.deg: [0, 0],  dip.deg: [90, 0]}}
+            preamplifier: {$ref: "preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier"}
+            sensor: {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+            datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+Only ``datalogger`` maintains the default value. The other components are overriden with the values specified in channel 4.
+
+Orientation Codes
+--------------------
+
+Now we need to explain the orientation codes. Orientation codes are a FDSN standard. By convention, if the orientation code is **X**, **Y** or **Z**, these represent the regular coordinates in space following the right-hand rule, within five degrees of the actual directions. So **X** corresponds to an azimuth of 0º and a dip of 0º, **Y** corresponds to an azimuth of 90º and a dip of 0º, and **Z** corresponds to an azimuth of 0º and a dip of 90º (the positive **Z** direction is towards the bottom). However, if **1**, **2** or **3** are specified, these represent three linearly independent directions but not necessarily coincidental with the regular coordinates, so an azimuth and a dip *must* be specified, depending on the type of code. The same is true of the **H** (hydrophone) code. See reference above for details.
+
+Note also how we freely mix the two syntactic ways of specifying a dictionary in YAML, with curly parentheses or indentation. You can use whatever syntax you prefer. You only need to pay attention to curly parentheses if you choose to use that syntax.
+
+The order of the keys ``sensor``. ``preamplifier`` and ``datalogger`` are arbitrary, as there can be no ambiguity, but it is good to remember that their stages will always be processed in the logical order: sensor, preamplifier and datalogger.
+
+Configurations
+----------------
+
+So far so good. We have learnt how to specify default components through the default and how to override them. This is pretty flexible, but we can get more flexible still. This is done through *configuration definitions* and *configuration selection*. Configuration definitions are specified at the instrument component level, and thus will be treated in the next section. Suffice it to say hear that configuration definitions can take any field at the lower levels and change it either by overriding it or by adding it to a preexisting default configuration. This is by *selecting* a configuration at the channel level.  A configuration selection field can specify a configuration for each of the three instrument components in a channel: sensor, preamplifier and datalogger. The configuration **must** exist as a configuration definition. Let's add two things to the example: a default configuration for all channels in ``default`` and a  channel 3 that overrides this configuration.
+
+.. code-block:: yaml
+
+   channels:
+        default:
+            sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+            preamplifier:
+                {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+            datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+            preamplifier_configuration: "0.225x"
+
+        "1": {orientation_code: {"2": {azimuth.deg: [9, 0], dip.deg: [0, 0]}} }
+        "2":
+             orientation_code:
+                     "1":
+                         azimuth.deg: [90, 9]
+                         dip.deg: [0, 0]
+
+        "3":
+            orientation_code: "Z"
+            preamplifier_configuration: "1x"
+
+         "4":
+            orientation_code : {"H": {azimuth.deg: [0, 0],  dip.deg: [90, 0]}}
+            preamplifier: {$ref: "preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier"}
+            sensor: {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+
+This code specifies configurations`, which can be for sensor, preamplifier or datalogger; in this case, simply for the preamplifier. The configuration selected is called "0.225x" and is a gain multiplier, as will be seen shortly. This value will be used in all channels, except channel 3, where it will be changed to "1x". In the end, the four channels specified above will be the same as typing this:
+
+.. code-block:: yaml
+
+   channels:
+        "1":
+           sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+           preamplifier:
+                 {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+           datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+           orientation_code: {"2": {azimuth.deg: [90, 9], dip.deg: [0, 0]}}
+
+           preamplifier_configuration: "0.225"
+
+        "2":
+           sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+           preamplifier:
+                 {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+           datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+           orientation_code: {"1": {azimuth.deg: [0, 0], dip.deg: [0, 0]}}
+
+
+           preamplifier_configuration: "0.225x"
+
+        "3":
+           sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+           preamplifier:
+                {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+           datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+           orientation_code: Z
+           preamplifier_configuration: "1x"
+
+        "4":
+           sensor: {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+           preamplifier: {$ref: "preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier"}
+           datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+           orientation_code: {"H": {azimuth.deg: [0, 0],  dip.deg: [90, 0]}}
+
+           preamplifier_config: "1x"
+
+
+Channel modifications
+_______________________
+
+As seen in the last chapter, channel configurations can also be modified. The rationale behind this feature is that the user has a stable database of instruments which may occasionally suffer last-minute or punctual modifications, for example, in the serial number of an equipment (when it is replaced by another one as an emergency measure when it's malfunctioning or gain of a stage. OBS equipment is highly malleable and *obsinfo* is conceived to reflect that malleability. Channel modifications are performed at the ``station`` level but can potentially change *any* field from instrumentation level down. However, this is a more complex topic that falls outside of a beginner's tutorial. 
+It will be treated in the `Advanced Topics <AdvancedTopics>`_ documentation.
+
+Notes and extras
+-----------------
+
+This file is complex, so it's a good place to talk about notes and extras. These are optional fields. Notes can occur in any information file. They are documentation that can be used to remind users of the specifics of the information file. They will **not** be reflected in StationXML to avoid clutter.
+
+Extras are key:value pairs that document attributes that do not exist in the information file specification. They **are** reflected as remarks in the StationXML file. For this reason and to avoid clutter, they are only available at three levels: network, station and channel, which are the levels in StationXML which permit remarks. An earlier version of *obsinfo* permitted extras at any level. The result was considerable clutter at the response stages level, as stages are repeated and the same information is therefore repeated over and over.
+
+As an example, let's assume we have an "octopus" sensor where the serial number of the sensor is not specified. This is because we have actually several sensors with different serial numbers, enclosed in spheres. How do we convey that information? There are two ways. One is in a list of notes at the end of the *sensor* file:
+
+.. code-block:: yaml
+
+ notes:
+    - "INSU-IPGP OBS park sphere sensor pairs are: Sphere01-133, Sphere02-132,"
+    - "Sphere03-134, Sphere04-138, Sphere05-137, Sphere06-830, Sphere07-136,"
+    - "Sphere08-829, Sphere09-826"
+
+This associates serial numbers to the spheres. However, this will not be reflected in the StationXML file. The other YAML syntax for lists is possible too:
+
+.. code-block:: yaml
+
+notes: ["INSU-IPGP OBS park sphere sensor pairs are: Sphere01-133, Sphere02-132,",
+        "Sphere03-134, Sphere04-138, Sphere05-137, Sphere06-830, Sphere07-136,",
+        "Sphere08-829, Sphere09-826"]
+
+Or we can use the ``extras`` dictionary, but not in the sensor file but in the instrumentation one:
+
+.. code-block:: yaml
+
+ extras:
+    "Description": "Serial numbers for sensors"
+    "Sphere03": "134"
+    "Sphere04": "138"
+    "Sphere05": "137"
+    "Sphere06": "830"
+    "Sphere07": "136"
+    "Sphere08": "829"
+    "Sphere09": "826"
+
+Complete example
+__________________
+
+This is a real file. The order of the fields may change from the examples above. As mentioned, this is immaterial.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2019-12-19"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+        - {$ref: "authors/Romuald_Daniel.author.yaml#author"}
+ instrumentation:
+    operator: {$ref: "operators/INSU-IPGP.facility_info.yaml#facility_info"}
+    equipment:
+        model: "BBOBS1"
+        type: "Broadband Ocean Bottom Seismometer"
+        description: "LCHEAPO 2000 BBOBS 2012-present"
+        manufacturer: "Scripps Inst. Oceanography - INSU"
+        vendor: "Scripps Inst. Oceanography - UNSU"
+
+    channels:
+        default:
+            datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+            preamplifier:
+                {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+            sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}
+            preamplifier_configuration: "0.225x"
+
+        "1": {orientation_code: {"2": {azimuth.deg: [90, 0],  dip.deg: [0, 0]}} }
+        "2": {orientation_code: {"1": {azimuth.deg: [0, 0], dip.deg: [0, 0]}}}
+        "3":
+            orientation_code: "Z"
+            selections:
+               preamplifier: "1x"
+        "4":
+            orientation_code : {"H": {azimuth.deg: [0, 0],  dip.deg: [90, 0]}}
+            preamplifier: {$ref: "preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier"}
+            sensor: {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+
+
+
+* :ref:`Next page, Building instrument component files <Tutorial5>`
+* :ref:`Previous page <Tutorial4>`
+* :ref:`Back to start  <Tutorial1>`
+

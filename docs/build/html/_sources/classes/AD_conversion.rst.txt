@@ -1,0 +1,94 @@
+.. _ADConversion:
+
+
+****************
+ADConversion
+****************
+
+===============
+ Description
+===============
+
+StationXML does not specify analog to digital stages. We implement them as a
+Coefficients filter with one numerator coefficient, which is equal to one.
+
+
+---------------------
+Python class:
+---------------------
+
+ADConversion
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+ADConversion
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Coefficients (with no coefficients except one numerator equal to one)
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`Coefficients <Coefficients11>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is nested in :ref:`Stage <Stage>`
+
+==============================
+Attributes
+==============================
+
+======================== ================================== ============ ================= ========================== =========================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**                   **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+input_full_scale             number                             N           *None*           *None*
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+output_full_scale             number                             N           *None*           *None*                                                                                             
+======================== ================================== ============ ================= ========================== =========================================
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Filter section in stage information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/dataloggers/responses/CS5321_FIR1.stage.yaml>`_
+
+.. code-block:: yaml
+
+ filter:
+        type : "AD_CONVERSION"
+        input_full_scale : 9 #  9 V pp
+        output_full_scale : 10485760 #  4FFFFF@Vref and B00000@-Vref
+
+==================
+Class Navigation
+==================
+
+:ref:`Filter11` \<\=\= 
+

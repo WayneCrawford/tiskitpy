@@ -1,0 +1,302 @@
+.. _Tutorial5:
+
+********************************************************************************************
+Building instrument component files with response stages: sensors and preamplifiers
+********************************************************************************************
+
+Sensor, preamplifier and datalogger are all instrument components.
+While InstrumentComponent is not a key in information files, it is a class in
+Python used to inherit attributes and methods to all three component classes.
+All instrument components share the same attributes and sensor and datalogger
+add one each on their own.
+Components in an instrument are always understood to come in the same order,
+and are processed in that order: first the sensor, then possibly a preamplifier,
+usually analog, and then the datalogger.
+
+What characterizes all components is that they have an ordered list of
+response stages.
+While the order of the components themselves is predetermined, the order of
+the stages *must* be specified.
+The order of all stages is then determined as sensor stage 1, sensor state 2,...,
+preamplifier stage 1, preamplifier stage 2,..., datalogger stage 1, datalogger stage 2,...
+
+A simple sensor component
+----------------------------
+
+A sensor is, as it is well-known, any kind of transducer that senses a seismic
+signal and transduces it to an electrical signal, typically an analog one.
+
+Let's see an example of a sensor component.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+ sensor:
+    equipment:
+        model: "Trillium T240"
+        type: "Broadband seismometer"
+        description: "Trillium T240 seismometer, single-sided connection"
+        manufacturer: "Nanometrics, Inc"
+        vendor: "Nanometrics, Inc"
+
+We have an equipment section, just as the instrumentation level, as sensors
+can have different manufacturers from the rest of the equipment.
+The description allows to add enough detail so we can identify this sensor.
+Then we have the seed codes section.
+Seed codes are coded descriptions of such elements as the band base, the
+instrument type and the orientation.
+The codes of the first two follow the FDSN standard, as explained
+`here <http://docs.fdsn.org/projects/source-identifiers/en/v1.0/channel-codes.html>`_ .
+
+.. code-block:: yaml
+
+    seed_codes:
+        band_base: "B"
+        instrument: "H"
+
+Seed codes are only present in sensors. No other component has them.
+Seed codes are based on an FDSN standard and consist of three characters.
+The first specifies the band_base, the second the instrument type.
+A third one, orientation, with azimuth and dip, is specified at the channel
+level, although in the StationXML file it will part of the seed code.
+
+The value of ``polarity`` should be "+" if an upward motion or a pressure
+increase results in a positive voltage, and "-" otherwise.
+
+Stages
+-------
+
+Now, let's take a look at the next section, response stages.
+As is readily seen in the example, ``response_stages`` are a list of stages.
+Being a list, individual stages have no label or key, which would  make them
+dictionary items rather than list items.
+As they are (usually) not referenced elsewhere (the glaring exception being
+channel modifications), this simplifies the syntax.
+In this case, we only include a single stage, as a reference to a stage file,
+which is the recommended best practice. Stages are found in a stage folder.
+
+.. code-block:: yaml
+
+    response_stages
+         - $ref: "stages/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage"
+
+Response stages are used in all three components.
+While StationXML lists all stages separately from the components, *obsinfo*
+associates conceptually stages to components by way of their functionality.
+In the end, however, stages will be grouped together and numbered from the
+sensor stages to the datalogger ones, all in sequence.
+
+This ends the presentation of a simple sensor file.
+But the important part of components, their flexibility, lies ahead.
+
+Configuration definitions
+------------------------------
+
+This is the place where the full power of *obsinfo* manifests itself.
+The application allows several configuration definitions to coexist in any
+component file.
+This means that we can have a virtual sensor or datalogger which can
+potentially have any number of configurations, so we can form a library of
+component files.
+Only when they are added to an instrument (or, if you like to think it that
+way, to a channel), will one particular configuration be "instantiated" and a
+real component will be described by the file.
+This occurs with the field ``configuration_selections`` in the instrumentation file.
+That value selects one configuration among all the configuration definitions.
+But we also allow a default configuration, so if no configuration is selected
+at the channel level, this will be the actual configuration selected.
+Let's modify our simple sensor file adding configurations:
+
+.. code-block:: yaml
+
+  ---
+  format_version: "0.110"
+  revision:
+    date: "2017-11-30"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+  sensor:
+    equipment:
+        model: "Trillium T240"
+        type: "Broadband seismometer"
+        description: "Trillium T240 seismometer, negative shorted to ground"
+        manufacturer: "Nanometrics, Inc"
+        vendor: "Nanometrics, Inc"
+
+    seed_codes:
+        band_base: "B"
+        instrument: "H"
+
+    configuration_default: "SINGLE-SIDED_SN1-399"
+
+    configuration_definitions:
+        "SINGLE-SIDED_SN1-399" :
+            configuration_description: "serial numbers 1-399"
+            response_stages:
+                -$ref: "responses/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage"
+        "SINGLE-SIDED_SN400plus" :
+            configuration_description: "serial numbers 400+"
+            response_stages:
+                -$ref: "responses/Trillium_T240_SN400-singlesided_theoretical.stage.yaml#stage"
+
+This file requires a lot of commentary.
+Let's start with the resulting configuration.
+Note that we have added two configuration definitions, which are specified as
+a dictionary (i.e. they have labels, key/value pairs),"SINGLE-SIDED_SN1-399"
+and "SINGLE-SIDED_SN400plus".
+This is a real example in which a component has different behaviour depending
+on its serial number (below or above 400), which calls for two differently
+configured stages.
+If no sensor configuration is selected in the instrumentation file, the result
+would be to use the default configuration, so the file above would be the
+same as this:
+
+.. code-block:: yaml
+
+ ---
+  format_version: "0.110"
+  revision:
+    date: "2017-11-30"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+
+  sensor:
+    equipment:
+        model: "Trillium T240"
+        type: "Broadband seismometer"
+        description: "Trillium T240 seismometer, negative shorted to ground [config: serial numbers 1-399]"
+        manufacturer: "Nanometrics, Inc"
+        vendor: "Nanometrics, Inc"
+
+    seed_codes:
+        band_base: "B"
+        instrument: "H"
+
+    response_stages:
+        -$ref: "responses/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage"
+
+``response_stages`` is added from the default configuration definition. No surprises here. But look at what happened in ``description``. We didn't override the existing description, we *concatenated* the new one to the old one. This is an exception to the way all other fields behave. The idea is to be more specific about the description according to the configuration. This could possibly be achieved with YAML anchors, but unfortunately YAML does not concatenate strings, so we need to do it this way, with an exception to the general overriding rule.
+
+Now, if we had selected configuration "SINGLE-SIDED_SN400plus" in the
+instrumentation file (in the ``config_selections`` section), the result would be:
+
+.. code-block:: yaml
+
+ ---
+  format_version: "0.110"
+  revision:
+    date: "2017-11-30"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+
+  sensor:
+    equipment:
+        model: "Trillium T240"
+        type: "Broadband seismometer"
+        description: "Trillium T240 seismometer, negative shorted to ground [config: serial numbers 400+]"
+        manufacturer: "Nanometrics, Inc"
+        vendor: "Nanometrics, Inc"
+
+    seed_codes:
+        band_base: "B"
+        instrument: "H"
+
+    response_stages:
+        - $ref: "responses/Trillium_T240_SN400-singlesided_theoretical.stage.yaml#stage"
+
+
+At any rate, the philosophy is to have all these configurations added to the
+component file from the start, so we don't change the file much;
+but, of course, if needs be, you can add more configurations anytime.
+
+Complete example sensor file
+------------------------------
+
+.. code-block:: yaml
+
+  ---
+  format_version: "0.110"
+  revision:
+    date: "2017-11-30"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+  sensor:
+    equipment:
+        model: "Trillium T240"
+        type: "Broadband seismometer"
+        description: "Trillium T240 seismometer, negative shorted to ground"
+        manufacturer: "Nanometrics, Inc"
+        vendor: "Nanometrics, Inc"
+
+    seed_codes:
+        band_base: "B"
+        instrument: "H"
+
+    configuration_default: "SINGLE-SIDED_SN1-399"
+
+    configuration_definitions:
+        "SINGLE-SIDED_SN1-399" :
+            configuration_description: "serial numbers 1-399"
+            response_stages:
+                -$ref: "responses/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage"
+        "SINGLE-SIDED_SN400plus" :
+            configuration_description: "serial numbers 400+"
+            response_stages:
+                -$ref: "responses/Trillium_T240_SN400-singlesided_theoretical.stage.yaml#stage"
+
+ notes:
+    - "INSU-IPGP OBS park sphere sensor pairs are: Sphere01-133, Sphere02-132,"
+    - "Sphere03-134, Sphere04-138, Sphere05-137, Sphere06-830, Sphere07-136,"
+    - "Sphere08-829, Sphere09-826"
+
+
+Preamplifier configuration definitions
+-------------------------------------------
+
+Preamplifiers are, in fact, the simplest components. 
+They only have ``equipment``, ``response_stages``, ``configuration_default``
+and ``configuration_definitions``, already explained above.
+Thus, we limit ourselves to showing an example, noting the the configuration
+definitions are based on gain, not serial number as in the sensor example before.
+Remember that labels for configuration definitions are totally arbitrary, so
+you can make your own choice as to how to characterize the configurations.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ preamplifier:
+    equipment:
+        model: "BBOBS-GAIN"
+        type: "Analog gain card"
+        description: "INSU BBOBS gain card"
+        manufacturer: "SIO or IPGP"
+        vendor: ~
+
+    configuration_default: "1x"
+
+    configuration_definitions:
+        "0.225x":
+            configuration_description: "0.225x gain"
+            response_stages:
+                - $ref: "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage"
+        "1x":
+            configuration_description: "1x gain"
+            response_stages:
+                - $ref: "responses/INSU_BBOBS_gain1.0_theoretical.stage.yaml#stage"
+
+In the next section we will see how to configure a datalogger information file.
+
+* :ref:`Next page, Building a datalogger information file <Tutorial6>`
+* :ref:`Previous page <Tutorial5>`
+* :ref:`Back to start  <Tutorial1>`

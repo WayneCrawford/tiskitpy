@@ -1,0 +1,14 @@
+*****************
+Information files
+*****************
+
+Here are examples of information files, from the most basic to the most
+complete.  You can also see the schemas at ...
+
+.. toctree::
+  :maxdepth: 2
+  :caption: Table of Contents:
+  
+  information_files/basic_flat
+  information_files/basic_atomic
+  information_files/full_network

@@ -1,0 +1,157 @@
+.. _Tutorial1:
+
+*************************
+Introduction
+*************************
+
+Information files are written in YAML or JSON, mostly YAML. YAML is a markup language (despite some claim its acronym means "yaml ain't a markup language" that permits users to encode data in a structured format which can be shared, written and read by many applications using text files (rather than binary ones), a process known as *serialization* of data. It is one of the standard tools for this purpose, others being JSON and XML, which tend to be more verbose and harder to read and write. This tutorial will center on YAML, but it is readily translatable to JSON for users fluent in the use of that markup language, which can, at any rate, be learned `here <https://www.w3schools.com/js/js_json_intro.asp>`_. Keep in mind YAML is a superset of JSON, so some functionality is not readily implemented in the latter.
+
+This is **not** a YAML tutorial. We freely mix required YAML syntax with best practices advocated for *obsinfo* and leave out many aspects of the language. For people wanting to get acquainted with YAML, a number of resources are available, such as `this <https://www.tutorialspoint.com/yaml/index.htm>`_.
+
+
+Basic YAML syntax
+---------------------
+
+YAML files, as in the other markup languages mentioned, are structured hierarchically. The basic structure is the key-value pair, which permits to assign a value retrievable by key (and easily readable by a human user), such as:
+
+.. code-block:: yaml 
+
+ last_name  : "Presley"
+ first_name : "Elvis"
+
+Being hierarchical, these key-value pairs can be nested:
+
+.. code-block:: yaml 
+
+ artist_name:
+   last_name  : "Presley"
+   first_name : "Elvis"
+
+*Space* indentation is used in YAML to nest key-value pairs. NEVER use tabs. As a convention, two spaces are used and all key-value pairs at the same level must be equally indented.
+
+YAML uses three dashes "---" to separate different streams of data. Always put as the first line in your file the three dashes as a best practice. All YAML files such have a ``.yaml`` extension.
+
+YAML data types
+---------------------
+
+There are other observations for the little piece of code above. First, the data types. Scalars can be either a ``number``, a ``boolean`` (True or False as values) or a ``string``, enclosed in double quotes. Numbers can be integers (without decimal point) or floating point (with decimal point).
+
+Other data structures include lists and dictionaries. A list is simply an enumeration of elements which can be any data type, enclosed in brackets or listed in separate indented lines which start by dashes. The following are equivalent:
+
+.. code-block:: yaml 
+
+ die_toss: [1,2,3,4,5,6]
+
+ die_toss: 
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+
+Dictionaries are a collection of key-value pairs. They can either be indented, as above (``last_name``: "Presley" and ``first_name``: "Elvis" are actually elements of a dictionary value associated with the key ``artist_name``) or as enumerations enclosed in curly brackets, or, again, as dashes. As a side note, the curly brackets syntax makes YAML compatible with JSON. The following are equivalent:
+
+.. code-block:: yaml 
+
+ artist_name:
+   last_name  : "Presley"
+   first_name : "Elvis"
+
+ artist_name: { last_name  : "Presley", first_name : "Elvis"}
+
+ artist_name:
+   - last_name  : "Presley"
+   - first_name : "Elvis"
+
+YAML variables
+---------------------
+
+YAML is case sensitive. In *obsinfo* we only use keys in lower case with words separated by underscores. 
+
+Code reuse
+------------
+
+The $ref special variable, a JSON feature, is used in *obsinfo* to allow the inclusion of the content of another file in the current YAML file:
+
+.. code-block:: yaml 
+
+ revision: 
+    date: "2018-06-01"
+    authors:
+        - $ref: "Wayne_Crawford.author.yaml#author"
+
+In this example, only the part corresponding to the key ``author`` will be included.
+Note that a file can be totally included by omitting the ``#author`` anchor. $ref references will totally override all other keys at their level. For example, if we had another field at the ``authors`` level:
+
+.. code-block:: yaml 
+
+ revision: 
+    date: "2018-06-01"
+    authors:
+        - $ref: "Alfred_Wegener.author.yaml#author"
+        email: Alfred_Wegenerd@yahoo.de
+
+the email field will disappear in the final result. Contrast this with YAML anchors, to be discussed next.
+
+YAML anchors
+---------------------
+
+YAML anchors are used to avoid repetition, according to the DRY ("don't repeat yourself") principle. In this real *obsinfo* example, an anchor is defined which has the value of a dictionary:
+
+.. code-block:: yaml 
+
+ yaml_anchors:
+    obs_clock_correction_linear_defaults: &LINEAR_CLOCK_DEFAULTS
+        time_base: "Seascan MCXO, ~1e-8 nominal drift"
+        reference: "GPS"
+        start_sync_instrument: 0
+
+Further down the information file the following appears in several places wiwth different values for the ``start_sync_reference``, ``end_sync_reference`` and ``end_sync_instrument`` keys:
+
+.. code-block:: yaml 
+
+              processing:
+                - clock_correction_linear_drift:
+                    <<: *LINEAR_CLOCK_DEFAULTS
+                    start_sync_reference: "2015-04-21T21:06:00Z"
+                    end_sync_reference: "2016-05-28T20:59:00.32Z"
+                    end_sync_instrument: "2016-05-28T20:59:03Z"
+
+
+When an anchor is referenced with a star (*) it's called an alias and has the effect of replacing the alias by the anchor definition. The effect will be:
+
+.. code-block:: yaml 
+
+              processing:
+                - clock_correction_linear_drift:
+                      time_base: "Seascan MCXO, ~1e-8 nominal drift"
+                      reference: "GPS"
+                      start_sync_instrument: 0
+                    start_sync_reference: "2015-04-21T21:06:00Z"
+                    end_sync_reference: "2016-05-28T20:59:00.32Z"
+                    end_sync_instrument: "2016-05-28T20:59:03Z"
+
+Furthermore, the ``<<`` label above indicates that this is a mapping. If no fields with the similar name appear under the alias, its effect is to simply replace the alias by the anchor, as mentioned earlier. But if there are fields such as ``time_base`` under the alias, like this:
+
+.. code-block:: yaml 
+
+ - clock_correction_linear_drift:
+                    <<: *LINEAR_CLOCK_DEFAULTS
+                        time_base: "unavailable"
+
+those fields will be overriden, so the effect of the latter piece of code is the following:
+
+.. code-block:: yaml 
+
+ - clock_correction_linear_drift:
+                     time_base: "Seascan MCXO, ~1e-8 nominal drift"
+                     reference: "GPS"
+                     start_sync_instrument: 0
+
+overriding the value of ``time_base``.
+
+All this allows for code reuse without needing an external file as in ``$ref``.
+
+:ref:`Next page, Information File Structure <Tutorial2>`, discusses how to start creating *obsinfo* information files.
+

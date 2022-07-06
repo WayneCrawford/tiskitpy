@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building a simple network file with stations &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building a simple instrumentation file with channels" href="tutorial-4.html" />
+    <link rel="prev" title="The general structure of information files" href="tutorial-2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial-1.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-2.html">The general structure of information files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building a simple network file with stations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fundamentals-of-an-information-file">Fundamentals of an information file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#file-discovery">File discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#network">Network</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#stations">Stations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#instrumentation">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#locations">Locations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#channel-modifications">Channel modifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-example">Complete example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-4.html">Building a simple instrumentation file with channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-5.html">Building instrument component files with response stages: sensors and preamplifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-6.html">Building a datalogger information file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-7.html">Building a stage information file with different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-8.html">Building a filter information file for different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-9.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../tutorial.html">Tutorial</a> &raquo;</li>
+      <li>Building a simple network file with stations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/tutorial-3.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-a-simple-network-file-with-stations">
+<span id="tutorial3"></span><h1>Building a simple network file with stations<a class="headerlink" href="#building-a-simple-network-file-with-stations" title="Permalink to this headline"></a></h1>
+<section id="fundamentals-of-an-information-file">
+<h2>Fundamentals of an information file<a class="headerlink" href="#fundamentals-of-an-information-file" title="Permalink to this headline"></a></h2>
+<p>Under the folder which will contain all your information files, create a folder called <code class="docutils literal notranslate"><span class="pre">network</span></code>.
+Network information files can be part of or referenced by a campaign information file, but since
+we are not dealing with campaigns in <em>obsinfo</em> we will start with a network file.</p>
+<p>Use your favourite text editor to create a network information file. Select as filename something
+meaningful, for example, single period OBS from INSU-IPGP would be SPOBS.INSU-IPGP. Then add the
+type of information file, <code class="docutils literal notranslate"><span class="pre">network</span></code> and the type of format, <code class="docutils literal notranslate"><span class="pre">yaml</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">SPOBS.INSU-IPGP.network.yaml</span>
+</pre></div>
+</div>
+<p>The file should start with the three dashes; the next line must specify the <em>obsinfo</em> version (required to know how to process the file).
+There are several optional fields which we will omit in this first exercise.
+It’s a good idea, though, to include a revision with a date and an author.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>
+         <span class="nt">first_name</span><span class="p">:</span> <span class="s">&quot;Wayne&quot;</span>
+         <span class="nt">last_name</span><span class="p">:</span> <span class="s">&quot;Crawford&quot;</span>
+         <span class="nt">email</span><span class="p">:</span> <span class="s">&quot;crawford@ipgp.fr&quot;</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-10-04&quot;</span>
+</pre></div>
+</div>
+<p>Note the dash in a lonely line which indicates <code class="docutils literal notranslate"><span class="pre">authors</span></code> is a list.
+Alternatively, since the author is probably an information that will be
+repeated several times, this information can be stored in another file.
+Let’s say we create a folder named <code class="docutils literal notranslate"><span class="pre">authors</span></code> at the same level as <code class="docutils literal notranslate"><span class="pre">network</span></code>
+and then create a file inside that folder named <code class="docutils literal notranslate"><span class="pre">Wayne_Crawford.author.yaml</span></code>.
+We put the three fields previously under the <code class="docutils literal notranslate"><span class="pre">authors</span></code> key in that file,
+so the file will look like:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">author</span><span class="p">:</span>
+    <span class="nt">first_name</span><span class="p">:</span> <span class="s">&quot;Wayne&quot;</span>
+    <span class="nt">last_name</span><span class="p">:</span> <span class="s">&quot;Crawford&quot;</span>
+    <span class="nt">email</span><span class="p">:</span> <span class="s">&quot;crawford@ipgp.fr&quot;</span>
+</pre></div>
+</div>
+<p>And then we reference the file with a <code class="docutils literal notranslate"><span class="pre">$ref</span></code> field in the original network file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;authors/Wayne_Crawford.author.yaml&#39;</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-10-04&quot;</span>
+</pre></div>
+</div>
+<p>The effect of this, from the point of view of <em>obsinfo</em>, is to insert said part of the <code class="docutils literal notranslate"><span class="pre">Wayne_Crawford.author.yaml</span></code> file instead of the <code class="docutils literal notranslate"><span class="pre">$ref</span></code> line.
+Now, observe that if you do this the <em>totality</em> of the contents will be inserted.
+This is undesirable as it will cause a syntax error; the system expects to see the fields <code class="docutils literal notranslate"><span class="pre">first_name</span></code>, <code class="docutils literal notranslate"><span class="pre">last_name</span></code> and <code class="docutils literal notranslate"><span class="pre">email</span></code>, not the three dashes, the version, etc.
+The solution to this is using an <em>anchor</em> or <em>fragment</em>, which will only insert the contents of the field referenced by the anchor.
+In this case, the anchor should be the field <code class="docutils literal notranslate"><span class="pre">author</span></code>, so the final syntax is the following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;authors/Wayne_Crawford.author.yaml#author&#39;</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-10-04&quot;</span>
+</pre></div>
+</div>
+<p>This will be regular practice to avoid repeating information. In fact, it is the heart of the <em>obsinfo</em> information file hierarchy.</p>
+<section id="file-discovery">
+<h3>File discovery<a class="headerlink" href="#file-discovery" title="Permalink to this headline"></a></h3>
+<p>How to find the information files is one of the most relevant features in <em>obsinfo</em>. Notice the
+pathnames in the examples above are not absolute (i.e. they don’t give an absolute reference such as
+<code class="docutils literal notranslate"><span class="pre">/home/luis/obsinfo/authors/Wayne_Crawford.author.yaml#author</span></code>.
+In regular POSIX practice it would be assumed that not including the parent directory
+means that file lies in the directory where the application is executed out of
+(called the current working directory or cwd). This is not the case with <em>obsinfo</em>.
+What the application does is try to <em>discover</em> the file in one of several directories
+which are specified by the variable <code class="docutils literal notranslate"><span class="pre">obsinfo_datapath</span></code>, set by the <code class="docutils literal notranslate"><span class="pre">obsinfo-setup</span></code> application
+and found in the configuration file <code class="docutils literal notranslate"><span class="pre">.obsinforc</span></code>, which is in turn found in your home directory.
+This works much in the same way executables are found in Linux, MacOS or Windows with the variable PATH.</p>
+<p>Whenever a file in a <code class="docutils literal notranslate"><span class="pre">$ref</span></code> is found without an absolute or relative path,
+<em>obsinfo</em> will <strong>sequentally</strong> look for the file in all the directories specified as a Python list
+in <code class="docutils literal notranslate"><span class="pre">obsinfo_datapath</span></code>. A special keyword, <code class="docutils literal notranslate"><span class="pre">GITLAB</span></code>, is used to specify a remote repository
+in GitLab. Let’s see an example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">obsinfo_datapath</span></code>, as specified above, will always look in a local directory where the
+current examples are installed (via <code class="docutils literal notranslate"><span class="pre">pip</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code>) and then, if not found, in the
+remote repository. This gives the user extreme flexibility, as (s)he can override an existing
+remote information file with a local one, change the order of discovery, etc.</p>
+<p>Of course, you will create your own information files in a directory selected by you. Then you
+will have to edit the <code class="docutils literal notranslate"><span class="pre">obsinfo_datapath</span></code> variable to reflect the directory you want to put your
+information files in.</p>
+<p>On the other hand, it is possible, although not recommended, to use absolute and relative paths.</p>
+</section>
+</section>
+<section id="network">
+<h2>Network<a class="headerlink" href="#network" title="Permalink to this headline"></a></h2>
+<p>The next field key starts with the actual information. It’s <code class="docutils literal notranslate"><span class="pre">network</span></code>.
+You may specify several attributes which are listed in the <a class="reference internal" href="#network"><span class="std std-ref">Network</span></a>, but let’s stick to the absolute fundamentals:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">network</span><span class="p">:</span>
+   <span class="nt">facility</span><span class="p">:</span>
+       <span class="nt">reference_name</span><span class="p">:</span> <span class="s">&quot;INSU-IPGP&quot;</span>
+       <span class="nt">full_name</span><span class="p">:</span> <span class="s">&quot;INSU-IPGP</span><span class="nv"> </span><span class="s">OBS</span><span class="nv"> </span><span class="s">Park&quot;</span>
+
+   <span class="nt">campaign_ref_name</span><span class="p">:</span> <span class="s">&quot;SPOBS&quot;</span>
+
+   <span class="nt">network_info</span><span class="p">:</span>
+       <span class="nt">code</span><span class="p">:</span> <span class="s">&quot;4G&quot;</span> <span class="c1">#This is either an FDSN provided network code or &quot;XX&quot; if no such code exists.</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&quot;Short</span><span class="nv"> </span><span class="s">period</span><span class="nv"> </span><span class="s">OBSs&quot;</span> <span class="c1">#Use the FDSN name if applicable</span>
+       <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2007-07-01&quot;</span>
+       <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2025-12-31&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;Short</span><span class="nv"> </span><span class="s">period</span><span class="nv"> </span><span class="s">OBS</span><span class="nv"> </span><span class="s">network</span><span class="nv"> </span><span class="s">example&quot;</span>
+</pre></div>
+</div>
+<p>This section describes the network itself in <code class="docutils literal notranslate"><span class="pre">network_info</span></code>.
+It also adds a reference to the campaign name and the description of the facility (the institution responsible), which has in turn a reference (short) name and a long name.</p>
+<p>If the network has been declared to the FDSN, the information in <code class="docutils literal notranslate"><span class="pre">network_info</span></code> should correspond to the values on the FDSN site.
+For information on how to request a network code or use a temporary code, see this <a class="reference external" href="http://docs.fdsn.org/projects/source-identifiers/en/v1.0/network-codes.html">link</a> .</p>
+<section id="stations">
+<h3>Stations<a class="headerlink" href="#stations" title="Permalink to this headline"></a></h3>
+<p>Stations belonging to the network are specified next.
+This could of course belong to a different file in a <code class="docutils literal notranslate"><span class="pre">stations</span></code> folder, but it is a best practice to leave the station information here to avoid excessive clog.</p>
+<p>The following attribute is, therefore, <code class="docutils literal notranslate"><span class="pre">stations</span></code>.
+We can specify several in the same format, but in order to keep the example simple we will only specify one.
+Stations are identified by a one to five character code, which can be an acronym of the longer description, although the content of the field is completely arbitrary.
+This code acts like a key, but be careful to surround it by quotes as it is not a part of the syntax.
+Stations have an optional start date and end date, which may differ from the network’s, as they may be deployed at different times.</p>
+<p>The site is described as a text field, and a location code is specified too.
+More on locations later.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stations</span><span class="p">:</span>
+     <span class="s">&quot;LSVW&quot;</span><span class="p p-Indicator">:</span>
+         <span class="nt">site</span><span class="p">:</span> <span class="s">&quot;Lucky</span><span class="nv"> </span><span class="s">Strike</span><span class="nv"> </span><span class="s">Volcano</span><span class="nv"> </span><span class="s">West&quot;</span>
+         <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2015-04-22T12:00:00Z&quot;</span>
+         <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2016-05-28T21:01:00Z&quot;</span>
+         <span class="nt">location_code</span><span class="p">:</span> <span class="s">&quot;00&quot;</span>
+         <span class="nt">instrumentation</span><span class="p">:</span>
+
+             <span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="instrumentation">
+<h2>Instrumentation<a class="headerlink" href="#instrumentation" title="Permalink to this headline"></a></h2>
+<p>Most importantly, stations must have an instrumentation,
+which is where the actual devices which provide source data, signal processing and data logging are specified.
+The best practice is to specify these in a separate file, but they must be referenced here to make the link.
+The way to reference an instrumentation is the following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instrumentation</span><span class="p">:</span>
+        <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/SPOBS2.instrumentation.yaml#instrumentation&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">$ref</span></code> a different file in a folder called <code class="docutils literal notranslate"><span class="pre">instrumentation</span></code>.
+This is, again, best practice, as it will allow the reuse of instrumentations in several stations.
+It is possible to specify several instrumentations in list format:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instrumentations</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/SPOBS2.instrumentation.yaml#instrumentation&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/BBOBS1_2012+.instrumentation.yaml#instrumentation&quot;</span>
+</pre></div>
+</div>
+<p>However, this has little use for OBS equipment as there is usually a single instrumentation per station.</p>
+</section>
+<section id="locations">
+<h2>Locations<a class="headerlink" href="#locations" title="Permalink to this headline"></a></h2>
+<p>Now let’s go back to locations. There must be at least one location in the file.
+This is the position in geographical coordinates of the station, and is usually referred as location “00”, which is the location_code of the station.
+Locations are specified as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">locations</span><span class="p">:</span>
+    <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+        <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/SURFACE_DROP.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+        <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.32504</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.29744</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-2030</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>There is a base, which is again a referenced file in a different folder (as best practice).
+The syntax shown here will be common to all the file references in <em>obsinfo</em> information files.
+The folder here is not at the same level of the <code class="docutils literal notranslate"><span class="pre">network</span></code> folder, but rather under it.
+That’s the meaning of the way the file is referenced as a <em>pathname</em>, which is, on the other hand, regular POSIX syntax.
+Use of slashes (/) instead of Windows backslashes () are recommended for uniformity, so a file can be migrated among different operation systems.
+It should be noted Mac uses POSIX syntax.
+However, if you use backslashes, <em>obsinfo</em> will understand them.</p>
+<p>Observe the difference between a list and a dictionary.
+List items are separated by dashes, dictionaries need a key/value pair.
+Authors is a list.
+Locations is a dictionary.</p>
+<p>However, there can be several locations.
+That’s the reason we have a <code class="docutils literal notranslate"><span class="pre">location_code</span></code> to specify the location corresponding to the station itself.
+The rest of locations are used for channels, as will be seen shortly.
+Those channels may have different geographical coordinates, but, more importantly, this is the way in which we can distinguish channels among themselves.</p>
+</section>
+<section id="channel-modifications">
+<h2>Channel modifications<a class="headerlink" href="#channel-modifications" title="Permalink to this headline"></a></h2>
+<p>Next to instrumentation there is the possibility of making modifications to channels in the
+instrumentation.
+For example, a change in the configuration, which will select one of several possible configurations for the instrument components of a channel (more about this in
+the <a class="reference internal" href="tutorial-4.html#tutorial4"><span class="std std-ref">Next page, Building a simple instrumentation file</span></a>).
+If both are specified, the one in the network file takes precedence.</p>
+<p>Channel modifications are what makes <em>obsinfo</em> so flexible.
+We can specify several different configurations for the same components, and then select one of them.
+We can also directly change other attributes in the instrumentation.
+This allows components to be regarded almost as virtual descriptions which, when a particular configuration is selected, are instantiated into a specific, actual component.
+Thus instrumentation files can be authentic libraries with little changes, while the changes of configuration are specified for each station in a network in a specific campaign.</p>
+<p>Furthermore, these libraries can reside in a central GitLab repository, which is updated by
+authorized users and, being public, is available for reuse by all users.
+A user can even clone the repository in the regular GitLab way
+(see <a class="reference external" href="https://docs.gitlab.com/ee/gitlab-basics/command-line-commands.html">here</a>)
+in order to work offline with the latest version of the repository.</p>
+</section>
+<section id="complete-example">
+<h2>Complete example<a class="headerlink" href="#complete-example" title="Permalink to this headline"></a></h2>
+<p><em>You can skip this section in a first reading.</em></p>
+<p>This is an actual network information file with the above information and some optional fields which have not been described. Note the additions:</p>
+<ol class="arabic simple">
+<li><p>Addition of a second station</p></li>
+<li><p>Use of yaml_anchors to avoid repeating information <em>in the same file</em></p></li>
+<li><p>Comments field in <code class="docutils literal notranslate"><span class="pre">network_info</span></code></p></li>
+<li><p>Processing field in <code class="docutils literal notranslate"><span class="pre">stations</span></code>. For more information on this, see <a class="reference internal" href="../classes/processing.html#processingclockcorrections"><span class="std std-ref">Processing</span></a></p></li>
+</ol>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+
+<span class="nt">yaml_anchors</span><span class="p">:</span>
+   <span class="nt">obs_clock_correction_linear_defaults</span><span class="p">:</span> <span class="nl">&amp;LINEAR_CLOCK_DEFAULTS</span>
+       <span class="nt">time_base</span><span class="p">:</span> <span class="s">&quot;Seascan</span><span class="nv"> </span><span class="s">MCXO,</span><span class="nv"> </span><span class="s">~1e-8</span><span class="nv"> </span><span class="s">nominal</span><span class="nv"> </span><span class="s">drift&quot;</span>
+       <span class="nt">reference</span><span class="p">:</span> <span class="s">&quot;GPS&quot;</span>
+       <span class="nt">start_sync_instrument</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;authors/Wayne_Crawford.author.yaml#author&#39;</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-10-04&quot;</span>
+<span class="nt">network</span><span class="p">:</span>
+   <span class="nt">facility</span><span class="p">:</span>
+       <span class="nt">reference_name</span><span class="p">:</span> <span class="s">&quot;INSU-IPGP&quot;</span>
+       <span class="nt">full_name</span><span class="p">:</span> <span class="s">&quot;INSU-IPGP</span><span class="nv"> </span><span class="s">OBS</span><span class="nv"> </span><span class="s">Park&quot;</span>
+   <span class="nt">campaign_ref_name</span><span class="p">:</span> <span class="s">&quot;EMSO-MOMAR_I&quot;</span>
+   <span class="nt">network_info</span><span class="p">:</span>
+       <span class="nt">code</span><span class="p">:</span> <span class="s">&quot;4G&quot;</span> <span class="c1">#This is an FDSN provided network code.</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&quot;Short</span><span class="nv"> </span><span class="s">period</span><span class="nv"> </span><span class="s">OBSs&quot;</span>
+       <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2007-07-01&quot;</span>
+       <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2025-12-31&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;Short</span><span class="nv"> </span><span class="s">period</span><span class="nv"> </span><span class="s">OBS</span><span class="nv"> </span><span class="s">network</span><span class="nv"> </span><span class="s">example&quot;</span>
+       <span class="nt">comments</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;Lucky</span><span class="nv"> </span><span class="s">Strike</span><span class="nv"> </span><span class="s">Volcano,</span><span class="nv"> </span><span class="s">North</span><span class="nv"> </span><span class="s">Mid-Atlantic</span><span class="nv"> </span><span class="s">Ridge&quot;</span><span class="p p-Indicator">]</span>
+<span class=" -Error">  </span><span class="nt">stations</span><span class="p">:</span>
+       <span class="s">&quot;LSVWI&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">site</span><span class="p">:</span> <span class="s">&quot;Lucky</span><span class="nv"> </span><span class="s">Strike</span><span class="nv"> </span><span class="s">Volcano</span><span class="nv"> </span><span class="s">West&quot;</span>
+           <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2015-04-22T12:00:00Z&quot;</span>
+           <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2016-05-28T21:01:00Z&quot;</span>
+           <span class="nt">location_code</span><span class="p">:</span> <span class="s">&quot;00&quot;</span>
+           <span class="nt">instrumentation</span><span class="p">:</span>
+               <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/SPOBS2.instrumentation.yaml#instrumentation&quot;</span>
+           <span class="nt">channel_modifications</span><span class="p">:</span>
+               <span class="s">&quot;*-*&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">datalogger_configuration</span><span class="p">:</span> <span class="s">&quot;125sps&quot;</span><span class="p p-Indicator">}</span>
+           <span class="nt">locations</span><span class="p">:</span>
+               <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+                   <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/SURFACE_DROP.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+                   <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.32504</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.29744</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-2030</span><span class="p p-Indicator">}</span>
+           <span class="nt">processing</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">clock_correction_linear_drift</span><span class="p">:</span>
+                   <span class="nt">&lt;&lt;</span><span class="p">:</span> <span class="nv">*LINEAR_CLOCK_DEFAULTS</span>
+                   <span class="nt">start_sync_reference</span><span class="p">:</span> <span class="s">&quot;2015-04-21T21:06:00Z&quot;</span>
+                   <span class="nt">end_sync_reference</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:00.32Z&quot;</span>
+                   <span class="nt">end_sync_instrument</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:03Z&quot;</span>
+       <span class="s">&quot;LSVEI&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">site</span><span class="p">:</span> <span class="s">&quot;Lucky</span><span class="nv"> </span><span class="s">Strike</span><span class="nv"> </span><span class="s">Volcano</span><span class="nv"> </span><span class="s">East&quot;</span>
+           <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2015-04-22T12:00:00Z&quot;</span>
+           <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2016-05-28T21:01:00Z&quot;</span>
+           <span class="nt">location_code</span><span class="p">:</span> <span class="s">&quot;00&quot;</span>
+           <span class="nt">instrumentation</span><span class="p">:</span>
+               <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/SPOBS2.instrumentation.yaml#instrumentation&quot;</span>
+           <span class="nt">channel_modifications</span><span class="p">:</span>
+               <span class="s">&quot;*-*&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">datalogger_configuration</span><span class="p">:</span> <span class="s">&quot;125sps&quot;</span><span class="p p-Indicator">}</span>
+           <span class="nt">locations</span><span class="p">:</span>
+               <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+                   <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/ACOUSTIC_SURVEY.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+                   <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.02504</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.25744</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-2130</span><span class="p p-Indicator">}</span>
+           <span class="nt">processing</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">clock_correct_linear_drift</span><span class="p">:</span>
+                   <span class="nt">&lt;&lt;</span><span class="p">:</span> <span class="nv">*LINEAR_CLOCK_DEFAULTS</span>
+                   <span class="nt">start_sync_reference</span><span class="p">:</span> <span class="s">&quot;2015-04-21T21:06:00Z&quot;</span>
+                   <span class="nt">end_sync_reference</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:00.32Z&quot;</span>
+                   <span class="nt">end_sync_instrument</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:01Z&quot;</span>
+</pre></div>
+</div>
+<p>In all <em>obsinfo</em> information files, you can always add <code class="docutils literal notranslate"><span class="pre">notes</span></code> as a list of strings. Notes are not reflected in the output StationXML file. They only serve documentation purposes within the information file. On the other hand, <code class="docutils literal notranslate"><span class="pre">comments</span></code> can only be added in selected places which correspond to the places in a StationXML file which admit comments. They will be copied into the StationXML output.</p>
+<p>You can also add <code class="docutils literal notranslate"><span class="pre">extras</span></code>, which are key:value pairs that you wish to document but are not taken into account by the <em>obsinfo</em> syntax. When possible, they will be added as comments to the output StationXML file.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="tutorial-4.html#tutorial4"><span class="std std-ref">Next page, Building a simple instrumentation file</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-2.html#tutorial2"><span class="std std-ref">Previous page</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-1.html#tutorial1"><span class="std std-ref">Back to start</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial-2.html" class="btn btn-neutral float-left" title="The general structure of information files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial-4.html" class="btn btn-neutral float-right" title="Building a simple instrumentation file with channels" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

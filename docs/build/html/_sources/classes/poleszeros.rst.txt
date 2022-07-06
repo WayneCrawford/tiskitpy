@@ -1,0 +1,145 @@
+.. _PolesZeros11:
+
+************
+PolesZeros
+************
+
+
+===============
+Description
+===============
+
+A Pole-Zero :ref:`filter <Filter11>`. Every digital filter can be specified by its poles and zeros (together with a gain factor). Poles and zeros give useful insights into a filter's response. For a more detailed discussion, `click here <https://ccrma.stanford.edu/~jos/filters/Pole_Zero_Analysis_I.html>`_.
+
+---------------------
+Python class:
+---------------------
+
+* PolesZeros
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+* PolesZeros
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+No direct correspondence. Mapped into subattribute `PolesZeros <http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#poleszeros>`_ of attribute `Stage <http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#stage>`_.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`Filter <Filter11>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+* :ref:`Analog <Analog11>`
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is nested in :ref:`Stage <Stage>`
+
+==============================
+Attributes
+==============================
+
+.. _PZTransferFunctionType: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#pztransferfunctiontype-required
+.. _Zero: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#zero
+.. _Pole: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#pole
+.. _NormalizationFrequency: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#normalizationfrequency-required
+.. _NormalizationFactor: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#normalizationfactor-required
+.. _`More info...`: https://ccrma.stanford.edu/~jos/filters/Transfer_Function_Analysis.html
+
+======================== =============================== ============ ================= ========================== =========================================
+        **Name**                   **Type**              **Required**    **Default**     **Equivalent StationXML**                   **Remarks**
+------------------------ ------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+transfer_function_type    List of Values:                     N       LAPLACE           `PzTransferFunctionType`_     `More info...`_ 
+                           LAPLACE (RADIANS/SECOND),                  (RADIANS/SECOND)
+                           LAPLACE (HERTZ),                                            
+                           DIGITAL (Z-TRANFORM)
+------------------------ ------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+zeros                    List of numbers                      Y              *None*       `Zero`_
+------------------------ ------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+poles                    List of numbers                      Y              *None*        `Pole`_
+------------------------ ------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+normalization_frequency  number                               N            *None*       `NormalizationFrequency`_
+------------------------ ------------------------------- ------------ ----------------- -------------------------- ----------------------------------------- 
+normalization_factor     number                               N             *None*      `NormalizationFactor`_      Frequency at which the 
+                                                                                                                    NormalizationFactor is valid. 
+                                                                                                                    This should be the same for all stages
+                                                                                                                    and within the passband, if any.
+
+======================== =============================== ============ ================= ========================== =========================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+ Example
+==============================
+
+In the filter information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/sensors/responses/PolesZeros/Trillium_T240_SN400-_generic.filter.yaml>`_ . 
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision: 
+    date: "2018-06-01"
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+
+ filter:
+    type: "PolesZeros"
+    transfer_function_type: "LAPLACE (RADIANS/SECOND)"
+    zeros :
+        -     [0.0,  0.0]
+        -     [0.0,  0.0]
+        -   [-72.5,  0.0]
+        -  [-159.3,  0.0]
+        -  [-251,    0.0]
+        - [-3270.0,  0.0]
+    poles :
+        -    [-0.017699,    0.017604]
+        -    [-0.017699,   -0.017604]
+        -   [-85.3,         0.0]
+        -  [-155.4,       210.8]
+        -  [-155.4,      -210.8]
+        -  [-713,           0]
+        - [-1140,          -0]
+        - [-4300,          -0]
+        - [-5800,          -0]
+        - [-4300,        4400]
+        - [-4300,       -4400]
+    offset: 0
+    
+ notes:
+    - poles et zeros d'un Trillium T240 no de serie 400+
+    - d'apres le fichier Trillium240_UserGuide_15672R7.pdf de Nanometrics.
+    
+ extras: None
+
+==================
+Class Navigation
+==================
+
+:ref:`Filter11` \<\=\= 
+

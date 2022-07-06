@@ -1,0 +1,120 @@
+.. _Tutorial6:
+
+********************************************
+Building a datalogger information file
+********************************************
+
+Dataloggers are the components used to record the data treated by the instrument stages before. Their configuration files might get quite complex due to the number of necessary stages.
+
+Dataloggers have the same common fields of any other instrument component, with two extra fields: ``delay_correction`` and ``sample_rate``, which is the overall sample rate of the complete instrument.
+
+**delay_correction**
+
+All stages can have nominal delays, but these delays sometimes need to be corrected. The ``delay_correction`` field accomplishes this. In StationXML ``correction`` is an attribute of each individual stage. However, we find it is not realistic to be able to apply each individual correction and opt instead to apply a general correction to all stages. 
+We accomplish this by using two attributes in :ref:`Stage <Stage>`: the (nominal) ``delay`` and the ``correction``. We consider two cases:
+
+#. ``delay_correction`` **is not** specified in the datalogger information file. Then, the corresponding ``correction`` attribute in each stage for all components will be set to the ``delay`` value corresponding to that stage.
+
+#. ``delay_correction`` **is** specified in the datalogger information file. Then, the corresponding ``correction`` attribute in each stage for all components is set to zero, *except* for the last stage (which is of course the last datalogger stage), which is set to the ``delay_correction``  value, thus becoming the total correction value.
+
+Aside from this,  the rest of the attributes have been discussed in the last section.
+
+
+Datalogger configuration definitions
+---------------------------------------
+
+The following paragraph requires the reader to have a minimal knowledge of signal treatment.
+
+The code below is a real datalogger configuration file. We see that this example has several response stages in each configuration, based this time on the sample rate. This is due to the fact that each stage with the FIR2 amd FIR3 filters has a decimation factor of 2: each one divides the sample rate by two. FIR1 is actually an ADC, an analog to digital converter, all previous stages in this instrument being analog, in particular the one in the previous component, the preamplifier. FIR1 outputs a 32000 sps sample rate. Thus, to get to a final 1000 sps sample rate we need four FIR2 and one FIR3, each halving the sample rate. FIR2 and FIR3 have different coefficients and thus both are necessary. This means we need at least one FIR1, one FIR2 and one FIR3. To keep halving the sample rate we simply add more FIR2. So it's simple now to see now the difference in configurations: it's simply adding an extra FIR2 each time.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2019-12-20"
+    authors:
+        - $ref: 'authors/Wayne_Crawford.author.yaml#author'
+ notes:
+    - "Delay correction is hard-coded to 29 samples in LCHEAPO software"
+
+ datalogger:
+    equipment:
+        model: "CS5321/22"
+        type: "delta-sigma A/D converter + digital filter"
+        description: "CS5321/22 delta-sigma A/D converter + FIR digital filter"
+        manufacturer: "Cirrus Logic"
+        vendor: "various"
+
+    configuration_default: "125 sps"
+
+    configuration_definitions:
+        "62.5sps":
+            sample_rate: 62.5
+            delay_correction: 0.464
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "125sps":
+            sample_rate: 125
+            delay_correction: 0.232
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "250sps":
+            sample_rate: 250
+            delay_correction: 0.116
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "500sps":
+            sample_rate: 500
+            delay_correction: 0.058
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "1000sps":
+            sample_rate: 1000
+            delay_correction: 0.029
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+
+As can be seen, configuration definition labels are flexible and can suit any purpose imagined by the user. The best practice is to keep them short, explicit and consistent among different selectable configurations in the same group.
+
+Next we will see stages and filters in more detail.
+
+* :ref:`Next page, Building stage information files <Tutorial7>`
+* :ref:`Previous page <Tutorial5>`
+* :ref:`Back to start  <Tutorial1>`
+

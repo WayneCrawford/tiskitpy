@@ -1,0 +1,128 @@
+
+.. _Filter11:
+
+*******************
+Filter
+*******************
+
+
+======================== 
+Description
+======================== 
+
+The class Filter describes the different types of filters that process
+the signal in the stages of the instrument components of an OBS.
+
+======================== 
+Superclass
+======================== 
+
+*None*
+
+======================== 
+Subclasses
+======================== 
+* :ref:`PolesZeros <PolesZeros11>`
+* :ref:`FIR <FIR11>`
+
+  - :ref:`Analog <Analog11>`
+* :ref:`Coefficients <Coefficients11>`
+
+  - :ref:`ADConversion <ADConversion>`
+  - :ref:`Digital <Digital11>`
+* :ref:`Response List <ResponseList>`
+
+======================== 
+Relationships
+========================
+
+Is nested in a :ref:`Stage <Stage>`
+
+========================
+Attributes
+======================== 
+
+=========== ======== ============ =========== ========================== ==============================================================================================
+ **Name**   **Type** **Required** **Default**  **Equivalent StationXML** **Remarks**               
+----------- -------- ------------ ----------- -------------------------- ----------------------------------------------------------------------------------------------
+  type      string       Y          *None*              N/A              Possible values: "PolesZeros", "FIR", "Coefficients", "Analog", "Digital", "ADConversion"
+----------- -------- ------------ ----------- -------------------------- ----------------------------------------------------------------------------------------------
+  offset    number       Y          *None*        Decimation.Offset      If delay is not present in the corresponding Stage, it will be set to offset/input_sample_rate                                                            
+=========== ======== ============ =========== ========================== ==============================================================================================
+
+Depending on the `type`, other attributes will be required
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+ Example
+==============================
+
+This is the filter information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/dataloggers/responses/FIR/CirrusLogic_CS5322_FIR3.filter.yaml>`_ ,
+which specifies a "FIR"-type filter.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision: 
+    date: "2017-11-30"
+    authors: 
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+        
+ notes: ["101 coefficients, linear phase filter"]
+
+ filter:
+    type: "FIR"
+    symmetry: "NONE"
+    offset: 50
+    coefficients:
+        - -3.09982E-6
+        - -2.94483E-5
+        - -9.8002E-5
+        - -1.62383E-4
+        - -1.00029E-4
+        - 1.20655E-4
+        - 2.61935E-4
+        - 2.52755E-5
+        - -4.10488E-4
+        - -3.66852E-4
+        - 3.7627E-4
+        - 8.54597E-4
+        - -3.05213E-5
+        - -0.00127677
+          ...
+        - 1.20655E-4
+        - -1.00029E-4
+        - -1.62383E-4
+        - -9.8002E-5
+        - -2.94483E-5
+        - -3.09982E-6
+
+
+==================
+Class Navigation
+==================
+
+:ref:`Stage` \<\=\= 
+
+\=\=\> :ref:`PolesZeros11`
+
+\=\=\> :ref:`FIR11`
+
+\=\=\> :ref:`Coefficients11`
+
+\=\=\> :ref:`ResponseList`
+
+\=\=\> :ref:`ADConversion`
+
+\=\=\> :ref:`Digital <Digital11>`
+
+\=\=\> :ref:`Analog11`           
+

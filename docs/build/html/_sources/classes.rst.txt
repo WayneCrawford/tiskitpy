@@ -1,0 +1,130 @@
+.. _Classes:
+
+*********************
+Classes
+*********************
+
+Information File Tree
+----------------------------
+
+network | :ref:`Network`
+   * network_info | :ref:`FDSNNetwork`
+   * operator | :ref:`Operator`
+   * station | :ref:`Station`
+      * processing | :ref:`ProcessingClockCorrections`
+         * clock_correct_leap_second | :ref:`LeapSecond11`
+         * clock_correct_linear_drift | :ref:`LinearDrift`
+      * location | :ref:`Location1`
+         * location_base | :ref:`LocationBase`
+      * instrumentation(s) | :ref:`Instrumentation`
+         * equipment | :ref:`Equipment`
+         * channel | :ref:`Channel`
+            * *No label* | :ref:`Instrument11`
+               * *No label* | :ref:`InstrumentComponent`
+                  * sensor | :ref:`Sensor`
+                     * seed_codes | :ref:`SeedCodes11`
+                  * preamplifier | :ref:`Preamplifier11`
+                  * datalogger | :ref:`Datalogger11`
+                  * response_stages | :ref:`ResponseStages`
+                     * stage | :ref:`Stage`
+                     
+                       * filter | :ref:`Filter11`
+                       
+                         * ADConversion | :ref:`ADConversion`
+                         
+                         * Analog | :ref:`Analog11`
+                         
+                         * Coefficients | :ref:`Coefficients11`
+                         
+                         * Digital | :ref:`Digital11`
+                         
+                         * FIR | :ref:`FIR11`
+                         
+                         * PolesZeros | :ref:`PolesZeros11`
+                         
+                         * ResponseList | :ref:`ResponseList`
+
+Names left of the ``|`` symbol are as they appear in information files as labels/keys. 
+Names right of the ``|`` are the corresponding classes in the object model and the Python implementation of that model.
+An empty label means the label does not exist in information files but exists as an object model / Python class.
+
+Filter Types
+---------------
+
+        * type="ADConversion" | :ref:`ADConversion`
+        * type="Analog" | :ref:`Analog11`
+        * type="Coefficients" | :ref:`Coefficients11`
+        * type="Digital" | :ref:`Digital11`
+        * type="FIR" | :ref:`FIR11`
+        * type="PolesZeros" | :ref:`PolesZeros11`
+        * type="ResponseList" | :ref:`ResponseList`
+
+
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Table of Contents (should be in class hierarchy order)
+
+  classes/network
+  classes/FDSNNetwork
+  classes/operator
+  classes/station
+  classes/instrumentation
+  classes/equipment
+  classes/channel
+  classes/instrument
+  classes/instrument_component
+  classes/sensor
+  classes/seed_codes
+  classes/preamplifier
+  classes/datalogger
+  classes/response_stages
+  classes/response_list
+  classes/stage
+  classes/filter
+  classes/AD_conversion
+  classes/analog
+  classes/equipment
+  classes/coefficients
+  classes/digital
+  classes/FIR
+  classes/poleszeros
+  classes/processing
+  classes/linear_drift
+  classes/leap_second
+  classes/location
+  classes/location_base
+        
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Table of Contents (alphabetic)
+
+  classes/AD_conversion
+  classes/analog
+  classes/channel
+  classes/coefficients
+  classes/datalogger
+  classes/digital
+  classes/equipment
+  classes/FDSNNetwork
+  classes/filter
+  classes/FIR
+  classes/instrumentation
+  classes/instrument_component
+  classes/instrument
+  classes/leap_second
+  classes/linear_drift
+  classes/location_base
+  classes/location
+  classes/network
+  classes/operator
+  classes/poleszeros
+  classes/preamplifier
+  classes/processing
+  classes/response_list
+  classes/response_stages
+  classes/seed_codes
+  classes/sensor
+  classes/stage
+  classes/station

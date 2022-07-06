@@ -1,0 +1,335 @@
+
+.. _Tutorial3:
+
+***********************************************
+Building a simple network file with stations
+***********************************************
+
+Fundamentals of an information file
+_____________________________________
+
+Under the folder which will contain all your information files, create a folder called ``network``. 
+Network information files can be part of or referenced by a campaign information file, but since 
+we are not dealing with campaigns in *obsinfo* we will start with a network file.
+
+Use your favourite text editor to create a network information file. Select as filename something 
+meaningful, for example, single period OBS from INSU-IPGP would be SPOBS.INSU-IPGP. Then add the 
+type of information file, ``network`` and the type of format, ``yaml``:
+
+.. code-block:: yaml
+
+  SPOBS.INSU-IPGP.network.yaml
+
+The file should start with the three dashes; the next line must specify the *obsinfo* version (required to know how to process the file).
+There are several optional fields which we will omit in this first exercise.
+It's a good idea, though, to include a revision with a date and an author.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    authors:
+        -
+          first_name: "Wayne"
+          last_name: "Crawford"
+          email: "crawford@ipgp.fr"
+    date: "2017-10-04"
+
+Note the dash in a lonely line which indicates ``authors`` is a list.
+Alternatively, since the author is probably an information that will be
+repeated several times, this information can be stored in another file.
+Let's say we create a folder named ``authors`` at the same level as ``network``
+and then create a file inside that folder named ``Wayne_Crawford.author.yaml``.
+We put the three fields previously under the ``authors`` key in that file,
+so the file will look like:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ author:
+     first_name: "Wayne"
+     last_name: "Crawford"
+     email: "crawford@ipgp.fr"
+
+And then we reference the file with a ``$ref`` field in the original network file:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    authors:
+        - $ref: 'authors/Wayne_Crawford.author.yaml'
+    date: "2017-10-04"
+
+The effect of this, from the point of view of *obsinfo*, is to insert said part of the ``Wayne_Crawford.author.yaml`` file instead of the ``$ref`` line.
+Now, observe that if you do this the *totality* of the contents will be inserted.
+This is undesirable as it will cause a syntax error; the system expects to see the fields ``first_name``, ``last_name`` and ``email``, not the three dashes, the version, etc.
+The solution to this is using an *anchor* or *fragment*, which will only insert the contents of the field referenced by the anchor.
+In this case, the anchor should be the field ``author``, so the final syntax is the following:
+
+.. code-block:: yaml
+
+
+ ---
+ format_version: "0.110"
+ revision:
+    authors:
+        - $ref: 'authors/Wayne_Crawford.author.yaml#author'
+    date: "2017-10-04"
+
+This will be regular practice to avoid repeating information. In fact, it is the heart of the *obsinfo* information file hierarchy.
+
+File discovery
+----------------
+
+How to find the information files is one of the most relevant features in *obsinfo*. Notice the 
+pathnames in the examples above are not absolute (i.e. they don't give an absolute reference such as 
+``/home/luis/obsinfo/authors/Wayne_Crawford.author.yaml#author``. 
+In regular POSIX practice it would be assumed that not including the parent directory 
+means that file lies in the directory where the application is executed out of 
+(called the current working directory or cwd). This is not the case with *obsinfo*. 
+What the application does is try to *discover* the file in one of several directories 
+which are specified by the variable ``obsinfo_datapath``, set by the ``obsinfo-setup`` application 
+and found in the configuration file ``.obsinforc``, which is in turn found in your home directory. 
+This works much in the same way executables are found in Linux, MacOS or Windows with the variable PATH.
+
+Whenever a file in a ``$ref`` is found without an absolute or relative path, 
+*obsinfo* will **sequentally** look for the file in all the directories specified as a Python list 
+in ``obsinfo_datapath``. A special keyword, ``GITLAB``, is used to specify a remote repository 
+in GitLab. Let's see an example:
+
+
+``obsinfo_datapath``, as specified above, will always look in a local directory where the 
+current examples are installed (via ``pip`` or ``conda``) and then, if not found, in the 
+remote repository. This gives the user extreme flexibility, as (s)he can override an existing 
+remote information file with a local one, change the order of discovery, etc.
+
+Of course, you will create your own information files in a directory selected by you. Then you 
+will have to edit the ``obsinfo_datapath`` variable to reflect the directory you want to put your 
+information files in.
+
+On the other hand, it is possible, although not recommended, to use absolute and relative paths.
+
+Network
+________
+
+The next field key starts with the actual information. It's ``network``.
+You may specify several attributes which are listed in the :ref:`Network`, but let's stick to the absolute fundamentals:
+
+.. code-block:: yaml
+
+ network:
+    facility:
+        reference_name: "INSU-IPGP"
+        full_name: "INSU-IPGP OBS Park"
+
+    campaign_ref_name: "SPOBS"
+
+    network_info:
+        code: "4G" #This is either an FDSN provided network code or "XX" if no such code exists.
+        name: "Short period OBSs" #Use the FDSN name if applicable
+        start_date: "2007-07-01"
+        end_date: "2025-12-31"
+        description: "Short period OBS network example"
+
+This section describes the network itself in ``network_info``.
+It also adds a reference to the campaign name and the description of the facility (the institution responsible), which has in turn a reference (short) name and a long name.
+
+If the network has been declared to the FDSN, the information in ``network_info`` should correspond to the values on the FDSN site.
+For information on how to request a network code or use a temporary code, see this `link <http://docs.fdsn.org/projects/source-identifiers/en/v1.0/network-codes.html>`_ .
+
+
+Stations
+---------------
+
+Stations belonging to the network are specified next.
+This could of course belong to a different file in a ``stations`` folder, but it is a best practice to leave the station information here to avoid excessive clog.
+
+The following attribute is, therefore, ``stations``.
+We can specify several in the same format, but in order to keep the example simple we will only specify one.
+Stations are identified by a one to five character code, which can be an acronym of the longer description, although the content of the field is completely arbitrary.
+This code acts like a key, but be careful to surround it by quotes as it is not a part of the syntax.
+Stations have an optional start date and end date, which may differ from the network's, as they may be deployed at different times.
+
+The site is described as a text field, and a location code is specified too.
+More on locations later.
+
+.. code-block:: yaml
+
+   stations:
+        "LSVW":
+            site: "Lucky Strike Volcano West"
+            start_date: "2015-04-22T12:00:00Z"
+            end_date: "2016-05-28T21:01:00Z"
+            location_code: "00"
+            instrumentation:
+
+                ...
+
+Instrumentation
+__________________
+
+Most importantly, stations must have an instrumentation, 
+which is where the actual devices which provide source data, signal processing and data logging are specified.
+The best practice is to specify these in a separate file, but they must be referenced here to make the link.
+The way to reference an instrumentation is the following:
+
+.. code-block:: yaml
+
+            instrumentation:
+                    $ref: "instrumentation/SPOBS2.instrumentation.yaml#instrumentation"
+
+``$ref`` a different file in a folder called ``instrumentation``.
+This is, again, best practice, as it will allow the reuse of instrumentations in several stations.
+It is possible to specify several instrumentations in list format:
+
+.. code-block:: yaml
+
+            instrumentations:
+                    - $ref: "instrumentation/SPOBS2.instrumentation.yaml#instrumentation"
+                    - $ref: "instrumentation/BBOBS1_2012+.instrumentation.yaml#instrumentation"
+
+However, this has little use for OBS equipment as there is usually a single instrumentation per station.
+
+Locations
+___________
+
+Now let's go back to locations. There must be at least one location in the file.
+This is the position in geographical coordinates of the station, and is usually referred as location "00", which is the location_code of the station.
+Locations are specified as follows:
+
+.. code-block:: yaml
+
+            locations:
+                "00":
+                    base: {$ref: 'location_bases/SURFACE_DROP.location_base.yaml#location_base'}
+                    position: {lon: -32.32504, lat: 37.29744, elev: -2030}
+
+There is a base, which is again a referenced file in a different folder (as best practice).
+The syntax shown here will be common to all the file references in *obsinfo* information files.
+The folder here is not at the same level of the ``network`` folder, but rather under it.
+That's the meaning of the way the file is referenced as a *pathname*, which is, on the other hand, regular POSIX syntax.
+Use of slashes (/) instead of Windows backslashes (\) are recommended for uniformity, so a file can be migrated among different operation systems.
+It should be noted Mac uses POSIX syntax.
+However, if you use backslashes, *obsinfo* will understand them.
+
+Observe the difference between a list and a dictionary.
+List items are separated by dashes, dictionaries need a key/value pair.
+Authors is a list.
+Locations is a dictionary.
+
+However, there can be several locations.
+That's the reason we have a ``location_code`` to specify the location corresponding to the station itself.
+The rest of locations are used for channels, as will be seen shortly.
+Those channels may have different geographical coordinates, but, more importantly, this is the way in which we can distinguish channels among themselves.
+
+Channel modifications
+_________________________
+
+Next to instrumentation there is the possibility of making modifications to channels in the 
+instrumentation. 
+For example, a change in the configuration, which will select one of several possible configurations for the instrument components of a channel (more about this in 
+the :ref:`Next page, Building a simple instrumentation file <Tutorial4>`).
+If both are specified, the one in the network file takes precedence.
+
+Channel modifications are what makes *obsinfo* so flexible.
+We can specify several different configurations for the same components, and then select one of them.
+We can also directly change other attributes in the instrumentation.
+This allows components to be regarded almost as virtual descriptions which, when a particular configuration is selected, are instantiated into a specific, actual component.
+Thus instrumentation files can be authentic libraries with little changes, while the changes of configuration are specified for each station in a network in a specific campaign.
+
+Furthermore, these libraries can reside in a central GitLab repository, which is updated by 
+authorized users and, being public, is available for reuse by all users. 
+A user can even clone the repository in the regular GitLab way 
+(see `here <https://docs.gitlab.com/ee/gitlab-basics/command-line-commands.html>`_) 
+in order to work offline with the latest version of the repository.
+
+Complete example
+_____________________
+
+*You can skip this section in a first reading.*
+
+This is an actual network information file with the above information and some optional fields which have not been described. Note the additions:
+
+1) Addition of a second station
+2) Use of yaml_anchors to avoid repeating information *in the same file*
+3) Comments field in ``network_info``
+4) Processing field in ``stations``. For more information on this, see :ref:`ProcessingClockCorrections`
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+
+ yaml_anchors:
+    obs_clock_correction_linear_defaults: &LINEAR_CLOCK_DEFAULTS
+        time_base: "Seascan MCXO, ~1e-8 nominal drift"
+        reference: "GPS"
+        start_sync_instrument: 0
+ revision:
+    authors:
+        - $ref: 'authors/Wayne_Crawford.author.yaml#author'
+    date: "2017-10-04"
+ network:
+    facility:
+        reference_name: "INSU-IPGP"
+        full_name: "INSU-IPGP OBS Park"
+    campaign_ref_name: "EMSO-MOMAR_I"
+    network_info:
+        code: "4G" #This is an FDSN provided network code.
+        name: "Short period OBSs"
+        start_date: "2007-07-01"
+        end_date: "2025-12-31"
+        description: "Short period OBS network example"
+        comments: ["Lucky Strike Volcano, North Mid-Atlantic Ridge"]
+   stations:
+        "LSVWI":
+            site: "Lucky Strike Volcano West"
+            start_date: "2015-04-22T12:00:00Z"
+            end_date: "2016-05-28T21:01:00Z"
+            location_code: "00"
+            instrumentation:
+                $ref: "instrumentation/SPOBS2.instrumentation.yaml#instrumentation"
+            channel_modifications:
+                "*-*": {datalogger_configuration: "125sps"}
+            locations:
+                "00":
+                    base: {$ref: 'location_bases/SURFACE_DROP.location_base.yaml#location_base'}
+                    position: {lon: -32.32504, lat: 37.29744, elev: -2030}
+            processing:
+                - clock_correction_linear_drift:
+                    <<: *LINEAR_CLOCK_DEFAULTS
+                    start_sync_reference: "2015-04-21T21:06:00Z"
+                    end_sync_reference: "2016-05-28T20:59:00.32Z"
+                    end_sync_instrument: "2016-05-28T20:59:03Z"
+        "LSVEI":
+            site: "Lucky Strike Volcano East"
+            start_date: "2015-04-22T12:00:00Z"
+            end_date: "2016-05-28T21:01:00Z"
+            location_code: "00"
+            instrumentation:
+                $ref: "instrumentation/SPOBS2.instrumentation.yaml#instrumentation"
+            channel_modifications:
+                "*-*": {datalogger_configuration: "125sps"}
+            locations:
+                "00":
+                    base: {$ref: 'location_bases/ACOUSTIC_SURVEY.location_base.yaml#location_base'}
+                    position: {lon: -32.02504, lat: 37.25744, elev: -2130}
+            processing:
+                - clock_correct_linear_drift:
+                    <<: *LINEAR_CLOCK_DEFAULTS
+                    start_sync_reference: "2015-04-21T21:06:00Z"
+                    end_sync_reference: "2016-05-28T20:59:00.32Z"
+                    end_sync_instrument: "2016-05-28T20:59:01Z"
+
+
+In all *obsinfo* information files, you can always add ``notes`` as a list of strings. Notes are not reflected in the output StationXML file. They only serve documentation purposes within the information file. On the other hand, ``comments`` can only be added in selected places which correspond to the places in a StationXML file which admit comments. They will be copied into the StationXML output.
+
+You can also add ``extras``, which are key:value pairs that you wish to document but are not taken into account by the *obsinfo* syntax. When possible, they will be added as comments to the output StationXML file.
+
+* :ref:`Next page, Building a simple instrumentation file <Tutorial4>`
+* :ref:`Previous page <Tutorial2>`
+* :ref:`Back to start  <Tutorial1>`

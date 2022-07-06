@@ -51,6 +51,25 @@ class FIRFilter:
                 coeffs = [x/divisor for x in coeffs]
         return cls(coeffs, offset, decim, f"SAC_decim{decim}")
 
+    def __sub__(self, y):
+        if not len(self.coeffs) == len(y.coeffs):
+            raise ValueError('Cannot subtract filters with different lengths')
+        return FIRFilter([x - y for x,y in zip(self.coeffs, y.coeffs)])
+
+    def __eq__(self, y):
+        if not len(self.coeffs) == len(y.coeffs):
+            return False
+        if not self.coeffs == y.coeffs:
+            return False
+        if not self.offset == y.offset:
+            return Fasle
+        if not self.decim == y.decim:
+            return False
+        if not self.name == y.name:
+            return False
+        return True
+        return FIRFilter([x - y for x,y in zip(self.coeffs, y.coeffs)])
+
     def convolve(self, data):
         """
         convolve data with FIR filter and return result

@@ -1,0 +1,56 @@
+****************
+Troubleshooting
+****************
+
+Sometimes it is a challenge to understand where an error lies in an information file. Messages are sometimes cryptic. We recommend you use the best practice above of using templates to avoid indentation errors. Also, if you can, use the best practice of working with an editor which recognizes elementary YAML errors such as indentation or wrong parentheses balancing. Let's review the most common sources of error:
+
+1) ``JSONEncodeError/EOF``. 
+An error which raises a JSONEncodeError exception and/or ``EOF (end of file) reached prematurely``. This is the most serious error, as it stops processing of the information file and exits the program. It is usually due to:
+
+   a) Indentation
+
+   b) Unmatched double or single quotes, parentheses, brackets, curly brackets
+
+   c) Extra commas or not enough commas
+
+Check for these, if possible, with an editor which shows matching signs. Use templates if possible. If everything else fails, try to reduce the information file to a bare bones version, see if the error persists. If it doesn't, add new attributes gradually. For example, a network file might have this kind of problem. Temporarily eliminate attributes such as ``channel_modifications`` and reduce the network to a single station.
+
+2) ``File not found: <filename>``. 
+<filename> has not been found. Either the directory where the file exists is not correctly specified in the path of the argument or in OBSINFO-DATAPATH, or the <filename>  is misspelled or the file does not exist. This is typical for files referenced in ``$ref``. 
+
+3) Validation error: ``<YAML expression> is not valid under any of the given schemas``. 
+This means that the information file is recognized and correctly parsed, but the portion <YAML expression> is not recognized. This may be due to illegal values, illegal value type (e.g. a string instead of a number, or a string pattern which does not correspond to valid patterns. An example is the wrong version:
+
+.. code-block:: yaml
+
+ ['format_version']: '0.107' is not valid under any of the given schemas
+
+or a phone number with letters:
+
+.. code-block:: 
+
+ ['revision']: {'date': '2017-11-30', 'authors': [{'first_name': 'Wayne', 'last_name': 'Crawford', 'institution': 'IPGP', 'email': 'crawford@ipgp.fr', 'phones': ['+33A 01 83 95 76 63'}]]} is not valid under any of the given schemas.
+
+or a string instead of a list (in the phones attribute):
+
+.. code-block:: 
+
+ ['revision']: {'date': '2017-11-30', 'authors': [{'first_name': 'Wayne', 'last_name': 'Crawford', 'institution': 'IPGP', 'email': 'crawford@ipgp.fr', 'phones': '+33A 01 83 95 76 63'}]} is not valid under any of the given schemas
+
+One possibility with validation errors is that the output of the message may be too long and difficult to parse, as it shows the whole produced information files with all its subfiles. The way to avoid this is to apply the best practice of validation bottom-up: first validate filters, then stages, then components, then instrumentations, then networks. This way the output is manageable.
+ 
+
+4) Validation error: ``Additional properties are not allowed (<attribute name> was unexpected)``
+An attribute name was not recognized, either because it was misspelled or because it does not exist in the specification. 
+
+.. code-block:: 
+
+ ['network']['operator']: Additional properties are not allowed ('fulsdl_name' was unexpected)
+
+5) Validation error: ``<attribute name> is a required property``
+A required attribute name was not included.
+
+.. code-block::
+
+ ['network']['operator']: 'reference_name' is a required property
+

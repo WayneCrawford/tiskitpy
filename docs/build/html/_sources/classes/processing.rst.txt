@@ -1,0 +1,104 @@
+
+.. _ProcessingClockCorrections:
+
+*****************************
+ Processing
+*****************************
+
+
+===============
+ Description
+===============
+
+This class has no correlate in StationXML, but it is used for important documentation purposes in *obsinfo*, and thus is included as a comment in StationXML. It documents the addition or subtraction of leap seconds to the signal data, and any kind of clock drift. As is well known, OBS equipment does not have a GPS connection and its clock must be manually synchronized. 
+
+---------------------
+Python class:
+---------------------
+
+Processing
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+processing 
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is element of :ref:`Station <Station>`
+* Is composed of :ref:`LeapSecond <LeapSecond11>`
+* Is composed of :ref:`LinearDrift <LinearDrift>`
+
+==============================
+Attributes
+==============================
+
+
+======================== ================================== ============ ================= ================================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**            **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+  linear_drift              :ref:`LinearDrift`                   N           *None*                 *None*                       
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+  leap_second               :ref:`LeapSecond11`                  N           *None*                 *None*                        
+======================== ================================== ============ ================= ================================== =============================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Processing section of network information file `<https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/BBOBS.INSU-IPGP.network.yaml>`_ . 
+
+.. code-block:: yaml
+
+  processing:
+                - clock_corrections:
+                    linear_drift:
+                        time_base: "Seascan MCXO, ~1e-8 nominal drift"
+                        reference: "GPS"
+                        start_sync_instrument: 0
+                        start_sync_reference: "2015-04-23T11:20:00"
+                        end_sync_reference: "2016-05-27T14:00:00.2450"
+                        end_sync_instrument: "22016-05-27T14:00:00"
+
+:ref:`Station` \<\=\=
+
+=\=\> :ref:`LinearDrift`
+
+=\=\> :ref:`LeapSecond11`
+
+           
+

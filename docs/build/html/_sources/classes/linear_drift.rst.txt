@@ -1,0 +1,116 @@
+.. _LinearDrift:
+
+*******************
+LinearDrift
+*******************
+
+===============
+ Description
+===============
+
+This class has no correlate in StationXML, but it is used for important documentation purposes in *obsinfo*, and thus is included as a comment in StationXML. It documents the clock drift. As is well known, OBS equipment does not have a GPS connection and its clock must be manually synchronized. 
+
+---------------------
+Python class:
+---------------------
+
+Processing
+
+The subclass LinearDrift is not implemented in Python but directly as attributes of class Processing  
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+processing: clock_correct_linear_drift
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+
+==============================
+Object Hierarchy
+==============================
+
+*None*
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is element of :ref:`ProcessingClockCorrections <ProcessingClockCorrections>`
+
+==============================
+Attributes
+==============================
+
+======================== ================================== ============ ================= ================================== =======================================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**            **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------------
+  time_base                  string                               Y           *None*                 *None*                      Time base of OBS  
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------------
+  reference                  string                               Y           *None*                 *None*                      Reference used                       
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------------
+ start_sync_instrument        timestamp                            Y          *None*                 *None*                     If set to zero or absent, see below in Calculated Attributes.
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------------
+ start_sync_reference        timestamp                            Y           *None*                 *None*              
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------------
+  end_sync_instrument        timestamp                            Y           *None*                 *None* 
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -----------------------------------------------------------------------
+  end_sync_reference         timestamp                            Y           *None*                 *None*               
+======================== ================================== ============ ================= ================================== =======================================================================
+
+==============================
+Calculated Attributes
+==============================
+
+
+
+======================== ================================== ================= ================================== =============================================================
+
+        **Name**                   **Type**                   **Default**          **StationXML**                     **Remarks**       
+------------------------ ---------------------------------- ----------------- ---------------------------------- -------------------------------------------------------------
+ start_sync_instrument       timestamp                           *None*                 *None*                       If set to 0 or absent in the file, it is set equal to the start_sync_reference
+======================== ================================== ================= ================================== =============================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Processing section of network information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/BBOBS.INSU-IPGP.network.yaml>`_ . 
+
+.. code-block:: yaml
+
+                    clock_correct_linear_drift:
+                        time_base: "Seascan MCXO, ~1e-8 nominal drift"
+                        reference: "GPS"
+                        start_sync_reference: "2015-04-23T11:20:00"
+                        end_sync_reference: "2016-05-27T14:00:00.2450"
+                        end_sync_instrument: "22016-05-27T14:00:00"
+
+:ref:`ProcessingClockCorrections` \<\=\=
+
+

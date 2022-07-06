@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best practices &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Notes" href="notes.html" />
+    <link rel="prev" title="AROL compatibility" href="arol.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced.html">Advanced</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="chan_mods.html">Channel modifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arol.html">AROL compatibility</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Best practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#place-instrumentation-information-files-in-a-central-repository">Place instrumentation information files in a central repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-a-file-hierarchy-for-different-objects">Use a file hierarchy for different objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#validate-all-information-files-bottom-up">Validate all information files bottom up</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verification-of-response-stages-in-information-file">Verification of <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in information file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reuse-information-files">Reuse information files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#document-information-files-with-notes-extras-and-comments">Document information files with notes, extras and comments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#placement-of-response-stages-in-information-file">Placement of <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in information file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-modify-individual-stages">How to modify individual stages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-of-channel-modifications">Use of channel modifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-use-notes">How to use notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#base-your-info-files-in-templates">Base your info files in templates</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notes.html">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="caveats.html">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addons.html">Addons</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced.html">Advanced</a> &raquo;</li>
+      <li>Best practices</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/advanced/best_practice.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="best-practices">
+<h1>Best practices<a class="headerlink" href="#best-practices" title="Permalink to this headline"></a></h1>
+<section id="place-instrumentation-information-files-in-a-central-repository">
+<h2>Place instrumentation information files in a central repository<a class="headerlink" href="#place-instrumentation-information-files-in-a-central-repository" title="Permalink to this headline"></a></h2>
+<p>One of the main pillars of <em>obsinfo</em> philosophy is reuse and the DRY (don’t repeat yourself) principle. In order to achieve this every effort has been made to ensure reusability, but the ultimate responsibiity for this lies with the user. It is strongly recommended to create a central repository of instrumentation information files which can then be reused by several campaigns. Instrumentations should be flexible enough, with several typical configurations, so the need to make modifications through <code class="docutils literal notranslate"><span class="pre">channel_modifications</span></code> is minimized.</p>
+<p>The use of a central repository will also permit information to be protected assigning modification writes only to the responsible parties.</p>
+<p>Campaign, network and station files can then be placed in different directories according to users and teams.</p>
+</section>
+<section id="use-a-file-hierarchy-for-different-objects">
+<h2>Use a file hierarchy for different objects<a class="headerlink" href="#use-a-file-hierarchy-for-different-objects" title="Permalink to this headline"></a></h2>
+<p>Although <em>obsinfo</em> gives you total flexibility to organize your files as you see fit,
+it is recommended to use a hierarchy of directories and the <code class="docutils literal notranslate"><span class="pre">obsinfo_datapath</span></code> variable setup
+with the <code class="docutils literal notranslate"><span class="pre">obsinfo-setup</span></code> application, whose used is explained in the <a class="reference internal" href="../general/installation.html#installstartup"><span class="std std-ref">Installation and Startup Guide</span></a>.</p>
+</section>
+<section id="validate-all-information-files-bottom-up">
+<h2>Validate all information files bottom up<a class="headerlink" href="#validate-all-information-files-bottom-up" title="Permalink to this headline"></a></h2>
+<p>Before trying to create a Station XML file, all information files should be validated individually. The best way to do this is to proceed bottom up: first validate filters, then stages, then components, then instrumentations, then networks. This way one can avoid very large output messages which are difficult to parse.</p>
+<p>Files in central repositories should never be uploaded unless they’re previously validated. Conversely, users can assume they don’t have any need to validate central repositories.</p>
+</section>
+<section id="verification-of-response-stages-in-information-file">
+<h2>Verification of <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in information file<a class="headerlink" href="#verification-of-response-stages-in-information-file" title="Permalink to this headline"></a></h2>
+<p>All files in central repositories must be validated before being uploaded. It is good practice to validate your files from the bottom up. That is, validate filter files first, stage next, and so on to network, unless you’re using (already verified) central repository files. This is to avoid long and unreadable messages from the validator.</p>
+</section>
+<section id="reuse-information-files">
+<h2>Reuse information files<a class="headerlink" href="#reuse-information-files" title="Permalink to this headline"></a></h2>
+<p>Either create a repository of your own or use one of the central repository. If you plan on working offline, you can clone the GitLab repository locally.</p>
+</section>
+<section id="document-information-files-with-notes-extras-and-comments">
+<h2>Document information files with notes, extras and comments<a class="headerlink" href="#document-information-files-with-notes-extras-and-comments" title="Permalink to this headline"></a></h2>
+<p>A choice of documentation options are available in information files. Aside of the “#” comment mechanism of the YAML language, <code class="docutils literal notranslate"><span class="pre">notes</span></code> are used for <em>obsinfo</em> documentation that will <strong>not</strong> be reflected in the resulting StationXML file. On the other hand, <code class="docutils literal notranslate"><span class="pre">comments</span></code> can be used at the <code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span></code> and <code class="docutils literal notranslate"><span class="pre">channel</span></code> levels which will be incorporated into the StationXML file. The reason to not extend this to <code class="docutils literal notranslate"><span class="pre">stage</span></code> and <code class="docutils literal notranslate"><span class="pre">filter</span></code> is that the resulting StationXML file would be cluttered with repeated comments. Similarly, at the same levels, <code class="docutils literal notranslate"><span class="pre">extras</span></code> can be specified. These take the form of key/value pairs to simulate attributes which are not actually present in StationXML but can be used for documentation. A typical example is:
+.. code-block:: yaml</p>
+<blockquote>
+<div><p>DBIRD_response_type : “CALIBRATED”</p>
+</div></blockquote>
+<p>which is used in several filters. It should be specified at the channel level, though, perharps specifying to which filters it applies.</p>
+</section>
+<section id="placement-of-response-stages-in-information-file">
+<h2>Placement of <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in information file<a class="headerlink" href="#placement-of-response-stages-in-information-file" title="Permalink to this headline"></a></h2>
+<p>Although <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> can be specified outside the <code class="docutils literal notranslate"><span class="pre">configuration_definitions</span></code>, this is discouraged unless there is a single configuration. If there are several configurations, <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> should be specified in the <code class="docutils literal notranslate"><span class="pre">configuration_definitions</span></code>. Nevertheless, if <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> is specified outside and there are several <code class="docutils literal notranslate"><span class="pre">configuration_definitions</span></code>, the one selected will overwrite the <code class="docutils literal notranslate"><span class="pre">response_stages</span></code>. If no configuration is specified, the <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> outside will be used.</p>
+<p>In the following example, “responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml” will <em>always</em> be overwritten by “responses/INSU_SPOBS_L28x128_theoretical.stage.yaml#stage”, as there is a configuration default which corresponds to the configuration definition “128x gain”.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">preamplifier</span><span class="p">:</span>
+    <span class="nt">equipment</span><span class="p">:</span>
+        <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;GEOPHONE-GAIN&quot;</span>
+        <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Analog</span><span class="nv"> </span><span class="s">gain/filter</span><span class="nv"> </span><span class="s">card&quot;</span>
+        <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;SIO</span><span class="nv"> </span><span class="s">gain/filter</span><span class="nv"> </span><span class="s">card,</span><span class="nv"> </span><span class="s">seismo</span><span class="nv"> </span><span class="s">channel&quot;</span>
+        <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;SIO</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">IPGP&quot;</span>
+        <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;&quot;</span>
+    <span class="nt">configuration_default</span><span class="p">:</span> <span class="s">&quot;128x</span><span class="nv"> </span><span class="s">gain&quot;</span>
+    <span class="nt">response_stages</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage&quot;</span> <span class="c1"># THIS WILL BE OVERWRITTEN</span>
+    <span class="nt">configuration_definitions</span><span class="p">:</span>
+        <span class="s">&quot;128x</span><span class="nv"> </span><span class="s">gain&quot;</span><span class="p p-Indicator">:</span>
+            <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/INSU_SPOBS_L28x128_theoretical.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p>Due to this, the best practice dictates that, in the presence of <code class="docutils literal notranslate"><span class="pre">configuration_definitions</span></code>,
+the <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in bold should be omitted. If <code class="docutils literal notranslate"><span class="pre">configuration_default</span></code> were not present and no configuration is selected at the channel/instrument level, a warning will be issued and the <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in bold will be used. If no response stages can be selected then an exception will be raised and the program will exit with error.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<p>The following example, though, is perfectly OK, as there is a single configuration and no need to specify <code class="docutils literal notranslate"><span class="pre">configuration_definitions</span></code>:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>preamplifier:</dt><dd><dl class="simple">
+<dt>equipment:</dt><dd><p>model: “GEOPHONE-GAIN”
+type: “Analog gain/filter card”
+description: “SIO gain/filter card, seismo channel”
+manufacturer: “SIO or IPGP”
+vendor: “”</p>
+</dd>
+<dt>response_stages:</dt><dd><ul class="simple">
+<li><p>$ref: “responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage”</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+<section id="how-to-modify-individual-stages">
+<h2>How to modify individual stages<a class="headerlink" href="#how-to-modify-individual-stages" title="Permalink to this headline"></a></h2>
+<p>Individual stage modification must always be specified in <code class="docutils literal notranslate"><span class="pre">response_modifications</span></code> at the instrument component level. This will NOT work:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">preamplifier</span><span class="p">:</span>
+   <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">gain</span><span class="p">:</span>
+      <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">34</span>
+</pre></div>
+</div>
+<p>This will:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">preamplifier</span><span class="p">:</span>
+   <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">response_modifications</span><span class="p">:</span>
+      <span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span> <span class="nt">gain</span><span class="p">:</span>
+             <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">34</span>
+</pre></div>
+</div>
+</section>
+<section id="use-of-channel-modifications">
+<h2>Use of channel modifications<a class="headerlink" href="#use-of-channel-modifications" title="Permalink to this headline"></a></h2>
+<p>It should be the aim to create a large and flexible instrumentation database with lots of possible configurations. This way, channel modifications will be rarely used. In fact, it is recommended to use channel modifications sparingly. Ir they must be used, remember to <strong>always</strong> use the adequate syntax. No shortcuts are allowed. All the hierarchical syntax must be used. For example, to change the gain of a sensor stage you need to write:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channel_modifications</span><span class="p">:</span>
+   <span class="nt">sensor</span><span class="p">:</span>
+       <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/SIO_DPG.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+       <span class="nt">response_modifications</span><span class="p">:</span>
+         <span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span> <span class="nt">gain</span><span class="p">:</span>
+                <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">34</span>
+</pre></div>
+</div>
+<p>and not a shortcut such as:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channel_modifications</span><span class="p">:</span>
+   <span class="nt">gain</span><span class="p">:</span>
+     <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">34</span>
+</pre></div>
+</div>
+<p>as there is no way <em>obsinfo</em> can determine to which stage of which component to apply the modification in gain.</p>
+</section>
+<section id="how-to-use-notes">
+<h2>How to use notes<a class="headerlink" href="#how-to-use-notes" title="Permalink to this headline"></a></h2>
+<p>There is a single <code class="docutils literal notranslate"><span class="pre">notes</span></code> attribute in JSON/YAML files, which contains a list of notes, in order to make documentation more systematic. However, sometimes a user may want to comment a piece of the file (for example, a single station in a network file). To do so we recommend using the YAML notation for comments, “#” followed by the comment text. Currently there is no way to do this in JSON files.</p>
+</section>
+<section id="base-your-info-files-in-templates">
+<h2>Base your info files in templates<a class="headerlink" href="#base-your-info-files-in-templates" title="Permalink to this headline"></a></h2>
+<p>While syntax may be a challenge, we recommend strongly that, when starting a new information file, you use a template. That way at least you can guarantee that the indentation and spelling of attributes is right.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="arol.html" class="btn btn-neutral float-left" title="AROL compatibility" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="notes.html" class="btn btn-neutral float-right" title="Notes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

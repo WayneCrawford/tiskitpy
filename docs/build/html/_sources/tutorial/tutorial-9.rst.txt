@@ -1,0 +1,31 @@
+
+.. _Tutorial9:
+
+*********************************
+Summary
+*********************************
+
+As a summary, remember *obsinfo* strives for reuse and flexibility.
+
+#. Try to use the hierarchy referencing files as much as possible. This allows reuse across files and different campaigns.
+#. Use ``yaml_anchors`` for reuse in the *same file*
+#. Start from simple files with only required fields and build up from that
+#. You can add notes at any level. You can add extras only in network, station and instrumentation files. Only extras and comments will be reflected as comments in StationXML.
+#. Make extensive use of the ``*`` default channel to avoid repeating redundant information in different channels.
+#. Make extensive use of configuration_definitions to avoid duplicating the same components with little variations
+#. Remember: ``*`` channel default preferably for complete substitutions of a component or of a default configuration. ``config_selection`` for changing the list of response_stages, filter parameters, equipment fields.
+
+`File templates <FileTemplates>`_ are available to help you start writing your information files.
+
+
+==================
+Conclusion
+==================
+
+This finishes our tutorial. For more detailed information please review the :ref:`Classes` hierarchy where attributes are described in detail and some optional attributes that were not discussed here for the sake of brevity are explained. Have fun using *obsinfo*!
+
+If you find any issues or have any questions please use the Issues functionality of gitlab: https://www.gitlab.com/resif/obsinfo/issues
+
+
+* :ref:`Previous page <Tutorial8>`
+* :ref:`Back to start  <Tutorial1>`

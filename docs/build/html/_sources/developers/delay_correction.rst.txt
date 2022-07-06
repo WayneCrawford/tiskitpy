@@ -1,0 +1,58 @@
+****************
+Delay correction
+****************
+
+As written in the tutorial, stage-level ``correction`` s are calculated by
+OBSINFO using the filter-level ``offset``, stage-level ``delay`` and
+datalogger-level ``delay_correction`` fields:
+
+- ``offset`` can be set at the Filter level.  If not, it is set to zero.
+  It is a required field for ``FIR`` filters (why not the other
+  digital filters?)
+- ``delay`` can be set at the Stage level.  If it is not specified, it is
+  set to the Stage Filter's ``offset`` divided by the Stage's 
+  '``input_sample rate``.  This cannot be done when the Stage is first read,
+  because the Stage's ``input_sample_rate`` usually depends on the preceding
+  Stages.
+- ``correction`` depends on the value of ``datalogger.delay_correction``:
+
+  - if ``datalogger.delay_correction`` is ``None`` (i.e., not specified
+    in the information file, ``correction`` = ``delay`` in every stage
+  - otherwise, ``correction = datalogger.delay_correction`` in the last stage
+    and ``correction = 0`` in every other stage.
+  
+  this calculation can only be made after ``delay`` is calculated
+
+The process for calculating ``delay`` and ` ``correction`` is as follows:
+     
+1. An attribute dictionary is passed to ``Instrument._init()``, which
+
+   1. creates ``Sensor``, ``Datalogger``, and ``PreAmplifier`` properties using
+      their constructors
+
+      - each one creates/contains a ResponseStages() property, but only the
+        ``Datalogger`` object gets a ``delay_correction``` value
+      - The ``ResponseStages`` constructor creates a list of ``Stage`` s.
+        Each ``Stage``:
+        
+        - contains a ``delay`` (usually not specfied in the information file,
+          in which case ``delay = None``)`
+        - contains a ``Filter``` that contains an ``offset`` (set to ``0``
+          if not specified)
+   
+   2. calls ``self.combine_response_stages()``, which combines the
+      Sensor, PreAmplifier and DataLogger stages into a single, ordered list
+      (Sensor stages, then Preamplifier and finally Datalogger)
+   3. calls ``self.integrate_response_stages()``, which loops through each
+      stage, checking/creating continuity, calculating ``delay`` (in
+      ``Stage.calculate_delay()``) and setting ``correction = delay`` if
+      ``correction`` is ``None`` 
+   4. creates a list of ``obspy`` stages and incorporates them into an obspy
+      ``Response`` object (including calculating Sensitivity)
+
+Problems
+------------------
+
+When I run ``obsinfo-test -s -v``, digital stages fail the equality test because
+``stage_from_info_file.correction=None``, whereas
+``obspy_result.decimation_correction=0``

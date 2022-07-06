@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>obsinfo.addons package &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="obsinfo.instrumentation package" href="obsinfo.instrumentation.html" />
+    <link rel="prev" title="Code Documentation: obsinfo package" href="obsinfo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer’s Corner</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Technical Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="obsinfo.html">Code Documentation: obsinfo package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="obsinfo.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">obsinfo.addons package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.instrumentation.html">obsinfo.instrumentation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.main.html">obsinfo.main package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.misc.html">obsinfo.misc package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.network.html">obsinfo.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.obsMetadata.html">obsinfo.obsMetadata package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.tests.html">obsinfo.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.print_version">obsinfo.print_version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.version">obsinfo.version module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Technical Documentation</a> &raquo;</li>
+          <li><a href="obsinfo.html">Code Documentation: obsinfo package</a> &raquo;</li>
+      <li>obsinfo.addons package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/obsinfo.addons.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="obsinfo-addons-package">
+<h1>obsinfo.addons package<a class="headerlink" href="#obsinfo-addons-package" title="Permalink to this headline"></a></h1>
+<section id="module-obsinfo.addons.LCHEAPO">
+<span id="obsinfo-addons-lcheapo-module"></span><h2>obsinfo.addons.LCHEAPO module<a class="headerlink" href="#module-obsinfo.addons.LCHEAPO" title="Permalink to this headline"></a></h2>
+<p>Write extraction script for LCHEAPO instruments (proprietary to miniseed)</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.addons.LCHEAPO.process_script">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.addons.LCHEAPO.</span></span><span class="sig-name descname"><span class="pre">process_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distrib_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'miniseed_basic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.addons.LCHEAPO.process_script" title="Permalink to this definition"></a></dt>
+<dd><p>Writes script to transform raw OBS data to miniSEED</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network_code</strong> (<em>str</em>) – FDSN network_code</p></li>
+<li><p><strong>(</strong> (<em>station</em>) – class: ~obsinfo.Station): the station to process</p></li>
+<li><p><strong>station_dir</strong> (<em>str</em>) – the base directory for the station data</p></li>
+<li><p><strong>distrib_dir</strong> (<em>str</em>) – directory where the lcheapo executables and
+property files are found</p></li>
+<li><p><strong>input_dir</strong> (<em>str</em>) – directory beneath station_dir for LCHEAPO data</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em>) – directory beneath station_dir for basic miniseed]</p></li>
+<li><p><strong>include_header</strong> (<em>bool</em>) – include the header that sets up paths
+(should be done once)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.addons.SDPCHAIN">
+<span id="obsinfo-addons-sdpchain-module"></span><h2>obsinfo.addons.SDPCHAIN module<a class="headerlink" href="#module-obsinfo.addons.SDPCHAIN" title="Permalink to this headline"></a></h2>
+<p>Generate scripts needed to go from basic miniSEED to data center ready</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.addons.SDPCHAIN.process_script">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.addons.SDPCHAIN.</span></span><span class="sig-name descname"><span class="pre">process_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distrib_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/opt/sdpchain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'miniseed_basic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrected_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'miniseed_corrected'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_commands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SDS_uncorr_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SDS_uncorrected'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SDS_corr_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SDS_corrected'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SDS_combined_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SDS_combined'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.addons.SDPCHAIN.process_script" title="Permalink to this definition"></a></dt>
+<dd><p>Writes OBS data processing script using SDPCHAIN software</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>station</strong> – an obsinfo.station object</p></li>
+<li><p><strong>station_dir</strong> – base directory for the station data</p></li>
+<li><p><strong>input_dir</strong> – directory beneath station_dir for input (basic)
+miniseed data [‘miniseed_basic’]</p></li>
+<li><p><strong>corrected_dir</strong> – directory beneath station_dir for output (corrected)
+miniseed data [‘miniseed_corrected’]</p></li>
+<li><p><strong>SDS_corr_dir</strong> – directory beneath station_dir in which to write
+SDS structure of corrected data (ideally
+../SOMETHING if ms2sds could write all to the
+same directory)</p></li>
+<li><p><strong>SDS_uncorr_dir</strong> – directory beneath station_dir in which to write
+SDS structure of uncorrected data (ideally
+../SOMETHING if ms2sds could write all to the
+same directory)</p></li>
+<li><p><strong>include_header</strong> – whether or not to include the bash script header
+(‘#!/bin/bash’) at the top of the script [True]</p></li>
+<li><p><strong>distrib_dir</strong> – Base directory of sdpchain distribution [‘/opt/sdpchain’]</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>The sequence of commands is:</dt><dd><ol class="arabic simple">
+<li><p>optional proprietary format steps (proprietary format -&gt; basic miniseed, separate)</p></li>
+<li><p>optional extra_steps (any cleanup needed for the basic
+miniseed data, should either overwrite the existing data or
+remove the original files so that subsequent steps only see the
+cleaned data)</p></li>
+<li><p>ms2sds on basic miniseed data</p></li>
+<li><p>leap-second corrections, if necessary</p></li>
+<li><p>msdrift (creates drift-corrected miniseed)</p></li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.addons.LC2SDS">
+<span id="obsinfo-addons-lc2sds-module"></span><h2>obsinfo.addons.LC2SDS module<a class="headerlink" href="#module-obsinfo.addons.LC2SDS" title="Permalink to this headline"></a></h2>
+<dl class="simple">
+<dt>Write bash scripts to convert LCHEAPO data to SeisComp Data Structure (SDS)</dt><dd><ul class="simple">
+<li><p>Includes clock drift and leap-second correction (must be entered in obsinfo
+network files)</p></li>
+<li><p>For onboard processing, does not apply drift at the record level, nor set
+associated record header flags or fill in record header time_correction</p></li>
+<li><p>Scripts require the lcheapo python package, and only work in a BASH shell</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.addons.LC2SDS.process_script">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.addons.LC2SDS.</span></span><span class="sig-name descname"><span class="pre">process_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'../'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.addons.LC2SDS.process_script" title="Permalink to this definition"></a></dt>
+<dd><p>Writes script to transform raw OBS data to SeisComp Data Structure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>network_code</strong> (<em>str</em>) – FDSN network_code</p></li>
+<li><p><strong>station</strong> (<a class="reference internal" href="obsinfo.network.html#obsinfo.network.station.Station" title="obsinfo.network.station.Station"><code class="xref py py-class docutils literal notranslate"><span class="pre">Station</span></code></a>) – the station to process</p></li>
+<li><p><strong>station_dir</strong> (<em>str</em>) – the base directory for the station data</p></li>
+<li><p><strong>input_dir</strong> (<em>str</em>) – directory beneath station_dir for LCHEAPO data</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em>) – directory beneath station_dir for SDS directory</p></li>
+<li><p><strong>include_header</strong> (<em>bool</em>) – include the header that sets up paths
+(should be done once)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="obsinfo.html" class="btn btn-neutral float-left" title="Code Documentation: obsinfo package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="obsinfo.instrumentation.html" class="btn btn-neutral float-right" title="obsinfo.instrumentation package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

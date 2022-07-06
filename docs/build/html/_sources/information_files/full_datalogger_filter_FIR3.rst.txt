@@ -1,0 +1,13 @@
+*****************
+Basic - one level
+*****************
+
+Here is an example of a valid information file containing only
+required fields, all in one file.  To save space, this is a one-channel
+instrument.  Generally, to save space and avoid repetition, information files
+are split into parts connected by JSON references: you can find the exact
+same information as below, but spit into "atomic" files, here.
+
+The file below can be found in obsinfo/_examples/examples/BASIC_FLAT.network.yaml
+
+.. code-block:: yaml

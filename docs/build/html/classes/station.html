@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Station &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installation and Startup Guide" href="../general/installation.html" />
+    <link rel="prev" title="Stage" href="stage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../classes.html">Classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../classes.html#information-file-tree">Information File Tree</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html#filter-types">Filter Types</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="analog.html">Analog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="channel.html">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="coefficients.html">Coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datalogger.html">Datalogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="digital.html">Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FIR.html">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument.html">Instrument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="leap_second.html">LeapSecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location_base.html">LocationBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location.html">Location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="network.html">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="operator.html">Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_list.html">ResponseList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_stages.html">ResponseStages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sensor.html">Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stage</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Station</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#object-hierarchy">Object Hierarchy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#json-schema">JSON schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#class-navigation">Class Navigation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../classes.html">Classes</a> &raquo;</li>
+      <li>Station</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/classes/station.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="station">
+<span id="id1"></span><h1>Station<a class="headerlink" href="#station" title="Permalink to this headline"></a></h1>
+<blockquote>
+<div><p>classes/</p>
+</div></blockquote>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>An OBS station is an actual implementation of one or several <cite>instrumentation</cite> in a given campaign and <a class="reference internal" href="../tutorial/tutorial-3.html#network"><span class="std std-ref">network</span></a>.</p>
+<section id="python-class">
+<h3>Python class:<a class="headerlink" href="#python-class" title="Permalink to this headline"></a></h3>
+<p>Station</p>
+</section>
+<section id="yaml-json-label">
+<h3>YAML / JSON label:<a class="headerlink" href="#yaml-json-label" title="Permalink to this headline"></a></h3>
+<dl class="simple">
+<dt>stations</dt><dd><p>Pertaining to Network Information File</p>
+</dd>
+</dl>
+</section>
+<section id="corresponding-stationxml-structure">
+<h3>Corresponding StationXML structure<a class="headerlink" href="#corresponding-stationxml-structure" title="Permalink to this headline"></a></h3>
+<p>Station</p>
+</section>
+</section>
+<section id="object-hierarchy">
+<h2>Object Hierarchy<a class="headerlink" href="#object-hierarchy" title="Permalink to this headline"></a></h2>
+<section id="superclass">
+<h3>Superclass<a class="headerlink" href="#superclass" title="Permalink to this headline"></a></h3>
+<p><em>None</em></p>
+</section>
+<section id="subclasses">
+<h3>Subclasses<a class="headerlink" href="#subclasses" title="Permalink to this headline"></a></h3>
+<p><em>None</em></p>
+</section>
+<section id="relationships">
+<h3>Relationships<a class="headerlink" href="#relationships" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Implements one or several <a class="reference internal" href="../tutorial/tutorial-3.html#instrumentation"><span class="std std-ref">Instrumentations</span></a></p></li>
+<li><p>Is part of a <a class="reference internal" href="../tutorial/tutorial-3.html#network"><span class="std std-ref">Network</span></a></p></li>
+<li><p>Is in one or several <a class="reference internal" href="location.html#location1"><span class="std std-ref">Locations</span></a></p></li>
+</ul>
+</section>
+</section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 25%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 13%" />
+<col style="width: 40%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>Name</strong></p></td>
+<td><p><strong>Type</strong></p></td>
+<td><p><strong>Required</strong></p></td>
+<td><p><strong>Default</strong></p></td>
+<td><p><strong>Equivalent StationXML</strong></p></td>
+<td><p><strong>Remarks</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><em>code</em></p></td>
+<td><p>string</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p>Station. <a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station">code</a></p></td>
+<td><p>Code does not appear as a YAML/JSON attribute. It’s simply the key of the station.</p></td>
+</tr>
+<tr class="row-odd"><td><p>site</p></td>
+<td><p>string</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#site-required">Site</a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>location_code</p></td>
+<td><p>string</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station">alternateCode</a></p></td>
+<td><p>See class <a class="reference internal" href="location.html#location1"><span class="std std-ref">Location</span></a> for details</p></td>
+</tr>
+<tr class="row-odd"><td><p>locations</p></td>
+<td><p>Array of <cite>Location</cite></p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference internal" href="operator.html#operator"><span class="std std-ref">Operator</span></a></p></td>
+<td><p>The use of locations is not simple. See class <a class="reference internal" href="location.html#location1"><span class="std std-ref">Location</span></a> for details</p></td>
+</tr>
+<tr class="row-even"><td><p>instrumentation</p></td>
+<td><p><a class="reference internal" href="../tutorial/tutorial-3.html#instrumentation"><span class="std std-ref">Instrumentation</span></a></p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><em>None</em></p></td>
+<td><p>This is mostly contained in attribute Channel in StationXML</p></td>
+</tr>
+<tr class="row-odd"><td><p>processing</p></td>
+<td><p><a class="reference internal" href="processing.html#processingclockcorrections"><span class="std std-ref">Processing</span></a></p></td>
+<td><p>N</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station-description">Description</a></p></td>
+<td><p>Will appear appended to Description in StationXML</p></td>
+</tr>
+<tr class="row-even"><td><p>restricted_state</p></td>
+<td><p>List of values: “open”, “closed”, “partial”, “unknown”</p></td>
+<td><p>N</p></td>
+<td><p>“unknown”</p></td>
+<td><p><em>None</em></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>comments</p></td>
+<td><p>string</p></td>
+<td><p>N</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station-description">Comment</a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>start_date</p></td>
+<td><p>date</p></td>
+<td><p>N</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station">startDate</a></p></td>
+<td><p>All three instrument components have these dates. They’re the same for all the station.</p></td>
+</tr>
+<tr class="row-odd"><td><p>end_date</p></td>
+<td><p>date</p></td>
+<td><p>N</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station">endDate</a></p></td>
+<td><p>All three instrument components have these dates. They’re the same for all the station.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="json-schema">
+<h2>JSON schema<a class="headerlink" href="#json-schema" title="Permalink to this headline"></a></h2>
+<p><a class="reference external" href="https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/station.schema.json">https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/station.schema.json</a></p>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Part of network information file <a class="reference external" href="https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml">https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml</a> corresponding to the stations, with an example of use of the anchor &amp;LINEAR_CLOCK_DEFAULT. The <code class="docutils literal notranslate"><span class="pre">instrumentations</span></code> parts are explained under <a class="reference internal" href="../tutorial/tutorial-3.html#instrumentation"><span class="std std-ref">Instrumentation</span></a>.</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">yaml_anchors</span><span class="p">:</span>
+   <span class="nt">obs_clock_correction_linear_defaults</span><span class="p">:</span> <span class="nl">&amp;LINEAR_CLOCK_DEFAULTS</span> <span class="c1">#Definition of the anchor as the next three attributes.</span>
+      <span class="nt">time_base</span><span class="p">:</span> <span class="s">&quot;Seascan</span><span class="nv"> </span><span class="s">MCXO,</span><span class="nv"> </span><span class="s">~1e-8</span><span class="nv"> </span><span class="s">nominal</span><span class="nv"> </span><span class="s">drift&quot;</span>
+      <span class="nt">reference</span><span class="p">:</span> <span class="s">&quot;GPS&quot;</span>
+      <span class="nt">start_sync_instrument</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+
+<span class=" -Error">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+
+   <span class="l l-Scalar l-Scalar-Plain">stations</span><span class="p p-Indicator">:</span>
+      <span class="s">&quot;LSVW&quot;</span><span class="p p-Indicator">:</span>
+          <span class="nt">site</span><span class="p">:</span> <span class="s">&quot;Lucky</span><span class="nv"> </span><span class="s">Strike</span><span class="nv"> </span><span class="s">Volcano</span><span class="nv"> </span><span class="s">West&quot;</span>
+          <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2015-04-22T12:00:00Z&quot;</span>
+          <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2016-05-28T21:01:00Z&quot;</span>
+          <span class="nt">location_code</span><span class="p">:</span> <span class="s">&quot;00&quot;</span>
+          <span class="nt">instrumentations</span><span class="p">:</span>
+              <span class="p p-Indicator">-</span>
+                  <span class="nt">base</span><span class="p">:</span>
+                      <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/SPOBS2.instrumentation.yaml#instrumentation&quot;</span>
+                  <span class="nt">datalogger_config</span><span class="p">:</span> <span class="s">&quot;125sps&quot;</span>
+          <span class="nt">locations</span><span class="p">:</span>
+              <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+                  <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/SURFACE_DROP.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+                  <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.32504</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.29744</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-2030</span><span class="p p-Indicator">}</span>
+          <span class="nt">processing</span><span class="p">:</span>
+              <span class="p p-Indicator">-</span> <span class="nt">clock_correction_linear_drift</span><span class="p">:</span>
+                  <span class="nt">&lt;&lt;</span><span class="p">:</span> <span class="nv">*LINEAR_CLOCK_DEFAULTS</span>
+                  <span class="nt">start_sync_reference</span><span class="p">:</span> <span class="s">&quot;2015-04-21T21:06:00Z&quot;</span>
+                  <span class="nt">end_sync_reference</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:00.32Z&quot;</span>
+                  <span class="nt">end_sync_instrument</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:03Z&quot;</span>
+
+      <span class="s">&quot;LSVE&quot;</span><span class="p p-Indicator">:</span>
+          <span class="nt">site</span><span class="p">:</span> <span class="s">&quot;Lucky</span><span class="nv"> </span><span class="s">Strike</span><span class="nv"> </span><span class="s">Volcano</span><span class="nv"> </span><span class="s">East&quot;</span>
+          <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2015-04-22T12:00:00Z&quot;</span>
+          <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2016-05-28T21:01:00Z&quot;</span>
+          <span class="nt">location_code</span><span class="p">:</span> <span class="s">&quot;00&quot;</span>
+          <span class="nt">instruments</span><span class="p">:</span>
+              <span class="p p-Indicator">-</span>
+                  <span class="nt">base</span><span class="p">:</span>
+                      <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/SPOBS2.instrumentation.yaml#instrumentation&quot;</span>
+                  <span class="nt">datalogger_config</span><span class="p">:</span> <span class="s">&quot;125sps&quot;</span>
+          <span class="nt">locations</span><span class="p">:</span>
+              <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+                  <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/ACOUSTIC_SURVEY.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+                  <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.02504</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.25744</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-2130</span><span class="p p-Indicator">}</span>
+          <span class="nt">processing</span><span class="p">:</span>
+              <span class="p p-Indicator">-</span> <span class="nt">clock_correct_linear_drift</span><span class="p">:</span>
+                  <span class="nt">&lt;&lt;</span><span class="p">:</span> <span class="nv">*LINEAR_CLOCK_DEFAULTS</span>
+                  <span class="nt">start_sync_reference</span><span class="p">:</span> <span class="s">&quot;2015-04-21T21:06:00Z&quot;</span>
+                  <span class="nt">end_sync_reference</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:00.32Z&quot;</span>
+                  <span class="nt">end_sync_instrument</span><span class="p">:</span> <span class="s">&quot;2016-05-28T20:59:01Z&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="class-navigation">
+<h2>Class Navigation<a class="headerlink" href="#class-navigation" title="Permalink to this headline"></a></h2>
+<p><a class="reference internal" href="../tutorial/tutorial-3.html#network"><span class="std std-ref">Network</span></a> &lt;==&gt; <a class="reference internal" href="../tutorial/tutorial-3.html#instrumentation"><span class="std std-ref">Instrumentation</span></a></p>
+<p>==&gt; <a class="reference internal" href="location.html#location1"><span class="std std-ref">Location</span></a></p>
+<p>==&gt; <a class="reference internal" href="processing.html#processingclockcorrections"><span class="std std-ref">Processing</span></a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="stage.html" class="btn btn-neutral float-left" title="Stage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../general/installation.html" class="btn btn-neutral float-right" title="Installation and Startup Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

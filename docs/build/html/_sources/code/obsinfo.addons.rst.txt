@@ -1,0 +1,17 @@
+obsinfo.addons package
+======================
+
+obsinfo.addons.LCHEAPO module
+-----------------------------
+
+.. automodule:: obsinfo.addons.LCHEAPO
+
+obsinfo.addons.SDPCHAIN module
+------------------------------
+
+.. automodule:: obsinfo.addons.SDPCHAIN
+
+obsinfo.addons.LC2SDS module
+------------------------------
+
+.. automodule:: obsinfo.addons.LC2SDS

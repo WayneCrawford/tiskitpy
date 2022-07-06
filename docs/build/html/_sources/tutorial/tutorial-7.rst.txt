@@ -1,0 +1,138 @@
+.. _Tutorial7:
+
+*********************************************************
+Building a stage information file with different filters
+*********************************************************
+
+Conceptually, stages are each of an electronic block diagram "boxes". They are usually implemented as a single printed circuit connected to the instrument bus. An instrument component has an ordered list of stages. Each stage has certain signal treatment characteristics.
+
+It is important to note that, since stages are chained,
+
+* Output units of stage and input units of the next stage must match.
+* In digital stages, the output sample rate of one stage must match the input sample rate of the next one.
+* Declared sample rate of the instrument as a whole must match calculated sample rate of the response ensemble.
+
+To allow flexible use of stages, as exemplified in the datalogger information file above, it is a good idea *not* to specificy input sample rates (output sample rates cannot be specified, see below) for all but the first stage. For example, the FIR2 stages in the datalogger example above only specify decimation factor. This means that, irrespective of input sample rate, the will have the output sample rate specified by the decimation factor.
+
+Both conditions are checked by *obsinfo*.
+
+In the current implementation, all stages have one, and exactly one filter associated. This may seem a little strange, as some stages are not properly filters, but rather analog and digital amplifiers (they only increment gain) or ADCs, analog-digital converters. This is idiosyncratic. It seems StationXML does not allow stages that are not some sort of filter. Therefore, as will be seen, these stages are implemented as filters in *obsinfo*.
+
+Let's profit from this to see what a stage with a very simple "filter" in the above sense looks like. This is a stage for a preamplifier. It is analog and only has a gain. with no other processing. We have a specification of input and output units and a gain, composed of a value and a frequency where that gain value is measured. It has an associated "filter" of type ANALOG. All these are required fields. We also have an optional description, which is nonetheless recommended.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ stage:
+    description : "PREAMPLIFIER: BBOBS 0.225x"
+    input_units : {name: "V", description: "VOLTS"}
+    output_units : {name: "V", description: "VOLTS"}
+    gain : {value : 0.225, frequency: 0}
+    filter :
+        type : "ANALOG"
+   polarity: "+"
+
+Next we can see another pseudo-filter, an analog to digital converter used as the first stage of a datalogger:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ notes:
+    - "From CS5321-22_F3.pdf"
+
+ stage:
+    description : "DIGITIZER - CS5321 Delta-Sigma A/D converter" #  optional
+    input_units : { name : "V", description: "Volts"}
+    output_units : { name : "counts", description: "Digital Counts"}
+    input_sample_rate : 256000
+    decimation_factor : 8
+    gain :
+        frequency: 0
+        value: 1165084 #  counts/V
+    filter:
+        type : "AD_CONVERSION"
+        input_full_scale : 9 #  9 V pp
+        output_full_scale : 10485760 #  4FFFFF@Vref and B00000@-Vref
+
+
+Although it is obvious that the input is analog, we specify an ``input_sample_rate`` in agreement with StationXML specifications. The output rate, as mentioned above, is never specified, but can easily be obtained from this and the ``decimation_factor`` by division. In the example, the output sample rate will be 32000 sps. For the time being, we will ignore the other fields in ``filter``, which will be discussed in the next section.
+
+Note the use of the ``notes`` attribute, which will **not** be processed as comments in StationXML. Other optional attributes don't appear here to keep the discussion simple but can be readily consulted in 
+the corresponding :ref:`Stage`. However, there are three attributes that should be noticed.
+
+delay, offset and correction attributes
+----------------------------------------
+
+Digital filters can have an ``offset``, which specifies how samples the peak
+of an impulse will be offset by the filter. This is specified at the filter level.
+
+The stage level has an attribute called ``delay``. If ``delay`` is not
+specified but ``offset`` is in the associated filter, ``delay`` is calculated
+by dividing ``offset`` by the input sample rate. If both ``delay`` and
+``offset``are specified, their specified values are kept untouched.
+
+``correction`` is an attribute in StationXML which is calculated, as mentioned 
+in the previous section, using the datalogger field ``delay_correction``.  It
+should **not** be specified by the user.
+
+We see in this example a stage without ``input_sample_rate`` but with
+``decimation_rate`` of 2, which divide the ``output_sample_rate`` of the
+previous stage by 2, as mentioned in the introduction to this section.
+This is precisely the stage FIR3 that was used in the previous page as a
+datalogger stage example.
+The other thing worth noting is the reference to a filter file in the folder
+``filters/``.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ notes: ["From CS5322_Filter.pdf"]
+
+ stage:
+    decimation_factor : 2
+    gain :         {value: 1, frequency: 0}
+    input_units :  { name : "counts", description: "Digital Counts"}
+    offset: 50
+
+    description : "DECIMATION - CS5322 FIR3 (linear phase)"
+    filter:
+        $ref: "filters/CirrusLogic_CS5322_FIR3.filter.yaml#filter"
+    extras:
+        DBIRD_response_type : "THEORETICAL"
+
+Polarity
+-----------
+
+Each stage can have a polarity: if omitted it is assumed to be "+".
+A "+" polarity means:
+ - For a seismometer, a postitive voltage corresponds to a movement **UP**.
+ - For a hydrophone, a positive voltage corresponds to an **INCREASE** in pressure
+ - For a non-sensor stage, the passband output has the **SAME** polarity as the
+   input in the passband
+A "-" polarity means:
+ - For a seismometer, a postitive voltage corresponds to a movement **DOWN**.
+ - For a hydrophone, a positive voltage corresponds to a **DECREASE** in pressure
+ - For a non-sensor stage, the passband output has the **OPPOSITE** polarity as the
+   input in the passband
+
+By multiplying the polarities in a channel's stages we get the channel's polarity.
+For seismometer and hydrophone channels, a positive polarity corresponds
+to dip = -90º and a negative polarity to dip = 90º
+
+* :ref:`Next page, Building a filter information file <Tutorial8>`
+* :ref:`Previous page <Tutorial6>`
+* :ref:`Back to start  <Tutorial1>`
+

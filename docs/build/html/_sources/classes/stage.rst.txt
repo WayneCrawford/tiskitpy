@@ -1,0 +1,160 @@
+.. _Stage:
+
+**************
+Stage
+**************
+
+===============
+ Description
+===============
+
+Stages are discrete units in the block diagram of an electronic circuit which perform a specific function and is usually physically circumscribed to a printed board. An instrument component in *obsinfo* is usually composed of several chained stages which connect the output of one stage to the input of the next one.
+
+---------------------
+Python class:
+---------------------
+
+Stage
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+Unnamed element of response_stages array. The array itself has a label ``response_stages``
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Stage
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is element of :ref:`ResponseStages`
+* Nests one :ref:`Filter11`
+
+
+==============================
+Attributes
+==============================
+
+.. _name: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#fir
+.. _Description: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-fir-description
+.. _InputUnits: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-fir-inputunits
+.. _OutputUnits: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-fir-outputunits
+.. _StageGain: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#stagegain-required
+.. _Frequency: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-stagegain-frequency
+.. _Value: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-stagegain-value
+.. _Factor: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#factor-required
+.. _InputSampleRate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#inputsamplerate-required
+.. _Delay: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#delay-required
+
+======================== ================================== ============ ================= ================================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**            **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+  name                      string                                N           *None*         e.g. FIR. `name`_                   In StationXML this attribute is at the filter (PZ, Coeff, FIR, etc.) level.
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+description               string                                  N           *None*        e.g. FIR. `Description`_             In StationXML this attribute is in the filter (PolesZeros, Coefficients, FIR, etc.) 
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+input_units               IRISUnits                               Y           *None*        e.g. FIR. `InputUnits`_              In StationXML this attribute is at the filter (PZ, Coeff, FIR, etc.) level.
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+output_units              IRISUnits                               Y           *None*        e.g. FIR. `OutputUnits`_             In StationXML this attribute is at the filter (PZ, Coeff, FIR, etc.) level.
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+
+gain::                                                            Y           *None*           `StageGain`_ 
+                                         
+*   frequency                     number                          Y           *None*         `Frequency`_                       In Hertz
+*   value                         number                          Y           *None*         `Value`_
+
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+filter                          :ref:`Filter11`                   Y           *None*           *None*                           No filter attribute in StationXML. Individual filters are subsumed in Stage.  
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+calibration_date                  date                            N           *None*           *None*                           In StationXML this attribute is only found at the equipment level.
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+decimation_factor                 number                          N           1.0           Decimation. `Factor`_ 
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+input_sample_rate                 number                          Y           *None*       Decimation. `InputSampleRate`_
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+delay                             number                          N           0.0           Decimation. `Delay`_                If not set, will be calculated as filter.offset / input_sample_rate
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+ polarity                 string with values "+" and "-"           Y           *None*            *None*                         "+" = counts increase when the input voltage increase, "-" otherwise.     
+======================== ================================== ============ ================= ================================== =============================================================
+
+==============================
+Calculated Attributes
+==============================
+
+These attributes do not exist in the YAML/JSON file. They are or may be calculated programmatically to feed corresponding values in the StationXML file or for other purposes.
+
+======================== ================================== ================= ========================== ===========================================================================================================================================================================================================================
+        **Name**                   **Type**                  **Default**      **Equivalent StationXML**          **Remarks**
+------------------------ ---------------------------------- ----------------- -------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+stage_sequence_number                  integer                   0                   number
+------------------------ ---------------------------------- ----------------- -------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+correction                             number                   0.0            Decimation.Correction             This value is calculated as a function of delay_correction in class Datalogger. If delay.correction exists correction=0 for all stages but the last, which has value = delay.correction. If it does not exist, correction = delay.
+------------------------ ---------------------------------- ----------------- -------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+output_sample_rate                     number                   0.0                    *None*
+======================== ================================== ================= ========================== ===========================================================================================================================================================================================================================
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/stage.schema.json>`_
+
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Stage information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/dataloggers/responses/CS5321_FIR3.stage.yaml>`_ . 
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision: 
+    date: "2017-11-30"
+    authors: 
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ notes: ["From CS5322_Filter.pdf"]
+ stage:
+    decimation_factor : 2
+    gain :         {value: 1, frequency: 0}
+    input_units :  { name : "counts", description: "Digital Counts"}
+
+    description : "DECIMATION - CS5322 FIR3 (linear phase)" 
+    filter: 
+        $ref: "FIR/CirrusLogic_CS5322_FIR3.filter.yaml#filter"
+    extras:
+        DBIRD_response_type : "THEORETICAL" 
+
+==================
+Class Navigation
+==================
+
+:ref:`ResponseStages` \<\=\=\> :ref:`Filter11`
+
+           
+

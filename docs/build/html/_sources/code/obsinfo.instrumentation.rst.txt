@@ -1,0 +1,53 @@
+obsinfo.instrumentation package
+===============================
+
+
+obsinfo.instrumentation.instrumentation module
+----------------------------------------------
+
+.. automodule:: obsinfo.instrumentation.instrumentation
+   :special-members: __init__
+
+obsinfo.instrumentation.channel module
+-----------------------------------------------
+
+.. automodule:: obsinfo.instrumentation.channel
+   :special-members: __init__
+
+obsinfo.instrumentation.instrument\_component module
+----------------------------------------------------
+
+.. automodule:: obsinfo.instrumentation.instrument_component
+   :special-members: __init__
+
+obsinfo.instrumentation.response\_stages module
+-----------------------------------------------
+
+.. automodule:: obsinfo.instrumentation.response_stages
+   :members:
+   :special-members: __init__
+
+obsinfo.instrumentation.filter module
+-------------------------------------
+
+.. automodule:: obsinfo.instrumentation.filter
+   :members:
+   :special-members: __init__
+
+obsinfo.instrumentation.equipment module
+-----------------------------------------------
+
+.. automodule:: obsinfo.instrumentation.equipment
+   :special-members: __init__
+
+obsinfo.instrumentation.location module
+-----------------------------------------------
+
+.. automodule:: obsinfo.instrumentation.location
+   :special-members: __init__
+
+obsinfo.instrumentation.orientation module
+-----------------------------------------------
+
+.. automodule:: obsinfo.instrumentation.orientation
+   :special-members: __init__

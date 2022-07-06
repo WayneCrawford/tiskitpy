@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Executing obsinfo &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial" href="../tutorial.html" />
+    <link rel="prev" title="Installation and Startup Guide" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Executing obsinfo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#obsinfo-setup">obsinfo-setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#obsinfo-makestationxml">obsinfo-makeStationXML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#obsinfo-validate">obsinfo-validate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#obsinfo-print">obsinfo-print</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Executing obsinfo</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/general/execution.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="executing-obsinfo">
+<span id="executing"></span><h1>Executing obsinfo<a class="headerlink" href="#executing-obsinfo" title="Permalink to this headline"></a></h1>
+<dl class="simple">
+<dt>There are four main executables:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#obsinfo-setup"><span class="std std-ref">obsinfo-setup</span></a></p></li>
+<li><p><a class="reference internal" href="#obsinfo-makestationxml"><span class="std std-ref">obsinfo-makeStationXML</span></a></p></li>
+<li><p><a class="reference internal" href="#obsinfo-validate"><span class="std std-ref">obsinfo-validate</span></a></p></li>
+<li><p><a class="reference internal" href="#obsinfo-print"><span class="std std-ref">obsinfo-print</span></a></p></li>
+</ul>
+</dd>
+</dl>
+<section id="obsinfo-setup">
+<h2>obsinfo-setup<a class="headerlink" href="#obsinfo-setup" title="Permalink to this headline"></a></h2>
+<p>creates an <cite>.obsinforc</cite> file that indicates where obsinfo should look for
+the reference files.  More details in the <a class="reference internal" href="installation.html#installation-and-startup-guide"><span class="std std-ref">Installation and Startup Guide</span></a></p>
+</section>
+<section id="obsinfo-makestationxml">
+<h2>obsinfo-makeStationXML<a class="headerlink" href="#obsinfo-makestationxml" title="Permalink to this headline"></a></h2>
+<p>Now you’re all set to run obsinfo. Type</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-makeStationXML -h
+</pre></div>
+</div>
+<p>to display all the options of makeStationXML. Most are self-explanatory.</p>
+<p>To create a StationXML file from a file called &lt;filename&gt;, type:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-makeStationXML <span class="o">[</span>options<span class="o">]</span> filename
+</pre></div>
+</div>
+<p>The output file, by default, will have the stem part of the network filename followed by “station.xml”.
+That is, if the filename to be processed is <code class="docutils literal notranslate"><span class="pre">BBOBS.INSU-IPGP.network.yaml</span></code>, the resulting file will be called by default
+<code class="docutils literal notranslate"><span class="pre">BBOBS.INSU-IPGP.station.xml</span></code>. This can be changed with the <code class="docutils literal notranslate"><span class="pre">-o</span></code> option.</p>
+<p>A single file is processed at a time. This is basically to simplify operation and avoid confusion with file discovery.
+However, a <code class="docutils literal notranslate"><span class="pre">for</span></code> statement in a shell script can be used to process several files at a time, as is customary.</p>
+<p>The most important thing about the way <em>obsinfo-makeStationXML</em> operates is where it finds its information files.
+As a rule, the argument you pass to the application must have a non-ambiguous path to a network
+information file, such as:</p>
+<p>..code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BBOBS</span><span class="o">.</span><span class="n">INSU</span><span class="o">-</span><span class="n">IPGP</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">yaml</span>
+
+<span class="o">./</span><span class="n">BBOBS</span><span class="o">.</span><span class="n">INSU</span><span class="o">-</span><span class="n">IPGP</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">yaml</span>
+
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">arean</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">BBOBS</span><span class="o">.</span><span class="n">INSU</span><span class="o">-</span><span class="n">IPGP</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">yaml</span>
+
+<span class="o">../../</span><span class="n">my_examples</span><span class="o">/</span><span class="n">BBOBS</span><span class="o">.</span><span class="n">INSU</span><span class="o">-</span><span class="n">IPGP</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>Standard POSIX notation is used. The first and second examples will look for the file in
+the current working directory. The third one is called an absolute path and will try to locate
+the file in the /home/arean/examples/ directory. The fourth one is a path relative to the
+working directory which will go up to levels and then down to /my_examples to find the file.</p>
+<p>All other files (i.e. the files in <code class="docutils literal notranslate"><span class="pre">$ref</span></code> attributes, will operate in a different fashion.
+Examples two, three and four will work in the same way, but example one will be considered
+a file that needs discovery. This discovery is performed through the variable
+<code class="docutils literal notranslate"><span class="pre">obsinfo_datapath</span></code>, which is a list of directories separated by commas, in typical Python/YAML syntax.
+Every director is visited in sequence.
+When the file is found in one of the, the discovery stops. If not file is found in any of the directories,
+an error message is generated.</p>
+<p>We can also make the filename passed as argument to <em>obsinfo-makeStationXML</em> behave in this way
+with the option <code class="docutils literal notranslate"><span class="pre">-r</span></code>. If we use this option, even the network file
+passed as an argument will be discovered in one of the directories in OBSINFO_DATAPATH.</p>
+<p>The rest of the options are self-explanatory, and are explained by a message generated with:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-makeStationXML -h
+
+<span class="go">usage: obsinfo-makeStationXML [-h] [-r] [-l] [-v] [-q] [-d] [-t] [-V]</span>
+<span class="go">                                   [-o OUTPUT]</span>
+<span class="go">                                   input_filename</span>
+
+<span class="go">positional arguments:</span>
+<span class="go">  input_filename        is required and must be a single value</span>
+
+<span class="go">optional arguments:</span>
+<span class="go">  -h, --help            show this help message and exit</span>
+<span class="go">  -r, --remote          Assumes input filename is discovered through obsinfo_datapath.</span>
+<span class="go">                        Does not affect treatment of $ref in info files</span>
+<span class="go">  -l, --validate        Performs complete validation, equivalent to obsinfo-validate, before processing</span>
+<span class="go">  -v, --verbose         Prints processing progression</span>
+<span class="go">  -q, --quiet           Silences a human-readable summary of processed information file</span>
+<span class="go">  -d, --debug           Turns on exception traceback</span>
+<span class="go">  -t, --test            Produces no output</span>
+<span class="go">  -V, --version         Print the version and exit</span>
+<span class="go">  -S, --station         Create a StationXML file with no instrumentation</span>
+<span class="go">  -o OUTPUT, --output OUTPUT</span>
+<span class="go">                       Names the output file. Default is &lt;input-filename-stem&gt;.station.xml</span>
+</pre></div>
+</div>
+</section>
+<section id="obsinfo-validate">
+<h2>obsinfo-validate<a class="headerlink" href="#obsinfo-validate" title="Permalink to this headline"></a></h2>
+<p>This executable will validate the specified file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-validate <span class="o">[</span>options<span class="o">]</span> filename
+</pre></div>
+</div>
+<p><em>obsinfo-validate</em> will identify the type of file from the filename and run the relevant validation.</p>
+<p>Option <code class="docutils literal notranslate"><span class="pre">-r</span></code> works as in <em>obsinfo-makeStationXML</em>. The rest of the options are self-explanatory:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-validate -h
+
+<span class="go">usage: obsinfo-validate [-h] [-q] [-r] [-d] input_filename</span>
+
+<span class="go">positional arguments:</span>
+<span class="go">  input_filename  Information file to be validated.</span>
+
+<span class="go">optional arguments:</span>
+<span class="go">  -h, --help      show this help message and exit</span>
+<span class="go">  -q, --quiet     Quiet operation. Don&#39;t print informative messages</span>
+<span class="go">  -r, --remote    Search input_filename in the DATAPATH repositories</span>
+<span class="go">  -d, --debug     Print traceback for exceptions</span>
+</pre></div>
+</div>
+<p>As mentioned in Best Practices, it is always a good idea to validate files before trying to create a StationXML file.
+Use a bottom-up approach to avoid getting difficult-to-read error messages:
+start with filters, then stages, then components, then instrumentations, then networks.</p>
+<p>All files in official central repositories are assumed to have been validated.</p>
+</section>
+<section id="obsinfo-print">
+<h2>obsinfo-print<a class="headerlink" href="#obsinfo-print" title="Permalink to this headline"></a></h2>
+<p>This executable will print the <em>obsinfo</em> objects generated out of the specified file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-print <span class="o">[</span>options<span class="o">]</span> filename
+</pre></div>
+</div>
+<p><em>obsinfo-print</em> will identify the type of file from the filename and run the relevant printing routine.
+When used with the <code class="docutils literal notranslate"><span class="pre">-l</span></code> option, it will print up to a certain level specified after the option
+according to the keywords below. For example, a sensor file with a <code class="docutils literal notranslate"><span class="pre">stage</span></code> level will not print the
+filter information, and a network file with a <code class="docutils literal notranslate"><span class="pre">station</span></code> level will not print the instrumentation information
+and down.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: obsinfo-print [-d] [-h] [-l LEVEL] input_filename</span>
+
+<span class="go">positional arguments:</span>
+<span class="go">  input_filename  Information file to be validated.</span>
+
+<span class="go">optional arguments:</span>
+<span class="go">     -l or --level: prints up to LEVEL, where LEVEL is:</span>
+<span class="go">                    all</span>
+<span class="go">                    stage</span>
+<span class="go">                    component</span>
+<span class="go">                    instrumentation</span>
+<span class="go">                    channel</span>
+<span class="go">                    station</span>
+<span class="go">                    network</span>
+<span class="go">     -d or --debug: do not catch exceptions to show error trace.</span>
+<span class="go">     -h or --help: prints this message</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation and Startup Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tutorial.html" class="btn btn-neutral float-right" title="Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

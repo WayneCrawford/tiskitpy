@@ -1,0 +1,90 @@
+.. _Instrument11:
+
+*********************
+Instrument
+*********************
+
+===============
+ Description
+===============
+
+An OBS instrument (measurement instrument) records one physical parameter. It is composed of a :ref:`Sensor`, an optional :ref:`Preamplifier11` and a :ref:`Datalogger11`.
+
+---------------------
+Python class:
+---------------------
+
+Instrument
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+*None*
+   Conceptually, the three instrument components are gathered under an instrument, which has a class in Python. However, as shorthand, we **omit** the instrument label in information files and list the ``sensor``, ``preamplifier`` and ``datalogger`` components directly under ``channel``.
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+ Atributes of an instrument are assigned to a Channel.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is assigned to a  :ref:`Channel`
+* Composed of a :ref:`Sensor`, an optional :ref:`Preamplifier11` and a :ref:`Datalogger11`
+
+==============================
+Attributes
+==============================
+
+
+======================== ================================== ============ ================= ========================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**       **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  sensor                           :ref:`Sensor`                  Y           *None*            Sensor  
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  preamprlifier                    :ref:`Preamplifier11`          N           *None*            Preamplifier  
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  datalogger                       :ref:`Datalogger11`            Y           *None*            Datalogger                    
+======================== ================================== ============ ================= ========================== =============================================================
+
+
+==============================
+JSON schema
+==============================
+
+*None*
+
+==============================
+Example
+==============================
+
+*None*
+
+==================
+Class Navigation
+==================
+
+:ref:`Channel` \<\=\=\> :ref:`InstrumentComponent`
+
+

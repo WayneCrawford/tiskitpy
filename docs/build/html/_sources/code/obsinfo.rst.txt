@@ -1,0 +1,28 @@
+Code Documentation: obsinfo package
+=============================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   obsinfo.addons
+   obsinfo.instrumentation
+   obsinfo.main
+   obsinfo.misc
+   obsinfo.network
+   obsinfo.obsMetadata
+   obsinfo.tests
+
+
+obsinfo.print\_version module
+-----------------------------
+
+.. automodule:: obsinfo.print_version
+
+obsinfo.version module
+----------------------
+
+.. automodule:: obsinfo.version
+

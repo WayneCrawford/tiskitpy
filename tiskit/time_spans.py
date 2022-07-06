@@ -43,6 +43,68 @@ class TimeSpans:
             s += f' {st} | {et}\n'
         return s
 
+    @classmethod
+    def from_eqs(cls, starttime, endtime, minmag=5.85,
+                      days_per_magnitude=1.5, eq_file=None,
+                      save_eq_file=True, quiet=False):
+        """
+        Generate timespans to avoid because of earthquakes
+    
+        Will read earthquakes from the USGS online catalog the first time,
+        saving the information to a file that can be subsequently used
+
+        Args:
+            starttime (UTCDateTime or str): earliest data that will be
+                presented.  If a str, must by ISO8601 compatible
+            endtime (UTCDateTime or str): latest data that will be presented.
+                If a str, must by ISO8601 compatible
+            minmag (float): EQ Magnitude above which to cut out times
+            days_per_magnitude (float): days to cut per magnitude above
+                min_magnitude
+            eq_file (str): the eq filename (otherwise, generates it)
+            save_eq_file (bool): save the catalog file for future use
+        Returns:
+            eq_spans (~class `.TimeSpans`): time spans covering EQ signal
+        """
+        if isinstance(starttime, str):
+            try:
+                starttime = UTCDateTime(starttime)
+            except Exception:
+                raise ValueError(f'UTCDateTime() could not read {starttime=}')
+        if isinstance(endtime, str):
+            try:
+                endtime = UTCDateTime(endtime)
+            except Exception:
+                raise ValueError(f'UTCDateTime() could not read {endtime=}')
+        if eq_file is None:
+            eq_file = _eq_filename(starttime, endtime, minmag)
+        if Path(eq_file).is_file():
+            cat = read_events(eq_file, format='quakeml')
+        else:
+            if not quiet:
+                print('Reading EQs from USGS online catalog...', end='',
+                      flush=True)
+            cat = Client("USGS").get_events(
+                starttime=starttime - _calc_eq_cut(9, minmag, days_per_magnitude),
+                endtime=endtime,
+                minmagnitude=minmag,
+                orderby='time-asc')
+            if not quiet:
+                print('Done', flush=True)
+                print(f'writing catalog to "{eq_file}"')
+            if save_eq_file:
+                cat.write(eq_file, format='quakeml')
+
+        new_cat = Catalog(events=[x for x in cat
+                                  if x.preferred_magnitude().mag >= minmag])
+        start_times = [x.preferred_origin().time for x in new_cat]
+        end_times = [x.preferred_origin().time
+                     + _calc_eq_cut(x.preferred_magnitude().mag, minmag,
+                                    days_per_magnitude)
+                     for x in new_cat]
+        return cls(start_times, end_times)
+
+
     def validate(self):
         """
         Returns false if there is a problem
@@ -263,63 +325,6 @@ class TimeSpans:
         if show:
             plt.show()        
     
-    @classmethod
-    def from_eqs(cls, starttime, endtime, minmag=5.85,
-                      days_per_magnitude=1.5, quiet=False):
-        """
-        Generate timespans to avoid because of earthquakes
-    
-        Will read earthquakes from the USGS online catalog the first time, saving
-        the information to a file that can be subsequently used
-
-        Args:
-            starttime (UTCDateTime or str): earliest data that will be
-                presented.  If a str, must by ISO8601 compatible
-            endtime (UTCDateTime or str): latest data that will be presented.
-                If a str, must by ISO8601 compatible
-            minmag (float): EQ Magnitude above which to cut out times
-            days_per_magnitude (float): days to cut per magnitude above
-                min_magnitude
-        Returns:
-            eq_spans (~class `.TimeSpans`): time spans covering EQ signal
-        """
-        if isinstance(starttime, str):
-            try:
-                starttime = UTCDateTime(starttime)
-            except Exception:
-                raise ValueError(f'UTCDateTime() could not read {starttime=}')
-        if isinstance(endtime, str):
-            try:
-                endtime = UTCDateTime(endtime)
-            except Exception:
-                raise ValueError(f'UTCDateTime() could not read {endtime=}')
-        eqfile = _eq_filename(starttime, endtime, minmag)
-        if Path(eqfile).is_file():
-            cat = read_events(eqfile, format='quakeml')
-        else:
-            if not quiet:
-                print('Reading EQs from USGS online catalog...', end='',
-                      flush=True)
-            cat = Client("USGS").get_events(
-                starttime=starttime - _calc_eq_cut(9, minmag, days_per_magnitude),
-                endtime=endtime,
-                minmagnitude=minmag,
-                orderby='time-asc')
-            if not quiet:
-                print('Done', flush=True)
-            print(f'writing catalog to "{eqfile}"')
-            cat.write(eqfile, format='quakeml')
-
-        new_cat = Catalog(events=[x for x in cat
-                                  if x.preferred_magnitude().mag >= minmag])
-        start_times = [x.preferred_origin().time for x in new_cat]
-        end_times = [x.preferred_origin().time
-                     + _calc_eq_cut(x.preferred_magnitude().mag, minmag,
-                                    days_per_magnitude)
-                     for x in new_cat]
-        return cls(start_times, end_times)
-
-
 def _calc_eq_cut(mag, minmag, days_per_magnitude):
     if mag < minmag:
         return None

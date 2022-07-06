@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filter &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ADConversion" href="AD_conversion.html" />
+    <link rel="prev" title="Stage" href="stage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../classes.html">Classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../classes.html#information-file-tree">Information File Tree</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html#filter-types">Filter Types</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="network.html">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="operator.html">Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="station.html">Station</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="channel.html">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument.html">Instrument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sensor.html">Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datalogger.html">Datalogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_stages.html">ResponseStages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_list.html">ResponseList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stage</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#superclass">Superclass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subclasses">Subclasses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#relationships">Relationships</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#json-schema">JSON schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#class-navigation">Class Navigation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="analog.html">Analog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="coefficients.html">Coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="digital.html">Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FIR.html">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="leap_second.html">LeapSecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location.html">Location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location_base.html">LocationBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="analog.html">Analog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="channel.html">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="coefficients.html">Coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datalogger.html">Datalogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="digital.html">Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#superclass">Superclass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subclasses">Subclasses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#relationships">Relationships</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#json-schema">JSON schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#class-navigation">Class Navigation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="FIR.html">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument.html">Instrument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="leap_second.html">LeapSecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location_base.html">LocationBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location.html">Location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="network.html">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="operator.html">Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_list.html">ResponseList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_stages.html">ResponseStages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sensor.html">Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="station.html">Station</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../classes.html">Classes</a> &raquo;</li>
+      <li>Filter</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/classes/filter.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="filter">
+<span id="filter11"></span><h1>Filter<a class="headerlink" href="#filter" title="Permalink to this headline"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>The class Filter describes the different types of filters that process
+the signal in the stages of the instrument components of an OBS.</p>
+</section>
+<section id="superclass">
+<h2>Superclass<a class="headerlink" href="#superclass" title="Permalink to this headline"></a></h2>
+<p><em>None</em></p>
+</section>
+<section id="subclasses">
+<h2>Subclasses<a class="headerlink" href="#subclasses" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="poleszeros.html#poleszeros11"><span class="std std-ref">PolesZeros</span></a></p></li>
+<li><p><a class="reference internal" href="FIR.html#fir11"><span class="std std-ref">FIR</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="analog.html#analog11"><span class="std std-ref">Analog</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="coefficients.html#coefficients11"><span class="std std-ref">Coefficients</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="AD_conversion.html#adconversion"><span class="std std-ref">ADConversion</span></a></p></li>
+<li><p><a class="reference internal" href="digital.html#digital11"><span class="std std-ref">Digital</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="response_list.html#responselist"><span class="std std-ref">Response List</span></a></p></li>
+</ul>
+</section>
+<section id="relationships">
+<h2>Relationships<a class="headerlink" href="#relationships" title="Permalink to this headline"></a></h2>
+<p>Is nested in a <a class="reference internal" href="stage.html#stage"><span class="std std-ref">Stage</span></a></p>
+</section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 5%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 16%" />
+<col style="width: 58%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>Name</strong></p></td>
+<td><p><strong>Type</strong></p></td>
+<td><p><strong>Required</strong></p></td>
+<td><p><strong>Default</strong></p></td>
+<td><p><strong>Equivalent StationXML</strong></p></td>
+<td><p><strong>Remarks</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>string</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p>N/A</p></td>
+<td><p>Possible values: “PolesZeros”, “FIR”, “Coefficients”, “Analog”, “Digital”, “ADConversion”</p></td>
+</tr>
+<tr class="row-odd"><td><p>offset</p></td>
+<td><p>number</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p>Decimation.Offset</p></td>
+<td><p>If delay is not present in the corresponding Stage, it will be set to offset/input_sample_rate</p></td>
+</tr>
+</tbody>
+</table>
+<p>Depending on the <cite>type</cite>, other attributes will be required</p>
+</section>
+<section id="json-schema">
+<h2>JSON schema<a class="headerlink" href="#json-schema" title="Permalink to this headline"></a></h2>
+<p><a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json</a></p>
+<p><a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json</a></p>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h2>
+<p>This is the filter information file <a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/dataloggers/responses/FIR/CirrusLogic_CS5322_FIR3.filter.yaml">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/dataloggers/responses/FIR/CirrusLogic_CS5322_FIR3.filter.yaml</a> ,
+which specifies a “FIR”-type filter.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">notes</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;101</span><span class="nv"> </span><span class="s">coefficients,</span><span class="nv"> </span><span class="s">linear</span><span class="nv"> </span><span class="s">phase</span><span class="nv"> </span><span class="s">filter&quot;</span><span class="p p-Indicator">]</span>
+
+<span class="nt">filter</span><span class="p">:</span>
+   <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;FIR&quot;</span>
+   <span class="nt">symmetry</span><span class="p">:</span> <span class="s">&quot;NONE&quot;</span>
+   <span class="nt">offset</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+   <span class="nt">coefficients</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-3.09982E-6</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-2.94483E-5</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-9.8002E-5</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-1.62383E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-1.00029E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">1.20655E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">2.61935E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">2.52755E-5</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-4.10488E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-3.66852E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">3.7627E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">8.54597E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-3.05213E-5</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-0.00127677</span>
+         <span class="l l-Scalar l-Scalar-Plain">...</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">1.20655E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-1.00029E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-1.62383E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-9.8002E-5</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-2.94483E-5</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-3.09982E-6</span>
+</pre></div>
+</div>
+</section>
+<section id="class-navigation">
+<h2>Class Navigation<a class="headerlink" href="#class-navigation" title="Permalink to this headline"></a></h2>
+<p><a class="reference internal" href="stage.html#stage"><span class="std std-ref">Stage</span></a> &lt;==</p>
+<p>==&gt; <a class="reference internal" href="poleszeros.html#poleszeros11"><span class="std std-ref">PolesZeros</span></a></p>
+<p>==&gt; <a class="reference internal" href="FIR.html#fir11"><span class="std std-ref">FIR</span></a></p>
+<p>==&gt; <a class="reference internal" href="coefficients.html#coefficients11"><span class="std std-ref">Coefficients</span></a></p>
+<p>==&gt; <a class="reference internal" href="response_list.html#responselist"><span class="std std-ref">ResponseList</span></a></p>
+<p>==&gt; <a class="reference internal" href="AD_conversion.html#adconversion"><span class="std std-ref">ADConversion</span></a></p>
+<p>==&gt; <a class="reference internal" href="digital.html#digital11"><span class="std std-ref">Digital</span></a></p>
+<p>==&gt; <a class="reference internal" href="analog.html#analog11"><span class="std std-ref">Analog</span></a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="stage.html" class="btn btn-neutral float-left" title="Stage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="AD_conversion.html" class="btn btn-neutral float-right" title="ADConversion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

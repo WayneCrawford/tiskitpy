@@ -28,10 +28,11 @@ class TestMethods(unittest.TestCase):
         """
         # this file only has 3 minutes and an EQ, is it enough?
         stream = stream_read(str(self.test_path / 'XS.S10D.LH.mseed'))
-        # rot_stream, bestAngle, bestAzimuth = rotate_clean(stream,
-        #                                                   verbose=False)
-        rotator = CleanRotator(stream, verbose=False)
-        # rot_stream = rotator.apply(stream)
+        rotator = CleanRotator(
+            stream, verbose=False,
+            remove_eq=str(self.test_path
+                          / "20161205T-20161207T_MM5.85_eqcat.qml"),
+                          save_eq_file=False)
         self.assertAlmostEqual(rotator.angle, -0.18, delta=0.01)
         self.assertAlmostEqual(rotator.azimuth, 61.67, delta=0.01)
 

@@ -1,0 +1,140 @@
+.. _Channel:
+
+***************
+Channel
+***************
+
+===============
+ Description
+===============
+
+An OBS channel is an :ref:`Instrument11` plus an orientation. An :ref:`Instrumentation` complex consists of one or several channels, each one implementing the signal processing of an instrument.
+
+Actual channels all have string labels, which are usually channel numbers. They must specify an orientation. Default chann properties can be specified with a label ``default``. This is not an actual channel. These properties are common to all channels *unless* overridden by attributes present in specific channels. For example, if a sensor **X**  appears under the label ``default`` but a sensor **Y**  appears under the label "2" then for channel 2  the selected sensor will be **Y**. If a preamplifier **Z**  is specified under the label ``default`` and no preamplifier is specified under the label "2", then channel 2 will have preamplifier **Z**. All attributes can be specified under the ``default`` label.
+
+Configurations are defined at the instrument component level, but are selected at the channel level. A configuration selection attribute specifies a configuration for each of the three instrument components in a channel: sensor, preamplifier and datalogger. They are the attributes sensor_configuration, preamplifier_configuration and datalogger_configuration, respectively.
+
+---------------------
+Python class:
+---------------------
+
+Channel
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+* channels
+* default
+* Particular string labels for each channel
+
+Channels are part of the instrumentation information file.
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Channel
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Implements the signal of an :ref:`Instrument <Instrument11>`
+* Is part of an :ref:`Instrumentation <Instrumentation>`
+
+==============================
+Attributes
+==============================
+
+.. _Azimuth: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#azimuth
+.. _Dip: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#dip
+.. _startDate: hhttp://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel
+.. _endDate: hhttp://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel
+.. _LocationCode: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel
+
+============================ ================================== ============ ================= =========================================== ================================================================================================== 
+        **Name**                       **Type**                 **Required**    **Default**    **Equivalent StationXML**                    **Remarks**
+---------------------------- ---------------------------------- ------------ ----------------- ------------------------------------------- --------------------------------------------------------------------------------------------------
+  instrument                           :ref:`Instrument11`             Y           *None*            *None*                                 Attributes of instrument in Channel in StationXML
+---------------------------- ---------------------------------- ------------ ----------------- ------------------------------------------- --------------------------------------------------------------------------------------------------
+  orientation:                          Orientation                    Y           *None*            *None*
+    * orientation_code           List of values: X,Y,Z,1,2,3,H         Y           *None*            *None*                                 If orientation code is 1,2,3 or H it must include as a dictionary azimuth and dip. See example.                       
+    * azimuth                           number                         Y           *None*            Channel. `Azimuth`_                     0.0 ≤ Azimuth < 360.0 in degrees                       
+    * dip                               number                         Y           *None*            Channel. `Dip`_                         -90.0 ≤ Dip ≤ 90.0 in degrees
+---------------------------- ---------------------------------- ------------ ----------------- ------------------------------------------- --------------------------------------------------------------------------------------------------
+  location_code                        string                          Y           *None*           `locationCode`_                           See :ref:`LocationBase` for details of how location codes are used.
+---------------------------- ---------------------------------- ------------ ----------------- ------------------------------------------- --------------------------------------------------------------------------------------------------
+  sensor_configuration                  string                         N            *None*           *None*                                 For *obsinfo* use only. This selects one of the configurations defined in the instrument components.
+      
+---------------------------- ---------------------------------- ------------ ----------------- ------------------------------------------- --------------------------------------------------------------------------------------------------
+ preamplifier_configuration              string                        N            *None*           *None*                                 For *obsinfo* use only. This selects one of the configurations defined in the instrument components.
+                                            
+---------------------------- ---------------------------------- ------------ ----------------- ------------------------------------------- --------------------------------------------------------------------------------------------------
+  datalogger_configuration              string                         N            *None*           *None*                                For *obsinfo* use only. This selects one of the configurations defined in the instrument components. 
+
+============================ ================================== ============ ================= =========================================== ==================================================================================================
+
+Orientation codes are a FDSN standard. By convention, if the orientation code is **X**, **Y** or **Z**, these represent the regular coordinates in space following the right-hand rule, within five degrees of the actual directions. So **X** corresponds to an azimuth of 0º and a dip of 0º, **Y** corresponds to an azimuth of 90º and a dip of 0º, and **Z** corresponds to an azimuth of 0º and a dip of -90º (the positive **Z** direction is towards the bottom). However, if **1**, **2** or **3** are specified, these represent three linearly independent directions but not necessarily coincidental with the regular coordinates, so an azimuth and a dip _must_ be specified. The same is true of the **H** (hydrophone) code.
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/instrumentation.schema.json>`_
+
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+
+==============================
+Example
+==============================
+
+Channels part of instrumentation information file `<https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/BBOBS1_2012%2B.instrumentation.yaml>`_
+
+.. code-block:: yaml
+
+    channels:
+        default:
+            datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+            preamplifier:  
+                {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"}
+            sensor: {$ref: "sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor"}    
+        
+            preamplifier_configuration: "0.225x"
+     
+        "1": {orientation_code: {"2": {azimuth.deg: [90, 0]}}}
+        "2": {orientation_code: {"1": {azimuth.deg: [0, 0]}}}
+        "3": 
+            orientation_code: "Z"
+            preamplifier_configuration: "1x"
+        "4":
+            orientation_code : {"H": {azimuth.deg: [0,0], dip.deg: [90,0]}}
+            preamplifier: {$ref: "preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier"}
+            sensor: {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+           
+
+===================
+Class Navigation
+===================
+
+:ref:`Instrumentation` \<\=\=\> :ref:`Instrument11`
+
+           

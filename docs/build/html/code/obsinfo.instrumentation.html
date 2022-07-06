@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>obsinfo.instrumentation package &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="obsinfo.main package" href="obsinfo.main.html" />
+    <link rel="prev" title="obsinfo.addons package" href="obsinfo.addons.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer’s Corner</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Technical Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="obsinfo.html">Code Documentation: obsinfo package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="obsinfo.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.addons.html">obsinfo.addons package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">obsinfo.instrumentation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.main.html">obsinfo.main package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.misc.html">obsinfo.misc package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.network.html">obsinfo.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.obsMetadata.html">obsinfo.obsMetadata package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.tests.html">obsinfo.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.print_version">obsinfo.print_version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.version">obsinfo.version module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Technical Documentation</a> &raquo;</li>
+          <li><a href="obsinfo.html">Code Documentation: obsinfo package</a> &raquo;</li>
+      <li>obsinfo.instrumentation package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/obsinfo.instrumentation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="obsinfo-instrumentation-package">
+<h1>obsinfo.instrumentation package<a class="headerlink" href="#obsinfo-instrumentation-package" title="Permalink to this headline"></a></h1>
+<section id="module-obsinfo.instrumentation.instrumentation">
+<span id="obsinfo-instrumentation-instrumentation-module"></span><h2>obsinfo.instrumentation.instrumentation module<a class="headerlink" href="#module-obsinfo.instrumentation.instrumentation" title="Permalink to this headline"></a></h2>
+<p>Instrumentation class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrumentation.Instrumentation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.instrumentation.</span></span><span class="sig-name descname"><span class="pre">Instrumentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict_or_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modifications</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serial_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrumentation.Instrumentation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>One or more Instruments. Part of an obspy/StationXML Station</p>
+<p>Methods convert info files to an instance of this class. No equivalent
+obspy/StationXML class</p>
+<p>A more detailed description the class and its attributes is found in XXX</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrumentation.Instrumentation.equipment">
+<span class="sig-name descname"><span class="pre">equipment</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrumentation.Instrumentation.equipment" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Equipment</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrumentation.Instrumentation.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrumentation.Instrumentation.channels" title="Permalink to this definition"></a></dt>
+<dd><p>list of channels (<code class="xref py py-class docutils literal notranslate"><span class="pre">Channel</span></code>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrumentation.Instrumentation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict_or_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modifications</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serial_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrumentation.Instrumentation.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<p>attributes_dict may contain a configuration_selection for the
+instrumentation and the corresponding configs for the components:
+datalogger, preamplifier and sensor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes_dict_or_list</strong> (<em>dict/ObsMetadata</em><em> or </em><em>list of same</em>) – instrumentation(s) attributes</p></li>
+<li><p><strong>locations</strong> (<em>list</em>) – of <code class="xref py py-class docutils literal notranslate"><span class="pre">Locations</span></code></p></li>
+<li><p><strong>start_date</strong> (<em>str</em>) – start date</p></li>
+<li><p><strong>end_date</strong> (<em>str</em>) – end date</p></li>
+<li><p><strong>channel_modifications</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – modification of attributes per channel specified in stations</p></li>
+<li><p><strong>serial_number</strong> (<em>str</em>) – instrumentation (OBS) serial number.
+Configures nothing for now</p></li>
+</ul>
+</dd>
+</dl>
+<p>locations, start_date and end_date are inherited from the
+corresponding attributes in a station to fill out StationXML fields.
+It is assumed an instrumentation default location,
+start date and end_date are the same as its station’s.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.instrumentation.channel">
+<span id="obsinfo-instrumentation-channel-module"></span><h2>obsinfo.instrumentation.channel module<a class="headerlink" href="#module-obsinfo.instrumentation.channel" title="Permalink to this headline"></a></h2>
+<p>Channel, Instrument and Operator classes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.channel.</span></span><span class="sig-name descname"><span class="pre">Channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_mods_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Corresponds to StationXML/obspy Channel plus channel code</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.das_channel">
+<span class="sig-name descname"><span class="pre">das_channel</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.das_channel" title="Permalink to this definition"></a></dt>
+<dd><p>represents a channel with defaults
+incorporated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.orientation_code">
+<span class="sig-name descname"><span class="pre">orientation_code</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.orientation_code" title="Permalink to this definition"></a></dt>
+<dd><p>orientation code for this channel (part of
+its ID)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.location_code">
+<span class="sig-name descname"><span class="pre">location_code</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.location_code" title="Permalink to this definition"></a></dt>
+<dd><p>location code for this channel (part of its ID)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.location">
+<span class="sig-name descname"><span class="pre">location</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.location" title="Permalink to this definition"></a></dt>
+<dd><p>represents location corresponding to
+location_code</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Location</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.start_date">
+<span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.start_date" title="Permalink to this definition"></a></dt>
+<dd><p>inherited from Station</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.end_date">
+<span class="sig-name descname"><span class="pre">end_date</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.end_date" title="Permalink to this definition"></a></dt>
+<dd><p>inherited from Station</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.instrument">
+<span class="sig-name descname"><span class="pre">instrument</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.instrument" title="Permalink to this definition"></a></dt>
+<dd><p>a sensor, a datalogger and an
+optional preamplifier</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrument</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.orientation">
+<span class="sig-name descname"><span class="pre">orientation</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.orientation" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Location</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.comments">
+<span class="sig-name descname"><span class="pre">comments</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.comments" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.extras">
+<span class="sig-name descname"><span class="pre">extras</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.extras" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.obspy_channel">
+<span class="sig-name descname"><span class="pre">obspy_channel</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.obspy_channel" title="Permalink to this definition"></a></dt>
+<dd><p>The
+obspy equivalent  of this object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">obspy.core.inventory.channel.Channel</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_mods_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel_label</strong> (<em>str</em>) – label to identify channel. Different from the
+channel id code and only used in the information file.</p></li>
+<li><p><strong>of</strong> (<em>attributes_dict_or_list</em><em> (</em><em>dict/ObsMetadata object</em><em> or </em><em>list</em>) – dicts//ObsMetadata objects): channel attributes</p></li>
+<li><p><strong>locations</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">Location</span></code>) – </p></li>
+<li><p><strong>start_date</strong> – (str): using date format</p></li>
+<li><p><strong>end_date</strong> – (str): using date format</p></li>
+<li><p><strong>channel_default</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – default attributes
+to complement attributes specified in attributes_dict</p></li>
+<li><p><strong>channel_mods_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – modification of
+attributes per channel specified in stations</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.channel_code">
+<span class="sig-name descname"><span class="pre">channel_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.channel_code" title="Permalink to this definition"></a></dt>
+<dd><p>Return channel code for a given sample rate.</p>
+<p>Validates instrument and orientation codes according to FDSN
+specifications (for instruments, just the length). Channel codes
+specified by user are indicative and are refined using actual sample
+rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sample_rate</strong> (<em>float</em>) – instrumentation sampling rate (sps)i</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.channel_id_code">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">channel_id_code</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.channel_id_code" title="Permalink to this definition"></a></dt>
+<dd><p>Uniquely identify channel through orientation and location code</p>
+<p>format: {orientation}-{location}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>channel code</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.complete_channel">
+<span class="sig-name descname"><span class="pre">complete_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">das_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_default</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.complete_channel" title="Permalink to this definition"></a></dt>
+<dd><p>Complement fields defined for each das channel</p>
+<p>Takes all the fields defined for each das channel and complementa them
+with the channel_default fields. If das_channel key exists, leave the
+corresponding value. If not, add channel_default key/value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>das_channel</strong> (dict or object of <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – channel to be completed with default</p></li>
+<li><p><strong>channel_default</strong> (dict or object of <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – default that will complement attributes not
+present in <code class="docutils literal notranslate"><span class="pre">das_channel</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.convert_notes_and_extras_to_obspy">
+<span class="sig-name descname"><span class="pre">convert_notes_and_extras_to_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.convert_notes_and_extras_to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Convert notes and extras to comments.</p>
+<p>In StationXML comments are found at the channel level and up.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.get_orientation_code">
+<span class="sig-name descname"><span class="pre">get_orientation_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.get_orientation_code" title="Permalink to this definition"></a></dt>
+<dd><p>Get the orientation code from a dict that may include azimuth and dip</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.get_selected_channel_modifications">
+<span class="sig-name descname"><span class="pre">get_selected_channel_modifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_mods_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.get_selected_channel_modifications" title="Permalink to this definition"></a></dt>
+<dd><p>Select a channel_modification by to id_code and channel label.</p>
+<p>An <code class="docutils literal notranslate"><span class="pre">id_code</span></code> is composed of an <code class="docutils literal notranslate"><span class="pre">orientation</span> <span class="pre">code</span></code> plus a “-”
+plus a <code class="docutils literal notranslate"><span class="pre">location</span> <span class="pre">code</span></code>. Selectors for <code class="docutils literal notranslate"><span class="pre">channel</span> <span class="pre">labels</span></code> in
+modifications can be:</p>
+<dl class="field-list simple">
+<dt class="field-odd">“*” or “-”</dt>
+<dd class="field-odd"><p>Applies to all <code class="docutils literal notranslate"><span class="pre">id_codes</span></code></p>
+</dd>
+<dt class="field-even">“&lt;NUM&gt;”-“*”</dt>
+<dd class="field-even"><p>Applies to all locations and a given channel
+orientation, &lt;NUM&gt;</p>
+</dd>
+<dt class="field-odd">“*”-“&lt;NUM&gt;”</dt>
+<dd class="field-odd"><p>Applies to all orientations and a given channel
+location, &lt;NUM&gt;</p>
+</dd>
+<dt class="field-even">“&lt;NUM&gt;-“&lt;NUM&gt;”</dt>
+<dd class="field-even"><p>Applies to a give orientation and a given
+location, &lt;NUM&gt;</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>selected channel modification</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.seed_code">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">seed_code</span></span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.seed_code" title="Permalink to this definition"></a></dt>
+<dd><p>This is equivalent to channel code</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.channel.Channel.to_obspy">
+<span class="sig-name descname"><span class="pre">to_obspy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.channel.Channel.to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Create obspy Channel object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><cite>obspy.core.inventory.channel.Channel</cite>)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(~class</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.instrumentation.instrument_component">
+<span id="obsinfo-instrumentation-instrument-component-module"></span><h2>obsinfo.instrumentation.instrument_component module<a class="headerlink" href="#module-obsinfo.instrumentation.instrument_component" title="Permalink to this headline"></a></h2>
+<p>InstrumentComponent class and subclasses Sensor, Preamplifier, Datalogger.
+Equipment class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Datalogger">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.instrument_component.</span></span><span class="sig-name descname"><span class="pre">Datalogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Datalogger" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent" title="obsinfo.instrumentation.instrument_component.InstrumentComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.instrument_component.InstrumentComponent</span></code></a></p>
+<p>Datalogger Instrument Component.</p>
+<p>Obspy equivalent is Datalogger, but only contains elements of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Equipment</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Datalogger.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Datalogger.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>equipment</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Equipment</span></code>) – equipment attributes</p></li>
+<li><p><strong>sample_rate</strong> (<em>float</em>) – sample rate of given configuration. Checked
+against actual sample rate</p></li>
+<li><p><strong>delay_correction</strong> (<em>float</em><em> or </em><em>None</em>) – the delay correction of the
+component. If a float, it is applied to the last stage and the
+other stage corrections are set to 0.  If None, each stage’s
+correction is set equal to its delay</p></li>
+<li><p><strong>response_stages</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ResponseStages</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>config_description</strong> (<em>str</em>) – the configuration description that was
+selected, to complement component description</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Datalogger.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Datalogger.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create Datalogger instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – component
+attributes</p></li>
+<li><p><strong>channel_modif</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – the configuration
+description that will override or complement default values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.instrument_component.Datalogger" title="obsinfo.instrumentation.instrument_component.Datalogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datalogger</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.instrument_component.</span></span><span class="sig-name descname"><span class="pre">InstrumentComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>InstrumentComponent class. Is superclass of all component classes.
+No obspy/StationXML equivalent, because they only specify the whole
+sensor+amplifier+datalogger system</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent.equipment">
+<span class="sig-name descname"><span class="pre">equipment</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent.equipment" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Equipment</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent.response_stages">
+<span class="sig-name descname"><span class="pre">response_stages</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent.response_stages" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ResponseStages</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent.obspy_equipment">
+<span class="sig-name descname"><span class="pre">obspy_equipment</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent.obspy_equipment" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">obspy_Equipment</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent.config_description">
+<span class="sig-name descname"><span class="pre">config_description</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent.config_description" title="Permalink to this definition"></a></dt>
+<dd><p>description of configuration to be added
+to equipment description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor. Invoked by dynamic_class_constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>equipment</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Equipment</span></code>) – equipment features of component</p></li>
+<li><p><strong>response_stages</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ResponseStages</span></code>) – Response of component
+as a list of stages</p></li>
+<li><p><strong>config_description</strong> (<em>str</em>) – description of configuration to be added
+to equipment description</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent.dynamic_class_constructor">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Creates an appropriate Instrument_component subclass (Sensor,
+Preamplifier, Datalogger) from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component_type</strong> (<em>str</em>) – type of component. Used for selection of
+adecuate class.</p></li>
+<li><p><strong>attributes_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – component
+attributes</p></li>
+<li><p><strong>channel_modif</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>delay_correction</strong> (<em>float</em><em> or </em><em>None</em>) – delay correction in seconds:
+if a float: set last component stage to this, others to 0.
+if None: all component stage corrections are set = delay</p></li>
+<li><p><strong>config_selector</strong> (<em>str</em>) – selector of configuration coming from
+Instrument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of the adequate subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.InstrumentComponent.retrieve_configuration">
+<span class="sig-name descname"><span class="pre">retrieve_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration_selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent.retrieve_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Completes the component configuration.</p>
+<p>A configuration selector can be defined in the instrumentation class,
+otherwise a config default is used.  They may be used to select a
+configuration in the list of configuration definitions. If a
+configuration matches the selector configuration its attributes will
+override or add to existing attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comp_type</strong> (<em>str</em>) – Type of instrument component. Used for messaging
+purposes only</p></li>
+<li><p><strong>attributes_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – attributes of
+component, hopefully including configuration_default</p></li>
+<li><p><strong>configuration_selection</strong> (<em>str</em>) – label of configuration to be
+selected</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>selected configuration, if found. Otherwise, empty dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Preamplifier">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.instrument_component.</span></span><span class="sig-name descname"><span class="pre">Preamplifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Preamplifier" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent" title="obsinfo.instrumentation.instrument_component.InstrumentComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.instrument_component.InstrumentComponent</span></code></a></p>
+<p>Preamplifier Instrument Component. No obspy equivalent</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Attributes:</dt><dd><p>None</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Preamplifier.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Preamplifier.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>equipment</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Equipment</span></code>) – Equipment information</p></li>
+<li><p><strong>response_stages</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ResponseStages</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>config_description</strong> (<em>str</em>) – the configuration description that was
+selected, added to equipment description</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Preamplifier.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Preamplifier.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create Preamplifier instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – attributes of
+component</p></li>
+<li><p><strong>channel_modif</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – the configuration
+description that will override or complement default values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.instrument_component.Preamplifier" title="obsinfo.instrumentation.instrument_component.Preamplifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Preamplifier</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Sensor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.instrument_component.</span></span><span class="sig-name descname"><span class="pre">Sensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_band_base_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_instrument_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Sensor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.instrument_component.InstrumentComponent" title="obsinfo.instrumentation.instrument_component.InstrumentComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.instrument_component.InstrumentComponent</span></code></a></p>
+<p>Sensor Instrument Component. No obspy equivalent</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Sensor.seed_band_base_code">
+<span class="sig-name descname"><span class="pre">seed_band_base_code</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Sensor.seed_band_base_code" title="Permalink to this definition"></a></dt>
+<dd><p>SEED base code (“B” or “S”) indicating
+instrument band.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Sensor.seed_instrument_code">
+<span class="sig-name descname"><span class="pre">seed_instrument_code</span></span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Sensor.seed_instrument_code" title="Permalink to this definition"></a></dt>
+<dd><p>SEED instrument code</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Sensor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equipment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_band_base_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_instrument_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_stages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Sensor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>equipment</strong> (<a class="reference internal" href="#obsinfo.instrumentation.equipment.Equipment" title="obsinfo.instrumentation.equipment.Equipment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equipment</span></code></a>) – Equipment information</p></li>
+<li><p><strong>seed_band_base_code</strong> (<em>str</em><em> (</em><em>len 1</em><em>)</em>) – SEED base code (“B” or “S”)
+indicating instrument band.  Must be modified by
+obsinfo to correspond to output sample rate. Actual SEED base
+code is determined by FDSN standard &lt;<a class="reference external" href="http://docs.fdsn.org/">http://docs.fdsn.org/</a>
+projects/source-identifiers/en/v1.0/channel-codes.html&gt;`</p></li>
+<li><p><strong>code</strong> (<em>seed_instrument</em>) – SEED instrument code, determined
+by <cite>FDSN standard &lt;http://docs.fdsn.org/projects/source-
+identifiers/en/v1.0/channel-codes.html&gt;</cite></p></li>
+<li><p><strong>response_stages</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ResponseStages</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>config_description</strong> (<em>str</em>) – the configuration description that was
+selected, to complement component description</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.instrument_component.Sensor.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.instrument_component.Sensor.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create Sensor instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – attributes of
+component</p></li>
+<li><p><strong>channel_modif</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – the configuration
+description that will override or complement default values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.instrument_component.Sensor" title="obsinfo.instrumentation.instrument_component.Sensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sensor</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.instrumentation.response_stages">
+<span id="obsinfo-instrumentation-response-stages-module"></span><h2>obsinfo.instrumentation.response_stages module<a class="headerlink" href="#module-obsinfo.instrumentation.response_stages" title="Permalink to this headline"></a></h2>
+<p>ResponseStages and Stage classes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.ResponseStages">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.response_stages.</span></span><span class="sig-name descname"><span class="pre">ResponseStages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.ResponseStages" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An ordered list of <a class="reference internal" href="#obsinfo.instrumentation.response_stages.Stage" title="obsinfo.instrumentation.response_stages.Stage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Stage</span></code></a>, representing a total response.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.ResponseStages.stages">
+<span class="sig-name descname"><span class="pre">stages</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.ResponseStages.stages" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of objects of <a class="reference internal" href="#obsinfo.instrumentation.response_stages.Stage" title="obsinfo.instrumentation.response_stages.Stage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Stage</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">obspy_stages</span> <span class="pre">(list</span> <span class="pre">of</span> <span class="pre">objects</span> <span class="pre">of</span> <span class="pre">different</span> <span class="pre">obspy</span> <span class="pre">classes</span> <span class="pre">according</span></span></dt>
+<dd><p>to the type of stage)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.ResponseStages.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.ResponseStages.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<p>Method can be invoked with attribute_list as a single element of class
+Stage or as a list of them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute_list</strong> (<em>list of dicts</em><em> or </em><em>dict</em>) – list of information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – configuration
+description to override or complement default values</p></li>
+<li><p><strong>delay_correction</strong> (<em>float</em>) – used only for datalogger: the delay
+correction for the entire instrument</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.ResponseStages.to_obspy">
+<span class="sig-name descname"><span class="pre">to_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.ResponseStages.to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Return list of obspy stage classes</p>
+<p>Each class will have a different obspy class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of objects of obspy classes</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.response_stages.</span></span><span class="sig-name descname"><span class="pre">Stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Stage is a discrete portion of the response of the instrument</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.name" title="Permalink to this definition"></a></dt>
+<dd><p>name of stage, if any</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.description" title="Permalink to this definition"></a></dt>
+<dd><p>description of stage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.input_units">
+<span class="sig-name descname"><span class="pre">input_units</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.input_units" title="Permalink to this definition"></a></dt>
+<dd><p>validated in schema</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.input_units_description">
+<span class="sig-name descname"><span class="pre">input_units_description</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.input_units_description" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.output_units">
+<span class="sig-name descname"><span class="pre">output_units</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.output_units" title="Permalink to this definition"></a></dt>
+<dd><p>validated in schema</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.output_units_description">
+<span class="sig-name descname"><span class="pre">output_units_description</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.output_units_description" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.gain">
+<span class="sig-name descname"><span class="pre">gain</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.gain" title="Permalink to this definition"></a></dt>
+<dd><p>value of gain</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.gain_frequency">
+<span class="sig-name descname"><span class="pre">gain_frequency</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.gain_frequency" title="Permalink to this definition"></a></dt>
+<dd><p>frequency at which gain is measured</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.filter" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>object of <code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.stage_sequence_number">
+<span class="sig-name descname"><span class="pre">stage_sequence_number</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.stage_sequence_number" title="Permalink to this definition"></a></dt>
+<dd><p>sequence number in total response, assigned
+later</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.input_sample_rate">
+<span class="sig-name descname"><span class="pre">input_sample_rate</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.input_sample_rate" title="Permalink to this definition"></a></dt>
+<dd><p>input sample rate in sps</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.delay">
+<span class="sig-name descname"><span class="pre">delay</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.delay" title="Permalink to this definition"></a></dt>
+<dd><p>delay in seconds of stage. If not present, will be
+calculated from offset from digital stages</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.decimation_factor">
+<span class="sig-name descname"><span class="pre">decimation_factor</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.decimation_factor" title="Permalink to this definition"></a></dt>
+<dd><p>decimation factor of stage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.correction">
+<span class="sig-name descname"><span class="pre">correction</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.correction" title="Permalink to this definition"></a></dt>
+<dd><p>delay correction. Calculated from instrument
+delay correction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.polarity">
+<span class="sig-name descname"><span class="pre">polarity</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.polarity" title="Permalink to this definition"></a></dt>
+<dd><p>whether stage changes polarity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str, either “+” or “-”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.calibration_date">
+<span class="sig-name descname"><span class="pre">calibration_date</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.calibration_date" title="Permalink to this definition"></a></dt>
+<dd><p>calibration date of stage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str in date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.instrument_sensitivity">
+<span class="sig-name descname"><span class="pre">instrument_sensitivity</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.instrument_sensitivity" title="Permalink to this definition"></a></dt>
+<dd><p>Not used, set to None. Sensitivity
+is calculated for the whole response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – attributes of
+component</p></li>
+<li><p><strong>channel_modif</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>correction</strong> (<em>float</em>) – used only for datalogger, it’s the delay
+correction of the whole instrument</p></li>
+<li><p><strong>sequence_number</strong> (<em>int</em>) – sequence number, starting at 1. First
+assigned within component, then for the whole instrument
+response</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.calculate_delay">
+<span class="sig-name descname"><span class="pre">calculate_delay</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.calculate_delay" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates delay</p>
+<p>Delay is a function of filter offset for digital filters if not
+specified in info file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.get_selected_modifications">
+<span class="sig-name descname"><span class="pre">get_selected_modifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modif_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_code</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.get_selected_modifications" title="Permalink to this definition"></a></dt>
+<dd><p>Select which channel modifications specified at station level apply
+to a given stage,  with the stage number (WITHIN an instrument
+component) as key code</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>modif_dict</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>key_code</strong> (<em>str</em>) – key to the selected configuration using special
+regex format, e.g.: “*”, “[1,2,4]” or “[1-3]”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.output_sample_rate">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">output_sample_rate</span></span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.output_sample_rate" title="Permalink to this definition"></a></dt>
+<dd><p>Output sample rate is not specified but calculated from
+input sample rate and decimation factor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.response_stages.Stage.to_obspy">
+<span class="sig-name descname"><span class="pre">to_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.response_stages.Stage.to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Return equivalent <em>obspy.core.inventory.response</em> classes stages:</p>
+<p>Possible stage classes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PolesZerosResponseStage</p></li>
+<li><p>FIRResponseStage</p></li>
+<li><p>CoefficientsTypeResponseStage</p></li>
+<li><p>ResponseListResponseStage</p></li>
+<li><p>Response</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of one the above classes</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.instrumentation.filter">
+<span id="obsinfo-instrumentation-filter-module"></span><h2>obsinfo.instrumentation.filter module<a class="headerlink" href="#module-obsinfo.instrumentation.filter" title="Permalink to this headline"></a></h2>
+<p>Filter class and subclasses</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.AD_Conversion">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">AD_Conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_full_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_full_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.AD_Conversion" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.filter.Coefficients" title="obsinfo.instrumentation.filter.Coefficients"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.filter.Coefficients</span></code></a></p>
+<p>AD_Conversion Filter (Flat Coefficients filter)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.AD_Conversion.input_full_scale">
+<span class="sig-name descname"><span class="pre">input_full_scale</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.AD_Conversion.input_full_scale" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.AD_Conversion.output_full_scale">
+<span class="sig-name descname"><span class="pre">output_full_scale</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.AD_Conversion.output_full_scale" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.AD_Conversion.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_full_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_full_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.AD_Conversion.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘ADConversion’</p></li>
+<li><p><strong>input_full_scale</strong> (<em>float</em>) – A/D’s input full scale (volts)</p></li>
+<li><p><strong>output_full_scale</strong> (<em>float</em>) – corresponding output full scale (counts)</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – number of samples that the filter offsets an
+impulse</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.AD_Conversion.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.AD_Conversion.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create AD_Conversion instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘ADConversion’</p></li>
+<li><p><strong>attribute_list</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – configuration
+description to override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">ADConversion</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Analog">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">Analog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Analog" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.filter.PolesZeros" title="obsinfo.instrumentation.filter.PolesZeros"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.filter.PolesZeros</span></code></a></p>
+<p>Analog Filter (Flat PolesZeros filter)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Analog.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Analog.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – necessarily ‘Analog’</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – </p></li>
+<li><p><strong>normalization_frequency</strong> (<em>float</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Analog.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Analog.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create Analog instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘Analog’</p></li>
+<li><p><strong>attribute_list</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+<li><p><strong>gain_frequency</strong> (<em>float</em>) – frequency at which gain was specified.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.filter.Analog" title="obsinfo.instrumentation.filter.Analog"><code class="xref py py-class docutils literal notranslate"><span class="pre">Analog</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Coefficients">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">Coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transfer_function_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numerator_coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominator_coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Coefficients" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.filter.Filter" title="obsinfo.instrumentation.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.filter.Filter</span></code></a></p>
+<p>Coefficients Filter Class</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Coefficients.transfer_function_type">
+<span class="sig-name descname"><span class="pre">transfer_function_type</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.Coefficients.transfer_function_type" title="Permalink to this definition"></a></dt>
+<dd><p>one of “ANALOG (RADIANS/SECOND)”,
+“ANALOG (HERTZ)”, or “DIGITAL”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Coefficients.numerator_coefficients">
+<span class="sig-name descname"><span class="pre">numerator_coefficients</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.Coefficients.numerator_coefficients" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Coefficients.denominator_coefficients">
+<span class="sig-name descname"><span class="pre">denominator_coefficients</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.Coefficients.denominator_coefficients" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Coefficients.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transfer_function_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numerator_coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominator_coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Coefficients.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘Coefficients’</p></li>
+<li><p><strong>transfer_function_type</strong> (<em>str</em>) – one of “ANALOG (RADIANS/SECOND)”,
+“ANALOG (HERTZ)”, or “DIGITAL”</p></li>
+<li><p><strong>numerator_coefficients</strong> (<em>list</em>) – of floats</p></li>
+<li><p><strong>denominator_coefficients</strong> (<em>list</em>) – of floats</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – samples that an impulse is offset by the filter</p></li>
+<li><p><strong>filter_type</strong> – type of filter, necessarily ‘Coefficients’</p></li>
+<li><p><strong>offset</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Coefficients.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Coefficients.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create Coefficients instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘Coefficients’</p></li>
+<li><p><strong>attribute_list</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.filter.Coefficients" title="obsinfo.instrumentation.filter.Coefficients"><code class="xref py py-class docutils literal notranslate"><span class="pre">Coefficients</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Digital">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">Digital</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Digital" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.filter.Coefficients" title="obsinfo.instrumentation.filter.Coefficients"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.filter.Coefficients</span></code></a></p>
+<p>Digital Filter (Flat Coefficients filter)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Digital.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Digital.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘Digital’</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Digital.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Digital.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create Digital instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘Digital’</p></li>
+<li><p><strong>attribute_list</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.filter.Digital" title="obsinfo.instrumentation.filter.Digital"><code class="xref py py-class docutils literal notranslate"><span class="pre">Digital</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.FIR">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">FIR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient_divisor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.FIR" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.filter.Filter" title="obsinfo.instrumentation.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.filter.Filter</span></code></a></p>
+<p>FIR Filter</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.FIR.symmetry">
+<span class="sig-name descname"><span class="pre">symmetry</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.FIR.symmetry" title="Permalink to this definition"></a></dt>
+<dd><p>filter symmetry, one of “EVEN”, “ODD”, “NONE”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.FIR.coefficients">
+<span class="sig-name descname"><span class="pre">coefficients</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.FIR.coefficients" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.FIR.coefficient_divisor">
+<span class="sig-name descname"><span class="pre">coefficient_divisor</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.FIR.coefficient_divisor" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.FIR.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient_divisor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.FIR.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘FIR’</p></li>
+<li><p><strong>symmetry</strong> (<em>str</em>) – filter symmetry, one of “EVEN”, “ODD”, “NONE”</p></li>
+<li><p><strong>coefficients</strong> (<em>list</em>) – floats</p></li>
+<li><p><strong>coefficient_divisor</strong> (<em>float</em>) – </p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – # of samples filter will offset an impulse</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.FIR.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.FIR.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create FIR instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘FIR’</p></li>
+<li><p><strong>attribute_list</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.filter.FIR" title="obsinfo.instrumentation.filter.FIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">FIR</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Filter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">Filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PolesZeros'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Filter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Filter is superclass of all filter classes</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Filter.type">
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.Filter.type" title="Permalink to this definition"></a></dt>
+<dd><p>filter type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Filter.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.Filter.offset" title="Permalink to this definition"></a></dt>
+<dd><p>offset is samples to skip at the beggining of a signal
+in digital filters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Filter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PolesZeros'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Filter.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<em>str</em>) – filter type</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – samples that an impulse is offset by a digital filter</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.Filter.dynamic_class_constructor">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.Filter.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Creates an appropriate Filter subclass from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes_dict</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+<li><p><strong>gain_frequency</strong> (<em>float</em>) – frequency at which gain was specified.
+Used for PoleZeros Normalization factor/frequency</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of the adequate filter subclass</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="#obsinfo.instrumentation.filter.Filter" title="obsinfo.instrumentation.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a>)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>(</strong><strong>TypeError</strong><strong>)</strong> – if filter type is not valid</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">PolesZeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transfer_function_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LAPLACE</span> <span class="pre">(RADIANS/SECOND)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.filter.Filter" title="obsinfo.instrumentation.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.filter.Filter</span></code></a></p>
+<p>PolesZeros filter</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.transfer_function_type">
+<span class="sig-name descname"><span class="pre">transfer_function_type</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.transfer_function_type" title="Permalink to this definition"></a></dt>
+<dd><p>one of  ‘LAPLACE (RADIANS/SECOND)’,
+‘LAPLACE (HERTZ)’,’DIGITAL (Z-TRANSFORM)’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.poles">
+<span class="sig-name descname"><span class="pre">poles</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.poles" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of complex numbers</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.zeros">
+<span class="sig-name descname"><span class="pre">zeros</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.zeros" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of complex numbers</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.normalization_frequency">
+<span class="sig-name descname"><span class="pre">normalization_frequency</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.normalization_frequency" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.normalization_factor">
+<span class="sig-name descname"><span class="pre">normalization_factor</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.normalization_factor" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transfer_function_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LAPLACE</span> <span class="pre">(RADIANS/SECOND)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeros</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – </p></li>
+<li><p><strong>transfer_function_type</strong> (<em>str</em>) – one of ‘LAPLACE (RADIANS/SECOND)’,
+‘LAPLACE (HERTZ)’, ‘DIGITAL (Z-TRANSFORM)’</p></li>
+<li><p><strong>poles</strong> (<em>list</em>) – complex numbers specified as [a, b]</p></li>
+<li><p><strong>zeros</strong> (<em>list</em>) – complex numbers specified as [a, b]</p></li>
+<li><p><strong>normalization_frequency</strong> (<em>float</em>) – </p></li>
+<li><p><strong>normalization_factor</strong> (<em>float</em>) – </p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – makes no sens for an analog filter</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.calc_normalization_factor">
+<span class="sig-name descname"><span class="pre">calc_normalization_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.calc_normalization_factor" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the normalization factor for a given set of poles-zeros</p>
+<p>The norm factor A0 is calculated such that</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                      sequence_product_over_n(s - zero_n)
+           A0 * abs(—--------------------------------------) == 1
+                      sequence_product_over_m(s - pole_m)
+
+for s_f = i*2pi*f if the transfer function is Laplace in radians
+          i*f if the transfer function is Laplace in Hertz
+</pre></div>
+</div>
+<p>There is no calculation for the digital z-transform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>normalization factor as a float or None if not Laplace</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.PolesZeros.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.PolesZeros.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create PolesZeros instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘PolesZeros’</p></li>
+<li><p><strong>attribute_list</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+<li><p><strong>gain_frequency</strong> (<em>float</em>) – frequency at which gain was specified.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.filter.PolesZeros" title="obsinfo.instrumentation.filter.PolesZeros"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolesZeros</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.ResponseList">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.filter.</span></span><span class="sig-name descname"><span class="pre">ResponseList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.ResponseList" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#obsinfo.instrumentation.filter.Filter" title="obsinfo.instrumentation.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">obsinfo.instrumentation.filter.Filter</span></code></a></p>
+<p>ResponseList Filter</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.ResponseList.response_list">
+<span class="sig-name descname"><span class="pre">response_list</span></span><a class="headerlink" href="#obsinfo.instrumentation.filter.ResponseList.response_list" title="Permalink to this definition"></a></dt>
+<dd><p>list of responses instead of function
+coefficients</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.ResponseList.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.ResponseList.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="simple">
+<dt>Args”</dt><dd><p>filter_type (str): type of filter, necessarily ‘ResponseList’
+response_list (list): floats specifying response
+offset (int): samples that an impulse is offset by the filter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.filter.ResponseList.dynamic_class_constructor">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">dynamic_class_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.filter.ResponseList.dynamic_class_constructor" title="Permalink to this definition"></a></dt>
+<dd><p>Create Response List instance from an attributes_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_type</strong> (<em>str</em>) – type of filter, necessarily ‘ResponseList’</p></li>
+<li><p><strong>attribute_list</strong> (<em>dict</em><em> or </em><em>list of dicts</em>) – information file
+dictionaries for stages</p></li>
+<li><p><strong>channel_modif</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – channel
+modifications inherited from station</p></li>
+<li><p><strong>selected_config</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – the configuration
+description that will override or complement default values</p></li>
+<li><p><strong>stage_id</strong> (<em>int</em>) – id of corresponding stage. Used for reporting only</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<a class="reference internal" href="#obsinfo.instrumentation.filter.ResponseList" title="obsinfo.instrumentation.filter.ResponseList"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResponseList</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.instrumentation.equipment">
+<span id="obsinfo-instrumentation-equipment-module"></span><h2>obsinfo.instrumentation.equipment module<a class="headerlink" href="#module-obsinfo.instrumentation.equipment" title="Permalink to this headline"></a></h2>
+<p>InstrumentComponent class and subclasses Sensor, Preamplifier, Datalogger.
+Equipment class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.equipment.</span></span><span class="sig-name descname"><span class="pre">Equipment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">obspy.core.inventory.util.Equipment</span></code></p>
+<p>Equipment.</p>
+<p>Equivalent to :class: obspy.core.inventory.util.Equipment</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.type">
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.type" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.channel_modif">
+<span class="sig-name descname"><span class="pre">channel_modif</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.channel_modif" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.selected_config">
+<span class="sig-name descname"><span class="pre">selected_config</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.selected_config" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.description" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.manufacturer">
+<span class="sig-name descname"><span class="pre">manufacturer</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.manufacturer" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.model" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.vendor">
+<span class="sig-name descname"><span class="pre">vendor</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.vendor" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.serial_number">
+<span class="sig-name descname"><span class="pre">serial_number</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.serial_number" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.installation_date">
+<span class="sig-name descname"><span class="pre">installation_date</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.installation_date" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str in date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.removal_date">
+<span class="sig-name descname"><span class="pre">removal_date</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.removal_date" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str in date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.calibration_dates">
+<span class="sig-name descname"><span class="pre">calibration_dates</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.calibration_dates" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str in date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.resource_id">
+<span class="sig-name descname"><span class="pre">resource_id</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.resource_id" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.obspy_equipment">
+<span class="sig-name descname"><span class="pre">obspy_equipment</span></span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.obspy_equipment" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>class <cite>obspy.core.inventory.equipmentEquipment</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes_dict</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – attributes of
+component, hopefully including configuration_default</p></li>
+<li><p><strong>channel_modif</strong> (dict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – channel modifications
+inherited from station</p></li>
+<li><p><strong>selected_config</strong> (sdict or <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – configuration dict
+selected at instrument_component level</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.equipment.Equipment.to_obspy">
+<span class="sig-name descname"><span class="pre">to_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.equipment.Equipment.to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Convert an equipment (including the equipment description in
+components) to its obspy object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">obspy.core.invertory.util.Equipment</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.instrumentation.location">
+<span id="obsinfo-instrumentation-location-module"></span><h2>obsinfo.instrumentation.location module<a class="headerlink" href="#module-obsinfo.instrumentation.location" title="Permalink to this headline"></a></h2>
+<p>Location classe</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.location.</span></span><span class="sig-name descname"><span class="pre">Location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.location.Location" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Location class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.latitude">
+<span class="sig-name descname"><span class="pre">latitude</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.latitude" title="Permalink to this definition"></a></dt>
+<dd><p>station latitude (degrees N)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.longitude">
+<span class="sig-name descname"><span class="pre">longitude</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.longitude" title="Permalink to this definition"></a></dt>
+<dd><p>station longitude (degrees E)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.elevation">
+<span class="sig-name descname"><span class="pre">elevation</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.elevation" title="Permalink to this definition"></a></dt>
+<dd><p>station elevation (meters above sea level)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.uncertainties_m">
+<span class="sig-name descname"><span class="pre">uncertainties_m</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.uncertainties_m" title="Permalink to this definition"></a></dt>
+<dd><p>‘lat’, ‘lon’, ‘elev’ in METERS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.geology">
+<span class="sig-name descname"><span class="pre">geology</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.geology" title="Permalink to this definition"></a></dt>
+<dd><p>site geology</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.vault">
+<span class="sig-name descname"><span class="pre">vault</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.vault" title="Permalink to this definition"></a></dt>
+<dd><p>vault type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.depth_m">
+<span class="sig-name descname"><span class="pre">depth_m</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.depth_m" title="Permalink to this definition"></a></dt>
+<dd><p>depth of station beneath surface (meters)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.localisation_method">
+<span class="sig-name descname"><span class="pre">localisation_method</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.localisation_method" title="Permalink to this definition"></a></dt>
+<dd><p>method used to determine position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.obspy_latitude">
+<span class="sig-name descname"><span class="pre">obspy_latitude</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.obspy_latitude" title="Permalink to this definition"></a></dt>
+<dd><p>latitude as an <em>obspy</em> object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.obspy_longitude">
+<span class="sig-name descname"><span class="pre">obspy_longitude</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.obspy_longitude" title="Permalink to this definition"></a></dt>
+<dd><p>longitude as an <em>obspy</em> object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create Location object and assign attributes from attributes_dict.
+Validate required location attributes exist
+Convert to obspy longitude and latitude</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>attributes_dict</strong> (dict or object of <code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code>) – location information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.get_location_from_code">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_location_from_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.get_location_from_code" title="Permalink to this definition"></a></dt>
+<dd><p>Obtain from the locations dictionary one location by code (key).
+Raise exception if not found</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.location.Location.obspy_elevation">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">obspy_elevation</span></span><a class="headerlink" href="#obsinfo.instrumentation.location.Location.obspy_elevation" title="Permalink to this definition"></a></dt>
+<dd><p>Returns elevation as obspy FloatWithUncertaintiesFixedUnit object</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">obspy_latitude</span></span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd><p>Returns obspy Latitude object</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">obspy_longitude</span></span><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
+<dd><p>Returns obspy Longitude object</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.instrumentation.orientation">
+<span id="obsinfo-instrumentation-orientation-module"></span><h2>obsinfo.instrumentation.orientation module<a class="headerlink" href="#module-obsinfo.instrumentation.orientation" title="Permalink to this headline"></a></h2>
+<p>Orientation class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.orientation.Orientation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.instrumentation.orientation.</span></span><span class="sig-name descname"><span class="pre">Orientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modifs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.orientation.Orientation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for sensor orientations. No channel modifs. Cannot change orientation
+as it is part of the channel identifiers. Azimuth and dip can be changed
+Orientation is coded by <cite>FDSN standard &lt;http://docs.fdsn.org/projects/
+source-identifiers/en/v1.0/channel-codes.html&gt;</cite></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.orientation.Orientation.azimuth">
+<span class="sig-name descname"><span class="pre">azimuth</span></span><a class="headerlink" href="#obsinfo.instrumentation.orientation.Orientation.azimuth" title="Permalink to this definition"></a></dt>
+<dd><p>azimuth, clockwise from north</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>degrees</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.orientation.Orientation.azimuth_uncertainty">
+<span class="sig-name descname"><span class="pre">azimuth_uncertainty</span></span><a class="headerlink" href="#obsinfo.instrumentation.orientation.Orientation.azimuth_uncertainty" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>degrees</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.orientation.Orientation.dip">
+<span class="sig-name descname"><span class="pre">dip</span></span><a class="headerlink" href="#obsinfo.instrumentation.orientation.Orientation.dip" title="Permalink to this definition"></a></dt>
+<dd><p>dip,  -90 to 90: positive=down, negative=up</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>degrees</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">type</span> <span class="pre">dip_uncertainty</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>degrees</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.orientation.Orientation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_modifs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.orientation.Orientation.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seismometer</dt>
+<dd class="field-odd"><p>If a positive voltage corresponds to upward motion
+(typical vertical seismometer), dip = -90º (up).  If positive
+voltage corresponds to downward motion (typical vertical geophone),
+dip = 90º</p>
+</dd>
+<dt class="field-even">Hydrophone</dt>
+<dd class="field-even"><p>If a positive voltage corresponds to a positive
+(compressional) pressure, then dip = -90º.  If a positive voltage
+corresponds to a decrease in pressure, then dip = 90°</p>
+</dd>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>attributes_dict</strong> (dict or <a class="reference internal" href="obsinfo.obsMetadata.html#obsinfo.obsMetadata.obsmetadata.ObsMetadata" title="obsinfo.obsMetadata.obsmetadata.ObsMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsMetadata</span></code></a>) – operator information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.instrumentation.orientation.Orientation.get_value_with_uncertainty">
+<span class="sig-name descname"><span class="pre">get_value_with_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.instrumentation.orientation.Orientation.get_value_with_uncertainty" title="Permalink to this definition"></a></dt>
+<dd><p>Validate that info_list is a 2 member list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_list</strong> (<em>list of strings</em><em> or </em><em>floats</em>) – two numbers, a value and
+an uncertainty</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the two members</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError if not a list of two floats</strong><strong> or </strong><strong>strings that can be</strong> – converted to floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="obsinfo.addons.html" class="btn btn-neutral float-left" title="obsinfo.addons package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="obsinfo.main.html" class="btn btn-neutral float-right" title="obsinfo.main package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

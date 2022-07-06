@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building a filter information file for different filters &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Summary" href="tutorial-9.html" />
+    <link rel="prev" title="Building a stage information file with different filters" href="tutorial-7.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial-1.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-2.html">The general structure of information files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-3.html">Building a simple network file with stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-4.html">Building a simple instrumentation file with channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-5.html">Building instrument component files with response stages: sensors and preamplifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-6.html">Building a datalogger information file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-7.html">Building a stage information file with different filters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building a filter information file for different filters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#poleszeros">PolesZeros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fir">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analog-and-digital">Analog and Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analog-to-digital-converter">ANALOG to DIGITAL Converter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-9.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../tutorial.html">Tutorial</a> &raquo;</li>
+      <li>Building a filter information file for different filters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/tutorial-8.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-a-filter-information-file-for-different-filters">
+<span id="tutorial8"></span><h1>Building a filter information file for different filters<a class="headerlink" href="#building-a-filter-information-file-for-different-filters" title="Permalink to this headline"></a></h1>
+<p>As pointed out in the last section, all stages have an associated filter, even if we can’t properly call it a filter, due to the ideosyncretic behavior of StationXML. Some of the normal filters are familiar:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../classes/poleszeros.html#poleszeros11"><span class="std std-ref">PolesZeros</span></a> - Any kind of digital filter specified by its poles and its zeros. Use this for Laplace transforms and IIR filters.</p></li>
+<li><p><a class="reference internal" href="../classes/FIR.html#fir11"><span class="std std-ref">FIR</span></a> - Finite Input Response digital filter</p></li>
+<li><p><a class="reference internal" href="../classes/coefficients.html#coefficients11"><span class="std std-ref">Coefficients</span></a> - A FIR expressed with coefficients of transfer function</p></li>
+<li><p><a class="reference internal" href="../classes/response_list.html#responselist"><span class="std std-ref">ResponseList</span></a> - A digital filter with all responses expressed as frequency, amplitude and phase.</p></li>
+</ul>
+<p>Others are not properly filters:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../classes/AD_conversion.html#adconversion"><span class="std std-ref">ADConversion</span></a> - Analog to digital conversion stage</p></li>
+<li><p><a class="reference internal" href="../classes/analog.html#analog11"><span class="std std-ref">Analog</span></a> - gain only analog stage-</p></li>
+<li><p><a class="reference internal" href="../classes/digital.html#digital11"><span class="std std-ref">Digital</span></a>  gain only digital stage</p></li>
+</ul>
+<p>For more details on each one go to their corresponding Class pages. Here are some examples on how to express different filters (for examples of Analog and ADConversion, see last section).</p>
+<p>All filters have a type, which is specified in the list above, and digital ones have an <code class="docutils literal notranslate"><span class="pre">offset</span></code>, which is the number of pulses to be skipped at the start of the signal input. <code class="docutils literal notranslate"><span class="pre">offset</span></code> is used to calculate delay, as explained in the last section.</p>
+<section id="poleszeros">
+<h2>PolesZeros<a class="headerlink" href="#poleszeros" title="Permalink to this headline"></a></h2>
+<p>A PolesZeros digital filter (as defined in the field <code class="docutils literal notranslate"><span class="pre">type</span></code>) specifies a transfer function type, a normalization factor and frequency, and the respective poles and zeros:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">filter</span><span class="p">:</span>
+   <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;PolesZeros&quot;</span>
+   <span class="nt">transfer_function_type</span><span class="p">:</span> <span class="s">&quot;LAPLACE</span><span class="nv"> </span><span class="s">(RADIANS/SECOND)&quot;</span>
+   <span class="nt">normalization_factor </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+   <span class="nt">normalization_frequency </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+   <span class="nt">zeros </span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>     <span class="p p-Indicator">[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>     <span class="p p-Indicator">[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>   <span class="p p-Indicator">[</span><span class="nv">-72.5</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-159.3</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-251</span><span class="p p-Indicator">,</span>    <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-3270.0</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+   <span class="nt">poles </span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>    <span class="p p-Indicator">[</span><span class="nv">-0.017699</span><span class="p p-Indicator">,</span>    <span class="nv">0.017604</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>    <span class="p p-Indicator">[</span><span class="nv">-0.017699</span><span class="p p-Indicator">,</span>   <span class="nv">-0.017604</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>   <span class="p p-Indicator">[</span><span class="nv">-85.3</span><span class="p p-Indicator">,</span>         <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-155.4</span><span class="p p-Indicator">,</span>       <span class="nv">210.8</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-155.4</span><span class="p p-Indicator">,</span>      <span class="nv">-210.8</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-713</span><span class="p p-Indicator">,</span>           <span class="nv">0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-1140</span><span class="p p-Indicator">,</span>          <span class="nv">-0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-4300</span><span class="p p-Indicator">,</span>          <span class="nv">-0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-5800</span><span class="p p-Indicator">,</span>          <span class="nv">-0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-4300</span><span class="p p-Indicator">,</span>        <span class="nv">4400</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-4300</span><span class="p p-Indicator">,</span>       <span class="nv">-4400</span><span class="p p-Indicator">]</span>
+   <span class="nt">offset</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+
+<span class="nt">notes</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">poles et zeros d&#39;un Trillium T240 no de serie 400+</span>
+   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">d&#39;apres le fichier Trillium240_UserGuide_15672R7.pdf de Nanometrics.</span>
+</pre></div>
+</div>
+</section>
+<section id="fir">
+<h2>FIR<a class="headerlink" href="#fir" title="Permalink to this headline"></a></h2>
+<p>A FIR filter can be specified by a symmetry and a set of numerator coefficients of the transfer function. The symmetry specification permits to specify the filter without having to repeat values. But a FIR filter can also be specified by the numerator <em>and</em> denominator coefficients of the transfer function, in which case the type “Coefficients” is used. For more information, see the corresponding class. Finally, the specification can take the form of a list of responses, which uses the type “ResponseList”. Again, this is straightforward. The syntax can be looked up in the corresponding class.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">filter</span><span class="p">:</span>
+   <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;FIR&quot;</span>
+   <span class="nt">symmetry</span><span class="p">:</span> <span class="s">&quot;NONE&quot;</span>
+   <span class="nt">offset</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">6</span>
+   <span class="nt">coefficients</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">2.44141E-4</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.00292969</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.0161133</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.0537109</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.12085</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.193359</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.225586</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.193359</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.12085</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.0537109</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.0161133</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.00292969</span>
+       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">2.44141E-4</span>
+</pre></div>
+</div>
+</section>
+<section id="analog-and-digital">
+<h2>Analog and Digital<a class="headerlink" href="#analog-and-digital" title="Permalink to this headline"></a></h2>
+<p>Analog and digital “filters” are stages that basically amplify the signal, whether analog or digital, with the gain specified, as usual, at the stage level. Analog filters can invert the polarity, so this needs to be specified with a <code class="docutils literal notranslate"><span class="pre">polarity</span></code> attribute.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">filter</span><span class="p">:</span>
+   <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Analog&quot;</span>
+   <span class="nt">polarity</span><span class="p">:</span> <span class="s">&quot;-&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="analog-to-digital-converter">
+<h2>ANALOG to DIGITAL Converter<a class="headerlink" href="#analog-to-digital-converter" title="Permalink to this headline"></a></h2>
+<p>This is another type of pseudo-filter which has the input voltage range and the output voltage range as attributes:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">filter</span><span class="p">:</span>
+   <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;ADConversion&quot;</span>
+   <span class="nt">input_full_scale </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9</span> <span class="c1">#  9 V pp</span>
+   <span class="nt">output_full_scale </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10485760</span> <span class="c1">#  4FFFFF@Vref and B00000@-Vref</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><a class="reference internal" href="tutorial-9.html#tutorial9"><span class="std std-ref">Next page, Conclusion</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-7.html#tutorial7"><span class="std std-ref">Previous page</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-1.html#tutorial1"><span class="std std-ref">Back to start</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial-7.html" class="btn btn-neutral float-left" title="Building a stage information file with different filters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial-9.html" class="btn btn-neutral float-right" title="Summary" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

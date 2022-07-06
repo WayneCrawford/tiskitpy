@@ -1,0 +1,27 @@
+obsinfo.tests package
+=====================
+
+
+obsinfo.tests.remoteGithub module
+---------------------------------
+
+.. automodule:: obsinfo.tests.remoteGithub
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.tests.test module
+-------------------------
+
+.. automodule:: obsinfo.tests.test
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.tests.testmain module
+-----------------------------
+
+.. automodule:: obsinfo.tests.testmain
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>obsinfo.main package &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="obsinfo.misc package" href="obsinfo.misc.html" />
+    <link rel="prev" title="obsinfo.instrumentation package" href="obsinfo.instrumentation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer’s Corner</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Technical Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="obsinfo.html">Code Documentation: obsinfo package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="obsinfo.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.addons.html">obsinfo.addons package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.instrumentation.html">obsinfo.instrumentation package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">obsinfo.main package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.misc.html">obsinfo.misc package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.network.html">obsinfo.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.obsMetadata.html">obsinfo.obsMetadata package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.tests.html">obsinfo.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.print_version">obsinfo.print_version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.version">obsinfo.version module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Technical Documentation</a> &raquo;</li>
+          <li><a href="obsinfo.html">Code Documentation: obsinfo package</a> &raquo;</li>
+      <li>obsinfo.main package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/obsinfo.main.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="obsinfo-main-package">
+<h1>obsinfo.main package<a class="headerlink" href="#obsinfo-main-package" title="Permalink to this headline"></a></h1>
+<section id="module-obsinfo.main.makeStationXML">
+<span id="obsinfo-main-makestationxml-module"></span><h2>obsinfo.main.makeStationXML module<a class="headerlink" href="#module-obsinfo.main.makeStationXML" title="Permalink to this headline"></a></h2>
+<p>Main functions for obsinfo-makeStationXML</p>
+<p>Creates obsinfo objects starting with a network object in a hierarchy which
+strongly follows the hierarchy of StationXML files.
+Then converts the objects to a StationXML file using obspy.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.makeStationXML.get_first_author">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.makeStationXML.</span></span><span class="sig-name descname"><span class="pre">get_first_author</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.makeStationXML.get_first_author" title="Permalink to this definition"></a></dt>
+<dd><p>Get info file first author info and return it in a string.</p>
+<p>Used to fill the author attribute in the Inventory object of obspy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info_dict</strong> – The name to use.</p></li>
+<li><p><strong>state</strong> (<em>bool.</em>) – Current state to be in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str – first author first name and last name and contact information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.makeStationXML.init_logging">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.makeStationXML.</span></span><span class="sig-name descname"><span class="pre">init_logging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.makeStationXML.init_logging" title="Permalink to this definition"></a></dt>
+<dd><p>Create or open a rotating logging file and add it to ObsinfoConfiguration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of Logger class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.makeStationXML.main">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.makeStationXML.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.makeStationXML.main" title="Permalink to this definition"></a></dt>
+<dd><p>Entry point for obsinfo-makeStationXML.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Setups status variables from command line arguments.</p></li>
+<li><p>Read yaml or jason file invoking read_info_file, which returns a dictionary. Optionally validates dictionary schema.</p></li>
+<li><p>Creates obsinfo objects starting from network object from the dictionary</p></li>
+<li><p>Converts these to StationXML using obpsy libraries.</p></li>
+</ol>
+</div></blockquote>
+<p>Manages all uncaught exceptions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argv</strong> (<em>list</em>) – list of command-line arguments to pass to ArgumentParser.
+If None, will use sys.argv</p></li>
+<li><p><strong>dp</strong> (<a class="reference internal" href="obsinfo.misc.html#obsinfo.misc.discoveryfiles.Datapath" title="obsinfo.misc.discoveryfiles.Datapath"><em>Datapath</em></a>) – Datapath object specifying where to look for files.
+If None, will use values specified in .obsinforc</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.makeStationXML.retrieve_arguments">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.makeStationXML.</span></span><span class="sig-name descname"><span class="pre">retrieve_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.makeStationXML.retrieve_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve arguments from command line. Setup several status variables and get information file name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argv</strong> (<em>list</em>) – command line arguments.  If None, uses sys.argv</p></li>
+<li><p><strong>datapath</strong> (<a class="reference internal" href="obsinfo.misc.html#obsinfo.misc.discoveryfiles.Datapath" title="obsinfo.misc.discoveryfiles.Datapath"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code></a>) – Object containing paths to find
+repository files, read from .obsinforc</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>All status variables and the information file name.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>args (NameSpace)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.main.print">
+<span id="obsinfo-main-print-module"></span><h2>obsinfo.main.print module<a class="headerlink" href="#module-obsinfo.main.print" title="Permalink to this headline"></a></h2>
+<p>Application to testing and printing obsinfo information files.</p>
+<p>Includes class TestObsinfo, class JsonRefTest and entry points.</p>
+<blockquote>
+<div><blockquote>
+<div><p># JsonRefTest tests the reading functions of JSON and YAML files.</p>
+<p># TestObsinfo tests information files content</p>
+</div></blockquote>
+<p>Much the SAME functions and methods are called whether printing or testing, as there is little difference
+between both functionalities. Entry points vary for each functionality and the distinction is achieved by naming
+the executable with two different names (i.e. a named link):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>obsinfo-print has entry point print_obs.</p></li>
+<li><p>obsinfo-test has entry point run_suite_info_files. It is meant to be used by developers. In this vein, contrary to obsinfo-validate, obsinfo-print calls private methods which are not callable from the command line but which can be called from the interpreter.</p></li>
+<li><p>JsonRefTest is meant to be called from the interpreter. It has no entry point.</p></li>
+</ul>
+</div></blockquote>
+<p>There are two types of testing functionalities.</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>If the file name includes “test–attributes” the output of the corresponding obsinfo test function will be checked against data contained in this class.</p></li>
+<li><p>If the file name is “normal”, it will simply run through to make sure there are no errors</p></li>
+</ol>
+</div></blockquote>
+<p>Testing for type (a) uses data from obsinfo/tests/data/Information_Files/responses/_filters.
+Testing for type (b) uses data from obsinfo/_examples/Information_Files</p>
+<p>WARNING: many tests are critically dependent on file hierarchy, including names. Do not change names
+in tests or _examples hierarchy, or else change the names here.
+Also, the following methods use four specific file names:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>test_all_stage_types()</p></li>
+<li><p>test_sensor()</p></li>
+<li><p>test_preamplifier()</p></li>
+<li><p>test_datalogger()</p></li>
+<li><p>test_station()</p></li>
+</ul>
+</div></blockquote>
+<p>All current examples of sensors safe NANOMETRICS_T240_SINGLESIDED have no configuration key and no default.
+Messages to this effect are to be expected.</p>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.main.print.JsonRefTest">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">JsonRefTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.JsonRefTest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Class of test methods for information file format</p>
+<blockquote>
+<div><p><strong>Attributes:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>testing_path (str): path to datafiles to be tested aside from the examples</p></li>
+<li><p>level (str): level to be printed</p></li>
+<li><p>test (boolean): determines if this is test mode</p></li>
+<li><p>print_output (boolean): determines if this is print mode. Both can coexist.</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.JsonRefTest.assertTextFilesEqual">
+<span class="sig-name descname"><span class="pre">assertTextFilesEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.JsonRefTest.assertTextFilesEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.JsonRefTest.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.JsonRefTest.setUp" title="Permalink to this definition"></a></dt>
+<dd><p>Set up default values and paths</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.JsonRefTest.test_readJSONREF_json">
+<span class="sig-name descname"><span class="pre">test_readJSONREF_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.JsonRefTest.test_readJSONREF_json" title="Permalink to this definition"></a></dt>
+<dd><p>Test JSONref using a JSON file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.JsonRefTest.test_readJSONREF_yaml">
+<span class="sig-name descname"><span class="pre">test_readJSONREF_yaml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.JsonRefTest.test_readJSONREF_yaml" title="Permalink to this definition"></a></dt>
+<dd><p>Test JSONref using a YAML file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.JsonRefTest.test_validate_json">
+<span class="sig-name descname"><span class="pre">test_validate_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.JsonRefTest.test_validate_json" title="Permalink to this definition"></a></dt>
+<dd><p>Test validation on a YAML file.</p>
+<p>The test file as an $ref to a file that doesn’t exist, a field that
+is not specified in the the schema, and lacks a field required in
+the schema</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">TestObsinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Test suite and print methods for obsinfo operations.</p>
+<blockquote>
+<div><p><strong>Attributes:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>infofiles_path (str): path to datafiles to be tested</p></li>
+<li><p>level (str): level to be printed</p></li>
+<li><p>test (boolean): determines if this is test mode</p></li>
+<li><p>print_output (boolean): determines if this is print mode. Both can coexist.</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.setUp" title="Permalink to this definition"></a></dt>
+<dd><p>Set up default values and paths</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>test - Invoke class methods in test mode, i.e. invoke assertions as well as obsinfo object creation</p>
+</dd>
+<dt class="field-even">Param</dt>
+<dd class="field-even"><p>print_output - Invoke class methos in print mode, no assertions.</p>
+</dd>
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>level - In print mode, determine up to which level information will be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_all_components">
+<span class="sig-name descname"><span class="pre">test_all_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_all_components" title="Permalink to this definition"></a></dt>
+<dd><p>Test all information files in each components directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_all_filters">
+<span class="sig-name descname"><span class="pre">test_all_filters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_all_filters" title="Permalink to this definition"></a></dt>
+<dd><p>Test all information files in both examples and test/data/Information_Files/_filters” subdirectory
+If you wish to test individual files, use test_filter(file) with file an absolute or
+relative file name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_all_instrumentations">
+<span class="sig-name descname"><span class="pre">test_all_instrumentations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_all_instrumentations" title="Permalink to this definition"></a></dt>
+<dd><p>Test all information files in instrumentation directory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_all_networks">
+<span class="sig-name descname"><span class="pre">test_all_networks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_all_networks" title="Permalink to this definition"></a></dt>
+<dd><p>Test all information files in network directory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_all_stages">
+<span class="sig-name descname"><span class="pre">test_all_stages</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_all_stages" title="Permalink to this definition"></a></dt>
+<dd><p>Test all information files in each responses subdirectory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_change_modifications">
+<span class="sig-name descname"><span class="pre">test_change_modifications</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_change_modifications" title="Permalink to this definition"></a></dt>
+<dd><p>Test all possible channel modification and response modification labels</p>
+<p>Uses several test network information files plus a test instrumentation file in _examples.
+Rationale for each assertEqual is given in the test information files themselves</p>
+<p>The five first tests check channel modification labels and their priorities. The last one
+checks response_modifications</p>
+<p>WARNING: Depends critically on the expected values of information files. If these change, tests will fail.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>channel 0 - 3-00</p></li>
+<li><p>channel 1 - H-00</p></li>
+<li><p>channel 2 - H-01</p></li>
+<li><p>channel 3 - 3-02</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_datalogger_configurations">
+<span class="sig-name descname"><span class="pre">test_datalogger_configurations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_datalogger_configurations" title="Permalink to this definition"></a></dt>
+<dd><p>Test all configurations of a particular datalogger example</p>
+<p>Will not test case 1 in test_sensor_configurations as it is common code. Will test what happens if configuration is not
+found or is empty.</p>
+<p>WARNING: Depends critically on the expected values of information files. If these change, tests will fail.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_preamp_configurations">
+<span class="sig-name descname"><span class="pre">test_preamp_configurations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_preamp_configurations" title="Permalink to this definition"></a></dt>
+<dd><p>Test all configurations of particular preamp examples</p>
+<p>Will not test case 1 in test_sensor_configurations as it is common code. Will test what happens if configuration is not
+found or is empty.</p>
+<p>WARNING: Depends critically on the expected values of information files. If these change, tests will fail.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.print.TestObsinfo.test_sensor_configurations">
+<span class="sig-name descname"><span class="pre">test_sensor_configurations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.TestObsinfo.test_sensor_configurations" title="Permalink to this definition"></a></dt>
+<dd><p>Test cases for configurations of particular sensor examples</p>
+<p>Will test what happens if no default is specified, if a default is specified and if default is overridden</p>
+<p>WARNING: Depends critically on the expected values of information files. If these change, tests will fail.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.print.init_logging">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">init_logging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.init_logging" title="Permalink to this definition"></a></dt>
+<dd><p>Create or open a rotating logging file and add it to ObsinfoConfiguration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of Logger class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.print.print_obs">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">print_obs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.print_obs" title="Permalink to this definition"></a></dt>
+<dd><p>Entry point for obsinfo-print. Print an information file according to its type,
+and levels below up to the specified level.</p>
+<blockquote>
+<div><p>Captures all exceptions</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.print.report_result_summary">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">report_result_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.report_result_summary" title="Permalink to this definition"></a></dt>
+<dd><p>Report a summary of errors and failures</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>result - Contains result stats, errors and failures.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.print.retrieve_arguments">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">retrieve_arguments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.retrieve_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve arguments from command line. Setup several status variables and get information file name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary object with all status variables and information file name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.print.retrieve_test_arguments">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">retrieve_test_arguments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.retrieve_test_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve arguments from command line for obsinfo-test. Setup several status variables and get information file name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary object with all status variables and information file name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.print.run_suite_info_files">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">run_suite_info_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.run_suite_info_files" title="Permalink to this definition"></a></dt>
+<dd><p>Create all test suites for information files</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.print.run_suite_yaml">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.print.</span></span><span class="sig-name descname"><span class="pre">run_suite_yaml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.print.run_suite_yaml" title="Permalink to this definition"></a></dt>
+<dd><p>Create and run test suite for jsonref</p>
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.main.setupObsinfo">
+<span id="obsinfo-main-setupobsinfo-module"></span><h2>obsinfo.main.setupObsinfo module<a class="headerlink" href="#module-obsinfo.main.setupObsinfo" title="Permalink to this headline"></a></h2>
+<p>Application to configure variables used by obsinfo in file .obsinforc
+and to copy examples and templates out of the distribution directories</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.setupObsinfo.build_datapath_list">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.setupObsinfo.</span></span><span class="sig-name descname"><span class="pre">build_datapath_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_repository</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.setupObsinfo.build_datapath_list" title="Permalink to this definition"></a></dt>
+<dd><p>Build datapath as a list of directories to search, similar to the PATH environment variable.</p>
+<ol class="arabic simple">
+<li><p>Add working_directory as first option if it exists</p></li>
+<li><p>Next add local repository first if it exists (wll be first if no working directory specified)</p></li>
+<li><p>Finally add destination, where standard examples lie. This won’t be used if -x is on</p></li>
+<li><p>Final directory will be the remote one unless -v (invert) is specified</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.setupObsinfo.retrieve_arguments">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.setupObsinfo.</span></span><span class="sig-name descname"><span class="pre">retrieve_arguments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.setupObsinfo.retrieve_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Parse command line arguments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary of arguments, both status and directory names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.setupObsinfo.setup_obsinfo">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.setupObsinfo.</span></span><span class="sig-name descname"><span class="pre">setup_obsinfo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.setupObsinfo.setup_obsinfo" title="Permalink to this definition"></a></dt>
+<dd><p>Entry point for application to configure variables used by obsinfo in file .obsinforc
+and to copy examples and templates out of the distribution directories</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.setupObsinfo.validate_arguments">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.setupObsinfo.</span></span><span class="sig-name descname"><span class="pre">validate_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.setupObsinfo.validate_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Validate that directories in command line arguments exist. Raise an exception if not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>dictionary of strings</em>) – directory with command line argument, but status and directories</p>
+</dd>
+</dl>
+<p>:raises OSError, ValueError</p>
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.main.validate">
+<span id="obsinfo-main-validate-module"></span><h2>obsinfo.main.validate module<a class="headerlink" href="#module-obsinfo.main.validate" title="Permalink to this headline"></a></h2>
+<p>Main functions for obsinfo-validate.</p>
+<p>obsinfo strongly follows the hierarchy of StationXML files.</p>
+<p>Module contains both class ValidateObsinfo and a main entry point for obsinfo-validate</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.main.validate.</span></span><span class="sig-name descname"><span class="pre">ValidateObsinfo</span></span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Contains methods to validate each level of information files.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.datapath">
+<span class="sig-name descname"><span class="pre">datapath</span></span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.datapath" title="Permalink to this definition"></a></dt>
+<dd><p>Store datapath list(s)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">/.Datapath</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>Prints progress messages</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.remote">
+<span class="sig-name descname"><span class="pre">remote</span></span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.remote" title="Permalink to this definition"></a></dt>
+<dd><p>Indicates file in command line argument is to be found
+using datapath</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.debug" title="Permalink to this definition"></a></dt>
+<dd><p>Print more detailed messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.assertTextFilesEqual">
+<span class="sig-name descname"><span class="pre">assertTextFilesEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.assertTextFilesEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Compares two text files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>first</strong> (<em>str</em>) – First file to compare</p></li>
+<li><p><strong>second</strong> (<em>str</em>) – Second file to compare</p></li>
+<li><p><strong>msg</strong> (<em>str</em>) – Message to print in case of failure</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.setUp" title="Permalink to this definition"></a></dt>
+<dd><p>Sets up status variables according to .obsinforc and command line arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>verbose</strong> (<em>bool</em>) – Print several progress messages</p></li>
+<li><p><strong>remote</strong> (<em>bool</em>) – Find file in command line argument using datapath</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Print more detailed messages and enable traceback
+of exceptions</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: self</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_all_components">
+<span class="sig-name descname"><span class="pre">validate_all_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_all_components" title="Permalink to this definition"></a></dt>
+<dd><p>Validate all information files in each components (sensor, preamplifier, datalogger) subdirectory
+as given by datapath</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_all_filters">
+<span class="sig-name descname"><span class="pre">validate_all_filters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_all_filters" title="Permalink to this definition"></a></dt>
+<dd><p>Validate all information files in &lt;component&gt;/responses/_filters” subdirectory, as given by datapath.</p>
+<p>If you wish to test individual files, use test_filter(file) with file an absolute or
+relative file name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_all_instrumentations">
+<span class="sig-name descname"><span class="pre">validate_all_instrumentations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_all_instrumentations" title="Permalink to this definition"></a></dt>
+<dd><p>Validate all information files for instrumentations in a directory given by datapath</p>
+<p>If you want to validate a single instrumentation file use validate_instrumentation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_all_networks">
+<span class="sig-name descname"><span class="pre">validate_all_networks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_all_networks" title="Permalink to this definition"></a></dt>
+<dd><p>Validate all network information files in a directory.given by datapath</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_all_stages">
+<span class="sig-name descname"><span class="pre">validate_all_stages</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_all_stages" title="Permalink to this definition"></a></dt>
+<dd><p>Validate all information files in each responses subdirectory “&lt;component&gt;/responses/_filters”</p>
+<p>If you wish to test individual files, use test_stage(file) with file an absolute or
+relative file name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_datalogger">
+<span class="sig-name descname"><span class="pre">validate_datalogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_datalogger" title="Permalink to this definition"></a></dt>
+<dd><p>Validate a single datalogger file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – datalogger info file to validate. No assumptions made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_filter">
+<span class="sig-name descname"><span class="pre">validate_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_filter" title="Permalink to this definition"></a></dt>
+<dd><p>Validate a single filter file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – filter info file to validate. No assumptions made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_filters_in_directory">
+<span class="sig-name descname"><span class="pre">validate_filters_in_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_filters_in_directory" title="Permalink to this definition"></a></dt>
+<dd><p>Validate all information files in filter directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dir</strong> (<em>str</em>) – directory where filter files reside</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_instrumentation">
+<span class="sig-name descname"><span class="pre">validate_instrumentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_instrumentation" title="Permalink to this definition"></a></dt>
+<dd><p>Validate single instrumentation information file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – instrumentation info file to validate. No assumptions
+made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_network">
+<span class="sig-name descname"><span class="pre">validate_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_network" title="Permalink to this definition"></a></dt>
+<dd><p>Validate single network information file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – network info file to validate. No assumptions made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_preamplifier">
+<span class="sig-name descname"><span class="pre">validate_preamplifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_preamplifier" title="Permalink to this definition"></a></dt>
+<dd><p>Validate single preamplifier instrument_component information file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – preamplifier info file to validate. No assumptions made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_sensor">
+<span class="sig-name descname"><span class="pre">validate_sensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_sensor" title="Permalink to this definition"></a></dt>
+<dd><p>Validate single sensor instrument_component information file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – sensor info file to validate. No assumptions made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_stage">
+<span class="sig-name descname"><span class="pre">validate_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_stage" title="Permalink to this definition"></a></dt>
+<dd><p>Validate a single stage file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – stage info file to validate. No assumptions made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_stages_in_directory">
+<span class="sig-name descname"><span class="pre">validate_stages_in_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_stages_in_directory" title="Permalink to this definition"></a></dt>
+<dd><p>Validate all information files in stage directory as given by datapath.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dir</strong> (<em>str</em>) – directory where stage files reside</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.main.validate.ValidateObsinfo.validate_station">
+<span class="sig-name descname"><span class="pre">validate_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TEST.station.yaml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.ValidateObsinfo.validate_station" title="Permalink to this definition"></a></dt>
+<dd><p>Validate single station information file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info_file</strong> (<em>str</em>) – station info file to validate. No assumptions made about path.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.validate.init_logging">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.validate.</span></span><span class="sig-name descname"><span class="pre">init_logging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.init_logging" title="Permalink to this definition"></a></dt>
+<dd><p>Create or open a rotating logging file and add it to ObsinfoConfiguration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object of Logger class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.validate.main">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.validate.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.main" title="Permalink to this definition"></a></dt>
+<dd><p>Entry point for obsinfo-validate.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Setups status variables from command line arguments.</p></li>
+<li><p>Validates file according to file type contained in name</p></li>
+<li><p>Manages all uncaught exceptions</p></li>
+</ol>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.main.validate.retrieve_arguments">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.main.validate.</span></span><span class="sig-name descname"><span class="pre">retrieve_arguments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.main.validate.retrieve_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve arguments from command line. Setup several status variables and get information file name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary object with all status variables and information file name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="obsinfo.instrumentation.html" class="btn btn-neutral float-left" title="obsinfo.instrumentation package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="obsinfo.misc.html" class="btn btn-neutral float-right" title="obsinfo.misc package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

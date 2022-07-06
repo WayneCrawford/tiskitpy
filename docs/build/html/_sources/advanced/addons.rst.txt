@@ -1,0 +1,51 @@
+****************
+Addons
+****************
+
+
+If you want to add codes allowing you to make scripts according to your needs,
+use the `obsinfo/addons/` directory.  Existing classes/executables in this
+directory are:
+  - :ref:`LCHEAPO`: Go from SIO LC2000 data files to basic miniSEED.
+  - :ref:`SDPCHAIN`: Go from basic miniSEED to datacenter-ready data
+  - :ref:`LC2SDS`: Generate basic clock-corrected SDS data archives.
+  - :ref:`OCA`:
+    
+
+================================
+LCHEAPO
+================================
+Creates scripts to generate miniSEED data from SIO LC2000 data files.
+miniSEED files are deliberately NOT drift corrected so that that step can be
+done at a data/metadata preparation 'A-node'
+    
+Run through the executable `obsinfo-makescripts-LCHEAPO`
+
+the generated scripts need the `sdpchain` module (not publically available)
+
+================================
+SDPCHAIN
+================================
+Makes scripts to to go from basic miniSEED to data center ready
+
+Run through the executable `obsinfo-makescripts-SDPCHAIN`
+
+the generated scripts need the `sdpchain` module (not publically available)
+
+================================
+LC2SDS
+================================
+Makes scripts to generate SDS data archives directly from SIO LC2000 data files,
+including basic clock corrections.  To furnish facility users, NOT
+FDSN/EIDA-level data centers
+
+Runs through the executable `obsinfo-makescripts-LC2SDS`
+
+The generated scripts need the pip-available `lcheapo` module
+
+================================
+OCA
+================================
+Just a stub for metadata conversion between *obsinfo* and *OCA* protocols.
+Never finished.
+

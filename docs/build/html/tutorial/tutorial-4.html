@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building a simple instrumentation file with channels &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building instrument component files with response stages: sensors and preamplifiers" href="tutorial-5.html" />
+    <link rel="prev" title="Building a simple network file with stations" href="tutorial-3.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial-1.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-2.html">The general structure of information files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-3.html">Building a simple network file with stations</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building a simple instrumentation file with channels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#equipment">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#channels-and-channel-default">Channels and channel default</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#orientation-codes">Orientation Codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configurations">Configurations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#channel-modifications">Channel modifications</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#notes-and-extras">Notes and extras</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#complete-example">Complete example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-5.html">Building instrument component files with response stages: sensors and preamplifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-6.html">Building a datalogger information file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-7.html">Building a stage information file with different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-8.html">Building a filter information file for different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-9.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../tutorial.html">Tutorial</a> &raquo;</li>
+      <li>Building a simple instrumentation file with channels</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/tutorial-4.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-a-simple-instrumentation-file-with-channels">
+<span id="tutorial4"></span><h1>Building a simple instrumentation file with channels<a class="headerlink" href="#building-a-simple-instrumentation-file-with-channels" title="Permalink to this headline"></a></h1>
+<p>As seen in the last section, instrumentation are usually referred to with <code class="docutils literal notranslate"><span class="pre">$ref</span></code> from a network / station information file. This is a best practice, but it is not mandatory. It does allow for easier reuse.</p>
+<p>The file starts as usual:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2019-12-19&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Romuald_Daniel.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>Observe that we have added an author to the list of authors, and that lists are separated by dashes.</p>
+<section id="equipment">
+<h2>Equipment<a class="headerlink" href="#equipment" title="Permalink to this headline"></a></h2>
+<p>The main part of the file is the instrumentation section. First, we have the <code class="docutils literal notranslate"><span class="pre">equipment</span></code> section, which details the manufacturer, model and serial number of the whole instrumentation, and which can be overridden for individual components.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instrumentation</span><span class="p">:</span>
+
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;BBOBS1&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Broadband</span><span class="nv"> </span><span class="s">Ocean</span><span class="nv"> </span><span class="s">Bottom</span><span class="nv"> </span><span class="s">Seismometer&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;LCHEAPO</span><span class="nv"> </span><span class="s">2000</span><span class="nv"> </span><span class="s">BBOBS</span><span class="nv"> </span><span class="s">2012-present&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Scripps</span><span class="nv"> </span><span class="s">Inst.</span><span class="nv"> </span><span class="s">Oceanography</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">INSU&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;Scripps</span><span class="nv"> </span><span class="s">Inst.</span><span class="nv"> </span><span class="s">Oceanography</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">UNSU&quot;</span>
+</pre></div>
+</div>
+<p>As most OBS are assembled with parts from different manufacturers, the only required fields of the equipment section are the type (a free-form text field) and the description.</p>
+</section>
+<section id="channels-and-channel-default">
+<h2>Channels and channel default<a class="headerlink" href="#channels-and-channel-default" title="Permalink to this headline"></a></h2>
+<p>In second place, we have channels. Channels are the most relevant part of the instrumentation. A channel is the ensemble of the three instrument components (called an instrument): sensor, optionally a preamplifier and a datalogger, plus an orientation. Orientation codes are explained <a class="reference external" href="http://docs.fdsn.org/projects/source-identifiers/en/v1.0/channel-codes.html#source-and-subsource-codes">here</a> in the <em>Geographic orientation subsource codes</em> section. They are dictated by FDSN standards.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">channels</span></code> are the actual channels in the instrumentation. They all have string labels, which are usually channel numbers. These must be in quotes as they are not keys in the <em>obsinfo</em> syntax. They must specify an orientation.</p>
+<p>However, to avoid duplication, a wildcard, default channel identified with label <code class="docutils literal notranslate"><span class="pre">default</span></code> is used to declare common elements to all channels. This is not an actual channel. It’s just a place to hold default attributes. If an attribute is not specified in an actual channel but exists in the default channel then it will be added to the final configuration of the channel.</p>
+<p>Let’s see an example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channels</span><span class="p">:</span>
+    <span class="nt">default</span><span class="p">:</span>
+        <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">preamplifier</span><span class="p">:</span>
+            <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+    <span class=" -Error"> </span><span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">orientation_code</span><span class="p">:</span> <span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt">  dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>  <span class="l l-Scalar l-Scalar-Plain">+</span>
+     <span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span>
+          <span class="nt">orientation_code</span><span class="p">:</span>
+                  <span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span>
+                      <span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">9</span><span class="p p-Indicator">]</span>
+                      <span class="nt">dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>This code specifies two channels as a dictionary. Each channel specifies the two or three instrument components and the <code class="docutils literal notranslate"><span class="pre">orientation_code</span></code>. The orientation_code will become the third character in the SEED code identification
+(see <a class="reference internal" href="../classes/seed_codes.html#seedcodes11"><span class="std std-ref">SeedCodes</span></a>, and thus must follow FDSN standards.</p>
+<p>Again, these are real, physical channels. But the default specifies three instrument components: <code class="docutils literal notranslate"><span class="pre">sensor</span></code>, <code class="docutils literal notranslate"><span class="pre">preamplifier</span></code> and <code class="docutils literal notranslate"><span class="pre">datalogger</span></code>. The preamplifier is optional. All three files reference an information file in separate directory, which, in the example, are just under the directory <code class="docutils literal notranslate"><span class="pre">Information_Files</span></code>. All fields in the <code class="docutils literal notranslate"><span class="pre">default</span></code> are applied to each one of the <code class="docutils literal notranslate"><span class="pre">channels</span></code> <em>unless</em> the channel already has one of those components. In other words, fields in the individual <code class="docutils literal notranslate"><span class="pre">channels</span></code> override fields in the default. So this is the same as typing:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channels</span><span class="p">:</span>
+       <span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span>
+<span class="nt">           sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">           preamplifier</span><span class="p">:</span>
+                <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">           datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+<span class="nt">           orientation_code</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">9</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt"> dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+       <span class="p p-Indicator">}</span>
+       <span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span>
+<span class="nt">           sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">           preamplifier</span><span class="p">:</span>
+                <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">           datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+<span class="nt">           orientation_code</span><span class="p">:</span>
+                   <span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span>
+<span class="nt">                       azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]</span>
+<span class="nt">                       dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>Observe that in this case we have used curly parentheses to specify elements in a dictionary. They can be left out, letting simple indentation do the job of determining the items in the dictionary.</p>
+<p>Now, if a channel specifies any of the fields in the default, it will override that field. Let’s assume we have a channel 4 with a different sensor and preamplifier:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;4&quot;</span><span class="p p-Indicator">:</span>
+    <span class="nt">orientation_code </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;H&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt">  dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+<span class="nt">    preamplifier</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">    sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/SIO_DPG.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>Then, assuming the same default field as above, the result of channel 4 would be:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;4&quot;</span><span class="p p-Indicator">:</span>
+    <span class="nt">orientation_code </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;H&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt">  dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+    <span class="nt">preamplifier</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+    <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/SIO_DPG.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+    <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>Only <code class="docutils literal notranslate"><span class="pre">datalogger</span></code> maintains the default value. The other components are overriden with the values specified in channel 4.</p>
+</section>
+<section id="orientation-codes">
+<h2>Orientation Codes<a class="headerlink" href="#orientation-codes" title="Permalink to this headline"></a></h2>
+<p>Now we need to explain the orientation codes. Orientation codes are a FDSN standard. By convention, if the orientation code is <strong>X</strong>, <strong>Y</strong> or <strong>Z</strong>, these represent the regular coordinates in space following the right-hand rule, within five degrees of the actual directions. So <strong>X</strong> corresponds to an azimuth of 0º and a dip of 0º, <strong>Y</strong> corresponds to an azimuth of 90º and a dip of 0º, and <strong>Z</strong> corresponds to an azimuth of 0º and a dip of 90º (the positive <strong>Z</strong> direction is towards the bottom). However, if <strong>1</strong>, <strong>2</strong> or <strong>3</strong> are specified, these represent three linearly independent directions but not necessarily coincidental with the regular coordinates, so an azimuth and a dip <em>must</em> be specified, depending on the type of code. The same is true of the <strong>H</strong> (hydrophone) code. See reference above for details.</p>
+<p>Note also how we freely mix the two syntactic ways of specifying a dictionary in YAML, with curly parentheses or indentation. You can use whatever syntax you prefer. You only need to pay attention to curly parentheses if you choose to use that syntax.</p>
+<p>The order of the keys <code class="docutils literal notranslate"><span class="pre">sensor</span></code>. <code class="docutils literal notranslate"><span class="pre">preamplifier</span></code> and <code class="docutils literal notranslate"><span class="pre">datalogger</span></code> are arbitrary, as there can be no ambiguity, but it is good to remember that their stages will always be processed in the logical order: sensor, preamplifier and datalogger.</p>
+</section>
+<section id="configurations">
+<h2>Configurations<a class="headerlink" href="#configurations" title="Permalink to this headline"></a></h2>
+<p>So far so good. We have learnt how to specify default components through the default and how to override them. This is pretty flexible, but we can get more flexible still. This is done through <em>configuration definitions</em> and <em>configuration selection</em>. Configuration definitions are specified at the instrument component level, and thus will be treated in the next section. Suffice it to say hear that configuration definitions can take any field at the lower levels and change it either by overriding it or by adding it to a preexisting default configuration. This is by <em>selecting</em> a configuration at the channel level.  A configuration selection field can specify a configuration for each of the three instrument components in a channel: sensor, preamplifier and datalogger. The configuration <strong>must</strong> exist as a configuration definition. Let’s add two things to the example: a default configuration for all channels in <code class="docutils literal notranslate"><span class="pre">default</span></code> and a  channel 3 that overrides this configuration.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channels</span><span class="p">:</span>
+     <span class="nt">default</span><span class="p">:</span>
+         <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+         <span class="nt">preamplifier</span><span class="p">:</span>
+             <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+         <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+         <span class="nt">preamplifier_configuration</span><span class="p">:</span> <span class="s">&quot;0.225x&quot;</span>
+
+     <span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">orientation_code</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">9</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt"> dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span> <span class="p p-Indicator">}</span>
+     <span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span>
+          <span class="nt">orientation_code</span><span class="p">:</span>
+                  <span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span>
+                      <span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">9</span><span class="p p-Indicator">]</span>
+                      <span class="nt">dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]</span>
+
+     <span class="s">&quot;3&quot;</span><span class="p p-Indicator">:</span>
+         <span class="nt">orientation_code</span><span class="p">:</span> <span class="s">&quot;Z&quot;</span>
+         <span class="nt">preamplifier_configuration</span><span class="p">:</span> <span class="s">&quot;1x&quot;</span>
+
+     <span class=" -Error"> </span><span class="s">&quot;4&quot;</span><span class="p p-Indicator">:</span>
+         <span class="nt">orientation_code </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;H&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt">  dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+         <span class="nt">preamplifier</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+         <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/SIO_DPG.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>This code specifies configurations`, which can be for sensor, preamplifier or datalogger; in this case, simply for the preamplifier. The configuration selected is called “0.225x” and is a gain multiplier, as will be seen shortly. This value will be used in all channels, except channel 3, where it will be changed to “1x”. In the end, the four channels specified above will be the same as typing this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channels</span><span class="p">:</span>
+     <span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span>
+        <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">preamplifier</span><span class="p">:</span>
+              <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+        <span class="nt">orientation_code</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">9</span><span class="p p-Indicator">],</span><span class="nt"> dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+
+        <span class="nt">preamplifier_configuration</span><span class="p">:</span> <span class="s">&quot;0.225&quot;</span>
+
+     <span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span>
+        <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">preamplifier</span><span class="p">:</span>
+              <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+        <span class="nt">orientation_code</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt"> dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+
+
+        <span class="nt">preamplifier_configuration</span><span class="p">:</span> <span class="s">&quot;0.225x&quot;</span>
+
+     <span class="s">&quot;3&quot;</span><span class="p p-Indicator">:</span>
+        <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">preamplifier</span><span class="p">:</span>
+             <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+        <span class="nt">orientation_code</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Z</span>
+        <span class="nt">preamplifier_configuration</span><span class="p">:</span> <span class="s">&quot;1x&quot;</span>
+
+     <span class="s">&quot;4&quot;</span><span class="p p-Indicator">:</span>
+        <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/SIO_DPG.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">preamplifier</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+        <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+
+        <span class="nt">orientation_code</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;H&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt">  dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+
+        <span class="nt">preamplifier_config</span><span class="p">:</span> <span class="s">&quot;1x&quot;</span>
+</pre></div>
+</div>
+<section id="channel-modifications">
+<h3>Channel modifications<a class="headerlink" href="#channel-modifications" title="Permalink to this headline"></a></h3>
+<p>As seen in the last chapter, channel configurations can also be modified. The rationale behind this feature is that the user has a stable database of instruments which may occasionally suffer last-minute or punctual modifications, for example, in the serial number of an equipment (when it is replaced by another one as an emergency measure when it’s malfunctioning or gain of a stage. OBS equipment is highly malleable and <em>obsinfo</em> is conceived to reflect that malleability. Channel modifications are performed at the <code class="docutils literal notranslate"><span class="pre">station</span></code> level but can potentially change <em>any</em> field from instrumentation level down. However, this is a more complex topic that falls outside of a beginner’s tutorial.
+It will be treated in the <a class="reference external" href="AdvancedTopics">Advanced Topics</a> documentation.</p>
+</section>
+</section>
+<section id="notes-and-extras">
+<h2>Notes and extras<a class="headerlink" href="#notes-and-extras" title="Permalink to this headline"></a></h2>
+<p>This file is complex, so it’s a good place to talk about notes and extras. These are optional fields. Notes can occur in any information file. They are documentation that can be used to remind users of the specifics of the information file. They will <strong>not</strong> be reflected in StationXML to avoid clutter.</p>
+<p>Extras are key:value pairs that document attributes that do not exist in the information file specification. They <strong>are</strong> reflected as remarks in the StationXML file. For this reason and to avoid clutter, they are only available at three levels: network, station and channel, which are the levels in StationXML which permit remarks. An earlier version of <em>obsinfo</em> permitted extras at any level. The result was considerable clutter at the response stages level, as stages are repeated and the same information is therefore repeated over and over.</p>
+<p>As an example, let’s assume we have an “octopus” sensor where the serial number of the sensor is not specified. This is because we have actually several sensors with different serial numbers, enclosed in spheres. How do we convey that information? There are two ways. One is in a list of notes at the end of the <em>sensor</em> file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">notes</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;INSU-IPGP</span><span class="nv"> </span><span class="s">OBS</span><span class="nv"> </span><span class="s">park</span><span class="nv"> </span><span class="s">sphere</span><span class="nv"> </span><span class="s">sensor</span><span class="nv"> </span><span class="s">pairs</span><span class="nv"> </span><span class="s">are:</span><span class="nv"> </span><span class="s">Sphere01-133,</span><span class="nv"> </span><span class="s">Sphere02-132,&quot;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;Sphere03-134,</span><span class="nv"> </span><span class="s">Sphere04-138,</span><span class="nv"> </span><span class="s">Sphere05-137,</span><span class="nv"> </span><span class="s">Sphere06-830,</span><span class="nv"> </span><span class="s">Sphere07-136,&quot;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;Sphere08-829,</span><span class="nv"> </span><span class="s">Sphere09-826&quot;</span>
+</pre></div>
+</div>
+<p>This associates serial numbers to the spheres. However, this will not be reflected in the StationXML file. The other YAML syntax for lists is possible too:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>notes: [“INSU-IPGP OBS park sphere sensor pairs are: Sphere01-133, Sphere02-132,”,</dt><dd><p>“Sphere03-134, Sphere04-138, Sphere05-137, Sphere06-830, Sphere07-136,”,
+“Sphere08-829, Sphere09-826”]</p>
+</dd>
+</dl>
+<p>Or we can use the <code class="docutils literal notranslate"><span class="pre">extras</span></code> dictionary, but not in the sensor file but in the instrumentation one:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">extras</span><span class="p">:</span>
+   <span class="s">&quot;Description&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;Serial</span><span class="nv"> </span><span class="s">numbers</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">sensors&quot;</span>
+   <span class="s">&quot;Sphere03&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;134&quot;</span>
+   <span class="s">&quot;Sphere04&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;138&quot;</span>
+   <span class="s">&quot;Sphere05&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;137&quot;</span>
+   <span class="s">&quot;Sphere06&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;830&quot;</span>
+   <span class="s">&quot;Sphere07&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;136&quot;</span>
+   <span class="s">&quot;Sphere08&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;829&quot;</span>
+   <span class="s">&quot;Sphere09&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;826&quot;</span>
+</pre></div>
+</div>
+<section id="complete-example">
+<h3>Complete example<a class="headerlink" href="#complete-example" title="Permalink to this headline"></a></h3>
+<p>This is a real file. The order of the fields may change from the examples above. As mentioned, this is immaterial.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2019-12-19&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Romuald_Daniel.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">instrumentation</span><span class="p">:</span>
+   <span class="nt">operator</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;operators/INSU-IPGP.facility_info.yaml#facility_info&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;BBOBS1&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Broadband</span><span class="nv"> </span><span class="s">Ocean</span><span class="nv"> </span><span class="s">Bottom</span><span class="nv"> </span><span class="s">Seismometer&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;LCHEAPO</span><span class="nv"> </span><span class="s">2000</span><span class="nv"> </span><span class="s">BBOBS</span><span class="nv"> </span><span class="s">2012-present&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Scripps</span><span class="nv"> </span><span class="s">Inst.</span><span class="nv"> </span><span class="s">Oceanography</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">INSU&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;Scripps</span><span class="nv"> </span><span class="s">Inst.</span><span class="nv"> </span><span class="s">Oceanography</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">UNSU&quot;</span>
+
+   <span class="nt">channels</span><span class="p">:</span>
+       <span class="nt">default</span><span class="p">:</span>
+           <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+           <span class="nt">preamplifier</span><span class="p">:</span>
+               <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+           <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/NANOMETRICS_T240_SINGLESIDED.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+           <span class="nt">preamplifier_configuration</span><span class="p">:</span> <span class="s">&quot;0.225x&quot;</span>
+
+       <span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">orientation_code</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt">  dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span> <span class="p p-Indicator">}</span>
+       <span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">orientation_code</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;1&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt"> dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}}</span>
+       <span class="s">&quot;3&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">orientation_code</span><span class="p">:</span> <span class="s">&quot;Z&quot;</span>
+           <span class="nt">selections</span><span class="p">:</span>
+              <span class="nt">preamplifier</span><span class="p">:</span> <span class="s">&quot;1x&quot;</span>
+       <span class="s">&quot;4&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">orientation_code </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="s">&quot;H&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">azimuth.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">],</span><span class="nt">  dip.deg</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]}}</span>
+           <span class="nt">preamplifier</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;preamplifiers/LCHEAPO_DPG.preamplifier.yaml#preamplifier&quot;</span><span class="p p-Indicator">}</span>
+           <span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;sensors/SIO_DPG.sensor.yaml#sensor&quot;</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><a class="reference internal" href="tutorial-5.html#tutorial5"><span class="std std-ref">Next page, Building instrument component files</span></a></p></li>
+<li><p><a class="reference internal" href="#tutorial4"><span class="std std-ref">Previous page</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-1.html#tutorial1"><span class="std std-ref">Back to start</span></a></p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial-3.html" class="btn btn-neutral float-left" title="Building a simple network file with stations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial-5.html" class="btn btn-neutral float-right" title="Building instrument component files with response stages: sensors and preamplifiers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

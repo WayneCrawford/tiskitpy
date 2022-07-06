@@ -1,0 +1,101 @@
+
+.. _ResponseList:
+
+***************
+ResponseList
+***************
+
+
+===============
+ Description
+===============
+
+A :ref:`filter <Filter11>` can be characterised by the list of impulse responses it yields, instead of its `transfer function <https://ccrma.stanford.edu/~jos/filters/Transfer_Function_Analysis.html>`_. These responses are triples of \[frequency (in Hz), amplitude, phase (in degrees)\], expressed in a list.
+
+
+---------------------
+Python class:
+---------------------
+
+ResponseList
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+ResponseList
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+ResponseList
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`Filter <Filter11>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is nested in :ref:`Stage <Stage>`
+
+==============================
+Attributes
+==============================
+
+.. _ResponseListElement: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#responselistelement
+.. _Frequency: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-responselist-responselistelement-frequency
+.. _Amplitude: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-responselist-responselistelement-Amplitude
+.. _Phase: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-responselist-responselistelement-Phase
+
+======================== ================================== ============ ================= ========================== =========================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**                   **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+elements                   Array of Values: 
+                              [number, number, number]           Y            *None*        `ResponseListElement`_::     
+                              where 
+                               first element = 
+                                   frequency (in Hz)                                       
+                               second elmenet = 
+                                    amplitude                                                 Frequency
+                               third element =:                                               Amplitude
+                                     phase (in degrees)                                       Phase                                      
+                                                                                             
+                                                                                             
+======================== ================================== ============ ================= ========================== =========================================
+
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+ Example
+==============================
+
+No available example.
+
+==================
+Class Navigation
+==================
+
+:ref:`Filter11` \<\=\= 
+

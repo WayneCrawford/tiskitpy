@@ -1,0 +1,109 @@
+
+.. _Location1:
+
+***************
+Location
+***************
+
+
+===============
+ Description
+===============
+
+This class serves two purposes. If a single location is specified or if the location code "00" is specified, this will be geographic location of the corresponding :ref:`Station <Station>` in StationXML. The rest of locations serve to group channels that treat the signal of a single sensor. They can be physically in other geographic locations or not.
+
+---------------------
+Python class:
+---------------------
+
+Location
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+location:
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+
+  Location codes appear in channels of a given instrumentation. All locations corresponding to these codes are specified as individual attributes in the channel section of StationXML.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is assigned, as a code, to a :ref:`Channel <Channel>`
+* Is assigned to a :ref:`Station <Station>`
+
+==============================
+Attributes
+==============================
+
+.. _Latitude: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#latitude-required
+.. _Longitude: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#longitude-required
+.. _Elevation: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#elevation-required
+.. _location_code: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel
+
+======================== ================================== ============ ================= ========================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**       **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  *code*                             string                        Y           *None*            `location_code`_  
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  base                           :ref:`LocationBase`               N           *None*            *None*                  Individual fields of base in Station attribute. See :ref:`LocationBase` for details.   
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  position:                           Position                      Y           *None*           *None*           
+    * lat                               number                      Y           *None*           `Latitude`_            Expressed in degrees/min/sec/fractions of sec.
+    * lon                               number                      Y           *None*           `Longitude`_           Expressed in degrees/min/sec/fractions of sec.
+    * elev                              number                      Y           *None*           `Elevation`_           Expressed in meters                         
+======================== ================================== ============ ================= ========================== =============================================================
+
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Facility section in network information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml>`_
+
+.. code-block:: yaml
+
+ locations:
+                "00":
+                    base: {$ref: 'location_bases/SURFACE_DROP.location_base.yaml#location_base'}
+                    position: {lon: -32.32504, lat: 37.29744, elev: -2030}
+
+===================
+Class Navigation
+===================
+
+:ref:`Station` \<\=\=\> :ref:`Instrumentation`
+
+\=\=\> :ref:`LocationBase`

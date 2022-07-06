@@ -1,0 +1,109 @@
+.. _InstrumentComponent:
+
+*********************
+InstrumentComponent
+*********************
+
+
+===============
+ Description
+===============
+
+An :ref:`Instrument11` in *obsinfo* is broken down into three components: :ref:`Sensor`, an optional :ref:`Preamplifier11` and a :ref:`Datalogger11`. All of them are subclasses of this class, with some specialized attributes.
+
+What characterizes all components is that they have an *ordered* list of response stages, along with different configuration definitions. The idea is to specify all regularly used configurations (you can always add more later). These different configuration override selected default attributes at the stage and filter level, or add new attributes to them. In turn, the information files at the instrumentation level select one particular configuration definition, and thus, one set of overrides and additions. Configurations are usually labeled with a code which specifies the main characteristic that changes in a particular set of configurations, such as sample rate or gain; in general, We present examples for three different ways to characterize configuration definitions.
+
+On the other hand, it is very important to realize that stages must be specified in order. The top level order is sensor - preamplifier - datalogger, but within these three components it is up to the user to make sure the stages are in the correct order, starting with the one closer to the sensor.
+
+The class InstrumentComponents does not appear explicitly in YAML or JASON files but it's part of the object model.
+
+---------------------
+Python class:
+---------------------
+
+InstrumentComponents
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+*None*
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+
+There are structures in StationXML for :ref:`Sensor`, :ref:`Preamplifier11` and a :ref:`Datalogger11`.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+* :ref:`Sensor`
+* :ref:`Preamplifier11` 
+* :ref:`Datalogger11`
+
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Contains :ref:`ResponseStages <ResponseStages>`
+* Specs are described in :ref:`Equipment <Equipment>`
+* Is part of an :ref:`Instrument <Instrument11>`
+
+
+==============================
+Attributes
+==============================
+
+.. _response: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response
+
+============================ ================================== ============ ================= ========================== =================================================================================================================================================
+        **Name**                   **Type**                     **Required**    **Default**    **Equivalent StationXML**       **Remarks**
+---------------------------- ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------
+  equipment                      :ref:`Equipment`                  Y           *None*            *None*                    In StationXML this is at the channel level: there is only one equipment.
+---------------------------- ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------
+  response_stages               :ref:`ResponseStages`              N           *None*           `Response`_               
+---------------------------- ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------
+  configuration_default         string                             N           *None*           *None*                     This is for *obsinfo* functionality only, if configuration is not specified at the instrumentation level
+---------------------------- ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------
+configuration_definitions     Stage and filter attributes          N           *None*           *None*                     A dictionary of stage and filter attributes to override the default configuration. A particular configuration definition may be selected at the instrumentation level 
+============================ ================================== ============ ================= ========================== =================================================================================================================================================
+
+==============================
+JSON schema
+==============================
+
+*None*
+
+==============================
+Example
+==============================
+
+*None*
+
+============
+Navigation
+============
+
+:ref:`Instrument11` \<\=\=
+
+\=\=\> :ref:`Sensor`
+
+\=\=\> :ref:`Preamplifier11`
+
+\=\=\> :ref:`Datalogger11`
+

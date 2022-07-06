@@ -1,0 +1,52 @@
+obsinfo.misc package
+====================
+
+obsinfo.misc.configuration module
+---------------------------------
+
+.. automodule:: obsinfo.misc.configuration
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.misc.const module
+-------------------------
+
+.. automodule:: obsinfo.misc.const
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.misc.discoveryfiles module
+----------------------------------
+
+.. automodule:: obsinfo.misc.discoveryfiles
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.misc.printobs module
+----------------------------
+
+.. automodule:: obsinfo.misc.printobs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.misc.remoteGitLab module
+--------------------------------
+
+.. automodule:: obsinfo.misc.remoteGitLab
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.misc.yamlref module
+---------------------------
+
+.. automodule:: obsinfo.misc.yamlref
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:
+

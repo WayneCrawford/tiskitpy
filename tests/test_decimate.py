@@ -18,7 +18,7 @@ from obspy.core.stream import read as stream_read
 from matplotlib import pyplot as plt
 import numpy as np
 
-from crawtools.decimate import FIRFilter, Decimator
+from tiskit.decimate import FIRFilter, Decimator
 
 
 class TestMethods(unittest.TestCase):
@@ -119,7 +119,7 @@ class TestMethods(unittest.TestCase):
     def test_SAC_Filters(self):
         """ Test lcdump outputs"""
         for decim in range(2, 8):
-            ff = FIRFilter.from_SAC(decim)
+            ff = FIRFilter.from_SAC(decim, normalize=False)
             fname = f'decim{decim}.pickle'
             with open(fname, 'wb') as f:
                 pickle.dump(ff, f)
@@ -136,10 +136,7 @@ class TestMethods(unittest.TestCase):
         self.assertRaises(ValueError, FIRFilter.from_SAC, *args)
 
     def test_modify_stationxml(self):
-        """
-        Read a stationxml file and create new channels for decimated data
-        """
-        # plot = True
+        """Read a stationxml file and create new decimated data channels"""
         inv = read_inventory(str(self.test_path / 'stations_PILAB.xml'))
         # Restrict to Scripps stations to shorten printouts
         inv_SIO = inv.select(station='S1*D')
@@ -147,21 +144,22 @@ class TestMethods(unittest.TestCase):
         st = stream_read(str(self.test_path / 'XS.S10D.20161212T2053.mseed'))
         # Test using stream channels
         # SIO's FIR8 causes problems here, because it's sum[coeffs] = 0.9767
-        invnew = decim.update_inventory(inv_SIO, st)
-        # print(invnew[0][0])
+        invnew = decim.update_inventory(inv_SIO, st, quiet=True)
         self.assertNotEqual(inv_SIO, invnew)
         invnew.write('stations_PILAB_S10decim.xml', format='STATIONXML')
         # self.assertEqual(
         #     inv_SIO, read_inventory(str(self.test_path /
         #                                 'stations_PILAB_S10decim.xml')))
         # Test using explicit channels
-        invnew = decim.update_inventory_from_nslc(inv_SIO, 'S10D', 'BHZ')
-        # print(invnew[0][0])
+        invnew = decim.update_inventory_from_nslc(inv_SIO, 'S10D', 'BHZ',
+                                                  quiet=True)
         self.assertNotEqual(inv, invnew)
         invnew.write('stations_PILAB_S10BHZdecim.xml', format='STATIONXML')
         # self.assertEqual(
         #     inv_SIO, read_inventory(str(self.test_path /
         #                                 'stations_PILAB_S10decim.xml')))
+        Path('stations_PILAB_S10decim.xml').unlink()
+        Path('stations_PILAB_S10BHZdecim.xml').unlink()
 
 
 def suite():

@@ -1,0 +1,139 @@
+
+.. _Network:
+
+***************
+ Network
+***************
+
+===============
+ Description
+===============
+
+An OBS network is a seismological network of stations as part of a campaign 
+:ref:`stations <Station>` in a given campaign.
+
+---------------------
+Python class:
+---------------------
+
+Network
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+network
+  Contained in a network file.
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Network
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Gathers one or more :ref:`Stations <Station>`
+* Is part of a Campaign (not implemented in *obsinfo* as a class).
+
+==============================
+Attributes
+==============================
+
+.. _StationFDSN: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station
+.. _OperatorFDSN: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#operator
+.. _Comment: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#comment
+.. _startDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-required
+.. _endDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-required
+
+======================== ================================== ============= ================= ================================== ================================================
+        **Name**                   **Type**                 **Required**    **Default**        **Equivalent StationXML**         **Remarks**
+------------------------ ---------------------------------- ------------- ----------------- ---------------------------------- ------------------------------------------------
+  network_info                  :ref:`FDSNNetwork`                  Y           *None*            *None*                    
+------------------------ ---------------------------------- ------------- ----------------- ---------------------------------- ------------------------------------------------
+  operator                      :ref:`Operator`                     Y           *None*            `OperatorFDSN`_                       Not required in StationXML  
+------------------------ ---------------------------------- ------------- ----------------- ---------------------------------- ------------------------------------------------
+  stations                   Array of :ref:`Station`                Y           *None*            `StationFDSN`_                    
+------------------------ ---------------------------------- ------------- ----------------- ---------------------------------- ------------------------------------------------
+  restricted_state         List of values:                         N           *None*            *None* 
+                           "open", "closed", 
+                           "partial", "unknown"
+======================== ================================== ============= ================= ================================== ================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+* Part of the network information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml>`_  with ``station`` content elided:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.107"
+ 
+  ...
+
+ revision:
+    authors:
+        - $ref: 'authors/Wayne_Crawford.author.yaml#author'
+    date: "2017-10-04"
+ network:
+    operator:
+        reference_name: "INSU-IPGP"
+        full_name: "INSU-IPGP OBS Park"
+    campaign_ref_name: "SPOBS"
+    network_info:
+        code: "4G"
+        name: "Short period OBSs"
+        start_date: "2007-07-01"
+        end_date: "2025-12-31"
+        description: "Short period OBS network example"
+        comments: ["Lucky Strike Volcano, North Mid-Atlantic Ridge"]
+    stations:
+        "LSVW":
+
+            ... 
+
+        "LSVE":
+
+            ... 
+
+
+* Another example: `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/BBOBS.INSU-IPGP.network.yaml>`_
+
+===================
+Class Navigation
+===================
+
+\=\=\> :ref:`Station`
+
+\=\=\> :ref:`FDSNNetwork`
+
+\=\=\> :ref:`Operator`

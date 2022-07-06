@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Troubleshooting &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Addons" href="addons.html" />
+    <link rel="prev" title="Caveats" href="caveats.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced.html">Advanced</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="chan_mods.html">Channel modifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arol.html">AROL compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="best_practice.html">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes.html">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="caveats.html">Caveats</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addons.html">Addons</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced.html">Advanced</a> &raquo;</li>
+      <li>Troubleshooting</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/advanced/troubleshooting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline"></a></h1>
+<p>Sometimes it is a challenge to understand where an error lies in an information file. Messages are sometimes cryptic. We recommend you use the best practice above of using templates to avoid indentation errors. Also, if you can, use the best practice of working with an editor which recognizes elementary YAML errors such as indentation or wrong parentheses balancing. Let’s review the most common sources of error:</p>
+<p>1) <code class="docutils literal notranslate"><span class="pre">JSONEncodeError/EOF</span></code>.
+An error which raises a JSONEncodeError exception and/or <code class="docutils literal notranslate"><span class="pre">EOF</span> <span class="pre">(end</span> <span class="pre">of</span> <span class="pre">file)</span> <span class="pre">reached</span> <span class="pre">prematurely</span></code>. This is the most serious error, as it stops processing of the information file and exits the program. It is usually due to:</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Indentation</p></li>
+<li><p>Unmatched double or single quotes, parentheses, brackets, curly brackets</p></li>
+<li><p>Extra commas or not enough commas</p></li>
+</ol>
+</div></blockquote>
+<p>Check for these, if possible, with an editor which shows matching signs. Use templates if possible. If everything else fails, try to reduce the information file to a bare bones version, see if the error persists. If it doesn’t, add new attributes gradually. For example, a network file might have this kind of problem. Temporarily eliminate attributes such as <code class="docutils literal notranslate"><span class="pre">channel_modifications</span></code> and reduce the network to a single station.</p>
+<p>2) <code class="docutils literal notranslate"><span class="pre">File</span> <span class="pre">not</span> <span class="pre">found:</span> <span class="pre">&lt;filename&gt;</span></code>.
+&lt;filename&gt; has not been found. Either the directory where the file exists is not correctly specified in the path of the argument or in OBSINFO-DATAPATH, or the &lt;filename&gt;  is misspelled or the file does not exist. This is typical for files referenced in <code class="docutils literal notranslate"><span class="pre">$ref</span></code>.</p>
+<p>3) Validation error: <code class="docutils literal notranslate"><span class="pre">&lt;YAML</span> <span class="pre">expression&gt;</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">valid</span> <span class="pre">under</span> <span class="pre">any</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">given</span> <span class="pre">schemas</span></code>.
+This means that the information file is recognized and correctly parsed, but the portion &lt;YAML expression&gt; is not recognized. This may be due to illegal values, illegal value type (e.g. a string instead of a number, or a string pattern which does not correspond to valid patterns. An example is the wrong version:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="s">&#39;format_version&#39;</span><span class="p p-Indicator">]:</span> <span class="s">&#39;0.107&#39;</span> <span class="l l-Scalar l-Scalar-Plain">is not valid under any of the given schemas</span>
+</pre></div>
+</div>
+<p>or a phone number with letters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;revision&#39;</span><span class="p">]:</span> <span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;2017-11-30&#39;</span><span class="p">,</span> <span class="s1">&#39;authors&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;first_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Wayne&#39;</span><span class="p">,</span> <span class="s1">&#39;last_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Crawford&#39;</span><span class="p">,</span> <span class="s1">&#39;institution&#39;</span><span class="p">:</span> <span class="s1">&#39;IPGP&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;crawford@ipgp.fr&#39;</span><span class="p">,</span> <span class="s1">&#39;phones&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;+33A 01 83 95 76 63&#39;</span><span class="p">}]]}</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span> <span class="n">under</span> <span class="nb">any</span> <span class="n">of</span> <span class="n">the</span> <span class="n">given</span> <span class="n">schemas</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>or a string instead of a list (in the phones attribute):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;revision&#39;</span><span class="p">]:</span> <span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;2017-11-30&#39;</span><span class="p">,</span> <span class="s1">&#39;authors&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;first_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Wayne&#39;</span><span class="p">,</span> <span class="s1">&#39;last_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Crawford&#39;</span><span class="p">,</span> <span class="s1">&#39;institution&#39;</span><span class="p">:</span> <span class="s1">&#39;IPGP&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="s1">&#39;crawford@ipgp.fr&#39;</span><span class="p">,</span> <span class="s1">&#39;phones&#39;</span><span class="p">:</span> <span class="s1">&#39;+33A 01 83 95 76 63&#39;</span><span class="p">}]}</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span> <span class="n">under</span> <span class="nb">any</span> <span class="n">of</span> <span class="n">the</span> <span class="n">given</span> <span class="n">schemas</span>
+</pre></div>
+</div>
+<p>One possibility with validation errors is that the output of the message may be too long and difficult to parse, as it shows the whole produced information files with all its subfiles. The way to avoid this is to apply the best practice of validation bottom-up: first validate filters, then stages, then components, then instrumentations, then networks. This way the output is manageable.</p>
+<p>4) Validation error: <code class="docutils literal notranslate"><span class="pre">Additional</span> <span class="pre">properties</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">allowed</span> <span class="pre">(&lt;attribute</span> <span class="pre">name&gt;</span> <span class="pre">was</span> <span class="pre">unexpected)</span></code>
+An attribute name was not recognized, either because it was misspelled or because it does not exist in the specification.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">][</span><span class="s1">&#39;operator&#39;</span><span class="p">]:</span> <span class="n">Additional</span> <span class="n">properties</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">allowed</span> <span class="p">(</span><span class="s1">&#39;fulsdl_name&#39;</span> <span class="n">was</span> <span class="n">unexpected</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>5) Validation error: <code class="docutils literal notranslate"><span class="pre">&lt;attribute</span> <span class="pre">name&gt;</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">required</span> <span class="pre">property</span></code>
+A required attribute name was not included.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">][</span><span class="s1">&#39;operator&#39;</span><span class="p">]:</span> <span class="s1">&#39;reference_name&#39;</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">required</span> <span class="nb">property</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="caveats.html" class="btn btn-neutral float-left" title="Caveats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="addons.html" class="btn btn-neutral float-right" title="Addons" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

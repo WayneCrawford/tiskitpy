@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>obsinfo.misc package &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="obsinfo.network package" href="obsinfo.network.html" />
+    <link rel="prev" title="obsinfo.main package" href="obsinfo.main.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer’s Corner</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Technical Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="obsinfo.html">Code Documentation: obsinfo package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="obsinfo.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.addons.html">obsinfo.addons package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.instrumentation.html">obsinfo.instrumentation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.main.html">obsinfo.main package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">obsinfo.misc package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.network.html">obsinfo.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.obsMetadata.html">obsinfo.obsMetadata package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.tests.html">obsinfo.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.print_version">obsinfo.print_version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.version">obsinfo.version module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Technical Documentation</a> &raquo;</li>
+          <li><a href="obsinfo.html">Code Documentation: obsinfo package</a> &raquo;</li>
+      <li>obsinfo.misc package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/obsinfo.misc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="obsinfo-misc-package">
+<h1>obsinfo.misc package<a class="headerlink" href="#obsinfo-misc-package" title="Permalink to this headline"></a></h1>
+<section id="module-obsinfo.misc.configuration">
+<span id="obsinfo-misc-configuration-module"></span><h2>obsinfo.misc.configuration module<a class="headerlink" href="#module-obsinfo.misc.configuration" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.misc.configuration.Singleton">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.misc.configuration.</span></span><span class="sig-name descname"><span class="pre">Singleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.configuration.Singleton" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to implement singleton pattern design in Python</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.configuration.Singleton.Instance">
+<span class="sig-name descname"><span class="pre">Instance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.configuration.Singleton.Instance" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.misc.const">
+<span id="obsinfo-misc-const-module"></span><h2>obsinfo.misc.const module<a class="headerlink" href="#module-obsinfo.misc.const" title="Permalink to this headline"></a></h2>
+<p>Exit values as constants as per UNIX BSD standard</p>
+</section>
+<section id="module-obsinfo.misc.discoveryfiles">
+<span id="obsinfo-misc-discoveryfiles-module"></span><h2>obsinfo.misc.discoveryfiles module<a class="headerlink" href="#module-obsinfo.misc.discoveryfiles" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.misc.discoveryfiles.Datapath">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.misc.discoveryfiles.</span></span><span class="sig-name descname"><span class="pre">Datapath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.discoveryfiles.Datapath" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to discover where information files are stored.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.misc.discoveryfiles.Datapath.datapath_list">
+<span class="sig-name descname"><span class="pre">datapath_list</span></span><a class="headerlink" href="#obsinfo.misc.discoveryfiles.Datapath.datapath_list" title="Permalink to this definition"></a></dt>
+<dd><p>directories where information files will
+be searched, in sequence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.misc.discoveryfiles.Datapath.infofiles_path">
+<span class="sig-name descname"><span class="pre">infofiles_path</span></span><a class="headerlink" href="#obsinfo.misc.discoveryfiles.Datapath.infofiles_path" title="Permalink to this definition"></a></dt>
+<dd><p>same as datapath_list, used by validate,
+kept for compatibility</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.misc.discoveryfiles.Datapath.validate_path">
+<span class="sig-name descname"><span class="pre">validate_path</span></span><a class="headerlink" href="#obsinfo.misc.discoveryfiles.Datapath.validate_path" title="Permalink to this definition"></a></dt>
+<dd><p>one unique path to validation schemas</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.discoveryfiles.Datapath.add_frag">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">add_frag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.discoveryfiles.Datapath.add_frag" title="Permalink to this definition"></a></dt>
+<dd><p>Add the path and the frag to restore a partial or complete uri</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – path portion of uri, possibly with other elements but without frag</p></li>
+<li><p><strong>frag</strong> (<em>str</em>) – fragment portion of uri</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>path with frag as string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.discoveryfiles.Datapath.build_datapath">
+<span class="sig-name descname"><span class="pre">build_datapath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.discoveryfiles.Datapath.build_datapath" title="Permalink to this definition"></a></dt>
+<dd><p>Create list of directories which may have data or schemas</p>
+<ol class="arabic simple">
+<li><p>If the file path is absolute, return the file itself.</p></li>
+<li><p>If path starts by ./ or ../ complete to an absolute path using working directory</p></li>
+<li><p>If the file has no prefix discover whether file exists in the datapath list.
+Use the first found file.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> (<em>str</em><em> or </em><em>path</em>) – filename of file to be found</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>found file as string</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>FileNotFoundError</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.misc.printobs">
+<span id="obsinfo-misc-printobs-module"></span><h2>obsinfo.misc.printobs module<a class="headerlink" href="#module-obsinfo.misc.printobs" title="Permalink to this headline"></a></h2>
+<p>Functions to print obsinfo objects</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.misc.printobs.PrintObs">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.misc.printobs.</span></span><span class="sig-name descname"><span class="pre">PrintObs</span></span><a class="headerlink" href="#obsinfo.misc.printobs.PrintObs" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Collection of methods to print obsinfo objects at different levels of depth.
+All methods are static.</p>
+<blockquote>
+<div><p><strong>Attributes:</strong></p>
+<blockquote>
+<div><p><em>None</em></p>
+</div></blockquote>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.printobs.PrintObs.print_component">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">print_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.printobs.PrintObs.print_component" title="Permalink to this definition"></a></dt>
+<dd><p>Prints comoponent information and continues if level is not “component” or “channel”.</p>
+<p>If level is not “channel” detailed equipment information is not printed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>level</strong> – determines to which level the <em>obsinfo</em> object will be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.printobs.PrintObs.print_instrumentation">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">print_instrumentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.printobs.PrintObs.print_instrumentation" title="Permalink to this definition"></a></dt>
+<dd><p>Prints instrumentation information and continues if level is not “instrumentation”.</p>
+<p>If level is  “response” or “all” response stages information will be printed (if it exists).
+Recall at this point all the response is gathered in <code class="docutils literal notranslate"><span class="pre">instrument.response_stages.sgates</span></code>
+If level is “all” or “filter” (i.e. not “response”) all information will be printed (only filter is left at this point…)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>level</strong> – determines to which level the <em>obsinfo</em> object will be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.printobs.PrintObs.print_network">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">print_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.printobs.PrintObs.print_network" title="Permalink to this definition"></a></dt>
+<dd><p>Prints network information and continues if level is not “network”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>level</strong> – determines to which level the <em>obsinfo</em> object will be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.printobs.PrintObs.print_station">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">print_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.printobs.PrintObs.print_station" title="Permalink to this definition"></a></dt>
+<dd><p>Prints station information and continues if level is not “station”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>level</strong> – determines to which level the <em>obsinfo</em> object will be printed</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.misc.remoteGitLab">
+<span id="obsinfo-misc-remotegitlab-module"></span><h2>obsinfo.misc.remoteGitLab module<a class="headerlink" href="#module-obsinfo.misc.remoteGitLab" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.misc.remoteGitLab.gitLabFile">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.misc.remoteGitLab.</span></span><span class="sig-name descname"><span class="pre">gitLabFile</span></span><a class="headerlink" href="#obsinfo.misc.remoteGitLab.gitLabFile" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provide the methods to use the gitlab API to read a remote file and decode it</p>
+<blockquote>
+<div><p><strong>Attributes:</strong></p>
+<blockquote>
+<div><p><em>None</em></p>
+</div></blockquote>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.remoteGitLab.gitLabFile.get_gitlab_file">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_gitlab_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uri</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.remoteGitLab.gitLabFile.get_gitlab_file" title="Permalink to this definition"></a></dt>
+<dd><p>Get the file content pointed at by uri and decode it.</p>
+<p>Uses b64 first to get the remote file and convert to a byte string,
+and then utf-8 to convert to regular string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uri</strong> (<em>string</em><em> or </em><em>path-like object</em>) – uri to read</p></li>
+<li><p><strong>read_file</strong> – If true, reads the content. If not, simply checks the file exists</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>string of read content</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>FileNotFoundError, ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.remoteGitLab.gitLabFile.isRemote">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">isRemote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.remoteGitLab.gitLabFile.isRemote" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if scheme means file is remote.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> (<em>str</em>) – filename to be checked, with complete uri</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean. True if remote, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.misc.yamlref">
+<span id="obsinfo-misc-yamlref-module"></span><h2>obsinfo.misc.yamlref module<a class="headerlink" href="#module-obsinfo.misc.yamlref" title="Permalink to this headline"></a></h2>
+<p>Module to read and parse YAML or JSON files, locally or remotely (gitlab only)</p>
+<blockquote>
+<div><p>jsonref with YAML reading added.</p>
+<p>copied directly from jsonref v0.2, with added routines _yaml_load
+and _yaml_loads replacing json.load and json.loads
+Added/modified lines are marked “# WCC”</p>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonLoader">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">JsonLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonLoader" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provides a callable which takes a URI, and returns the loaded JSON referred
+to by that URI. Uses <code class="xref py py-mod docutils literal notranslate"><span class="pre">requests</span></code> if available for HTTP URIs, and falls
+back to <code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code>. By default it keeps a cache of previously loaded
+documents.</p>
+<blockquote>
+<div><p><strong>Attributes:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>store: pre-populated dictionary matching URIs to loaded JSON</dt><dd><p>documents used as cache</p>
+</dd>
+</dl>
+</li>
+<li><p>cache_results (boolean): if this is set to false, the internal cache of</p></li>
+<li><p>loaded JSON documents is not used</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonLoader.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonLoader.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonLoader.get_json_or_yaml">
+<span class="sig-name descname"><span class="pre">get_json_or_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uri</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonLoader.get_json_or_yaml" title="Permalink to this definition"></a></dt>
+<dd><p>Open either a local file, if uri scheme is <code class="docutils literal notranslate"><span class="pre">file</span></code> or a remote one, calling a gitlab method
+which implements the gitlab API (version 4)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uri</strong> (<em>path-like object</em><em>, </em><em>string</em><em> or </em><em>byte string</em>) – The URI of the JSON or YAML document to load</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">json.loads()</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of parsed YAML or JSON formats</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>FileNotFoundError, IOError, OSError</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRef">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">JsonRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_on_repr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRef" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">proxytypes.LazyProxy</span></code></p>
+<p>A lazy loading proxy to the dereferenced data pointed to by a JSON
+Reference object.</p>
+<blockquote>
+<div><p><strong>Attributes:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>__reference__: dictionary object referenced to by a <code class="docutils literal notranslate"><span class="pre">$ref</span></code></p></li>
+<li><p>base_uri: object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> which is used to build the full uri</p></li>
+<li><p>loader:  a loader object (a callable) such as <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a> , to load a JSON or YAML file/string</p></li>
+<li><p>jsonschema = Flag to turn on <code class="docutils literal notranslate"><span class="pre">JSON</span> <span class="pre">Schema</span></code> mode</p></li>
+<li><dl class="simple">
+<dt>load_on_repr = If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> call on a</dt><dd><p><a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a> object will not cause the reference to be loaded
+if it hasn’t already. (defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p>
+</dd>
+</dl>
+</li>
+<li><p>path = list of string keywords: keywords of different $ref in lists or dictionaries</p></li>
+<li><p>store = dictionary of cached objects used to prevent reading files over again</p></li>
+<li><p>datapath = object of <code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code>, stores directories to search for files</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRef.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_on_repr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRef.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRef.callback">
+<span class="sig-name descname"><span class="pre">callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRef.callback" title="Permalink to this definition"></a></dt>
+<dd><p>Callback from proxytypes, <code class="xref py py-class docutils literal notranslate"><span class="pre">LazyProxy</span></code>.</p>
+<p>Resolves the pointer (part of the dictionary read from the info file)
+that is incorporated instead of <code class="docutils literal notranslate"><span class="pre">$ref</span></code>. Updates <code class="docutils literal notranslate"><span class="pre">base_uri</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the fragment portion of the base_doc, which has already had its <code class="docutils literal notranslate"><span class="pre">$ref</span></code> replaced.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRef.full_uri">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">full_uri</span></span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRef.full_uri" title="Permalink to this definition"></a></dt>
+<dd><p>This method/property returns the full uri to reference a <code class="docutils literal notranslate"><span class="pre">$ref</span></code> object.
+It’s the heart of how a datapath is used to either access a local or remote (gitlab) file.
+All schema files are supposed to be local, part of the obsinfo distribution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>updated full uri</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRef.replace_refs">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">replace_refs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRef.replace_refs" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a deep copy of <code class="docutils literal notranslate"><span class="pre">obj</span></code> with all contained JSON reference objects
+replaced with <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a> instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<em>Either JSONref</em><em> or </em><em>collection object</em>) – If this is a JSON reference object, a <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a>
+instance will be created. If <code class="docutils literal notranslate"><span class="pre">obj</span></code> is not a JSON reference object,
+a deep copy of it will be created with all contained JSON
+reference objects replaced by <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a> instances</p></li>
+<li><p><strong>recursive</strong> (<em>boolean</em>) – Processes <code class="docutils literal notranslate"><span class="pre">$ref</span></code> recursively</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">json.loads()</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object of <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a> containing the information in <code class="docutils literal notranslate"><span class="pre">$ref</span></code> file</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>TypeError, ValueError through JsonRef object creation</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">kwargs</span></code> include:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param base_uri</dt>
+<dd class="field-odd"><p>URI to resolve relative references against.
+Can be remote (<a class="reference external" href="https://">https://</a>) or local(<a class="reference external" href="file://">file://</a>)
+This is how datapath is implemented</p>
+</dd>
+<dt class="field-even">type base_uri</dt>
+<dd class="field-even"><p>object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></p>
+</dd>
+<dt class="field-odd">param datapath</dt>
+<dd class="field-odd"><p>object to implement file discovery in a list of directories</p>
+</dd>
+<dt class="field-even">type base_uri</dt>
+<dd class="field-even"><p>object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code></p>
+</dd>
+<dt class="field-odd">param loader</dt>
+<dd class="field-odd"><p>Callable that takes a URI and returns the parsed JSON
+(defaults to global <code class="docutils literal notranslate"><span class="pre">jsonloader</span></code>, a <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a> instance)</p>
+</dd>
+<dt class="field-even">type loader</dt>
+<dd class="field-even"><p>a loader object such as <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a></p>
+</dd>
+<dt class="field-odd">param jsonschema</dt>
+<dd class="field-odd"><p>Flag to turn on <a class="reference external" href="http://json-schema.org/latest/json-schema-core.html#anchor25">JSON Schema mode</a>,
+which means the file is a schema file.
+This makes ‘id’ keyword to change the <code class="docutils literal notranslate"><span class="pre">base_uri</span></code> for references contained within
+the object, such as $ref: ‘#/definitions’</p>
+</dd>
+<dt class="field-even">type jsonschema</dt>
+<dd class="field-even"><p>boolean</p>
+</dd>
+<dt class="field-odd">param load_on_repr</dt>
+<dd class="field-odd"><p>If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> call on a
+<a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a> object will not cause the reference to be loaded
+if it hasn’t already. (defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p>
+</dd>
+<dt class="field-even">type load_on_repr</dt>
+<dd class="field-even"><p>boolean</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRef.resolve_pointer">
+<span class="sig-name descname"><span class="pre">resolve_pointer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRef.resolve_pointer" title="Permalink to this definition"></a></dt>
+<dd><p>Resolve a json pointer <code class="docutils literal notranslate"><span class="pre">pointer</span></code> within the referenced <code class="docutils literal notranslate"><span class="pre">document</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>document</strong> – the referent document</p></li>
+<li><p><strong>pointer</strong> (<em>str</em>) – a json pointer URI fragment to resolve within it</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>part of document dictionary pointed at by pointer</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRefError">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">JsonRefError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cause</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRefError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Create exception for JSONRef</p>
+<blockquote>
+<div><p><strong>Attributes:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>message (str): message to print with exception</p></li>
+<li><p>reference (str): reference where exception occurred</p></li>
+<li><p>uri (str or path-like): uri of file being processed</p></li>
+<li><p>base_uri: (str or path-like): base_uri (complement) of file being processed</p></li>
+<li><p>path = list of string keywords: keywords of different $ref in lists or dictionaries</p></li>
+<li><p>cause (str): cause of exception</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.JsonRefError.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cause</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.JsonRefError.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.dump">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.dump" title="Permalink to this definition"></a></dt>
+<dd><p>Serialize <code class="docutils literal notranslate"><span class="pre">obj</span></code>, which may contain <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a> objects, as a JSON
+formatted stream to file-like <code class="docutils literal notranslate"><span class="pre">fp</span></code>. <code class="docutils literal notranslate"><span class="pre">JsonRef</span></code> objects will be dumped as the
+original reference object they were created from.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<em>object</em>) – Object to serialize</p></li>
+<li><p><strong>fp</strong> (<em>file-like object</em>) – File-like object that will be used to dump obj</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments are the same as to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">json.dump()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.dumps">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">dumps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.dumps" title="Permalink to this definition"></a></dt>
+<dd><p>Serialize <code class="docutils literal notranslate"><span class="pre">obj</span></code>, which may contain <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef" title="obsinfo.misc.yamlref.JsonRef"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonRef</span></code></a> objects, to a JSON
+formatted string. <code class="docutils literal notranslate"><span class="pre">JsonRef</span></code> objects will be dumped as the original
+reference object they were created from.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<em>object</em>) – Object to serialize</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments are the same as to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">json.dump()</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dumped string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.load">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_on_repr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.load" title="Permalink to this definition"></a></dt>
+<dd><p>Drop in replacement for <code class="xref py py-func docutils literal notranslate"><span class="pre">json.load()</span></code>, where JSON references are
+proxied to their referent data.</p>
+<p>The difference between load and loads is that the first uses a file-like object and
+the second a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fp</strong> (<em>File-like object</em>) – File-like object containing JSON document</p></li>
+<li><p><strong>base_uri</strong> (object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – URI to resolve relative references against. Can be remote (<a class="reference external" href="https://">https://</a>) or local(<a class="reference external" href="file://">file://</a>)  This is how datapath is implemented</p></li>
+<li><p><strong>datapath</strong> (object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code>) – object to implement file discovery in a list of directories</p></li>
+<li><p><strong>loader</strong> (a loader object such as <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a>) – Callable that takes a URI and returns the parsed JSON (defaults to global <code class="docutils literal notranslate"><span class="pre">jsonloader</span></code>, a <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a> instance)</p></li>
+<li><p><strong>jsonschema</strong> (<em>boolean</em>) – <p>Flag to turn on <a class="reference external" href="http://json-schema.org/latest/json-schema-core.html#anchor25">JSON Schema mode</a>, which means the file is a schema file. This makes ‘id’ keyword to change the <code class="docutils literal notranslate"><span class="pre">base_uri</span></code> for references contained within the object, such as $ref: ‘#/definitions’</p>
+</p></li>
+<li><p><strong>load_on_repr</strong> (<em>boolean</em>) – If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> call on a:class:<cite>JsonRef</cite> object will not cause the reference to be loaded if it hasn’t already. (defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – This function takes any of the keyword arguments from <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef.replace_refs" title="obsinfo.misc.yamlref.JsonRef.replace_refs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">JsonRef.replace_refs()</span></code></a>. Any other keyword arguments will be passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">_yaml_load()</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of parsed YAML or JSON formats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.load_uri">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">load_uri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uri</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_on_repr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.load_uri" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Load JSON data from <code class="docutils literal notranslate"><span class="pre">uri</span></code> instead of file-like object or string.</dt><dd><p>with JSON references proxied to their referent data. Not used in obsinfo.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uri</strong> (<em>string</em><em> or </em><em>path-like object</em>) – URI to fetch the JSON from</p></li>
+<li><p><strong>base_uri</strong> (object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – URI to resolve relative references against. Can be remote (<a class="reference external" href="https://">https://</a>) or local(<a class="reference external" href="file://">file://</a>)  This is how datapath is implemented</p></li>
+<li><p><strong>datapath</strong> (object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code>) – object to implement file discovery in a list of directories</p></li>
+<li><p><strong>loader</strong> (a loader object such as <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a>) – Callable that takes a URI and returns the parsed JSON (defaults to global <code class="docutils literal notranslate"><span class="pre">jsonloader</span></code>, a <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a> instance)</p></li>
+<li><p><strong>jsonschema</strong> (<em>boolean</em>) – <p>Flag to turn on <a class="reference external" href="http://json-schema.org/latest/json-schema-core.html#anchor25">JSON Schema mode</a>, which means the file is a schema file. This makes ‘id’ keyword to change the <code class="docutils literal notranslate"><span class="pre">base_uri</span></code> for references contained within the object, such as $ref: ‘#/definitions’</p>
+</p></li>
+<li><p><strong>load_on_repr</strong> (<em>boolean</em>) – If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> call on a:class:<cite>JsonRef</cite> object will not cause the reference to be loaded if it hasn’t already. (defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of parsed YAML or JSON formats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="obsinfo.misc.yamlref.loads">
+<span class="sig-prename descclassname"><span class="pre">obsinfo.misc.yamlref.</span></span><span class="sig-name descname"><span class="pre">loads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_on_repr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.misc.yamlref.loads" title="Permalink to this definition"></a></dt>
+<dd><p>Drop in replacement for <code class="xref py py-func docutils literal notranslate"><span class="pre">json.loads()</span></code>, where JSON references are
+proxied to their referent data.</p>
+<p>The difference between load and loads is that the first uses a file-like object and
+the second a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – String containing JSON document</p></li>
+<li><p><strong>base_uri</strong> (object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – URI to resolve relative references against. Can be remote (<a class="reference external" href="https://">https://</a>) or local(<a class="reference external" href="file://">file://</a>)  This is how datapath is implemented</p></li>
+<li><p><strong>datapath</strong> (object of type <code class="xref py py-class docutils literal notranslate"><span class="pre">Datapath</span></code>) – object to implement file discovery in a list of directories</p></li>
+<li><p><strong>loader</strong> (a loader object such as <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a>) – Callable that takes a URI and returns the parsed JSON (defaults to global <code class="docutils literal notranslate"><span class="pre">jsonloader</span></code>, a <a class="reference internal" href="#obsinfo.misc.yamlref.JsonLoader" title="obsinfo.misc.yamlref.JsonLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonLoader</span></code></a> instance)</p></li>
+<li><p><strong>jsonschema</strong> (<em>boolean</em>) – <p>Flag to turn on <a class="reference external" href="http://json-schema.org/latest/json-schema-core.html#anchor25">JSON Schema mode</a>, which means the file is a schema file. This makes ‘id’ keyword to change the <code class="docutils literal notranslate"><span class="pre">base_uri</span></code> for references contained within the object, such as $ref: ‘#/definitions’</p>
+</p></li>
+<li><p><strong>load_on_repr</strong> (<em>boolean</em>) – If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code> call on a:class:<cite>JsonRef</cite> object will not cause the reference to be loaded if it hasn’t already. (defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – This function takes any of the keyword arguments from <a class="reference internal" href="#obsinfo.misc.yamlref.JsonRef.replace_refs" title="obsinfo.misc.yamlref.JsonRef.replace_refs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">JsonRef.replace_refs()</span></code></a>. Any other keyword arguments will be passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">_yaml_load()</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of decoded JSON or YAML</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="obsinfo.main.html" class="btn btn-neutral float-left" title="obsinfo.main package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="obsinfo.network.html" class="btn btn-neutral float-right" title="obsinfo.network package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

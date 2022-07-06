@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obsinfo Overview &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Classes" href="classes.html" />
+    <link rel="prev" title="Obsinfo documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Obsinfo Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#object-model">Object Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#information-files">Information Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-naming-convention">File Naming Convention</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-metadata">File Metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#python-architecture">Python architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#executables">Executables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#package-and-modules">Package and Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#auxiliary-subdirectories">Auxiliary subdirectories</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#obsinfo-data-schema"><cite>obsinfo/data/schema</cite></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#obsinfo-examples"><cite>obsinfo/_examples/</cite></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#obsinfo-tests"><cite>obsinfo/tests/</cite></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#comments-on-versioning">Comments on versioning</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#resources">Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Obsinfo Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/intro.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="obsinfo-overview">
+<h1>Obsinfo Overview<a class="headerlink" href="#obsinfo-overview" title="Permalink to this headline"></a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
+<p><strong>obsinfo</strong> is a Python standalone application for creating FDSN-standard (StationXML) data and metadata for ocean bottom
+seismometers using standardized, easy-to-read information files in <a class="reference external" href="https://yaml.org/spec/1.2/spec.html">YAML</a> or <a class="reference external" href="https://www.json.org/json-en.html">JSON</a> formats. The advantages
+of <strong>obsinfo</strong> are the following:</p>
+<ul class="simple">
+<li><p>Easier input user format, as YAML and JSON syntax is simpler than XML</p></li>
+<li><p>Flexibility to change configurations avoiding rewriting or modifying a new StationXML file each time (DRY, don’t repeat yourself)</p></li>
+<li><p>Avoiding redundancy</p></li>
+<li><p>Extreme autonomy of operation from Internet connections, being text-based</p></li>
+<li><p>Adapting StationXML to OBS-specific functionality</p></li>
+<li><p>Simple interface to other systems, such as AROL-based Yasmine</p></li>
+</ul>
+<p>Unlike general systems like Yasmine/AROL, <strong>obsinfo</strong> is conceived to reflect the vast variability of OBS equipment and the fact that changes on the field are common and cannot be planned in advance. Emergency procedures such as changing an equipment component or a stage in the high seas need to be taken into account. The fact that the editing of information needs to occur without necessarily a connection to a central database is a consideration too.
+Therefore, the choice has been made to avoid a GUI such as Yasmine and make <strong>obsinfo</strong> totally text-based using regular files. At the same time, every effort has been made to stay compatible with AROL, which is based on an earlier version of <strong>obsinfo</strong> itself, v0.106, so AROL yaml files can be imported into <strong>obsinfo</strong>.
+However, as of this publication, some differences exist which are documented <a class="reference external" href="AROL11">here</a>.</p>
+<p>Lack of redundancy and reusability is achieved by creating a repository of instrumentations which is referenced time and again by different campaigns. Flexibility is achieved by permitting these instrumentations to have several selectable configurations. as well as the ability to make punctual changes to <em>any</em> field via
+channel modifications (see <a class="reference external" href="AdvancedTopics">Advanced Topics</a>).</p>
+</section>
+<section id="object-model">
+<h2>Object Model<a class="headerlink" href="#object-model" title="Permalink to this headline"></a></h2>
+<img alt="_images/object_model.jpg" src="_images/object_model.jpg" />
+<p>The reference manual is organized around the object model, in pages that describe each particular class.
+The object hierarchy starts in Class <a class="reference internal" href="tutorial/tutorial-3.html#network"><span class="std std-ref">Network</span></a>. You can navigate from one class to the other by using the <strong>Relationships</strong> section.</p>
+</section>
+<section id="information-files">
+<h2>Information Files<a class="headerlink" href="#information-files" title="Permalink to this headline"></a></h2>
+<p>The system is based on “<a class="reference internal" href="#information-files">information files</a>” in <a class="reference external" href="https://www.json.org/json-en.html">JSON</a> or <a class="reference external" href="https://yaml.org/spec/1.2/spec.html">YAML</a> format as input, filled in
+by appropriate actors and broken down into different categories to remove
+redundancy and simplify input as much as possible. Information files are taken as input and converted first to an obsinfo object, which in turn
+gets converted to an obs_py object, finally output as a StationXML file.</p>
+<p>There are 6 main file types:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 28%" />
+<col style="width: 21%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Filled by</p></th>
+<th class="head"><p>When filled</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>campaign</strong></p></td>
+<td><p>Lists of stations
+facilities and
+participants, plus
+desired verification.
+NOT NEEDED FOR
+PROCESSING</p></td>
+<td><p>Chief scientist</p></td>
+<td><p>after a data
+collection
+campaign</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>network</strong></p></td>
+<td><p>Deployed stations,
+their instruments
+and parameters</p></td>
+<td><p>OBS facility</p></td>
+<td><p>after a
+campaign</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>instrumentation</strong></p></td>
+<td><p>Instrument
+description</p></td>
+<td><p>OBS facility</p></td>
+<td><p>new/changed
+instruments</p></td>
+</tr>
+<tr class="row-odd"><td><dl>
+<dt><em>instrument_components</em></dt><dd><p><strong>sensors</strong></p>
+<p><strong>components</strong></p>
+<p><strong>dataloggers</strong></p>
+</dd>
+</dl>
+</td>
+<td><p>Description of basic
+components</p></td>
+<td><p>OBS facility
+-or-
+component
+manufacturer</p></td>
+<td><p>when there
+are new
+are new
+components or
+calibrations</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>response_stage</strong></p></td>
+<td><p>Description of stages</p>
+<p>digitizers,
+amplifiers/filters)</p>
+</td>
+<td><p>OBS facility
+-or-
+component
+manufacturer</p></td>
+<td><p>when there
+are new
+components or
+calibrations</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>filter</strong></p></td>
+<td><p>Description of filters
+amplifiers and
+digitizers used in
+stages</p></td>
+<td><p>OBS facility
+-or-
+component
+manufacturer</p></td>
+<td><p>when there
+are new
+components or
+calibrations</p></td>
+</tr>
+</tbody>
+</table>
+<p>Only the <strong>campaign</strong> and <strong>network</strong> files are OBS-specific.
+The <strong>instrumentation</strong> files and their subfiles could be replaced by existing
+standards such as RESP files or the NRL (Nominal Response Library), but obsinfo provides
+a simpler and more standards-compliant way to specify the components, and
+it can automatically calculate response sensitivities based on gains and filter
+characteristics (using obsPy).  obsinfo instrumentation files could also be used to
+make RESP-files and NRL directories, if so desired.</p>
+<section id="file-hierarchy">
+<h3>File Hierarchy<a class="headerlink" href="#file-hierarchy" title="Permalink to this headline"></a></h3>
+<p>It is recommended to arrange the information files in a file hierarchy such as this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">authors</span> <span class="p">(</span><span class="n">contains</span> <span class="n">files</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">headers</span> <span class="n">of</span> <span class="n">other</span> <span class="n">information</span> <span class="n">files</span><span class="p">)</span>
+<span class="o">/</span><span class="n">network</span>
+<span class="o">/</span><span class="n">instrumentation</span>
+<span class="o">/</span><span class="n">sensors</span>
+<span class="o">/</span><span class="n">preamplifiers</span>
+<span class="o">/</span><span class="n">dataloggers</span>
+<span class="p">[</span><span class="o">/</span><span class="n">instrumentation_componenent</span><span class="p">]</span><span class="o">/</span><span class="n">stages</span>
+<span class="p">[</span><span class="n">instrumentation_componenent</span><span class="p">]</span><span class="o">/</span><span class="n">stages</span><span class="o">/</span><span class="n">filters</span>
+</pre></div>
+</div>
+<p>where [instrumentation_componenent] = sensors, preamplifiers or dataloggers.</p>
+<p><strong>The hierarchy is completely up to the user</strong>, including the names of the folders/directories. In fact, it is perfectly possible to put all the information in a single file, although it is not recommended as reusability of filters, stages or components depends on independent files.</p>
+<p>To reference a file from within another file, use the <em>JREF</em> syntax:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>authors: - {$ref: &quot;../authors/Wayne_Crawford.author.yaml#author&quot;}
+</pre></div>
+</div>
+<p>The effect of this directive is at the core of the philosophy of <em>obsinfo</em>, as it is this mechanism which allows reuse: it substitutes the content
+of the key <code class="docutils literal notranslate"><span class="pre">author</span></code> within the file <code class="docutils literal notranslate"><span class="pre">../authors/Wayne_Crawford.author.yaml</span></code> as the value of the key <code class="docutils literal notranslate"><span class="pre">authors</span></code>. If you want to include the complete file, remove the <code class="docutils literal notranslate"><span class="pre">#author</span></code> anchor.</p>
+</section>
+<section id="file-naming-convention">
+<h3>File Naming Convention<a class="headerlink" href="#file-naming-convention" title="Permalink to this headline"></a></h3>
+<p>While there is flexibility about the folder hierarchy, information files <strong>must</strong> follow the following naming convention:</p>
+<p>&lt;descriptive file name&gt;.&lt;obsinfo file type&gt;.&lt;file format&gt;</p>
+<p>where</p>
+<blockquote>
+<div><p><strong>&lt;descriptive file name&gt;</strong> usually includes vendor and configuration shorthand to make the file easily identifiable by users,</p>
+<p><strong>&lt;obsinfo file type&gt;</strong> is one of <code class="docutils literal notranslate"><span class="pre">campaign</span></code>, <code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">instrumentation</span></code>, <code class="docutils literal notranslate"><span class="pre">sensor</span></code>, <code class="docutils literal notranslate"><span class="pre">preamplifier</span></code>, <code class="docutils literal notranslate"><span class="pre">datalogger</span></code>, <code class="docutils literal notranslate"><span class="pre">stage</span></code>, <code class="docutils literal notranslate"><span class="pre">filter</span></code></p>
+<p><strong>&lt;file format&gt;</strong> is one of <code class="docutils literal notranslate"><span class="pre">yml</span></code>, <code class="docutils literal notranslate"><span class="pre">yaml</span></code> or <code class="docutils literal notranslate"><span class="pre">json</span></code>.</p>
+</div></blockquote>
+<p>Examples:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TI_ADS1281_FIR1.stage.yml</span></code> is a stage with a Texas Instruments FIR filter nested in it, in YAML format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BBOBS.INSU-IPGP.network.json</span></code> is a network of broad-band stations deployed by INSU IPGP, in JSON format.</p></li>
+</ul>
+<p>There are three resources to look up the exact syntax for each information file. One is the <a class="reference internal" href="tutorial/tutorial-1.html#tutorial1"><span class="std std-ref">Introduction</span></a> which takes you step by step building a
+typical hierarchy of information files. The different <a class="reference internal" href="classes.html#classes"><span class="std std-ref">Classes</span></a> pages have a complete explanation of all the attributes in the class. Unless otherwise noted, attributes in the file have the same syntax as attributes in the class. The third resource is the formal syntax of the file, which is a JSON schema, which is always referenced in the Class page.</p>
+</section>
+<section id="file-metadata">
+<h3>File Metadata<a class="headerlink" href="#file-metadata" title="Permalink to this headline"></a></h3>
+<p>All information files contain common metadata</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">format_version:</span></code> - This is a required field. It reflects the template version against which this file must be validated</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">revision:</span></code> - Revision information (date in particular) to keep change control of file.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">date:</span></code> - date of revision</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">authors:</span></code> - authors of revision, usually a reference to an author file</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">notes:</span></code> - Optional extra information which will not be put in final metadata.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">yaml_anchors:</span></code> - YAML anchors to avoid redundancy, for advanced YAML users. <a class="reference external" href="https://medium.com/&#64;kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd">Here</a> is a guide on how to use YAML anchors.</p></li>
+</ul>
+</section>
+</section>
+<section id="python-architecture">
+<h2>Python architecture<a class="headerlink" href="#python-architecture" title="Permalink to this headline"></a></h2>
+<section id="executables">
+<h3>Executables<a class="headerlink" href="#executables" title="Permalink to this headline"></a></h3>
+<p>The following command-line executables perform the main tasks:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">makeSTATIONXML</span></code>: generates StationXML files from a network +
+instrumentation information files</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python3 makeStationXML -h
+</pre></div>
+</div>
+<p>displays all the options of makeStationXML.</p>
+<p>To create a StationXML file from a file called &lt;filename&gt;, type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python3 makeStationXML.py [options] filename
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">obsinfo-validate</span></code>: validates an information file against its schema</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obsinfo-print</span></code>: prints a summary of an information file</p></li>
+</ul>
+<p>The following command-line executables make scripts to run specific data conversion software:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">obsinfo-make_LCHEAPO_scripts</span></code>: Makes scripts to convert LCHEAPO data to miniSEED</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obsinfo-make_SDPCHAIN_scripts</span></code>: Makes scripts to drift correct miniSEED data and package
+them for FDSN-compatible data centers</p></li>
+</ul>
+</section>
+<section id="package-and-modules">
+<h3>Package and Modules<a class="headerlink" href="#package-and-modules" title="Permalink to this headline"></a></h3>
+<p>The package name is <code class="docutils literal notranslate"><span class="pre">obsinfo</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">obsinfo.main</span></code> contains code to initialize the main obsinfo routine, to read and potentially validate main (network) information file and to write StationXML file</p>
+<p><code class="docutils literal notranslate"><span class="pre">obsinfo.network</span></code> and  <code class="docutils literal notranslate"><span class="pre">obsinfo.instrumentation</span></code> contain the main code to process the corresponding
+information files.</p>
+<p><code class="docutils literal notranslate"><span class="pre">obsinfo.OBSMetadata</span></code> contains code to read and validate information files in either YAML or JSON formats.</p>
+<p><code class="docutils literal notranslate"><span class="pre">obsinfo.misc</span></code> contains miscellaneous code, currently deprecated and unsupported, which is not used anymore in the application</p>
+<p><code class="docutils literal notranslate"><span class="pre">obspy.addons</span></code> contains modules specific to proprietary systems:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">obspy.addons.LCHEAPO</span></code> creates scripts to convert LCHEAPO OBS data to
+miniSEED using the <code class="docutils literal notranslate"><span class="pre">lc2ms</span></code> software</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obspy.addons.SDPCHAIN</span></code> creates scripts to convert basic miniSEED data
+to OBS-aware miniSEED using the <code class="docutils literal notranslate"><span class="pre">SDPCHAIN</span></code> software suite</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obspy.addons.OCA</span></code> creates JSON metadata in a format used by the
+Observatoire de la Cote d’Azur to create StationXML</p></li>
+</ul>
+</section>
+<section id="auxiliary-subdirectories">
+<h3>Auxiliary subdirectories<a class="headerlink" href="#auxiliary-subdirectories" title="Permalink to this headline"></a></h3>
+<section id="obsinfo-data-schema">
+<h4><cite>obsinfo/data/schema</cite><a class="headerlink" href="#obsinfo-data-schema" title="Permalink to this headline"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">data/schema</span></code> contains JSON Schema for each file type.</p>
+</section>
+<section id="obsinfo-examples">
+<h4><cite>obsinfo/_examples/</cite><a class="headerlink" href="#obsinfo-examples" title="Permalink to this headline"></a></h4>
+<p>Contains example information files and scripts:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_examples/Information_Files</span></code> contains a complete set of information files</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">_examples/Information_Files/network</span></code> contains <strong>network</strong>  files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_examples/Information_Files/instrumentation</span></code> contains <strong>instrumentation</strong>,
+<strong>instrument_components</strong>, <strong>response</strong> and <strong>filter</strong> files.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_examples/scripts</span></code> contains bash scripts to look at and manipulate these files
+using the executables.  Running these scripts is a good way to make sure your
+installation works, looking at the files they work on is a good way to start
+making your own information files.</p></li>
+</ul>
+</section>
+<section id="obsinfo-tests">
+<h4><cite>obsinfo/tests/</cite><a class="headerlink" href="#obsinfo-tests" title="Permalink to this headline"></a></h4>
+<p>Contains test cases and code using <code class="docutils literal notranslate"><span class="pre">unittest.py</span></code>. The tests are performed either on the information files under <code class="docutils literal notranslate"><span class="pre">test/data</span></code> or on <code class="docutils literal notranslate"><span class="pre">_examples</span></code>.</p>
+</section>
+</section>
+<section id="comments-on-versioning">
+<h3>Comments on versioning<a class="headerlink" href="#comments-on-versioning" title="Permalink to this headline"></a></h3>
+<p>We use standard MAJOR.MINOR.MAINTENANCE version numbering but, while the
+system is in prerelease:</p>
+<ul class="simple">
+<li><p>MAJOR==0</p></li>
+<li><p>MINOR increments every time the information
+file structure changes in a <strong>non-backwards-compatible</strong> way</p></li>
+<li><p>MAINTENANCE increments when the code changes or the file structure changes
+in a <strong>backwards-compatible</strong> way</p></li>
+</ul>
+<p>Current version: v0.110</p>
+</section>
+</section>
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Permalink to this headline"></a></h2>
+<p><cite>Installation and Startup Guide  &lt;InstallStartup&gt;</cite></p>
+<p><cite>Tutorial &lt;Tutorial1&gt;</cite></p>
+<p><cite>Class Reference Pages &lt;class11&gt;</cite></p>
+<p><cite>Information File Templates &lt;FILE&gt;</cite></p>
+<p>For the YAML specification, see <a class="reference external" href="https://yaml.org/spec/1.2/spec.html">YAML</a> . For a tutorial, see <a class="reference external" href="https://www.tutorialspoint.com/yaml/index.htm">YAML Tutorial</a></p>
+<p>For the JSON specification, see <a class="reference external" href="https://www.json.org/json-en.html">JSON</a> . For a tutorial, see <a class="reference external" href="https://www.tutorialspoint.com/json/index.htm">JSON Tutorial</a></p>
+<p>For the JREF notation, see <a class="reference external" href="https://tools.ietf.org/id/draft-pbryan-zyp-json-ref-03.html">JREF Notation</a></p>
+<p>For the StationXML reference, see <a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#">FDSN StationXML Reference</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Obsinfo documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classes.html" class="btn btn-neutral float-right" title="Classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

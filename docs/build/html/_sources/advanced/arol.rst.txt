@@ -1,0 +1,60 @@
+****************
+AROL compatibility
+****************
+
+One of the objectives of *obsinfo* is to be compatible with the AROL instrumentation database.
+AROL is a yaml-based instrumentation database which can be explored through the Yasmine application.
+Its syntax is heavily based on version v0.106 of *obsinfo*.
+Efforts are underway to make the syntax of the current version of *obsinfo* and of AROL be as close as possible.
+However, since the philosophy is somewhat different, some discrepancies will be inevitable.
+AROL builds a configuration out of user choices made with the Yasmine tool.
+*obsinfo* lists all available configurations and lets the user choose using the configuration fields (``sensor_configuration``, ``preamplifier_configuration``, ``datalogger_configuration``) in a station or network information file.
+
+The current effort is to make AROL yaml files readable by *obsinfo*. However, there are some outstanding issues:
+
+ 1. AROL does not have an offset field in its filter information files.
+    It has a field called ``delay.samples`` which fulfills the same function. 
+    Proposed solution: let AROL change name. 
+    If not possible, read the AROL file and change within the *obsinfo* application.
+
+ 2. AROL uses ``units`` instead of ``transfer_function_type`` in Pole/Zero filters.
+    Their value is directly translatable, via a table, to the ``transfer_function_type`` enumeration used by StationXML (see table below).
+    Proposed solution: let AROL change names.
+    If not possible, read the AROL file and change within the *obsinfo* application.
+
+========================== ====================================================  
+  **AROL unit**                **obsinfo/StationXML equivalent**  
+-------------------------- ----------------------------------------------------
+    "rad/s"                  "LAPLACE (RADIANS/SECOND)"
+-------------------------- ----------------------------------------------------
+    "hz"                     "LAPLACE (HERTZ)" 
+-------------------------- ----------------------------------------------------
+   "z-transform"             "DIGITAL (Z-TRANSFORM)"
+========================== ====================================================
+
+
+
+ 3. AROL names of "fake" filters ANALOG, DIGITAL and AD_CONVERSION are in CamelCase in *obsinfo*: Analog, Digital, ADConversion to be consistent with StationXML.
+    **Proposed solution**: let AROL change name.
+    If not possible, read the AROL file and change within the *obsinfo* application.
+
+ 4. AROL specifies both ``input_sample_rate`` and ``output_sample_rate`` for all stages. *obsinfo* only specifies the input sample rate for the first stage in the whole instrument.
+    It calculates all the other values out of decimation factors. 
+    This gives more flexibility to the definition of each individual stage in the ``response_stages`` field of an information file.
+    **Proposed solution**: read the AROL file and ignore these fields within the *obsinfo* application.
+
+ 5. AROL specifies response stages thus: 
+
+   .. code-block:: yaml
+ 
+    response:
+      decimation_info:
+        delay_correction: true
+      stages:
+
+   *obsinfo* simply specifies ``response_stages`` and the ``delay_correction`` attribute is specified at the ``datalogger`` level, 
+   as it is the only place where it makes sense for the global instrument.
+   Also, ``delay_correction`` is specified as either  boolean in AROL or as a real number.
+   In *obsinfo* a value of ``None`` is equivalent to AROL ``False`` and a numeric value is equivalent to AROL ``True``.
+   **Proposed solution**: make *obsinfo* read the AROL file and interpret this attribute.
+   If found in a response other than the datalogger, give a warning and ignore.

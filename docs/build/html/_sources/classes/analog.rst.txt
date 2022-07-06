@@ -1,0 +1,89 @@
+
+.. _Analog11:
+
+****************
+Analog
+****************
+
+===============
+ Description
+===============
+
+StationXML does not specify Analog stages which do not have filters. They are
+implemented here as a PZ filter without poles or zeroes.
+
+---------------------
+Python class:
+---------------------
+
+Analog
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+Analog
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+PolesZeros (with no poles or zeros))
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`PolesZeros <PolesZeros11>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is nested in :ref:`Stage <Stage>`
+
+==============================
+Attributes
+==============================
+
+======================== ================================== ============ ================= =============================== =======================================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**            **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -----------------------------------------------------------------------
+======================== ================================== ============ ================= =============================== =======================================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+In stage information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/preamplifiers/responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml>`_
+
+.. code-block:: yaml
+
+ filter :
+        type : "Analog"
+
+==================
+Class Navigation
+==================
+
+:ref:`Filter11` \<\=\= 
+

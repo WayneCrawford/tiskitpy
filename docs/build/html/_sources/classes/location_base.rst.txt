@@ -1,0 +1,113 @@
+
+.. _LocationBase:
+
+****************
+LocationBase
+****************
+
+===============
+ Description
+===============
+
+LocationBase specifies parameters specific to a type of location.
+
+---------------------
+Python class:
+---------------------
+
+LocationBase
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+location_base
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+ Individual attributes in this class belong to the Station attributes.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is part of a :ref:`Location <Location1>`
+
+==============================
+Attributes
+==============================
+
+.. _Geology: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#geology
+.. _Vault: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#vault
+.. _Comment: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station-comment
+
+======================== ================================== ============ ================= ========================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**       **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  uncertainties            dictionary of {lat: number,             Y           *None*       Included in latitude,          In meters. As uncertainties.m in YANL / JSON
+                           lon:number, elev: number}                                        longitude and elevation
+                                                                                            (see Class Location)
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------   
+  depth                            number                          Y           *None*            *None*                     In meters. As depth.m in YANL / JSON
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  geology                          string                          Y           *None*            `Geology`_ 
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  vault                            string                          Y           *None*            `Vault`_
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+  localisation_method              string                          Y           *None*            *None*                    Added in `Comment`_ in StationXML               
+======================== ================================== ============ ================= ========================== =============================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+LocationBase information file `https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/location_bases/SURFACE_DROP.location_base.yaml>`_
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.107"
+ revision: 
+    date: "2018-06-01"
+    authors: 
+        - $ref: "Wayne_Crawford.author.yaml#author"
+ location_base:
+    depth.m: 0
+    geology: "unknown"
+    vault: "Sea floor"
+    uncertainties.m: {lon: 200, lat: 200, elev: 20}
+    localisation_method: "Sea surface release point"
+
+===================
+Class Navigation
+===================
+
+:ref:`Location1` \<\=\=

@@ -1,0 +1,119 @@
+
+.. _Tutorial2:
+
+**********************************************
+The general structure of information files
+**********************************************
+
+Information files are arranged in a hierarchy, with upper files referencing lower files. There are 5 main file types in *obsinfo*:
+
++---------------------------+-----------------------+-----------------+---------------+
+|    Name                   |    Description        |     Filled by   | When filled   |
++===========================+=======================+=================+===============+
+| **network**               | Deployed stations,    |                 | after a       |
+|                           | their instruments     | OBS facility    | campaign      |
+|                           | and parameters        |                 |               |
++---------------------------+-----------------------+-----------------+---------------+
+| **instrumentation**       | Instrument            | OBS facility    | new/changed   |
+|                           | description           |                 | instruments   |
++---------------------------+-----------------------+-----------------+---------------+
+| *instrument_components*   | Description of basic  | OBS facility    | when there    |
+|         **sensors**       | components            | -or-            | are new       |                      
+|                           |                       | component       | are new       |   
+|         **components**    |                       | manufacturer    | components or |       
+|                           |                       |                 | calibrations  |
+|         **dataloggers**   |                       |                 |               |
++---------------------------+-----------------------+-----------------+---------------+
+| **stage**                 | Description of stages | OBS facility    | when there    |
+|                           |                       | -or-            | are new       |
+|                           | digitizers,           | component       | components or |
+|                           | amplifiers/filters)   | manufacturer    | calibrations  |
++---------------------------+-----------------------+-----------------+---------------+
+| **filter**                | Description of filters| OBS facility    | when there    |
+|                           | amplifiers and        | -or-            | are new       |
+|                           | digitizers used in    | component       | components or |
+|                           | stages                | manufacturer    | calibrations  |
++---------------------------+-----------------------+-----------------+---------------+
+
+The hierarchy is a best practice. In principle, all information contained in lower level files can be included in the network file. However, it is highly recommended that the "$ref" functionality to refer to other files is used. 
+
+
+File Hierarchy
+====================
+
+It is recommended to arrange the information files in a file hierarchy such as this:
+
+..code-block::
+
+ /authors (contains files used in headers of other information files)
+ /network
+ /instrumentations
+ /sensors
+ /preamplifiers
+ /dataloggers
+ [instrumentation_componenent]/stages/
+ [instrumentation_componenent]/stages/filters (filters can be substituted by a specific kind of filter: FIR, PZ, etc.)
+
+where [instrumentation_componenent] = sensors, preamplifiers or dataloggers.
+
+Another possibility is to arrange instrument components under instrumentation, but that may cause extra typing while writing references (``$ref``)in information files. That would be something like this:
+
+..code-block::
+ /instrumentations/sensors
+
+**The hierarchy is completely up to the user**, including the names of the folders/directories. In fact, it is perfectly possible to put all the information in a single file, although it is not recommended as reusability of filters, stages or components depends on independent files.
+
+To reference a file from within another file, use the *JREF* syntax:
+
+::
+
+    authors: - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+
+The effect of this directive is at the core of the philosophy of *obsinfo*, as it is this mechanism which allows reuse: it substitutes the content
+of the key ``author`` within the file `authors/Wayne_Crawford.author.yaml`` as the value of the key ``authors``. If you want to include the complete file, 
+remove the ``#author`` anchor.
+
+How to express absolute and relative paths, and their meaning, are discussed later.
+
+File Naming Convention
+========================
+
+While there is flexibility about the folder hierarchy, information files **must** follow the following naming convention:
+
+\<descriptive file name\>.\<obsinfo file type\>.\<file format\>
+
+where 
+
+ **\<descriptive file name\>** usually includes vendor and configuration shorthand to make the file easily identifiable by users,
+
+ **\<obsinfo file type\>** is one of ``campaign``, ``network``, ``instrumentation``, ``sensor``, ``preamplifier``, ``datalogger``, ``stage``, ``filter``
+
+ **\<file format\>** is one of ``yaml`` or ``json``.
+
+
+Examples:
+
+* ``TI_ADS1281_FIR1.stage.yaml`` is a stage with a Texas Instruments FIR filter nested in it, in YAML format. 
+* ``BBOBS.INSU-IPGP.network.json`` is a network of broad-band stations deployed by INSU IPGP, in JSON format.  
+
+There are two resources, other than this tutorial, to look up the exact syntax for each information file. The different pages have a complete explanation of all the attributes in the class. Unless otherwise noted, YAML keys or labels (also called fields or sections) in the file have the same exact name (case sensitive) as the attributes in the class. The other resource is the formal syntax of the file, which is a JSON schema, which is always referenced in the Class page.
+
+File Metadata
+=================
+
+All information files contain or may contain common metadata. ``format_version`` and ``revision`` are required.
+
+* ``format_version:`` - This is a required field. It reflects the template version against which this file must be validated
+
+* ``revision:`` - Revision information (date in particular) to keep change control of file. 
+
+   - ``date:`` - date of revision  
+
+   - ``authors:`` - authors of revision, usually a reference to an author file
+
+* ``notes:`` - Optional extra information which will not be put in final metadata.
+* ``yaml_anchors:`` - YAML anchors to avoid redundancy, for advanced YAML users. `Here <https://medium.com/@kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd>`_ is a guide on how to use YAML anchors.
+
+* :ref:`Next page: Building a simple network file <Tutorial3>`
+* :ref:`Previous page <Tutorial1>`
+* :ref:`Back to start  <Tutorial1>`

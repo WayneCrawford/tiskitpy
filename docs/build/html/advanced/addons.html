@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Addons &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Technical Documentation" href="../modules.html" />
+    <link rel="prev" title="Troubleshooting" href="troubleshooting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced.html">Advanced</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="chan_mods.html">Channel modifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arol.html">AROL compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="best_practice.html">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes.html">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="caveats.html">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Addons</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lcheapo">LCHEAPO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sdpchain">SDPCHAIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lc2sds">LC2SDS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oca">OCA</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced.html">Advanced</a> &raquo;</li>
+      <li>Addons</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/advanced/addons.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="addons">
+<h1>Addons<a class="headerlink" href="#addons" title="Permalink to this headline"></a></h1>
+<p>If you want to add codes allowing you to make scripts according to your needs,
+use the <cite>obsinfo/addons/</cite> directory.  Existing classes/executables in this
+directory are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#lcheapo"><span class="std std-ref">LCHEAPO</span></a>: Go from SIO LC2000 data files to basic miniSEED.</p></li>
+<li><p><a class="reference internal" href="#sdpchain"><span class="std std-ref">SDPCHAIN</span></a>: Go from basic miniSEED to datacenter-ready data</p></li>
+<li><p><a class="reference internal" href="#lc2sds"><span class="std std-ref">LC2SDS</span></a>: Generate basic clock-corrected SDS data archives.</p></li>
+<li><p><a class="reference internal" href="#oca"><span class="std std-ref">OCA</span></a>:</p></li>
+</ul>
+</div></blockquote>
+<section id="lcheapo">
+<h2>LCHEAPO<a class="headerlink" href="#lcheapo" title="Permalink to this headline"></a></h2>
+<p>Creates scripts to generate miniSEED data from SIO LC2000 data files.
+miniSEED files are deliberately NOT drift corrected so that that step can be
+done at a data/metadata preparation ‘A-node’</p>
+<p>Run through the executable <cite>obsinfo-makescripts-LCHEAPO</cite></p>
+<p>the generated scripts need the <cite>sdpchain</cite> module (not publically available)</p>
+</section>
+<section id="sdpchain">
+<h2>SDPCHAIN<a class="headerlink" href="#sdpchain" title="Permalink to this headline"></a></h2>
+<p>Makes scripts to to go from basic miniSEED to data center ready</p>
+<p>Run through the executable <cite>obsinfo-makescripts-SDPCHAIN</cite></p>
+<p>the generated scripts need the <cite>sdpchain</cite> module (not publically available)</p>
+</section>
+<section id="lc2sds">
+<h2>LC2SDS<a class="headerlink" href="#lc2sds" title="Permalink to this headline"></a></h2>
+<p>Makes scripts to generate SDS data archives directly from SIO LC2000 data files,
+including basic clock corrections.  To furnish facility users, NOT
+FDSN/EIDA-level data centers</p>
+<p>Runs through the executable <cite>obsinfo-makescripts-LC2SDS</cite></p>
+<p>The generated scripts need the pip-available <cite>lcheapo</cite> module</p>
+</section>
+<section id="oca">
+<h2>OCA<a class="headerlink" href="#oca" title="Permalink to this headline"></a></h2>
+<p>Just a stub for metadata conversion between <em>obsinfo</em> and <em>OCA</em> protocols.
+Never finished.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="troubleshooting.html" class="btn btn-neutral float-left" title="Troubleshooting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules.html" class="btn btn-neutral float-right" title="Technical Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

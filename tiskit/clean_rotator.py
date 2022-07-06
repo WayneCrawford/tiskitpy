@@ -33,7 +33,8 @@ def debug(s):
 class CleanRotator():
     def __init__(self, stream, excludes=[], plot=False,
                  quickTest=False, remove_eq=True, uselogvar=False,
-                 verbose=True, filt_band=(0.001, 0.01)):
+                 verbose=True, filt_band=(0.001, 0.01),
+                 save_eq_file=True):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
 
@@ -49,6 +50,7 @@ class CleanRotator():
             uselogvar(bool): use logarithm of variance as metric
             filt_band (tuple): lower, upper frequency limits of band to filter data
                 before calculating rotation
+            save_eq_file (bool): Passed onto TimeSpans.from_eqs()
 
         Attributes:
             angle: angle by which Z (or Z-X-Y) was rotated
@@ -58,7 +60,8 @@ class CleanRotator():
                 (float): 
                 (float): azimuth by which Z (or Z-X-Y) was rotated
         """
-        eq_spans = self._make_eq_spans(remove_eq, stream[0].stats, verbose)
+        eq_spans = self._make_eq_spans(remove_eq, stream[0].stats, verbose,
+                                       save_eq_file)
         filtstream = self._filtstream(stream, excludes, filt_band)
         srData = SeisRotate(filtstream)
         (ang, azi) = srData.calc_zrotate_opt(verbose=verbose, eq_spans=eq_spans,
@@ -86,13 +89,15 @@ class CleanRotator():
         filtstream.filter('highpass', freq=filt_band[0], corners=4, zerophase=True)
         return filtstream
 
-    def _make_eq_spans(self, remove_eq, stats, verbose):
+    def _make_eq_spans(self, remove_eq, stats, verbose, save_eq_file):
         if isinstance(remove_eq, str):
-            return TimeSpans.from_eqs(stats.starttime, stats.endtime,
-                                      quiet=not verbose, eqfile=remove_eq)
+            return TimeSpans.from_eqs(
+                stats.starttime, stats.endtime, quiet=not verbose,
+                eq_file=remove_eq, save_eq_file=save_eq_file)
         elif remove_eq is True:
-            return TimeSpans.from_eqs(stats.starttime, stats.endtime,
-                                      quiet=not verbose)
+            return TimeSpans.from_eqs(
+                stats.starttime, stats.endtime, quiet=not verbose,
+                save_eq_file=save_eq_file)
         return None
 
     def _plot_filtered_stream(self, stream):

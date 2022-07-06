@@ -2,7 +2,7 @@
 <q:quakeml xmlns="http://quakeml.org/xmlns/bed/1.2" xmlns:anss="http://anss.org/xmlns/event/0.1" xmlns:catalog="http://anss.org/xmlns/catalog/0.1" xmlns:q="http://quakeml.org/xmlns/quakeml/1.2">
   <eventParameters publicID="quakeml:earthquake.usgs.gov/fdsnws/event/1/query?starttime=2016-11-30T06%3A36%3A00.008261&amp;endtime=2016-12-07T00%3A00%3A00.008261&amp;minmagnitude=5.85&amp;orderby=time-asc">
     <creationInfo>
-      <creationTime>2022-07-06T11:18:16.000000Z</creationTime>
+      <creationTime>2022-01-31T13:43:25.000000Z</creationTime>
     </creationInfo>
     <event publicID="quakeml:earthquake.usgs.gov/fdsnws/event/1/query?eventid=us10007e55&amp;format=quakeml" catalog:datasource="us" catalog:eventsource="us" catalog:eventid="10007e55">
       <preferredOriginID>quakeml:earthquake.usgs.gov/product/origin/us10007e55/us/1487808715040/product.xml</preferredOriginID>
@@ -14,7 +14,7 @@
       </description>
       <creationInfo>
         <agencyID>us</agencyID>
-        <creationTime>2022-05-03T18:03:30.429000Z</creationTime>
+        <creationTime>2020-07-10T15:16:49.392000Z</creationTime>
       </creationInfo>
       <origin publicID="quakeml:earthquake.usgs.gov/product/origin/us10007e55/us/1487808715040/product.xml" catalog:datasource="us" catalog:dataid="us10007e55" catalog:eventsource="us" catalog:eventid="10007e55">
         <time>
@@ -69,7 +69,7 @@
       </description>
       <creationInfo>
         <agencyID>us</agencyID>
-        <creationTime>2022-05-03T18:03:37.628000Z</creationTime>
+        <creationTime>2019-06-17T22:33:57.737000Z</creationTime>
       </creationInfo>
       <origin publicID="quakeml:earthquake.usgs.gov/product/origin/us10007ekb/us/1488524760040/product.xml" catalog:datasource="us" catalog:dataid="us10007ekb" catalog:eventsource="us" catalog:eventid="10007ekb">
         <time>
@@ -124,7 +124,7 @@
       </description>
       <creationInfo>
         <agencyID>us</agencyID>
-        <creationTime>2022-05-03T19:28:27.785000Z</creationTime>
+        <creationTime>2017-03-03T07:06:02.040000Z</creationTime>
       </creationInfo>
       <origin publicID="quakeml:earthquake.usgs.gov/product/origin/us10007ev8/us/1488524762040/product.xml" catalog:datasource="us" catalog:dataid="us10007ev8" catalog:eventsource="us" catalog:eventid="10007ev8">
         <time>
@@ -179,7 +179,7 @@
       </description>
       <creationInfo>
         <agencyID>us</agencyID>
-        <creationTime>2022-05-03T18:04:05.669000Z</creationTime>
+        <creationTime>2020-07-10T15:17:06.982000Z</creationTime>
       </creationInfo>
       <origin publicID="quakeml:earthquake.usgs.gov/product/origin/us10007ggp/us/1488524765040/product.xml" catalog:datasource="us" catalog:dataid="us10007ggp" catalog:eventsource="us" catalog:eventid="10007ggp">
         <time>
@@ -234,7 +234,7 @@
       </description>
       <creationInfo>
         <agencyID>us</agencyID>
-        <creationTime>2022-05-03T18:04:11.730000Z</creationTime>
+        <creationTime>2020-07-10T15:17:17.924000Z</creationTime>
       </creationInfo>
       <origin publicID="quakeml:earthquake.usgs.gov/product/origin/us10007ghm/us/1488524765040/product.xml" catalog:datasource="us" catalog:dataid="us10007ghm" catalog:eventsource="us" catalog:eventid="10007ghm">
         <time>

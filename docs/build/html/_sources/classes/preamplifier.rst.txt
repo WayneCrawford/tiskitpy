@@ -1,0 +1,114 @@
+.. _Preamplifier11:
+
+****************
+Preamplifier
+****************
+
+===============
+ Description
+===============
+
+An optional preamplifier may be part of an OBS instrument. It is an :ref:`InstrumentComponent <InstrumentComponent>` with response stages and no particular attributes of its own.
+
+---------------------
+Python class:
+---------------------
+
+Preamplifier
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+preamplifier
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Preamplifier
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`InstrumentComponent <InstrumentComponent>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+* :ref:`Filter <Filter11>`
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is element of :ref:`Equipment <Equipment>`
+* Contains :ref:`Response Stages <ResponseStages>`
+
+==============================
+Attributes
+==============================
+
+*None*
+
+*For the rest of attributes, see superclass :ref:`InstrumentComponent <InstrumentComponent>`*
+
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/preamplifier.schema.json>`_
+
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Preamplifier information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml>`_ (complete file)
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision: 
+    date: "2017-11-30"
+    authors: 
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+        
+ preamplifier:
+    equipment:
+        model: "BBOBS-GAIN"
+        type: "Analog gain card"
+        description: "INSU BBOBS gain card"
+        manufacturer: "SIO or IPGP"
+        vendor: ~
+        
+    configuration_default: "1x"
+ 
+    configuration_definitions:
+        "0.225x":
+            config_description: "0.225x gain"
+            response_stages:
+                - $ref: "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage"
+        "1x":
+            config_description: "1x gain"
+            response_stages:
+                - $ref: "responses/INSU_BBOBS_gain1.0_theoretical.stage.yaml#stage"
+
+==================
+Class Navigation
+==================
+
+:ref:`InstrumentComponent` \<\=\=\> :ref:`ResponseStages`
+
+           
+

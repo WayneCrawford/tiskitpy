@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building a datalogger information file &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building a stage information file with different filters" href="tutorial-7.html" />
+    <link rel="prev" title="Building instrument component files with response stages: sensors and preamplifiers" href="tutorial-5.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial-1.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-2.html">The general structure of information files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-3.html">Building a simple network file with stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-4.html">Building a simple instrumentation file with channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-5.html">Building instrument component files with response stages: sensors and preamplifiers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building a datalogger information file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#datalogger-configuration-definitions">Datalogger configuration definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-7.html">Building a stage information file with different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-8.html">Building a filter information file for different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-9.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../tutorial.html">Tutorial</a> &raquo;</li>
+      <li>Building a datalogger information file</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/tutorial-6.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-a-datalogger-information-file">
+<span id="tutorial6"></span><h1>Building a datalogger information file<a class="headerlink" href="#building-a-datalogger-information-file" title="Permalink to this headline"></a></h1>
+<p>Dataloggers are the components used to record the data treated by the instrument stages before. Their configuration files might get quite complex due to the number of necessary stages.</p>
+<p>Dataloggers have the same common fields of any other instrument component, with two extra fields: <code class="docutils literal notranslate"><span class="pre">delay_correction</span></code> and <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, which is the overall sample rate of the complete instrument.</p>
+<p><strong>delay_correction</strong></p>
+<p>All stages can have nominal delays, but these delays sometimes need to be corrected. The <code class="docutils literal notranslate"><span class="pre">delay_correction</span></code> field accomplishes this. In StationXML <code class="docutils literal notranslate"><span class="pre">correction</span></code> is an attribute of each individual stage. However, we find it is not realistic to be able to apply each individual correction and opt instead to apply a general correction to all stages.
+We accomplish this by using two attributes in <a class="reference internal" href="../classes/stage.html#stage"><span class="std std-ref">Stage</span></a>: the (nominal) <code class="docutils literal notranslate"><span class="pre">delay</span></code> and the <code class="docutils literal notranslate"><span class="pre">correction</span></code>. We consider two cases:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">delay_correction</span></code> <strong>is not</strong> specified in the datalogger information file. Then, the corresponding <code class="docutils literal notranslate"><span class="pre">correction</span></code> attribute in each stage for all components will be set to the <code class="docutils literal notranslate"><span class="pre">delay</span></code> value corresponding to that stage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">delay_correction</span></code> <strong>is</strong> specified in the datalogger information file. Then, the corresponding <code class="docutils literal notranslate"><span class="pre">correction</span></code> attribute in each stage for all components is set to zero, <em>except</em> for the last stage (which is of course the last datalogger stage), which is set to the <code class="docutils literal notranslate"><span class="pre">delay_correction</span></code>  value, thus becoming the total correction value.</p></li>
+</ol>
+<p>Aside from this,  the rest of the attributes have been discussed in the last section.</p>
+<section id="datalogger-configuration-definitions">
+<h2>Datalogger configuration definitions<a class="headerlink" href="#datalogger-configuration-definitions" title="Permalink to this headline"></a></h2>
+<p>The following paragraph requires the reader to have a minimal knowledge of signal treatment.</p>
+<p>The code below is a real datalogger configuration file. We see that this example has several response stages in each configuration, based this time on the sample rate. This is due to the fact that each stage with the FIR2 amd FIR3 filters has a decimation factor of 2: each one divides the sample rate by two. FIR1 is actually an ADC, an analog to digital converter, all previous stages in this instrument being analog, in particular the one in the previous component, the preamplifier. FIR1 outputs a 32000 sps sample rate. Thus, to get to a final 1000 sps sample rate we need four FIR2 and one FIR3, each halving the sample rate. FIR2 and FIR3 have different coefficients and thus both are necessary. This means we need at least one FIR1, one FIR2 and one FIR3. To keep halving the sample rate we simply add more FIR2. So it’s simple now to see now the difference in configurations: it’s simply adding an extra FIR2 each time.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2019-12-20&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;authors/Wayne_Crawford.author.yaml#author&#39;</span>
+<span class="nt">notes</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;Delay</span><span class="nv"> </span><span class="s">correction</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">hard-coded</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">29</span><span class="nv"> </span><span class="s">samples</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">LCHEAPO</span><span class="nv"> </span><span class="s">software&quot;</span>
+
+<span class="nt">datalogger</span><span class="p">:</span>
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;CS5321/22&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;delta-sigma</span><span class="nv"> </span><span class="s">A/D</span><span class="nv"> </span><span class="s">converter</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">digital</span><span class="nv"> </span><span class="s">filter&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;CS5321/22</span><span class="nv"> </span><span class="s">delta-sigma</span><span class="nv"> </span><span class="s">A/D</span><span class="nv"> </span><span class="s">converter</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">FIR</span><span class="nv"> </span><span class="s">digital</span><span class="nv"> </span><span class="s">filter&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Cirrus</span><span class="nv"> </span><span class="s">Logic&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;various&quot;</span>
+
+   <span class="nt">configuration_default</span><span class="p">:</span> <span class="s">&quot;125</span><span class="nv"> </span><span class="s">sps&quot;</span>
+
+   <span class="nt">configuration_definitions</span><span class="p">:</span>
+       <span class="s">&quot;62.5sps&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">sample_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">62.5</span>
+           <span class="nt">delay_correction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.464</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5321_FIR1.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR3.stage.yaml#stage&quot;</span>
+       <span class="s">&quot;125sps&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">sample_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">125</span>
+           <span class="nt">delay_correction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.232</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5321_FIR1.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR3.stage.yaml#stage&quot;</span>
+       <span class="s">&quot;250sps&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">sample_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">250</span>
+           <span class="nt">delay_correction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.116</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5321_FIR1.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR3.stage.yaml#stage&quot;</span>
+       <span class="s">&quot;500sps&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">sample_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">500</span>
+           <span class="nt">delay_correction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.058</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5321_FIR1.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR3.stage.yaml#stage&quot;</span>
+       <span class="s">&quot;1000sps&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">sample_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+           <span class="nt">delay_correction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.029</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5321_FIR1.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR3.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p>As can be seen, configuration definition labels are flexible and can suit any purpose imagined by the user. The best practice is to keep them short, explicit and consistent among different selectable configurations in the same group.</p>
+<p>Next we will see stages and filters in more detail.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="tutorial-7.html#tutorial7"><span class="std std-ref">Next page, Building stage information files</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-5.html#tutorial5"><span class="std std-ref">Previous page</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-1.html#tutorial1"><span class="std std-ref">Back to start</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial-5.html" class="btn btn-neutral float-left" title="Building instrument component files with response stages: sensors and preamplifiers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial-7.html" class="btn btn-neutral float-right" title="Building a stage information file with different filters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

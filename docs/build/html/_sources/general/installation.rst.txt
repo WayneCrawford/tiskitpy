@@ -1,0 +1,315 @@
+.. _InstallStartup: 
+
+***********************************
+Installation and Startup Guide
+***********************************
+
+
+==============
+Prerequisites
+==============
+
+*obsinfo* is written in Python 3.6.9. While it is expected that it will run in any version of Python 3, this has not been tested.
+
+You must have Python installed in your computer with at least version 3.6.9.
+
+Linux
+-------
+
+Most Linux installations have Python preinstalled. However, it might not be the latest version. Check the version and update to 3.6.9 at least.
+
+To check your version, use any of the following commands:
+
+.. code-block:: console
+
+  $ python --version
+
+  $ python2 --version
+
+  $ python3 --version
+
+Windows
+------------
+
+Must have Windows 10 installed.
+
+====================
+Python installation
+====================
+
+The following link provides complete information on how to install Python in several platforms:
+
+https://realpython.com/installing-python/#how-to-check-your-python-version-on-linux
+
+The official installation guide for **UNIX** is here:
+
+https://docs.python.org/3/using/unix.html
+
+**Windows**:
+
+https://docs.python.org/3/using/windows.html
+
+**MacOS**:
+
+https://docs.python.org/3/using/mac.html
+
+====================
+Python packages
+====================
+
+The following packages must be installed, preferably with a package manager, either using ``pip`` or ``conda``.
+
+Instructions to install a package using ``pip``. If you don't have ``pip`` installed, this same link instructs you who to install it.
+
+https://packaging.python.org/tutorials/installing-packages/
+
+Instructions to install a package using ``conda``
+
+https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-pkgs.html
+
+**Packages**
+
+*Standard library (no need to install)*
+
+.. code-block:: console
+
+ difflib
+ glob
+ inspect
+ json
+ math
+ pathlib
+ pprint
+ os
+ re
+ sys
+ unittest
+ warnings
+
+*External libraries*
+
+.. code-block:: console
+
+ jsonschema
+ jsonref
+ gitlab
+ numpy
+ obspy
+ pyyaml
+
+In particular *obsinfo* relies on ``obspy`` to create the objects needed to output a StationXML file.
+
+===============================
+Git installation
+===============================
+
+If you wish to install *obsinfo* using ``git``, you have to install it first.
+
+**Linux**:
+
+.. code-block:: console
+
+  $ sudo apt-get install git
+
+In **Windows**, download from this site:
+
+.. code-block:: console
+
+ https://git-scm.com/download/win 
+
+================================
+Obsinfo installation
+================================
+
+*obsinfo* is a published package in PyPI. Currently, version v0.110 is available as a beta version.
+
+Make sure you have the latest pip version:
+.. code-block:: console
+
+  $ python3 -m pip install --upgrade pip
+
+or
+
+.. code-block:: console
+
+  $ python -m pip install --upgrade pip
+
+depending on your Python configuration.
+ 
+Next, use ``pip`` to install *obsinfo*:
+
+.. code-block:: console
+
+  $ python3 -m pip install obsinfo
+  
+or
+
+.. code-block:: console
+
+  $ python -m pip install obsinfo
+
+depending on your Python configuration.
+
+======================================
+Description of obsinfo file structure
+======================================
+
++-----------------+---------------------------+
+| data            | YAML/JSON schemas         |
++-----------------+---------------------------+
+| _examples       | Example information files |
++-----------------+---------------------------+
+| instrumentation | Python code               |
++-----------------+---------------------------+
+| main            | Python code               |
++-----------------+---------------------------+
+| misc            | Python code               |
++-----------------+---------------------------+
+| network         | Python code               |
++-----------------+---------------------------+
+| obsMetadata     | Python code               |
++-----------------+---------------------------+
+
+================================
+Obsinfo setup
+================================
+
+**Linux**:
+ 
+The *obsinfo* executables are:
+
+ * ``obsinfo-makeStationXML`` to create StationXML files
+
+ * ``obsinfo-validate`` to validate the syntax of information files
+
+ * ``obsinfo-print`` to simply print information files without creating the StationXML file. This may be useful as a test.
+
+All executables are installed in ``~/.local/bin``, which is usually in the PATH variable of the operating system. If this is not the case, add that directory:
+
+.. code-block:: console
+
+ $ PATH=$PATH:$HOME/.local/bin
+ $ export PATH
+
+To avoid having to set up the variable in each session, store these instructions in your .bashrc file in your home directory. 
+
+Remember in **Windows** and **MacOS** you can setup the variable in the configuration panel. 
+Follow the instructions to set environment variables.
+
+After having installed *obsinfo* with pip or conda, you need to run a setup. 
+This gives you an opportunity of creating a local directory where the existing examples of information files will be copied, instead of the arcane and standard ~/.local/lib/python3.x/site-packages/obsinfo/_examples/Information_Files.
+
+In its simplest form, simply run:
+
+.. code-block:: console
+
+ $ obsinfo-setup -d <directory name>
+
+
+The program will copy the examples to the directory mentioned and will perform other administrative tasks. 
+
+**IMPORTANT**: EVEN if you don't want to create a new directory, you MUST run ``obsinfo-setup``, as it performs several housekeeping tasks, 
+notably creating the configuration file ``.obsinforc`` and the directory ``.obsinfo`` which is used
+for logging purposes.
+
+``obsinfo-setup`` is very flexible. Through it you can reconfigure several variables that will
+tell *obsinfo* where to find your files. More on this in the next section.
+
+
+==================
+File discovery
+==================
+
+``obsinfo-setup`` sets several variables specific to *obsinfo* and stores them in a configuration file called ``.obsinforc`` 
+in your home directory called ``.obsinforc``. Here they are with their default values:
+
+.. code-block:: console
+
+ gitlab_repository: www.gitlab.com
+ gitlab_project: resif/obsinfo
+ gitlab_path: _examples/Information_Files
+ datapath:  [https://www.gitlab.com/resif/obsinfo/obsinfo/_examples/Information_Files]
+ obsinfo_branch: master
+
+The first, second and third variables are used to tell *obsinfo* where the remote repository for information files is. 
+The fourth one needs more explanation. It works like the ``PATH`` variable in Linux: whenever a file in a ``$ref`` is found in an 
+information file, *obsinfo* will **sequentally** look for the file in all the directories specified in ``obsinfo_datapath``. In 
+the default case, the only place where  *obsinfo* will look is the remote directory. Observe this is
+the concatenation of the first three variables, the repository, the project and the path. 
+
+Finally, since the remote repository is assumet to be a gitlab repository, we must specify a gitlab branch, which by 
+default is ``master``.
+
+All these defaults are achieved by simply running:
+
+.. code-block:: console
+
+ $ obsinfo-setup
+ 
+with no parameters. But with options you can specify all the variables. ``gitlab_repository`` is specfied
+with ``-g``, ``gitlab_project`` with ``-p``, ``gitlab_path`` with ``-P`` and ``obsinfo_branch`` 
+with ``-b``. 
+
+Other options allow you to not copy the examples (``-x``) or modify the ``datapath`` variable. This is done 
+so you don't have to manually edit ``.obsinforc`` **which is discouraged**. Three local directories are
+considered in ``datapath``: a working directory, a local repository and an example directory. We have
+seen that the ``-d`` option creates (if non existing) the example directory. When specified, this directory
+takes precedence over the remote directory (unless ``-x`` is specified). The ``datapath`` variable will
+look like:
+
+.. code-block::
+
+ datapath:  [<local example directory>, https://www.gitlab.com/resif/obsinfo/obsinfo/_examples/Information_Files]
+
+
+where ``<local example directory>`` is the directory specified with ``-d``. If you add the working
+directory (with ``-w``) and the local repository (with ``-l``), they will take precedence in this order:
+
+.. code-block::
+
+ datapath:  [<working directory>, <local repository>, <local example directory>, https://www.gitlab.com/resif/obsinfo/obsinfo/_examples/Information_Files]
+
+You can change the order putting the remote repository first by using the ``-v`` option. Of course, you
+change the order of the local directories by simply specifying one or the other as working, local repository 
+or example.
+
+All this is summarized here:
+ 
+.. code-block:: 
+
+  -x, --no_examples     Don't import examples, only templates, and remove
+                        examples directory from the datapath
+  -c, --no_copy         Don't import anything at all, don't create dest
+                        directory, which will be removed from datapath
+  -n, --no_remote       Install obsinfo without access to a gitlab repository.
+                        May be needed in some operating systems for
+                        compatibility issues
+  -v, --invert_datapath
+                        Put remote gitlab repository first. All local
+                        directories will keep their order
+  -b, --branch          Specifies the git branch to use, if not master
+  -d DEST, --dest DEST  Destination directory for templates and examples.
+  -g GITLAB, --gitlab GITLAB
+                        Gitlab repository)
+  -p PROJECT, --project PROJECT
+                        path to project and the directory where information
+                        files lie within the Gitlab repository)
+  -l LOCAL_REPOSITORY, --local_repository LOCAL_REPOSITORY
+                        Specify local repository for information files and
+                        include it as first or second option in datapath
+  -w WORKING_DIRECTORY, --working_directory WORKING_DIRECTORY
+                        Specify working directory for obsinfo and include it
+                        as first option in datapath
+  -P REMOTE_PATH, --remote_path REMOTE_PATH
+                        Specify remote directory under project
+
+
+**IMPORTANT**: In datapath, the remote directory is always the concatenation of ``gitlab_repository``, 
+ ``gitlab_project`` and ``gitlab_path`` when created by ``obsinfo-setup``. Therefore, if you manually change the ``datapath``
+ in the ``.obsinforc`` file you will not get the expected result. Always use ``obsinfo-setup`` to
+ change that file.
+ 
+Of course, you will create your own information files in a directory selected by you. 
+
+
+

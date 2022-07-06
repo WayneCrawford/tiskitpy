@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building a stage information file with different filters &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building a filter information file for different filters" href="tutorial-8.html" />
+    <link rel="prev" title="Building a datalogger information file" href="tutorial-6.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial-1.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-2.html">The general structure of information files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-3.html">Building a simple network file with stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-4.html">Building a simple instrumentation file with channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-5.html">Building instrument component files with response stages: sensors and preamplifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-6.html">Building a datalogger information file</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building a stage information file with different filters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#delay-offset-and-correction-attributes">delay, offset and correction attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#polarity">Polarity</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-8.html">Building a filter information file for different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-9.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../tutorial.html">Tutorial</a> &raquo;</li>
+      <li>Building a stage information file with different filters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/tutorial-7.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-a-stage-information-file-with-different-filters">
+<span id="tutorial7"></span><h1>Building a stage information file with different filters<a class="headerlink" href="#building-a-stage-information-file-with-different-filters" title="Permalink to this headline"></a></h1>
+<p>Conceptually, stages are each of an electronic block diagram “boxes”. They are usually implemented as a single printed circuit connected to the instrument bus. An instrument component has an ordered list of stages. Each stage has certain signal treatment characteristics.</p>
+<p>It is important to note that, since stages are chained,</p>
+<ul class="simple">
+<li><p>Output units of stage and input units of the next stage must match.</p></li>
+<li><p>In digital stages, the output sample rate of one stage must match the input sample rate of the next one.</p></li>
+<li><p>Declared sample rate of the instrument as a whole must match calculated sample rate of the response ensemble.</p></li>
+</ul>
+<p>To allow flexible use of stages, as exemplified in the datalogger information file above, it is a good idea <em>not</em> to specificy input sample rates (output sample rates cannot be specified, see below) for all but the first stage. For example, the FIR2 stages in the datalogger example above only specify decimation factor. This means that, irrespective of input sample rate, the will have the output sample rate specified by the decimation factor.</p>
+<p>Both conditions are checked by <em>obsinfo</em>.</p>
+<p>In the current implementation, all stages have one, and exactly one filter associated. This may seem a little strange, as some stages are not properly filters, but rather analog and digital amplifiers (they only increment gain) or ADCs, analog-digital converters. This is idiosyncratic. It seems StationXML does not allow stages that are not some sort of filter. Therefore, as will be seen, these stages are implemented as filters in <em>obsinfo</em>.</p>
+<p>Let’s profit from this to see what a stage with a very simple “filter” in the above sense looks like. This is a stage for a preamplifier. It is analog and only has a gain. with no other processing. We have a specification of input and output units and a gain, composed of a value and a frequency where that gain value is measured. It has an associated “filter” of type ANALOG. All these are required fields. We also have an optional description, which is nonetheless recommended.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">stage</span><span class="p">:</span>
+   <span class="nt">description </span><span class="p">:</span> <span class="s">&quot;PREAMPLIFIER:</span><span class="nv"> </span><span class="s">BBOBS</span><span class="nv"> </span><span class="s">0.225x&quot;</span>
+   <span class="nt">input_units </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span> <span class="s">&quot;V&quot;</span><span class="p p-Indicator">,</span><span class="nt"> description</span><span class="p">:</span> <span class="s">&quot;VOLTS&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">output_units </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span> <span class="s">&quot;V&quot;</span><span class="p p-Indicator">,</span><span class="nt"> description</span><span class="p">:</span> <span class="s">&quot;VOLTS&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">gain </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">value </span><span class="p">:</span> <span class="nv">0.225</span><span class="p p-Indicator">,</span><span class="nt"> frequency</span><span class="p">:</span> <span class="nv">0</span><span class="p p-Indicator">}</span>
+   <span class="nt">filter </span><span class="p">:</span>
+       <span class="nt">type </span><span class="p">:</span> <span class="s">&quot;ANALOG&quot;</span>
+<span class=" -Error">  </span><span class="nt">polarity</span><span class="p">:</span> <span class="s">&quot;+&quot;</span>
+</pre></div>
+</div>
+<p>Next we can see another pseudo-filter, an analog to digital converter used as the first stage of a datalogger:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">notes</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;From</span><span class="nv"> </span><span class="s">CS5321-22_F3.pdf&quot;</span>
+
+<span class="nt">stage</span><span class="p">:</span>
+   <span class="nt">description </span><span class="p">:</span> <span class="s">&quot;DIGITIZER</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">CS5321</span><span class="nv"> </span><span class="s">Delta-Sigma</span><span class="nv"> </span><span class="s">A/D</span><span class="nv"> </span><span class="s">converter&quot;</span> <span class="c1">#  optional</span>
+   <span class="nt">input_units </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt"> name </span><span class="p">:</span> <span class="s">&quot;V&quot;</span><span class="p p-Indicator">,</span><span class="nt"> description</span><span class="p">:</span> <span class="s">&quot;Volts&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">output_units </span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt"> name </span><span class="p">:</span> <span class="s">&quot;counts&quot;</span><span class="p p-Indicator">,</span><span class="nt"> description</span><span class="p">:</span> <span class="s">&quot;Digital</span><span class="nv"> </span><span class="s">Counts&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">input_sample_rate </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">256000</span>
+   <span class="nt">decimation_factor </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">8</span>
+   <span class="nt">gain </span><span class="p">:</span>
+       <span class="nt">frequency</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+       <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1165084</span> <span class="c1">#  counts/V</span>
+   <span class="nt">filter</span><span class="p">:</span>
+       <span class="nt">type </span><span class="p">:</span> <span class="s">&quot;AD_CONVERSION&quot;</span>
+       <span class="nt">input_full_scale </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9</span> <span class="c1">#  9 V pp</span>
+       <span class="nt">output_full_scale </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10485760</span> <span class="c1">#  4FFFFF@Vref and B00000@-Vref</span>
+</pre></div>
+</div>
+<p>Although it is obvious that the input is analog, we specify an <code class="docutils literal notranslate"><span class="pre">input_sample_rate</span></code> in agreement with StationXML specifications. The output rate, as mentioned above, is never specified, but can easily be obtained from this and the <code class="docutils literal notranslate"><span class="pre">decimation_factor</span></code> by division. In the example, the output sample rate will be 32000 sps. For the time being, we will ignore the other fields in <code class="docutils literal notranslate"><span class="pre">filter</span></code>, which will be discussed in the next section.</p>
+<p>Note the use of the <code class="docutils literal notranslate"><span class="pre">notes</span></code> attribute, which will <strong>not</strong> be processed as comments in StationXML. Other optional attributes don’t appear here to keep the discussion simple but can be readily consulted in
+the corresponding <a class="reference internal" href="../classes/stage.html#stage"><span class="std std-ref">Stage</span></a>. However, there are three attributes that should be noticed.</p>
+<section id="delay-offset-and-correction-attributes">
+<h2>delay, offset and correction attributes<a class="headerlink" href="#delay-offset-and-correction-attributes" title="Permalink to this headline"></a></h2>
+<p>Digital filters can have an <code class="docutils literal notranslate"><span class="pre">offset</span></code>, which specifies how samples the peak
+of an impulse will be offset by the filter. This is specified at the filter level.</p>
+<p>The stage level has an attribute called <code class="docutils literal notranslate"><span class="pre">delay</span></code>. If <code class="docutils literal notranslate"><span class="pre">delay</span></code> is not
+specified but <code class="docutils literal notranslate"><span class="pre">offset</span></code> is in the associated filter, <code class="docutils literal notranslate"><span class="pre">delay</span></code> is calculated
+by dividing <code class="docutils literal notranslate"><span class="pre">offset</span></code> by the input sample rate. If both <code class="docutils literal notranslate"><span class="pre">delay</span></code> and
+<a href="#id1"><span class="problematic" id="id2">``</span></a>offset``are specified, their specified values are kept untouched.</p>
+<p><code class="docutils literal notranslate"><span class="pre">correction</span></code> is an attribute in StationXML which is calculated, as mentioned
+in the previous section, using the datalogger field <code class="docutils literal notranslate"><span class="pre">delay_correction</span></code>.  It
+should <strong>not</strong> be specified by the user.</p>
+<p>We see in this example a stage without <code class="docutils literal notranslate"><span class="pre">input_sample_rate</span></code> but with
+<code class="docutils literal notranslate"><span class="pre">decimation_rate</span></code> of 2, which divide the <code class="docutils literal notranslate"><span class="pre">output_sample_rate</span></code> of the
+previous stage by 2, as mentioned in the introduction to this section.
+This is precisely the stage FIR3 that was used in the previous page as a
+datalogger stage example.
+The other thing worth noting is the reference to a filter file in the folder
+<code class="docutils literal notranslate"><span class="pre">filters/</span></code>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">notes</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;From</span><span class="nv"> </span><span class="s">CS5322_Filter.pdf&quot;</span><span class="p p-Indicator">]</span>
+
+<span class="nt">stage</span><span class="p">:</span>
+   <span class="nt">decimation_factor </span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+   <span class="nt">gain </span><span class="p">:</span>         <span class="p p-Indicator">{</span><span class="nt">value</span><span class="p">:</span> <span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> frequency</span><span class="p">:</span> <span class="nv">0</span><span class="p p-Indicator">}</span>
+   <span class="nt">input_units </span><span class="p">:</span>  <span class="p p-Indicator">{</span><span class="nt"> name </span><span class="p">:</span> <span class="s">&quot;counts&quot;</span><span class="p p-Indicator">,</span><span class="nt"> description</span><span class="p">:</span> <span class="s">&quot;Digital</span><span class="nv"> </span><span class="s">Counts&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">offset</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+
+   <span class="nt">description </span><span class="p">:</span> <span class="s">&quot;DECIMATION</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">CS5322</span><span class="nv"> </span><span class="s">FIR3</span><span class="nv"> </span><span class="s">(linear</span><span class="nv"> </span><span class="s">phase)&quot;</span>
+   <span class="nt">filter</span><span class="p">:</span>
+       <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;filters/CirrusLogic_CS5322_FIR3.filter.yaml#filter&quot;</span>
+   <span class="nt">extras</span><span class="p">:</span>
+       <span class="nt">DBIRD_response_type </span><span class="p">:</span> <span class="s">&quot;THEORETICAL&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="polarity">
+<h2>Polarity<a class="headerlink" href="#polarity" title="Permalink to this headline"></a></h2>
+<p>Each stage can have a polarity: if omitted it is assumed to be “+”.
+A “+” polarity means:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For a seismometer, a postitive voltage corresponds to a movement <strong>UP</strong>.</p></li>
+<li><p>For a hydrophone, a positive voltage corresponds to an <strong>INCREASE</strong> in pressure</p></li>
+<li><p>For a non-sensor stage, the passband output has the <strong>SAME</strong> polarity as the
+input in the passband</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>A “-” polarity means:</dt><dd><ul class="simple">
+<li><p>For a seismometer, a postitive voltage corresponds to a movement <strong>DOWN</strong>.</p></li>
+<li><p>For a hydrophone, a positive voltage corresponds to a <strong>DECREASE</strong> in pressure</p></li>
+<li><p>For a non-sensor stage, the passband output has the <strong>OPPOSITE</strong> polarity as the
+input in the passband</p></li>
+</ul>
+</dd>
+</dl>
+<p>By multiplying the polarities in a channel’s stages we get the channel’s polarity.
+For seismometer and hydrophone channels, a positive polarity corresponds
+to dip = -90º and a negative polarity to dip = 90º</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="tutorial-8.html#tutorial8"><span class="std std-ref">Next page, Building a filter information file</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-6.html#tutorial6"><span class="std std-ref">Previous page</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-1.html#tutorial1"><span class="std std-ref">Back to start</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial-6.html" class="btn btn-neutral float-left" title="Building a datalogger information file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial-8.html" class="btn btn-neutral float-right" title="Building a filter information file for different filters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

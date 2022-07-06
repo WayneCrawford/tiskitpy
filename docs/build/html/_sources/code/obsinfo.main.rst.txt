@@ -1,0 +1,36 @@
+obsinfo.main package
+====================
+
+
+obsinfo.main.makeStationXML module
+----------------------------------
+
+.. automodule:: obsinfo.main.makeStationXML
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.main.print module
+-------------------------
+
+.. automodule:: obsinfo.main.print
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.main.setupObsinfo module
+--------------------------------
+
+.. automodule:: obsinfo.main.setupObsinfo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+obsinfo.main.validate module
+----------------------------
+
+.. automodule:: obsinfo.main.validate
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

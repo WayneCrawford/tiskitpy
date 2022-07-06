@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classes &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Network" href="classes/network.html" />
+    <link rel="prev" title="Obsinfo Overview" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#information-file-tree">Information File Tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#filter-types">Filter Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes/network.html">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/operator.html">Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/station.html">Station</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/channel.html">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/instrument.html">Instrument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/sensor.html">Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/datalogger.html">Datalogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/response_stages.html">ResponseStages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/response_list.html">ResponseList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/stage.html">Stage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/filter.html">Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/analog.html">Analog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/coefficients.html">Coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/digital.html">Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/FIR.html">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/processing.html">Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/leap_second.html">LeapSecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/location.html">Location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/location_base.html">LocationBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/analog.html">Analog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/channel.html">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/coefficients.html">Coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/datalogger.html">Datalogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/digital.html">Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/filter.html">Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/FIR.html">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/instrument.html">Instrument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/leap_second.html">LeapSecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/location_base.html">LocationBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/location.html">Location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/network.html">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/operator.html">Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/processing.html">Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/response_list.html">ResponseList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/response_stages.html">ResponseStages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/sensor.html">Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/stage.html">Stage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/station.html">Station</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Classes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/classes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="classes">
+<span id="id1"></span><h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline"></a></h1>
+<section id="information-file-tree">
+<h2>Information File Tree<a class="headerlink" href="#information-file-tree" title="Permalink to this headline"></a></h2>
+<dl class="simple">
+<dt>network | <a class="reference internal" href="tutorial/tutorial-3.html#network"><span class="std std-ref">Network</span></a></dt><dd><ul class="simple">
+<li><p>network_info | <a class="reference internal" href="classes/FDSNNetwork.html#fdsnnetwork"><span class="std std-ref">FDSNNetwork</span></a></p></li>
+<li><p>operator | <a class="reference internal" href="classes/operator.html#operator"><span class="std std-ref">Operator</span></a></p></li>
+<li><dl class="simple">
+<dt>station | <a class="reference internal" href="classes/station.html#station"><span class="std std-ref">Station</span></a></dt><dd><ul>
+<li><dl class="simple">
+<dt>processing | <a class="reference internal" href="classes/processing.html#processingclockcorrections"><span class="std std-ref">Processing</span></a></dt><dd><ul>
+<li><p>clock_correct_leap_second | <a class="reference internal" href="classes/leap_second.html#leapsecond11"><span class="std std-ref">LeapSecond</span></a></p></li>
+<li><p>clock_correct_linear_drift | <a class="reference internal" href="classes/linear_drift.html#lineardrift"><span class="std std-ref">LinearDrift</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>location | <a class="reference internal" href="classes/location.html#location1"><span class="std std-ref">Location</span></a></dt><dd><ul>
+<li><p>location_base | <a class="reference internal" href="classes/location_base.html#locationbase"><span class="std std-ref">LocationBase</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>instrumentation(s) | <a class="reference internal" href="tutorial/tutorial-3.html#instrumentation"><span class="std std-ref">Instrumentation</span></a></dt><dd><ul>
+<li><p>equipment | <a class="reference internal" href="tutorial/tutorial-4.html#equipment"><span class="std std-ref">Equipment</span></a></p></li>
+<li><dl class="simple">
+<dt>channel | <a class="reference internal" href="classes/channel.html#channel"><span class="std std-ref">Channel</span></a></dt><dd><ul>
+<li><dl class="simple">
+<dt><em>No label</em> | <a class="reference internal" href="classes/instrument.html#instrument11"><span class="std std-ref">Instrument</span></a></dt><dd><ul>
+<li><dl class="simple">
+<dt><em>No label</em> | <a class="reference internal" href="classes/instrument_component.html#instrumentcomponent"><span class="std std-ref">InstrumentComponent</span></a></dt><dd><ul>
+<li><dl class="simple">
+<dt>sensor | <a class="reference internal" href="classes/sensor.html#sensor"><span class="std std-ref">Sensor</span></a></dt><dd><ul>
+<li><p>seed_codes | <a class="reference internal" href="classes/seed_codes.html#seedcodes11"><span class="std std-ref">SeedCodes</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>preamplifier | <a class="reference internal" href="classes/preamplifier.html#preamplifier11"><span class="std std-ref">Preamplifier</span></a></p></li>
+<li><p>datalogger | <a class="reference internal" href="classes/datalogger.html#datalogger11"><span class="std std-ref">Datalogger</span></a></p></li>
+<li><dl class="simple">
+<dt>response_stages | <a class="reference internal" href="classes/response_stages.html#responsestages"><span class="std std-ref">ResponseStages</span></a></dt><dd><ul>
+<li><p>stage | <a class="reference internal" href="classes/stage.html#stage"><span class="std std-ref">Stage</span></a></p>
+<ul>
+<li><p>filter | <a class="reference internal" href="classes/filter.html#filter11"><span class="std std-ref">Filter</span></a></p>
+<ul>
+<li><p>ADConversion | <a class="reference internal" href="classes/AD_conversion.html#adconversion"><span class="std std-ref">ADConversion</span></a></p></li>
+<li><p>Analog | <a class="reference internal" href="classes/analog.html#analog11"><span class="std std-ref">Analog</span></a></p></li>
+<li><p>Coefficients | <a class="reference internal" href="classes/coefficients.html#coefficients11"><span class="std std-ref">Coefficients</span></a></p></li>
+<li><p>Digital | <a class="reference internal" href="classes/digital.html#digital11"><span class="std std-ref">Digital</span></a></p></li>
+<li><p>FIR | <a class="reference internal" href="classes/FIR.html#fir11"><span class="std std-ref">FIR</span></a></p></li>
+<li><p>PolesZeros | <a class="reference internal" href="classes/poleszeros.html#poleszeros11"><span class="std std-ref">PolesZeros</span></a></p></li>
+<li><p>ResponseList | <a class="reference internal" href="classes/response_list.html#responselist"><span class="std std-ref">ResponseList</span></a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>Names left of the <code class="docutils literal notranslate"><span class="pre">|</span></code> symbol are as they appear in information files as labels/keys.
+Names right of the <code class="docutils literal notranslate"><span class="pre">|</span></code> are the corresponding classes in the object model and the Python implementation of that model.
+An empty label means the label does not exist in information files but exists as an object model / Python class.</p>
+</section>
+<section id="filter-types">
+<h2>Filter Types<a class="headerlink" href="#filter-types" title="Permalink to this headline"></a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>type=”ADConversion” | <a class="reference internal" href="classes/AD_conversion.html#adconversion"><span class="std std-ref">ADConversion</span></a></p></li>
+<li><p>type=”Analog” | <a class="reference internal" href="classes/analog.html#analog11"><span class="std std-ref">Analog</span></a></p></li>
+<li><p>type=”Coefficients” | <a class="reference internal" href="classes/coefficients.html#coefficients11"><span class="std std-ref">Coefficients</span></a></p></li>
+<li><p>type=”Digital” | <a class="reference internal" href="classes/digital.html#digital11"><span class="std std-ref">Digital</span></a></p></li>
+<li><p>type=”FIR” | <a class="reference internal" href="classes/FIR.html#fir11"><span class="std std-ref">FIR</span></a></p></li>
+<li><p>type=”PolesZeros” | <a class="reference internal" href="classes/poleszeros.html#poleszeros11"><span class="std std-ref">PolesZeros</span></a></p></li>
+<li><p>type=”ResponseList” | <a class="reference internal" href="classes/response_list.html#responselist"><span class="std std-ref">ResponseList</span></a></p></li>
+</ul>
+</div></blockquote>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Table of Contents (should be in class hierarchy order)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classes/network.html">Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/operator.html">Operator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/station.html">Station</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/equipment.html">Equipment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/channel.html">Channel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/instrument.html">Instrument</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/sensor.html">Sensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/datalogger.html">Datalogger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/response_stages.html">ResponseStages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/response_list.html">ResponseList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/stage.html">Stage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/filter.html">Filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/analog.html">Analog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/equipment.html">Equipment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/coefficients.html">Coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/digital.html">Digital</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/FIR.html">FIR</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/leap_second.html">LeapSecond</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/location.html">Location</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/location_base.html">LocationBase</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Table of Contents (alphabetic)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="classes/AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/analog.html">Analog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/channel.html">Channel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/coefficients.html">Coefficients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/datalogger.html">Datalogger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/digital.html">Digital</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/equipment.html">Equipment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/filter.html">Filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/FIR.html">FIR</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/instrument.html">Instrument</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/leap_second.html">LeapSecond</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/location_base.html">LocationBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/location.html">Location</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/network.html">Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/operator.html">Operator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/response_list.html">ResponseList</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/response_stages.html">ResponseStages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/sensor.html">Sensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/stage.html">Stage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes/station.html">Station</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-left" title="Obsinfo Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classes/network.html" class="btn btn-neutral float-right" title="Network" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

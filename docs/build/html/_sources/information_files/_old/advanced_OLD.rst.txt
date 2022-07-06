@@ -1,0 +1,472 @@
+.. _AdvancedTopics:
+
+****************
+Advanced Topics
+****************
+
+
+Channel modifications
+_____________________
+
+The full power of **obsinfo** is achieved using channel modifications. Unlike other equipment, OBS are subject to a lot of variations in configuration, even changes of components in the field. The aim of *obsinfo* is to have a relatively stable database of information files for instrumentation. But in actual operation it is common to reassemble the instrumentation, substituting stages and even whole components. This needs to be reflected in the metadata without compromising the stability of the instrumentation database. The way to do this is through channel modifications, which can change *any* attribute in the configuration, down to serial numbers or pole/zeros of filters at the channel level.
+
+The attribute ``channel_modifications`` is used for this. Under this keyword the user can specify a complete hierarchy down to the filter level. Only the value(s) specified will be modified. So if a "leaf" value is changed, such as gain value, only the gain value for a particular stage will be changed. But if a complete sensor is specified, the whole component along with its stages and filters will be modified.
+
+A channel must be identified in order to apply particular modifications to it. Channel identification is performed **not** by the channel label in the ``channels`` attribute, but by a channel code formed by the orientation and the location in the form:
+
+.. code-block:: yaml
+
+ "<orientation code>-<location code>"
+
+Recall `orientation codes <Channel>`_ are defined as an FDSN standard.
+
+For example, 
+
+.. code-block:: yaml
+
+ "Z-02"
+
+If location code is omitted, a location code of "00" is assumed as default. Furthermore, it is possible to select all location codes and/or all orientation codes using the "*" notation:
+
+==================== ==================================================   
+  **Channel Code**     **Result**  
+-------------------- --------------------------------------------------
+    
+ `"*"` or `"*-*"`      All channels
+-------------------- --------------------------------------------------
+
+    `"*-00"`           All orientations with location "00"
+-------------------- --------------------------------------------------
+
+    `"H-*"`             Channel with "orientation" H and all locations
+-------------------- --------------------------------------------------
+
+    `"H"`               Channel with "orientation" H and location "00"
+-------------------- --------------------------------------------------
+
+
+    `"1-01"`             Channel with orientation 1 and location "01"
+==================== ==================================================
+
+Channel codes have priorities. The more specific code will take precedence over the less specific code, 
+and the orientation code specification will take precedence over the location code specification. That is
+if both `"*-*"` and `"1-01"` are specified, `"1-01"` will take precedence. And if `"*-00"` and `"H-*"` 
+are specified, `"*-00"` will take precedence.
+
+The question of how to specify a particular stage arises, since stages have no name. Stages will then be referenced by their number, which, starting with zero, specifies the position of the stage within a given component (sensor, preamplifier or datalogger). Modifications to stages are specified under the keyword ``response_modifications``, as the keyword ``response_stages`` will completely overwrite all stages.
+
+So, if we want to change the gain of a particular stage, the third one in the sensor, the hierarchy would look like this:
+
+.. code-block:: yaml
+
+ channel_modifications:
+     sensor:
+         response_modifications:
+           "2": {gain: {value: 17}} 
+
+If we, however, want to replace all of the response stages, the file would look like this:
+
+.. code-block:: yaml
+
+ channel_modifications:
+     datalogger:
+         response_stages:
+            - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+            - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+            - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+            - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+                
+Finally, if we want to modify a complete component, the file would look something like this:
+
+.. code-block:: yaml
+
+ channel_modifications:
+     datalogger: {$ref: "dataloggers/LC2000.datalogger.yaml#datalogger"}
+
+Response modifications are very flexible. THe label can be any of several regular expressions. Either the single number, as above, a list, a range or a wildcard "*", which means all:
+
+=========================== ========================================================   
+  **Stage Number**             **Result**  
+--------------------------- --------------------------------------------------------
+   `"*"`                       All stages
+--------------------------- --------------------------------------------------------
+   "[1,2,3]"                   Second, third and fourth stages (stages start at 0)
+--------------------------- --------------------------------------------------------
+   "[1-3]"                     Same as above
+=========================== ========================================================  
+
+Here is a complete example of a network file with channel_modifications:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ yaml_anchors:
+    obs_clock_correction_linear_defaults: &LINEAR_CLOCK_DEFAULTS
+        time_base: "Seascan MCXO, ~1e-8 nominal drift"
+        reference: "GPS"
+        start_sync_instrument: 0
+ revision:
+    authors:
+        - {$ref: "authors/Wayne_Crawford.author.yaml#author"}
+    date: "2019-12-19"
+ network:
+    facility:
+        reference_name: "INSU-IPGP"
+        full_name: "INSU-IPGP OBS Park"
+        contact: 
+           first_name: "Wayne"
+           last_name: "Crawford"
+
+        email:  "crawford@ipgp.fr"
+        
+        website:  "http://ipgp.fr"
+         
+    campaign_ref_name: "MYCAMPAIGN"
+    network_info:
+        $ref: "network_info/EMSO-MOMAR.network_info.yaml#network_info"
+        
+    stations:
+        "BB_1":
+            site: "My favorite site"
+            start_date: "2015-04-23T10:00:00"
+            end_date: "2016-05-28T15:37:00"
+            location_code: "00"
+            instrumentation:
+                $ref: "instrumentation/BBOBS1_2012+.instrumentation.yaml#instrumentation"
+            channel_modifications:
+                "*-*": {datalogger_configuration: "62.5sps"}
+            locations:
+                "00":
+                    base: {$ref: 'location_bases/BUC_DROP.location_base.yaml#location_base'}
+                    position: {lon: -32.234, lat: 37.2806, elev: -1950}
+            processing:
+                - clock_corrections:
+                    linear_drift:
+                        <<: *LINEAR_CLOCK_DEFAULTS
+                        start_sync_reference: "2015-04-23T11:20:00"
+                        start_sync_instrument: 0
+                        end_sync_reference: "2016-05-27T14:00:00.2450"
+                        end_sync_instrument: "22016-05-27T14:00:00"
+        "BB_2":
+            notes: ["An example of changing the sensor"]
+            site: "My other favorite site"
+            start_date: "2015-04-23T10:00:00Z"
+            end_date: "2016-05-28T15:37:00Z"
+            location_code: "00"
+            instrumentation:
+                $ref: "instrumentation/BBOBS1_2012+.instrumentation.yaml#instrumentation" 
+            channel_modifications:
+               "*-*": {sensor: {equipment: {serial_number: "Sphere06"}}, datalogger_configuration: "62.5sps"}
+               "H-*": 
+                  sensor: 
+                    equipment: {serial_number: "IP007"}
+                    response_modifications:
+                      "3": {gain: {value: 15}}
+            locations:
+                "00":
+                    base: {$ref: 'location_bases/BUC_DROP.location_base.yaml#location_base'}
+                    position: {lon: -32.29756, lat: 37.26049, elev: -1887}
+            processing:
+                - clock_correct_linear_drift:
+                        <<: *LINEAR_CLOCK_DEFAULTS
+                        start_sync_reference: "2015-04-22T12:24:00"
+                        start_sync_instrument: 0
+                        end_sync_reference: "2016-05-28T15:35:00.3660"
+                        end_sync_instrument: "2016-05-28T15:35:02" 
+  
+
+.. _AROL11:
+
+AROL compatibility
+____________________
+
+One of the objectives of *obsinfo* is to be compatible with the AROL instrumentation database. AROL is a yaml-based instrumentation database which can be explored through the Yasmine application. Its syntax is heavily based on an earlier version of *obsinfo*, v0.106. Efforts are underway to make the syntax of the current version of *obsinfo* and of AROL be as close as possible. However, since the philosophy is somewhat different, some discrepancies will be inevitable. AROL builds a configuration out of user choices made with the Yasmine tool. *obsinfo* lists all available configurations and lets the user choose using the configuration fields (``sensor_configuration``, ``preamplifier_configuration``, ``datalogger_configuration``) in a station or network information file.
+
+The current effort is to make AROL yaml files readable by *obsinfo*. However, there are some outstanding issues:
+
+ 1. AROL does not have an offset field in its filter information files. It has a field called ``delay.samples`` which fulfills the same function. Proposed solution: let AROL change name. If not possible, read the AROL file and change within the *obsinfo* application.
+
+ 2. AROL uses ``units`` instead of ``transfer_function_type`` in Pole/Zero filters. Their value is directly translatable, via a table, to the ``transfer_function_type`` enumeration used by StationXML (see table below). Proposed solution: let AROL change names. If not possible, read the AROL file and change within the *obsinfo* application.
+
+========================== =================================================================================  
+  **AROL unit**                **obsinfo/StationXML equivalent**  
+-------------------------- ---------------------------------------------------------------------------------
+    "rad/s"                  "LAPLACE (RADIANS/SECOND)"
+-------------------------- ---------------------------------------------------------------------------------
+    "hz"                     "LAPLACE (HERTZ)" 
+-------------------------- ---------------------------------------------------------------------------------
+   "z-transform"             "DIGITAL (Z-TRANSFORM)"
+========================== =================================================================================  
+
+
+
+ 3. AROL names of "fake" filters ANALOG, DIGITAL and AD_CONVERSION are in CamelCase in *obsinfo*: Analog, Digital, ADConversion to be consistent with StationXML Proposed solution: let AROL change name. If not possible, read the AROL file and change within the *obsinfo* application.
+
+ 4. AROL specifies both ``input_sample_rate`` and ``output_sample_rate`` for all stages. *obsinfo* only specifies the input sample rate for the first stage in the whole instrument. It calculates all the other values out of decimation factors. This gives more flexibility to the definition of each individual stage in the ``response_stages`` field of an information file. Proposed solution: read the AROL file and ignore these fields within the *obsinfo* application.
+
+ 5. AROL specifies response stages thus: 
+
+.. code-block:: yaml
+ 
+ response:
+   decimation_info:
+     delay_correction: true
+   stages:
+
+*obsinfo* simply specifies ``response_stages`` and the ``delay_correction`` attribute is specified at the ``datalogger`` level, 
+as it is the only place where it makes sense for the global instrument. Also, ``delay_correction`` is specified as either 
+boolean in AROL or  as a real number. In *obsinfo* a value of ``None`` is equivalent to AROL ``False`` and a numeric value 
+is equivalent to AROL ``True``. Proposed solution: make *obsinfo* read the AROL file and interpret this attribute. If found in a response
+other than the datalogger, give a warning and ignore.
+
+
+Notes, best practices and caveats
+________________________________________
+
+Best practice: Place instrumentation information files in a central repository
+*******************************************************************************
+
+One of the main pillars of *obsinfo* philosophy is reuse and the DRY (don't repeat yourself) principle. In order to achieve this every effort has been made to ensure reusability, but the ultimate responsibiity for this lies with the user. It is strongly recommended to create a central repository of instrumentation information files which can then be reused by several campaigns. Instrumentations should be flexible enough, with several typical configurations, so the need to make modifications through ``channel_modifications`` is minimized.
+
+The use of a central repository will also permit information to be protected assigning modification writes only to the responsible parties.
+
+Campaign, network and station files can then be placed in different directories according to users and teams.
+
+Best practice: Use a file hierarchy for different objects
+***********************************************************
+
+Although *obsinfo* gives you total flexibility to organize your files as you see fit, 
+it is recommended to use a hierarchy of directories and the ``obsinfo_datapath`` variable setup 
+with the ``obsinfo-setup`` application, whose used is explained in the :ref:`InstallStartup`. 
+
+Best practice: Validate all information files bottom up
+***********************************************************
+
+Before trying to create a Station XML file, all information files should be validated individually. The best way to do this is to proceed bottom up: first validate filters, then stages, then components, then instrumentations, then networks. This way one can avoid very large output messages which are difficult to parse. 
+
+Files in central repositories should never be uploaded unless they're previously validated. Conversely, users can assume they don't have any need to validate central repositories.
+
+
+Best practice: Verification of ``response_stages`` in information file
+************************************************************************
+
+All files in central repositories must be validated before being uploaded. It is good practice to validate your files from the bottom up. That is, validate filter files first, stage next, and so on to network, unless you're using (already verified) central repository files. This is to avoid long and unreadable messages from the validator.
+
+Best practice: Reuse information files
+*****************************************
+
+Either create a repository of your own or use one of the central repository. If you plan on working offline, you can clone the GitLab repository locally.
+
+Best practice: Document information files with notes, extras and comments
+*******************************************************************************
+
+A choice of documentation options are available in information files. Aside of the "#" comment mechanism of the YAML language, ``notes`` are used for *obsinfo* documentation that will **not** be reflected in the resulting StationXML file. On the other hand, ``comments`` can be used at the ``network``, ``station`` and ``channel`` levels which will be incorporated into the StationXML file. The reason to not extend this to ``stage`` and ``filter`` is that the resulting StationXML file would be cluttered with repeated comments. Similarly, at the same levels, ``extras`` can be specified. These take the form of key/value pairs to simulate attributes which are not actually present in StationXML but can be used for documentation. A typical example is:
+.. code-block:: yaml
+
+ DBIRD_response_type : "CALIBRATED" 
+  
+which is used in several filters. It should be specified at the channel level, though, perharps specifying to which filters it applies.
+
+Caveat: Effect of ``$ref``
+*****************************
+
+In every case, the use of ``$ref`` is to totally substitute that line by the content referenced in the file path (under the "#" tag). It is completely equivalent to write the content of referenced file instead of the ``$ref`` line. This should be taken into account for syntax purposes. If syntax is not validated, a very good chance is that the ``$ref`` file syntax is either wrong or in the wrong place. Not finding the file also causes problems which are not evident at first glance; if you keep getting errors, check if the file is in the right place. 
+
+Caveat: Cryptic syntax messages
+**********************************
+
+Unfortunately, the JSON/YAML parser is very terse reporting syntax errors such as unmatched parentheses, brackets or curly brackets, single items instead of lists, etc., usually result in an exception with a cryptic message. It is *strongly* recommended that YAML files are edited in a suitable editor which can check at least basic syntax errors. See also the Troubleshooting section below. 
+
+Caveat: Use of response stages
+***********************************
+
+Although response stages are specified at the component (sensor, preamplifier and datalogger) level, in the end they are considered as a single response for the whole instrument. Response stages are taken in this order: sensor stages, preamplifier stages and datalogger stages, irrespective of the order in which components appear in the information file. Within a component, they are taken in the order specified in the information file. In the end, they are numbered from one to *n* for the whole response. 
+
+Caveat: Treatment of sample rates in response stages
+***********************************************************
+Only the input sample rate should be specified for a response, starting in the ADConversion stage. All other input and output rate are calculated using the decimation factor of each digital stage. Therefore, ``input_sample_rate`` and ``output_sample_rate`` should never be specified for later digital stages, and decimation factor should *always* be specified for them.
+
+Total sample rate is calculated for the whole response and checked against the sample rate specified in the datalogger. A warning will be issued if they are different.
+
+Best practice: Placement of ``response_stages`` in information file
+************************************************************************
+Although ``response_stages`` can be specified outside the ``configuration_definitions``, this is discouraged unless there is a single configuration. If there are several configurations, ``response_stages`` should be specified in the ``configuration_definitions``. Nevertheless, if ``response_stages`` is specified outside and there are several ``configuration_definitions``, the one selected will overwrite the ``response_stages``. If no configuration is specified, the ``response_stages`` outside will be used.
+
+In the following example, "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml" will *always* be overwritten by "responses/INSU_SPOBS_L28x128_theoretical.stage.yaml#stage", as there is a configuration default which corresponds to the configuration definition "128x gain".
+
+.. code-block:: yaml
+
+ preamplifier:
+     equipment:
+         model: "GEOPHONE-GAIN"
+         type: "Analog gain/filter card"
+         description: "SIO gain/filter card, seismo channel"
+         manufacturer: "SIO or IPGP"
+         vendor: ""
+     configuration_default: "128x gain"
+     response_stages: 
+         - $ref: "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage" # THIS WILL BE OVERWRITTEN
+     configuration_definitions:
+         "128x gain":
+             response_stages:
+                - $ref: "responses/INSU_SPOBS_L28x128_theoretical.stage.yaml#stage"
+
+Due to this, the best practice dictates that, in the presence of ``configuration_definitions``, 
+the ``response_stages`` in bold should be omitted. If ``configuration_default`` were not present and no configuration is selected at the channel/instrument level, a warning will be issued and the ``response_stages`` in bold will be used. If no response stages can be selected then an exception will be raised and the program will exit with error.
+
+.. code-block:: yaml
+
+The following example, though, is perfectly OK, as there is a single configuration and no need to specify ``configuration_definitions``: 
+
+ preamplifier:
+     equipment:
+         model: "GEOPHONE-GAIN"
+         type: "Analog gain/filter card"
+         description: "SIO gain/filter card, seismo channel"
+         manufacturer: "SIO or IPGP"
+         vendor: ""
+     response_stages:
+         - $ref: "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage"
+
+
+Best practice: How to modify individual stages
+*************************************************
+
+Individual stage modification must always be specified in ``response_modifications`` at the instrument component level. This will NOT work:
+
+.. code-block:: yaml  
+
+     preamplifier:  
+        {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"} 
+        gain: 
+           value: 34
+
+This will:
+
+.. code-block:: yaml
+
+     preamplifier:  
+        {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"} 
+        response_modifications:                                              
+           "*": gain: 
+                  value: 34
+
+Best practice: Use of channel modifications
+*************************************************
+
+It should be the aim to create a large and flexible instrumentation database with lots of possible configurations. This way, channel modifications will be rarely used. In fact, it is recommended to use channel modifications sparingly. Ir they must be used, remember to **always** use the adequate syntax. No shortcuts are allowed. All the hierarchical syntax must be used. For example, to change the gain of a sensor stage you need to write:
+
+.. code-block:: yaml
+ 
+  channel_modifications:
+     sensor:  
+         {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+         response_modifications:                                              
+           "*": gain: 
+                  value: 34
+
+and not a shortcut such as:
+
+.. code-block:: yaml
+ 
+  channel_modifications:
+     gain: 
+       value: 34
+
+as there is no way *obsinfo* can determine to which stage of which component to apply the modification in gain.
+
+Note: Date formats
+**************************
+
+Dates can be entered in regular "dd/mm/yyyy" format or in UTC format, either "yyyy-mm-dd" or 
+"yyyy-mm-ddThh:mm:ss" or "yyyy-mm-ddThh:mm:ssZ", according to norm 
+`ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_. The difference between the latter two formats
+is that the first represents local time and the second UTC time. The norm allows you to specify
+hours respective to UTC by adding or subtracting. This particular format is not allowed in *obsinfo*. 
+Separators can be either "/" or "-". 
+
+Dates in other formats will result in an exception. 
+
+No effort is made to validate if dates are legal, i.e., to reject dates such as "31/02/2021".
+
+Best practice: How to use notes
+***************************************
+
+There is a single ``notes`` attribute in JSON/YAML files, which contains a list of notes, in order to make documentation more systematic. However, sometimes a user may want to comment a piece of the file (for example, a single station in a network file). To do so we recommend using the YAML notation for comments, "#" followed by the comment text. Currently there is no way to do this in JSON files.
+
+Best practice: base your info files in templates
+*************************************************
+
+While syntax may be a challenge, we recommend strongly that, when starting a new information file, you use a template. That way at least you can guarantee that the indentation and spelling of attributes is right.
+
+Caveat: ALWAYS follow the syntax and beware of $ref overwriting your attributes
+********************************************************************************
+
+A naïve approach to syntax might think that we can add fields, for example, to a $ref information file. For example, the file could be an instrumentation file and we could decide to add a datalogger configuration which is not present in the file:
+
+..block-code:: yaml
+
+ instrumentation:
+     "$ref" : "instrumentations/BBOBS1_2012+.instrumentation.yaml" 
+     datalogger_config: "62.5sps"
+
+This is wrong. First, it is the wrong syntax: what channel with the configuration be applied to? There is no indication of that. Remember: modifications should always follow the same syntax. If ``datalogger_config`` belongs under a channel, it should always be applied to a channel.
+
+But there is another problem. "$ref" will substitute all attributes at the same level, thus erasing the attribute ``datalogger_config``. If this happens it will be a silent error, since substitution occurs before validation and the application will never know ``datalogger_config`` was there. The correct way of applying ``datalogger_config`` is through ``channel_modifications`` at the station level.
+
+Troubleshooting
+________________________________________
+
+Sometimes it is a challenge to understand where an error lies in an information file. Messages are sometimes cryptic. We recommend you use the best practice above of using templates to avoid indentation errors. Also, if you can, use the best practice of working with an editor which recognizes elementary YAML errors such as indentation or wrong parentheses balancing. Let's review the most common sources of error:
+
+1) ``JSONEncodeError/EOF``. 
+An error which raises a JSONEncodeError exception and/or ``EOF (end of file) reached prematurely``. This is the most serious error, as it stops processing of the information file and exits the program. It is usually due to:
+
+   a) Indentation
+
+   b) Unmatched double or single quotes, parentheses, brackets, curly brackets
+
+   c) Extra commas or not enough commas
+
+Check for these, if possible, with an editor which shows matching signs. Use templates if possible. If everything else fails, try to reduce the information file to a bare bones version, see if the error persists. If it doesn't, add new attributes gradually. For example, a network file might have this kind of problem. Temporarily eliminate attributes such as ``channel_modifications`` and reduce the network to a single station.
+
+2) ``File not found: <filename>``. 
+<filename> has not been found. Either the directory where the file exists is not correctly specified in the path of the argument or in OBSINFO-DATAPATH, or the <filename>  is misspelled or the file does not exist. This is typical for files referenced in ``$ref``. 
+
+3) Validation error: ``<YAML expression> is not valid under any of the given schemas``. 
+This means that the information file is recognized and correctly parsed, but the portion <YAML expression> is not recognized. This may be due to illegal values, illegal value type (e.g. a string instead of a number, or a string pattern which does not correspond to valid patterns. An example is the wrong version:
+
+.. code-block:: yaml
+
+ ['format_version']: '0.107' is not valid under any of the given schemas
+
+or a phone number with letters:
+
+.. code-block:: 
+
+ ['revision']: {'date': '2017-11-30', 'authors': [{'first_name': 'Wayne', 'last_name': 'Crawford', 'institution': 'IPGP', 'email': 'crawford@ipgp.fr', 'phones': ['+33A 01 83 95 76 63'}]]} is not valid under any of the given schemas.
+
+or a string instead of a list (in the phones attribute):
+
+.. code-block:: 
+
+ ['revision']: {'date': '2017-11-30', 'authors': [{'first_name': 'Wayne', 'last_name': 'Crawford', 'institution': 'IPGP', 'email': 'crawford@ipgp.fr', 'phones': '+33A 01 83 95 76 63'}]} is not valid under any of the given schemas
+
+One possibility with validation errors is that the output of the message may be too long and difficult to parse, as it shows the whole produced information files with all its subfiles. The way to avoid this is to apply the best practice of validation bottom-up: first validate filters, then stages, then components, then instrumentations, then networks. This way the output is manageable.
+ 
+
+4) Validation error: ``Additional properties are not allowed (<attribute name> was unexpected)``
+An attribute name was not recognized, either because it was misspelled or because it does not exist in the specification. 
+
+.. code-block:: 
+
+ ['network']['operator']: Additional properties are not allowed ('fulsdl_name' was unexpected)
+
+5) Validation error: ``<attribute name> is a required property``
+A required attribute name was not included.
+
+.. code-block::
+
+ ['network']['operator']: 'reference_name' is a required property
+

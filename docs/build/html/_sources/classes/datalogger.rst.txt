@@ -1,0 +1,180 @@
+
+.. _Datalogger11:
+
+*******************
+Datalogger
+*******************
+
+===============
+ Description
+===============
+
+A datalogger is the part of an OBS instrument which records the signal after processing. It is an :ref:`InstrumentComponent <InstrumentComponent>` with response stages and attributes such as the global delay correction and the overall sample rate of the instrument.
+
+---------------------
+Python class:
+---------------------
+
+Datalogger
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+datalogger
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Datalogger
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`InstrumentComponent <InstrumentComponent>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is element of :ref:`Equipment <Equipment>`
+* Contains :ref:`Response Stages <ResponseStages>`
+
+==============================
+Attributes
+==============================
+
+======================== ================================== ============ ================= ========================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**       **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+ sample_rate                      number                           Y           *None*            *None*    
+------------------------ ---------------------------------- ------------ ----------------- -------------------------- -------------------------------------------------------------
+ delay_correction                 number                           N           *None*            *None*                   This is used by *obsinfo* to calculate StationXML correction for each stage. 
+                                                                                                                          If None, correction = delay; if not None, correction for each stage is 0 except the last,
+                                                                                                                          which is the value of delay_correction.                    
+======================== ================================== ============ ================= ========================== =============================================================
+
+*For the rest of attributes, see superclass :ref:`InstrumentComponent <InstrumentComponent>`*
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/datalogger.schema.json>`_
+
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Datalogger information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/dataloggers/LC2000.datalogger.yaml>`_ :  
+
+.. code-block:: yaml
+
+ --
+ format_version: "0.110"
+ revision: 
+    date: "2019-12-20"
+    authors: 
+        - $ref: 'authors/Wayne_Crawford.author.yaml#author'
+ notes: 
+    - "Delay correction is hard-coded to 29 samples in LCHEAPO software"
+    
+ datalogger:
+    equipment:
+        model: "CS5321/22"
+        type: "delta-sigma A/D converter + digital filter"
+        description: "CS5321/22 delta-sigma A/D converter + FIR digital filter"
+        manufacturer: "Cirrus Logic"
+        vendor: "various"
+    configuration_default: "125 sps"
+
+    configuration_definitions:
+        "62.5sps":
+            config_description: "62.5 sps"
+            sample_rate: 62.5
+            delay_correction: 0.464
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "125sps":
+            config_description: "125 sps"
+            sample_rate: 125
+            delay_correction: 0.232
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "250sps":
+            config_description: "250 sps"
+            sample_rate: 250
+            delay_correction: 0.116
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "500sps":
+            config_description: "500 sps"
+            sample_rate: 500
+            delay_correction: 0.058
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+        "1000sps":
+            config_description: "1000 sps"
+            sample_rate: 1000
+            delay_correction: 0.029
+            response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+
+==================
+Class Navigation
+==================
+
+:ref:`InstrumentComponent` \<\=\=\> :ref:`ResponseStages`
+
+           
+

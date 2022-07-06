@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation and Startup Guide &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Executing obsinfo" href="execution.html" />
+    <link rel="prev" title="Station" href="../classes/station.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and Startup Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#linux">Linux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#python-installation">Python installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-packages">Python packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#git-installation">Git installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#obsinfo-installation">Obsinfo installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#description-of-obsinfo-file-structure">Description of obsinfo file structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#obsinfo-setup">Obsinfo setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-discovery">File discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Installation and Startup Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/general/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation-and-startup-guide">
+<span id="installstartup"></span><h1>Installation and Startup Guide<a class="headerlink" href="#installation-and-startup-guide" title="Permalink to this headline"></a></h1>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline"></a></h2>
+<p><em>obsinfo</em> is written in Python 3.6.9. While it is expected that it will run in any version of Python 3, this has not been tested.</p>
+<p>You must have Python installed in your computer with at least version 3.6.9.</p>
+<section id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline"></a></h3>
+<p>Most Linux installations have Python preinstalled. However, it might not be the latest version. Check the version and update to 3.6.9 at least.</p>
+<p>To check your version, use any of the following commands:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python --version
+
+<span class="gp">$ </span>python2 --version
+
+<span class="gp">$ </span>python3 --version
+</pre></div>
+</div>
+</section>
+<section id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline"></a></h3>
+<p>Must have Windows 10 installed.</p>
+</section>
+</section>
+<section id="python-installation">
+<h2>Python installation<a class="headerlink" href="#python-installation" title="Permalink to this headline"></a></h2>
+<p>The following link provides complete information on how to install Python in several platforms:</p>
+<p><a class="reference external" href="https://realpython.com/installing-python/#how-to-check-your-python-version-on-linux">https://realpython.com/installing-python/#how-to-check-your-python-version-on-linux</a></p>
+<p>The official installation guide for <strong>UNIX</strong> is here:</p>
+<p><a class="reference external" href="https://docs.python.org/3/using/unix.html">https://docs.python.org/3/using/unix.html</a></p>
+<p><strong>Windows</strong>:</p>
+<p><a class="reference external" href="https://docs.python.org/3/using/windows.html">https://docs.python.org/3/using/windows.html</a></p>
+<p><strong>MacOS</strong>:</p>
+<p><a class="reference external" href="https://docs.python.org/3/using/mac.html">https://docs.python.org/3/using/mac.html</a></p>
+</section>
+<section id="python-packages">
+<h2>Python packages<a class="headerlink" href="#python-packages" title="Permalink to this headline"></a></h2>
+<p>The following packages must be installed, preferably with a package manager, either using <code class="docutils literal notranslate"><span class="pre">pip</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code>.</p>
+<p>Instructions to install a package using <code class="docutils literal notranslate"><span class="pre">pip</span></code>. If you don’t have <code class="docutils literal notranslate"><span class="pre">pip</span></code> installed, this same link instructs you who to install it.</p>
+<p><a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/">https://packaging.python.org/tutorials/installing-packages/</a></p>
+<p>Instructions to install a package using <code class="docutils literal notranslate"><span class="pre">conda</span></code></p>
+<p><a class="reference external" href="https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-pkgs.html">https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-pkgs.html</a></p>
+<p><strong>Packages</strong></p>
+<p><em>Standard library (no need to install)</em></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">difflib</span>
+<span class="go">glob</span>
+<span class="go">inspect</span>
+<span class="go">json</span>
+<span class="go">math</span>
+<span class="go">pathlib</span>
+<span class="go">pprint</span>
+<span class="go">os</span>
+<span class="go">re</span>
+<span class="go">sys</span>
+<span class="go">unittest</span>
+<span class="go">warnings</span>
+</pre></div>
+</div>
+<p><em>External libraries</em></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">jsonschema</span>
+<span class="go">jsonref</span>
+<span class="go">gitlab</span>
+<span class="go">numpy</span>
+<span class="go">obspy</span>
+<span class="go">pyyaml</span>
+</pre></div>
+</div>
+<p>In particular <em>obsinfo</em> relies on <code class="docutils literal notranslate"><span class="pre">obspy</span></code> to create the objects needed to output a StationXML file.</p>
+</section>
+<section id="git-installation">
+<h2>Git installation<a class="headerlink" href="#git-installation" title="Permalink to this headline"></a></h2>
+<p>If you wish to install <em>obsinfo</em> using <code class="docutils literal notranslate"><span class="pre">git</span></code>, you have to install it first.</p>
+<p><strong>Linux</strong>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>sudo apt-get install git
+</pre></div>
+</div>
+<p>In <strong>Windows</strong>, download from this site:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">https://git-scm.com/download/win</span>
+</pre></div>
+</div>
+</section>
+<section id="obsinfo-installation">
+<h2>Obsinfo installation<a class="headerlink" href="#obsinfo-installation" title="Permalink to this headline"></a></h2>
+<p><em>obsinfo</em> is a published package in PyPI. Currently, version v0.110 is available as a beta version.</p>
+<p>Make sure you have the latest pip version:
+.. code-block:: console</p>
+<blockquote>
+<div><p>$ python3 -m pip install –upgrade pip</p>
+</div></blockquote>
+<p>or</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python -m pip install --upgrade pip
+</pre></div>
+</div>
+<p>depending on your Python configuration.</p>
+<p>Next, use <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install <em>obsinfo</em>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3 -m pip install obsinfo
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python -m pip install obsinfo
+</pre></div>
+</div>
+<p>depending on your Python configuration.</p>
+</section>
+<section id="description-of-obsinfo-file-structure">
+<h2>Description of obsinfo file structure<a class="headerlink" href="#description-of-obsinfo-file-structure" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 39%" />
+<col style="width: 61%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>data</p></td>
+<td><p>YAML/JSON schemas</p></td>
+</tr>
+<tr class="row-even"><td><p>_examples</p></td>
+<td><p>Example information files</p></td>
+</tr>
+<tr class="row-odd"><td><p>instrumentation</p></td>
+<td><p>Python code</p></td>
+</tr>
+<tr class="row-even"><td><p>main</p></td>
+<td><p>Python code</p></td>
+</tr>
+<tr class="row-odd"><td><p>misc</p></td>
+<td><p>Python code</p></td>
+</tr>
+<tr class="row-even"><td><p>network</p></td>
+<td><p>Python code</p></td>
+</tr>
+<tr class="row-odd"><td><p>obsMetadata</p></td>
+<td><p>Python code</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="obsinfo-setup">
+<h2>Obsinfo setup<a class="headerlink" href="#obsinfo-setup" title="Permalink to this headline"></a></h2>
+<p><strong>Linux</strong>:</p>
+<p>The <em>obsinfo</em> executables are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">obsinfo-makeStationXML</span></code> to create StationXML files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obsinfo-validate</span></code> to validate the syntax of information files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obsinfo-print</span></code> to simply print information files without creating the StationXML file. This may be useful as a test.</p></li>
+</ul>
+</div></blockquote>
+<p>All executables are installed in <code class="docutils literal notranslate"><span class="pre">~/.local/bin</span></code>, which is usually in the PATH variable of the operating system. If this is not the case, add that directory:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HOME</span>/.local/bin
+<span class="gp">$ </span><span class="nb">export</span> PATH
+</pre></div>
+</div>
+<p>To avoid having to set up the variable in each session, store these instructions in your .bashrc file in your home directory.</p>
+<p>Remember in <strong>Windows</strong> and <strong>MacOS</strong> you can setup the variable in the configuration panel.
+Follow the instructions to set environment variables.</p>
+<p>After having installed <em>obsinfo</em> with pip or conda, you need to run a setup.
+This gives you an opportunity of creating a local directory where the existing examples of information files will be copied, instead of the arcane and standard ~/.local/lib/python3.x/site-packages/obsinfo/_examples/Information_Files.</p>
+<p>In its simplest form, simply run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-setup -d &lt;directory name&gt;
+</pre></div>
+</div>
+<p>The program will copy the examples to the directory mentioned and will perform other administrative tasks.</p>
+<p><strong>IMPORTANT</strong>: EVEN if you don’t want to create a new directory, you MUST run <code class="docutils literal notranslate"><span class="pre">obsinfo-setup</span></code>, as it performs several housekeeping tasks,
+notably creating the configuration file <code class="docutils literal notranslate"><span class="pre">.obsinforc</span></code> and the directory <code class="docutils literal notranslate"><span class="pre">.obsinfo</span></code> which is used
+for logging purposes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">obsinfo-setup</span></code> is very flexible. Through it you can reconfigure several variables that will
+tell <em>obsinfo</em> where to find your files. More on this in the next section.</p>
+</section>
+<section id="file-discovery">
+<h2>File discovery<a class="headerlink" href="#file-discovery" title="Permalink to this headline"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">obsinfo-setup</span></code> sets several variables specific to <em>obsinfo</em> and stores them in a configuration file called <code class="docutils literal notranslate"><span class="pre">.obsinforc</span></code>
+in your home directory called <code class="docutils literal notranslate"><span class="pre">.obsinforc</span></code>. Here they are with their default values:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">gitlab_repository: www.gitlab.com</span>
+<span class="go">gitlab_project: resif/obsinfo</span>
+<span class="go">gitlab_path: _examples/Information_Files</span>
+<span class="go">datapath:  [https://www.gitlab.com/resif/obsinfo/obsinfo/_examples/Information_Files]</span>
+<span class="go">obsinfo_branch: master</span>
+</pre></div>
+</div>
+<p>The first, second and third variables are used to tell <em>obsinfo</em> where the remote repository for information files is.
+The fourth one needs more explanation. It works like the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> variable in Linux: whenever a file in a <code class="docutils literal notranslate"><span class="pre">$ref</span></code> is found in an
+information file, <em>obsinfo</em> will <strong>sequentally</strong> look for the file in all the directories specified in <code class="docutils literal notranslate"><span class="pre">obsinfo_datapath</span></code>. In
+the default case, the only place where  <em>obsinfo</em> will look is the remote directory. Observe this is
+the concatenation of the first three variables, the repository, the project and the path.</p>
+<p>Finally, since the remote repository is assumet to be a gitlab repository, we must specify a gitlab branch, which by
+default is <code class="docutils literal notranslate"><span class="pre">master</span></code>.</p>
+<p>All these defaults are achieved by simply running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>obsinfo-setup
+</pre></div>
+</div>
+<p>with no parameters. But with options you can specify all the variables. <code class="docutils literal notranslate"><span class="pre">gitlab_repository</span></code> is specfied
+with <code class="docutils literal notranslate"><span class="pre">-g</span></code>, <code class="docutils literal notranslate"><span class="pre">gitlab_project</span></code> with <code class="docutils literal notranslate"><span class="pre">-p</span></code>, <code class="docutils literal notranslate"><span class="pre">gitlab_path</span></code> with <code class="docutils literal notranslate"><span class="pre">-P</span></code> and <code class="docutils literal notranslate"><span class="pre">obsinfo_branch</span></code>
+with <code class="docutils literal notranslate"><span class="pre">-b</span></code>.</p>
+<p>Other options allow you to not copy the examples (<code class="docutils literal notranslate"><span class="pre">-x</span></code>) or modify the <code class="docutils literal notranslate"><span class="pre">datapath</span></code> variable. This is done
+so you don’t have to manually edit <code class="docutils literal notranslate"><span class="pre">.obsinforc</span></code> <strong>which is discouraged</strong>. Three local directories are
+considered in <code class="docutils literal notranslate"><span class="pre">datapath</span></code>: a working directory, a local repository and an example directory. We have
+seen that the <code class="docutils literal notranslate"><span class="pre">-d</span></code> option creates (if non existing) the example directory. When specified, this directory
+takes precedence over the remote directory (unless <code class="docutils literal notranslate"><span class="pre">-x</span></code> is specified). The <code class="docutils literal notranslate"><span class="pre">datapath</span></code> variable will
+look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datapath</span><span class="p">:</span>  <span class="p">[</span><span class="o">&lt;</span><span class="n">local</span> <span class="n">example</span> <span class="n">directory</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">gitlab</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">resif</span><span class="o">/</span><span class="n">obsinfo</span><span class="o">/</span><span class="n">obsinfo</span><span class="o">/</span><span class="n">_examples</span><span class="o">/</span><span class="n">Information_Files</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;local</span> <span class="pre">example</span> <span class="pre">directory&gt;</span></code> is the directory specified with <code class="docutils literal notranslate"><span class="pre">-d</span></code>. If you add the working
+directory (with <code class="docutils literal notranslate"><span class="pre">-w</span></code>) and the local repository (with <code class="docutils literal notranslate"><span class="pre">-l</span></code>), they will take precedence in this order:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datapath</span><span class="p">:</span>  <span class="p">[</span><span class="o">&lt;</span><span class="n">working</span> <span class="n">directory</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">local</span> <span class="n">repository</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">local</span> <span class="n">example</span> <span class="n">directory</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">gitlab</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">resif</span><span class="o">/</span><span class="n">obsinfo</span><span class="o">/</span><span class="n">obsinfo</span><span class="o">/</span><span class="n">_examples</span><span class="o">/</span><span class="n">Information_Files</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>You can change the order putting the remote repository first by using the <code class="docutils literal notranslate"><span class="pre">-v</span></code> option. Of course, you
+change the order of the local directories by simply specifying one or the other as working, local repository
+or example.</p>
+<p>All this is summarized here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">--</span><span class="n">no_examples</span>     <span class="n">Don</span><span class="s1">&#39;t import examples, only templates, and remove</span>
+                      <span class="n">examples</span> <span class="n">directory</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">datapath</span>
+<span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">--</span><span class="n">no_copy</span>         <span class="n">Don</span><span class="s1">&#39;t import anything at all, don&#39;</span><span class="n">t</span> <span class="n">create</span> <span class="n">dest</span>
+                      <span class="n">directory</span><span class="p">,</span> <span class="n">which</span> <span class="n">will</span> <span class="n">be</span> <span class="n">removed</span> <span class="kn">from</span> <span class="nn">datapath</span>
+<span class="o">-</span><span class="n">n</span><span class="p">,</span> <span class="o">--</span><span class="n">no_remote</span>       <span class="n">Install</span> <span class="n">obsinfo</span> <span class="n">without</span> <span class="n">access</span> <span class="n">to</span> <span class="n">a</span> <span class="n">gitlab</span> <span class="n">repository</span><span class="o">.</span>
+                      <span class="n">May</span> <span class="n">be</span> <span class="n">needed</span> <span class="ow">in</span> <span class="n">some</span> <span class="n">operating</span> <span class="n">systems</span> <span class="k">for</span>
+                      <span class="n">compatibility</span> <span class="n">issues</span>
+<span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="o">--</span><span class="n">invert_datapath</span>
+                      <span class="n">Put</span> <span class="n">remote</span> <span class="n">gitlab</span> <span class="n">repository</span> <span class="n">first</span><span class="o">.</span> <span class="n">All</span> <span class="n">local</span>
+                      <span class="n">directories</span> <span class="n">will</span> <span class="n">keep</span> <span class="n">their</span> <span class="n">order</span>
+<span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="o">--</span><span class="n">branch</span>          <span class="n">Specifies</span> <span class="n">the</span> <span class="n">git</span> <span class="n">branch</span> <span class="n">to</span> <span class="n">use</span><span class="p">,</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">master</span>
+<span class="o">-</span><span class="n">d</span> <span class="n">DEST</span><span class="p">,</span> <span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span>  <span class="n">Destination</span> <span class="n">directory</span> <span class="k">for</span> <span class="n">templates</span> <span class="ow">and</span> <span class="n">examples</span><span class="o">.</span>
+<span class="o">-</span><span class="n">g</span> <span class="n">GITLAB</span><span class="p">,</span> <span class="o">--</span><span class="n">gitlab</span> <span class="n">GITLAB</span>
+                      <span class="n">Gitlab</span> <span class="n">repository</span><span class="p">)</span>
+<span class="o">-</span><span class="n">p</span> <span class="n">PROJECT</span><span class="p">,</span> <span class="o">--</span><span class="n">project</span> <span class="n">PROJECT</span>
+                      <span class="n">path</span> <span class="n">to</span> <span class="n">project</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">directory</span> <span class="n">where</span> <span class="n">information</span>
+                      <span class="n">files</span> <span class="n">lie</span> <span class="n">within</span> <span class="n">the</span> <span class="n">Gitlab</span> <span class="n">repository</span><span class="p">)</span>
+<span class="o">-</span><span class="n">l</span> <span class="n">LOCAL_REPOSITORY</span><span class="p">,</span> <span class="o">--</span><span class="n">local_repository</span> <span class="n">LOCAL_REPOSITORY</span>
+                      <span class="n">Specify</span> <span class="n">local</span> <span class="n">repository</span> <span class="k">for</span> <span class="n">information</span> <span class="n">files</span> <span class="ow">and</span>
+                      <span class="n">include</span> <span class="n">it</span> <span class="k">as</span> <span class="n">first</span> <span class="ow">or</span> <span class="n">second</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">datapath</span>
+<span class="o">-</span><span class="n">w</span> <span class="n">WORKING_DIRECTORY</span><span class="p">,</span> <span class="o">--</span><span class="n">working_directory</span> <span class="n">WORKING_DIRECTORY</span>
+                      <span class="n">Specify</span> <span class="n">working</span> <span class="n">directory</span> <span class="k">for</span> <span class="n">obsinfo</span> <span class="ow">and</span> <span class="n">include</span> <span class="n">it</span>
+                      <span class="k">as</span> <span class="n">first</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">datapath</span>
+<span class="o">-</span><span class="n">P</span> <span class="n">REMOTE_PATH</span><span class="p">,</span> <span class="o">--</span><span class="n">remote_path</span> <span class="n">REMOTE_PATH</span>
+                      <span class="n">Specify</span> <span class="n">remote</span> <span class="n">directory</span> <span class="n">under</span> <span class="n">project</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><strong>IMPORTANT</strong>: In datapath, the remote directory is always the concatenation of <code class="docutils literal notranslate"><span class="pre">gitlab_repository</span></code>,</dt><dd><p><code class="docutils literal notranslate"><span class="pre">gitlab_project</span></code> and <code class="docutils literal notranslate"><span class="pre">gitlab_path</span></code> when created by <code class="docutils literal notranslate"><span class="pre">obsinfo-setup</span></code>. Therefore, if you manually change the <code class="docutils literal notranslate"><span class="pre">datapath</span></code>
+in the <code class="docutils literal notranslate"><span class="pre">.obsinforc</span></code> file you will not get the expected result. Always use <code class="docutils literal notranslate"><span class="pre">obsinfo-setup</span></code> to
+change that file.</p>
+</dd>
+</dl>
+<p>Of course, you will create your own information files in a directory selected by you.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../classes/station.html" class="btn btn-neutral float-left" title="Station" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="execution.html" class="btn btn-neutral float-right" title="Executing obsinfo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

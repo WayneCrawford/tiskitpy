@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>obsinfo.network package &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="obsinfo.obsMetadata package" href="obsinfo.obsMetadata.html" />
+    <link rel="prev" title="obsinfo.misc package" href="obsinfo.misc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer’s Corner</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Technical Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="obsinfo.html">Code Documentation: obsinfo package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="obsinfo.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.addons.html">obsinfo.addons package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.instrumentation.html">obsinfo.instrumentation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.main.html">obsinfo.main package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.misc.html">obsinfo.misc package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">obsinfo.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.obsMetadata.html">obsinfo.obsMetadata package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="obsinfo.tests.html">obsinfo.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.print_version">obsinfo.print_version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="obsinfo.html#module-obsinfo.version">obsinfo.version module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Technical Documentation</a> &raquo;</li>
+          <li><a href="obsinfo.html">Code Documentation: obsinfo package</a> &raquo;</li>
+      <li>obsinfo.network package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/obsinfo.network.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="obsinfo-network-package">
+<h1>obsinfo.network package<a class="headerlink" href="#obsinfo-network-package" title="Permalink to this headline"></a></h1>
+<section id="module-obsinfo.network.network">
+<span id="obsinfo-network-network-module"></span><h2>obsinfo.network.network module<a class="headerlink" href="#module-obsinfo.network.network" title="Permalink to this headline"></a></h2>
+<p>Network :class:</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.network.network.</span></span><span class="sig-name descname"><span class="pre">Network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.network.network.Network" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Network obsinfo: Equivalent to obspy/StationXML Network</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.campaign_ref">
+<span class="sig-name descname"><span class="pre">campaign_ref</span></span><a class="headerlink" href="#obsinfo.network.network.Network.campaign_ref" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.fdsn_code">
+<span class="sig-name descname"><span class="pre">fdsn_code</span></span><a class="headerlink" href="#obsinfo.network.network.Network.fdsn_code" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.fdsn_name">
+<span class="sig-name descname"><span class="pre">fdsn_name</span></span><a class="headerlink" href="#obsinfo.network.network.Network.fdsn_name" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.start_date">
+<span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#obsinfo.network.network.Network.start_date" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str with date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.end_date">
+<span class="sig-name descname"><span class="pre">end_date</span></span><a class="headerlink" href="#obsinfo.network.network.Network.end_date" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str with date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#obsinfo.network.network.Network.description" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.restricted_status">
+<span class="sig-name descname"><span class="pre">restricted_status</span></span><a class="headerlink" href="#obsinfo.network.network.Network.restricted_status" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.operator">
+<span class="sig-name descname"><span class="pre">operator</span></span><a class="headerlink" href="#obsinfo.network.network.Network.operator" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>object of <code class="xref py py-class docutils literal notranslate"><span class="pre">Operator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.stations">
+<span class="sig-name descname"><span class="pre">stations</span></span><a class="headerlink" href="#obsinfo.network.network.Network.stations" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of objects of <a class="reference internal" href="#obsinfo.network.station.Station" title="obsinfo.network.station.Station"><code class="xref py py-class docutils literal notranslate"><span class="pre">Station</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.comments">
+<span class="sig-name descname"><span class="pre">comments</span></span><a class="headerlink" href="#obsinfo.network.network.Network.comments" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.extras">
+<span class="sig-name descname"><span class="pre">extras</span></span><a class="headerlink" href="#obsinfo.network.network.Network.extras" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">obspy_network</span> <span class="pre">(</span></span></dt>
+<dd><p>class~`obspy.core.inventory.network.Network):
+obspy equivalent of this class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.convert_notes_and_extras_to_obspy">
+<span class="sig-name descname"><span class="pre">convert_notes_and_extras_to_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.network.network.Network.convert_notes_and_extras_to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Convert info file notes and extras to XML comments</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.network.network.Network.to_obspy">
+<span class="sig-name descname"><span class="pre">to_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.network.network.Network.to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Convert network object to obspy object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>class:~obspy.core.inventory.network.Network): corresponding</dt><dd><p>obspy Network</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><p>(</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.network.station">
+<span id="obsinfo-network-station-module"></span><h2>obsinfo.network.station module<a class="headerlink" href="#module-obsinfo.network.station" title="Permalink to this headline"></a></h2>
+<p>Station Class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.network.station.</span></span><span class="sig-name descname"><span class="pre">Station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations_operator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.network.station.Station" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Station. Equivalent to obspy/StationXML Station</p>
+<p>Methods convert info files to an instance of this class and convert the
+object to an <cite>obspy</cite> object.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.label">
+<span class="sig-name descname"><span class="pre">label</span></span><a class="headerlink" href="#obsinfo.network.station.Station.label" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.site">
+<span class="sig-name descname"><span class="pre">site</span></span><a class="headerlink" href="#obsinfo.network.station.Station.site" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.start_date">
+<span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#obsinfo.network.station.Station.start_date" title="Permalink to this definition"></a></dt>
+<dd><p>station start date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str with date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.end_date">
+<span class="sig-name descname"><span class="pre">end_date</span></span><a class="headerlink" href="#obsinfo.network.station.Station.end_date" title="Permalink to this definition"></a></dt>
+<dd><p>station end date</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str with date format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.location_code">
+<span class="sig-name descname"><span class="pre">location_code</span></span><a class="headerlink" href="#obsinfo.network.station.Station.location_code" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.restricted_status">
+<span class="sig-name descname"><span class="pre">restricted_status</span></span><a class="headerlink" href="#obsinfo.network.station.Station.restricted_status" title="Permalink to this definition"></a></dt>
+<dd><p>status of station</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.locations">
+<span class="sig-name descname"><span class="pre">locations</span></span><a class="headerlink" href="#obsinfo.network.station.Station.locations" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of <a class="reference internal" href="obsinfo.instrumentation.html#obsinfo.instrumentation.location.Location" title="obsinfo.instrumentation.location.Location"><code class="xref py py-class docutils literal notranslate"><span class="pre">Location</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.location">
+<span class="sig-name descname"><span class="pre">location</span></span><a class="headerlink" href="#obsinfo.network.station.Station.location" title="Permalink to this definition"></a></dt>
+<dd><p>default location code
+of channels, corresònding to <cite>location_code</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="obsinfo.instrumentation.html#obsinfo.instrumentation.location.Location" title="obsinfo.instrumentation.location.Location"><code class="xref py py-class docutils literal notranslate"><span class="pre">Location</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">instrumentation</span> <span class="pre">(:class:`.Instrumentation`</span> <span class="pre">or</span> <span class="pre">list</span> <span class="pre">of</span></span></dt>
+<dd><p><a class="reference internal" href="obsinfo.instrumentation.html#obsinfo.instrumentation.instrumentation.Instrumentation" title="obsinfo.instrumentation.instrumentation.Instrumentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instrumentation</span></code></a>):</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.processing">
+<span class="sig-name descname"><span class="pre">processing</span></span><a class="headerlink" href="#obsinfo.network.station.Station.processing" title="Permalink to this definition"></a></dt>
+<dd><p>attributes
+for clock correction processing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of objects of <a class="reference internal" href="#obsinfo.network.processing.Processing" title="obsinfo.network.processing.Processing"><code class="xref py py-class docutils literal notranslate"><span class="pre">Processing</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.comments">
+<span class="sig-name descname"><span class="pre">comments</span></span><a class="headerlink" href="#obsinfo.network.station.Station.comments" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.extras">
+<span class="sig-name descname"><span class="pre">extras</span></span><a class="headerlink" href="#obsinfo.network.station.Station.extras" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.obspy_station">
+<span class="sig-name descname"><span class="pre">obspy_station</span></span><a class="headerlink" href="#obsinfo.network.station.Station.obspy_station" title="Permalink to this definition"></a></dt>
+<dd><p>Equivalent obspy object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">obspy.core.inventory.station.Station</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.convert_comments_in_obspy">
+<span class="sig-name descname"><span class="pre">convert_comments_in_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.network.station.Station.convert_comments_in_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Convert info file notes and extras to XML comments</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="obsinfo.network.station.Station.to_obspy">
+<span class="sig-name descname"><span class="pre">to_obspy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.network.station.Station.to_obspy" title="Permalink to this definition"></a></dt>
+<dd><p>Convert station object to obspy object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>corresponding obspy Station object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(<code class="xref py py-class docutils literal notranslate"><span class="pre">obspy.core.inventory.station.Station</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-obsinfo.network.processing">
+<span id="obsinfo-network-processing-module"></span><h2>obsinfo.network.processing module<a class="headerlink" href="#module-obsinfo.network.processing" title="Permalink to this headline"></a></h2>
+<p>Processing Class, holds list of data processing steps</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="obsinfo.network.processing.Processing">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">obsinfo.network.processing.</span></span><span class="sig-name descname"><span class="pre">Processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#obsinfo.network.processing.Processing" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>No equivalent class in obspy/StationXML</p>
+<p>Saves a list of Processing steps as strings
+For now, just stores the list. Will be converted to StationXML comments</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="obsinfo.network.processing.Processing.processing_list">
+<span class="sig-name descname"><span class="pre">processing_list</span></span><a class="headerlink" href="#obsinfo.network.processing.Processing.processing_list" title="Permalink to this definition"></a></dt>
+<dd><p>list of processing steps with attributes,
+either linear_drift or leapsecond</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="obsinfo.misc.html" class="btn btn-neutral float-left" title="obsinfo.misc package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="obsinfo.obsMetadata.html" class="btn btn-neutral float-right" title="obsinfo.obsMetadata package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

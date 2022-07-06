@@ -1,0 +1,124 @@
+.. _ResponseStages: 
+
+*****************
+ResponseStages
+*****************
+
+
+===============
+ Description
+===============
+
+Stages are discrete units in the block diagram of an electronic circuit which perform a specific function and is usually physically circumscribed to a printed board. An instrument component in *obsinfo* is usually composed of several chained stages which connect the output of one stage to the input of the next one. This class implements the change of individual stages.
+
+It is important that contiguous stages are consistent in two ways:
+
+#. Output units of a stage must be equal to input units of the next stage
+#. Output sample rate of a stage must match the input sample rate of the next stage
+
+---------------------
+Python class:
+---------------------
+
+ResponseStages
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+response_stages
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Response
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Contains one or several :ref:`Stages <Stage>`
+* Belongs to an :ref:`Instrument Component <InstrumentComponent>`
+
+
+==============================
+Attributes
+==============================
+
+.. _StageFDSN: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#stage
+
+======================== ================================== ============ ================= ================================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**            **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+Stage                         Array of :ref:`Stage`               N           *None*           `StageFDSN`_                                
+======================== ================================== ============ ================= ================================== =============================================================
+
+==============================
+Calculated Attributes
+==============================
+
+These attributes do not exist in the YAML/JSON file. They are or may be calculated programmatically to feed corresponding values in the StationXML file or for other purposes.
+
+.. _Number: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#stage
+.. _InstrumentSensitivity: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-instrumentsensitivity
+
+======================== ================================== ================= ================================ =======================================================================================================================================================================================================================================
+        **Name**                   **Type**                  **Default**      **Equivalent StationXML**          **Remarks**
+------------------------ ---------------------------------- ----------------- -------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+number                         number                          *None*           Stage. `Number`_                 Calculated depending on position 
+------------------------ ---------------------------------- ----------------- -------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+sensitivity                   number                          *None*           `InstrumentSensitivity`_          Calculated with obspy.obspy_Sensitivity using gain.frequency of first stage as reference frequency 
+                                                                                                                 and then recalculated with frequency out of sensitivity calculation.
+------------------------ ---------------------------------- ----------------- -------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+total_sample_rate             number                          *None*           *None*                            Calculated as sum of stage sample rates in order to validate against declared sample_rate. 
+======================== ================================== ================= ================================ =======================================================================================================================================================================================================================================
+
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/response_stages.schema.json>`_
+
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Response stages part of a datalogger information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/dataloggers/LC2000.datalogger.yaml>`_
+
+.. code-block:: yaml
+
+ response_stages:
+                - $ref: "responses/CS5321_FIR1.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR2.stage.yaml#stage"
+                - $ref: "responses/CS5322_FIR3.stage.yaml#stage"
+
+==================
+Class Navigation
+==================
+
+:ref:`InstrumentComponent` \<\=\=\> :ref:`Stage`

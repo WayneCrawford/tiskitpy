@@ -1,0 +1,180 @@
+.. _Executing: 
+
+
+**************************
+Executing obsinfo
+**************************
+
+There are four main executables:
+  - :ref:`obsinfo-setup`
+  - :ref:`obsinfo-makeStationXML`
+  - :ref:`obsinfo-validate`
+  - :ref:`obsinfo-print`
+
+================================
+obsinfo-setup
+================================
+creates an `.obsinforc` file that indicates where obsinfo should look for
+the reference files.  More details in the :ref:`Installation and Startup Guide`
+
+
+================================
+obsinfo-makeStationXML
+================================
+
+Now you're all set to run obsinfo. Type
+
+.. code-block:: console
+
+ $ obsinfo-makeStationXML -h
+
+to display all the options of makeStationXML. Most are self-explanatory.
+
+To create a StationXML file from a file called <filename>, type:
+
+.. code-block:: console
+
+ $ obsinfo-makeStationXML [options] filename
+
+The output file, by default, will have the stem part of the network filename followed by "station.xml". 
+That is, if the filename to be processed is ``BBOBS.INSU-IPGP.network.yaml``, the resulting file will be called by default 
+``BBOBS.INSU-IPGP.station.xml``. This can be changed with the ``-o`` option. 
+
+A single file is processed at a time. This is basically to simplify operation and avoid confusion with file discovery. 
+However, a ``for`` statement in a shell script can be used to process several files at a time, as is customary.
+
+The most important thing about the way *obsinfo-makeStationXML* operates is where it finds its information files. 
+As a rule, the argument you pass to the application must have a non-ambiguous path to a network 
+information file, such as:
+
+..code-block::
+
+  BBOBS.INSU-IPGP.network.yaml
+
+  ./BBOBS.INSU-IPGP.network.yaml
+
+  /home/arean/examples/BBOBS.INSU-IPGP.network.yaml
+
+  ../../my_examples/BBOBS.INSU-IPGP.network.yaml
+
+Standard POSIX notation is used. The first and second examples will look for the file in 
+the current working directory. The third one is called an absolute path and will try to locate 
+the file in the /home/arean/examples/ directory. The fourth one is a path relative to the 
+working directory which will go up to levels and then down to /my_examples to find the file.
+
+All other files (i.e. the files in ``$ref`` attributes, will operate in a different fashion. 
+Examples two, three and four will work in the same way, but example one will be considered 
+a file that needs discovery. This discovery is performed through the variable 
+``obsinfo_datapath``, which is a list of directories separated by commas, in typical Python/YAML syntax.
+Every director is visited in sequence. 
+When the file is found in one of the, the discovery stops. If not file is found in any of the directories, 
+an error message is generated.
+
+We can also make the filename passed as argument to *obsinfo-makeStationXML* behave in this way 
+with the option ``-r``. If we use this option, even the network file 
+passed as an argument will be discovered in one of the directories in OBSINFO_DATAPATH.
+
+The rest of the options are self-explanatory, and are explained by a message generated with:
+
+.. code-block:: console
+
+ $ obsinfo-makeStationXML -h 
+ 
+ usage: obsinfo-makeStationXML [-h] [-r] [-l] [-v] [-q] [-d] [-t] [-V]
+                                    [-o OUTPUT]
+                                    input_filename
+
+ positional arguments:
+   input_filename        is required and must be a single value
+
+ optional arguments:
+   -h, --help            show this help message and exit
+   -r, --remote          Assumes input filename is discovered through obsinfo_datapath. 
+                         Does not affect treatment of $ref in info files
+   -l, --validate        Performs complete validation, equivalent to obsinfo-validate, before processing
+   -v, --verbose         Prints processing progression
+   -q, --quiet           Silences a human-readable summary of processed information file
+   -d, --debug           Turns on exception traceback
+   -t, --test            Produces no output
+   -V, --version         Print the version and exit
+   -S, --station         Create a StationXML file with no instrumentation
+   -o OUTPUT, --output OUTPUT
+                        Names the output file. Default is <input-filename-stem>.station.xml
+
+ 
+
+================================
+obsinfo-validate
+================================
+
+This executable will validate the specified file:
+
+.. code-block:: console
+
+ $ obsinfo-validate [options] filename
+ 
+*obsinfo-validate* will identify the type of file from the filename and run the relevant validation.
+
+Option ``-r`` works as in *obsinfo-makeStationXML*. The rest of the options are self-explanatory:
+
+.. code-block:: console
+
+ $ obsinfo-validate -h 
+ 
+ usage: obsinfo-validate [-h] [-q] [-r] [-d] input_filename
+
+ positional arguments:
+   input_filename  Information file to be validated.
+
+ optional arguments:
+   -h, --help      show this help message and exit
+   -q, --quiet     Quiet operation. Don't print informative messages
+   -r, --remote    Search input_filename in the DATAPATH repositories
+   -d, --debug     Print traceback for exceptions
+
+ 
+ 
+As mentioned in Best Practices, it is always a good idea to validate files before trying to create a StationXML file. 
+Use a bottom-up approach to avoid getting difficult-to-read error messages: 
+start with filters, then stages, then components, then instrumentations, then networks.
+
+All files in official central repositories are assumed to have been validated.
+
+
+================================
+obsinfo-print
+================================
+
+This executable will print the *obsinfo* objects generated out of the specified file:
+
+.. code-block:: console
+
+ $ obsinfo-print [options] filename
+  
+*obsinfo-print* will identify the type of file from the filename and run the relevant printing routine. 
+When used with the ``-l`` option, it will print up to a certain level specified after the option 
+according to the keywords below. For example, a sensor file with a ``stage`` level will not print the 
+filter information, and a network file with a ``station`` level will not print the instrumentation information
+and down.
+
+.. code-block:: console
+
+ usage: obsinfo-print [-d] [-h] [-l LEVEL] input_filename
+
+ positional arguments:
+   input_filename  Information file to be validated.
+
+ optional arguments:
+      -l or --level: prints up to LEVEL, where LEVEL is:
+                     all
+                     stage
+                     component
+                     instrumentation
+                     channel
+                     station
+                     network
+      -d or --debug: do not catch exceptions to show error trace.
+      -h or --help: prints this message
+
+      
+      

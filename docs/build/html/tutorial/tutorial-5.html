@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building instrument component files with response stages: sensors and preamplifiers &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building a datalogger information file" href="tutorial-6.html" />
+    <link rel="prev" title="Building a simple instrumentation file with channels" href="tutorial-4.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial-1.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-2.html">The general structure of information files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-3.html">Building a simple network file with stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-4.html">Building a simple instrumentation file with channels</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building instrument component files with response stages: sensors and preamplifiers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-simple-sensor-component">A simple sensor component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stages">Stages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-definitions">Configuration definitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-example-sensor-file">Complete example sensor file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preamplifier-configuration-definitions">Preamplifier configuration definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-6.html">Building a datalogger information file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-7.html">Building a stage information file with different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-8.html">Building a filter information file for different filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial-9.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developer’s Corner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../tutorial.html">Tutorial</a> &raquo;</li>
+      <li>Building instrument component files with response stages: sensors and preamplifiers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/tutorial-5.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-instrument-component-files-with-response-stages-sensors-and-preamplifiers">
+<span id="tutorial5"></span><h1>Building instrument component files with response stages: sensors and preamplifiers<a class="headerlink" href="#building-instrument-component-files-with-response-stages-sensors-and-preamplifiers" title="Permalink to this headline"></a></h1>
+<p>Sensor, preamplifier and datalogger are all instrument components.
+While InstrumentComponent is not a key in information files, it is a class in
+Python used to inherit attributes and methods to all three component classes.
+All instrument components share the same attributes and sensor and datalogger
+add one each on their own.
+Components in an instrument are always understood to come in the same order,
+and are processed in that order: first the sensor, then possibly a preamplifier,
+usually analog, and then the datalogger.</p>
+<p>What characterizes all components is that they have an ordered list of
+response stages.
+While the order of the components themselves is predetermined, the order of
+the stages <em>must</em> be specified.
+The order of all stages is then determined as sensor stage 1, sensor state 2,…,
+preamplifier stage 1, preamplifier stage 2,…, datalogger stage 1, datalogger stage 2,…</p>
+<section id="a-simple-sensor-component">
+<h2>A simple sensor component<a class="headerlink" href="#a-simple-sensor-component" title="Permalink to this headline"></a></h2>
+<p>A sensor is, as it is well-known, any kind of transducer that senses a seismic
+signal and transduces it to an electrical signal, typically an analog one.</p>
+<p>Let’s see an example of a sensor component.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">sensor</span><span class="p">:</span>
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Broadband</span><span class="nv"> </span><span class="s">seismometer&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240</span><span class="nv"> </span><span class="s">seismometer,</span><span class="nv"> </span><span class="s">single-sided</span><span class="nv"> </span><span class="s">connection&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+</pre></div>
+</div>
+<p>We have an equipment section, just as the instrumentation level, as sensors
+can have different manufacturers from the rest of the equipment.
+The description allows to add enough detail so we can identify this sensor.
+Then we have the seed codes section.
+Seed codes are coded descriptions of such elements as the band base, the
+instrument type and the orientation.
+The codes of the first two follow the FDSN standard, as explained
+<a class="reference external" href="http://docs.fdsn.org/projects/source-identifiers/en/v1.0/channel-codes.html">here</a> .</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">seed_codes</span><span class="p">:</span>
+    <span class="nt">band_base</span><span class="p">:</span> <span class="s">&quot;B&quot;</span>
+    <span class="nt">instrument</span><span class="p">:</span> <span class="s">&quot;H&quot;</span>
+</pre></div>
+</div>
+<p>Seed codes are only present in sensors. No other component has them.
+Seed codes are based on an FDSN standard and consist of three characters.
+The first specifies the band_base, the second the instrument type.
+A third one, orientation, with azimuth and dip, is specified at the channel
+level, although in the StationXML file it will part of the seed code.</p>
+<p>The value of <code class="docutils literal notranslate"><span class="pre">polarity</span></code> should be “+” if an upward motion or a pressure
+increase results in a positive voltage, and “-” otherwise.</p>
+</section>
+<section id="stages">
+<h2>Stages<a class="headerlink" href="#stages" title="Permalink to this headline"></a></h2>
+<p>Now, let’s take a look at the next section, response stages.
+As is readily seen in the example, <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> are a list of stages.
+Being a list, individual stages have no label or key, which would  make them
+dictionary items rather than list items.
+As they are (usually) not referenced elsewhere (the glaring exception being
+channel modifications), this simplifies the syntax.
+In this case, we only include a single stage, as a reference to a stage file,
+which is the recommended best practice. Stages are found in a stage folder.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">response_stages</span>
+     <span class="l l-Scalar l-Scalar-Plain">- $ref</span><span class="p p-Indicator">:</span> <span class="s">&quot;stages/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p>Response stages are used in all three components.
+While StationXML lists all stages separately from the components, <em>obsinfo</em>
+associates conceptually stages to components by way of their functionality.
+In the end, however, stages will be grouped together and numbered from the
+sensor stages to the datalogger ones, all in sequence.</p>
+<p>This ends the presentation of a simple sensor file.
+But the important part of components, their flexibility, lies ahead.</p>
+</section>
+<section id="configuration-definitions">
+<h2>Configuration definitions<a class="headerlink" href="#configuration-definitions" title="Permalink to this headline"></a></h2>
+<p>This is the place where the full power of <em>obsinfo</em> manifests itself.
+The application allows several configuration definitions to coexist in any
+component file.
+This means that we can have a virtual sensor or datalogger which can
+potentially have any number of configurations, so we can form a library of
+component files.
+Only when they are added to an instrument (or, if you like to think it that
+way, to a channel), will one particular configuration be “instantiated” and a
+real component will be described by the file.
+This occurs with the field <code class="docutils literal notranslate"><span class="pre">configuration_selections</span></code> in the instrumentation file.
+That value selects one configuration among all the configuration definitions.
+But we also allow a default configuration, so if no configuration is selected
+at the channel level, this will be the actual configuration selected.
+Let’s modify our simple sensor file adding configurations:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+  <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+  <span class="nt">authors</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+<span class="nt">sensor</span><span class="p">:</span>
+  <span class="nt">equipment</span><span class="p">:</span>
+      <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240&quot;</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Broadband</span><span class="nv"> </span><span class="s">seismometer&quot;</span>
+      <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240</span><span class="nv"> </span><span class="s">seismometer,</span><span class="nv"> </span><span class="s">negative</span><span class="nv"> </span><span class="s">shorted</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">ground&quot;</span>
+      <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+      <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+
+  <span class="nt">seed_codes</span><span class="p">:</span>
+      <span class="nt">band_base</span><span class="p">:</span> <span class="s">&quot;B&quot;</span>
+      <span class="nt">instrument</span><span class="p">:</span> <span class="s">&quot;H&quot;</span>
+
+  <span class="nt">configuration_default</span><span class="p">:</span> <span class="s">&quot;SINGLE-SIDED_SN1-399&quot;</span>
+
+  <span class="nt">configuration_definitions</span><span class="p">:</span>
+      <span class="s">&quot;SINGLE-SIDED_SN1-399&quot;</span> <span class="p p-Indicator">:</span>
+          <span class="nt">configuration_description</span><span class="p">:</span> <span class="s">&quot;serial</span><span class="nv"> </span><span class="s">numbers</span><span class="nv"> </span><span class="s">1-399&quot;</span>
+          <span class="nt">response_stages</span><span class="p">:</span>
+              <span class="nt">-$ref</span><span class="p">:</span> <span class="s">&quot;responses/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage&quot;</span>
+      <span class="s">&quot;SINGLE-SIDED_SN400plus&quot;</span> <span class="p p-Indicator">:</span>
+          <span class="nt">configuration_description</span><span class="p">:</span> <span class="s">&quot;serial</span><span class="nv"> </span><span class="s">numbers</span><span class="nv"> </span><span class="s">400+&quot;</span>
+          <span class="nt">response_stages</span><span class="p">:</span>
+              <span class="nt">-$ref</span><span class="p">:</span> <span class="s">&quot;responses/Trillium_T240_SN400-singlesided_theoretical.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p>This file requires a lot of commentary.
+Let’s start with the resulting configuration.
+Note that we have added two configuration definitions, which are specified as
+a dictionary (i.e. they have labels, key/value pairs),”SINGLE-SIDED_SN1-399”
+and “SINGLE-SIDED_SN400plus”.
+This is a real example in which a component has different behaviour depending
+on its serial number (below or above 400), which calls for two differently
+configured stages.
+If no sensor configuration is selected in the instrumentation file, the result
+would be to use the default configuration, so the file above would be the
+same as this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+ <span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+ <span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+
+ <span class="nt">sensor</span><span class="p">:</span>
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Broadband</span><span class="nv"> </span><span class="s">seismometer&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240</span><span class="nv"> </span><span class="s">seismometer,</span><span class="nv"> </span><span class="s">negative</span><span class="nv"> </span><span class="s">shorted</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">ground</span><span class="nv"> </span><span class="s">[config:</span><span class="nv"> </span><span class="s">serial</span><span class="nv"> </span><span class="s">numbers</span><span class="nv"> </span><span class="s">1-399]&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+
+   <span class="nt">seed_codes</span><span class="p">:</span>
+       <span class="nt">band_base</span><span class="p">:</span> <span class="s">&quot;B&quot;</span>
+       <span class="nt">instrument</span><span class="p">:</span> <span class="s">&quot;H&quot;</span>
+
+   <span class="nt">response_stages</span><span class="p">:</span>
+       <span class="nt">-$ref</span><span class="p">:</span> <span class="s">&quot;responses/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">response_stages</span></code> is added from the default configuration definition. No surprises here. But look at what happened in <code class="docutils literal notranslate"><span class="pre">description</span></code>. We didn’t override the existing description, we <em>concatenated</em> the new one to the old one. This is an exception to the way all other fields behave. The idea is to be more specific about the description according to the configuration. This could possibly be achieved with YAML anchors, but unfortunately YAML does not concatenate strings, so we need to do it this way, with an exception to the general overriding rule.</p>
+<p>Now, if we had selected configuration “SINGLE-SIDED_SN400plus” in the
+instrumentation file (in the <code class="docutils literal notranslate"><span class="pre">config_selections</span></code> section), the result would be:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+ <span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+ <span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+
+ <span class="nt">sensor</span><span class="p">:</span>
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Broadband</span><span class="nv"> </span><span class="s">seismometer&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240</span><span class="nv"> </span><span class="s">seismometer,</span><span class="nv"> </span><span class="s">negative</span><span class="nv"> </span><span class="s">shorted</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">ground</span><span class="nv"> </span><span class="s">[config:</span><span class="nv"> </span><span class="s">serial</span><span class="nv"> </span><span class="s">numbers</span><span class="nv"> </span><span class="s">400+]&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+
+   <span class="nt">seed_codes</span><span class="p">:</span>
+       <span class="nt">band_base</span><span class="p">:</span> <span class="s">&quot;B&quot;</span>
+       <span class="nt">instrument</span><span class="p">:</span> <span class="s">&quot;H&quot;</span>
+
+   <span class="nt">response_stages</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/Trillium_T240_SN400-singlesided_theoretical.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p>At any rate, the philosophy is to have all these configurations added to the
+component file from the start, so we don’t change the file much;
+but, of course, if needs be, you can add more configurations anytime.</p>
+</section>
+<section id="complete-example-sensor-file">
+<h2>Complete example sensor file<a class="headerlink" href="#complete-example-sensor-file" title="Permalink to this headline"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span> <span class="l l-Scalar l-Scalar-Plain">---</span>
+ <span class="l l-Scalar l-Scalar-Plain">format_version</span><span class="p p-Indicator">:</span> <span class="s">&quot;0.110&quot;</span>
+ <span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+ <span class="nt">sensor</span><span class="p">:</span>
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Broadband</span><span class="nv"> </span><span class="s">seismometer&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;Trillium</span><span class="nv"> </span><span class="s">T240</span><span class="nv"> </span><span class="s">seismometer,</span><span class="nv"> </span><span class="s">negative</span><span class="nv"> </span><span class="s">shorted</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">ground&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="s">&quot;Nanometrics,</span><span class="nv"> </span><span class="s">Inc&quot;</span>
+
+   <span class="nt">seed_codes</span><span class="p">:</span>
+       <span class="nt">band_base</span><span class="p">:</span> <span class="s">&quot;B&quot;</span>
+       <span class="nt">instrument</span><span class="p">:</span> <span class="s">&quot;H&quot;</span>
+
+   <span class="nt">configuration_default</span><span class="p">:</span> <span class="s">&quot;SINGLE-SIDED_SN1-399&quot;</span>
+
+   <span class="nt">configuration_definitions</span><span class="p">:</span>
+       <span class="s">&quot;SINGLE-SIDED_SN1-399&quot;</span> <span class="p p-Indicator">:</span>
+           <span class="nt">configuration_description</span><span class="p">:</span> <span class="s">&quot;serial</span><span class="nv"> </span><span class="s">numbers</span><span class="nv"> </span><span class="s">1-399&quot;</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="nt">-$ref</span><span class="p">:</span> <span class="s">&quot;responses/Trillium_T240_SN1-399-singlesided_theoretical.stage.yaml#stage&quot;</span>
+       <span class="s">&quot;SINGLE-SIDED_SN400plus&quot;</span> <span class="p p-Indicator">:</span>
+           <span class="nt">configuration_description</span><span class="p">:</span> <span class="s">&quot;serial</span><span class="nv"> </span><span class="s">numbers</span><span class="nv"> </span><span class="s">400+&quot;</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="nt">-$ref</span><span class="p">:</span> <span class="s">&quot;responses/Trillium_T240_SN400-singlesided_theoretical.stage.yaml#stage&quot;</span>
+
+<span class="nt">notes</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;INSU-IPGP</span><span class="nv"> </span><span class="s">OBS</span><span class="nv"> </span><span class="s">park</span><span class="nv"> </span><span class="s">sphere</span><span class="nv"> </span><span class="s">sensor</span><span class="nv"> </span><span class="s">pairs</span><span class="nv"> </span><span class="s">are:</span><span class="nv"> </span><span class="s">Sphere01-133,</span><span class="nv"> </span><span class="s">Sphere02-132,&quot;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;Sphere03-134,</span><span class="nv"> </span><span class="s">Sphere04-138,</span><span class="nv"> </span><span class="s">Sphere05-137,</span><span class="nv"> </span><span class="s">Sphere06-830,</span><span class="nv"> </span><span class="s">Sphere07-136,&quot;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&quot;Sphere08-829,</span><span class="nv"> </span><span class="s">Sphere09-826&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="preamplifier-configuration-definitions">
+<h2>Preamplifier configuration definitions<a class="headerlink" href="#preamplifier-configuration-definitions" title="Permalink to this headline"></a></h2>
+<p>Preamplifiers are, in fact, the simplest components.
+They only have <code class="docutils literal notranslate"><span class="pre">equipment</span></code>, <code class="docutils literal notranslate"><span class="pre">response_stages</span></code>, <code class="docutils literal notranslate"><span class="pre">configuration_default</span></code>
+and <code class="docutils literal notranslate"><span class="pre">configuration_definitions</span></code>, already explained above.
+Thus, we limit ourselves to showing an example, noting the the configuration
+definitions are based on gain, not serial number as in the sensor example before.
+Remember that labels for configuration definitions are totally arbitrary, so
+you can make your own choice as to how to characterize the configurations.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2017-11-30&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>   <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span>
+
+<span class="nt">preamplifier</span><span class="p">:</span>
+   <span class="nt">equipment</span><span class="p">:</span>
+       <span class="nt">model</span><span class="p">:</span> <span class="s">&quot;BBOBS-GAIN&quot;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;Analog</span><span class="nv"> </span><span class="s">gain</span><span class="nv"> </span><span class="s">card&quot;</span>
+       <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;INSU</span><span class="nv"> </span><span class="s">BBOBS</span><span class="nv"> </span><span class="s">gain</span><span class="nv"> </span><span class="s">card&quot;</span>
+       <span class="nt">manufacturer</span><span class="p">:</span> <span class="s">&quot;SIO</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">IPGP&quot;</span>
+       <span class="nt">vendor</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">~</span>
+
+   <span class="nt">configuration_default</span><span class="p">:</span> <span class="s">&quot;1x&quot;</span>
+
+   <span class="nt">configuration_definitions</span><span class="p">:</span>
+       <span class="s">&quot;0.225x&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">configuration_description</span><span class="p">:</span> <span class="s">&quot;0.225x</span><span class="nv"> </span><span class="s">gain&quot;</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage&quot;</span>
+       <span class="s">&quot;1x&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">configuration_description</span><span class="p">:</span> <span class="s">&quot;1x</span><span class="nv"> </span><span class="s">gain&quot;</span>
+           <span class="nt">response_stages</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/INSU_BBOBS_gain1.0_theoretical.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p>In the next section we will see how to configure a datalogger information file.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="tutorial-6.html#tutorial6"><span class="std std-ref">Next page, Building a datalogger information file</span></a></p></li>
+<li><p><a class="reference internal" href="#tutorial5"><span class="std std-ref">Previous page</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial-1.html#tutorial1"><span class="std std-ref">Back to start</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial-4.html" class="btn btn-neutral float-left" title="Building a simple instrumentation file with channels" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial-6.html" class="btn btn-neutral float-right" title="Building a datalogger information file" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

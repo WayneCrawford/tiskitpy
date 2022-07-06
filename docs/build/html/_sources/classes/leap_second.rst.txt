@@ -1,0 +1,114 @@
+.. _LeapSecond11:
+
+***********************
+ LeapSecond
+***********************
+
+===============
+ Description
+===============
+
+This class has no correlate in StationXML, but it is used for important documentation purposes in *obsinfo*, and thus is included as a comment in StationXML. It documents the addition or subtraction of leap seconds to the signal data. As is well known, OBS equipment does not have a GPS connection and its clock must be manually synchronized. 
+
+---------------------
+Python class:
+---------------------
+
+Processing
+
+The subclass LeapSecond is not implemented in Python but directly as attributes of class Processing  
+
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+clock_correct_leap_second
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is element of :ref:`ProcessingClockCorrections <ProcessingClockCorrections>`
+
+
+
+==============================
+Attributes
+==============================
+
+.. _name: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#fir
+.. _Description: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-fir-description
+.. _InputUnits: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-fir-inputunits
+.. _OutputUnits: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-fir-outputunits
+.. _StageGain: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#stagegain-required
+.. _Frequency: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-stagegain-frequency
+.. _Value: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#response-stage-stagegain-value
+.. _Factor: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#factor-required
+.. _InputSampleRate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#inputsamplerate-required
+.. _Delay: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#delay-required
+
+======================== ================================== ============ ================= ================================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**            **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+  time                        timestamp                           Y           *None*               *None* 
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+  type                       string (1 char, + or -)              Y           *None*                                             A positive leapsecond is a 61 second minute, a negative one, a 59 sec. 
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+corrected_in_end_sync                    boolean                  Y           *None*            *None*
+------------------------ ---------------------------------- ------------ ----------------- ---------------------------------- -------------------------------------------------------------
+corrected_in_end_data                    boolean                  Y           *None*             
+======================== ================================== ============ ================= ================================== =============================================================
+
+
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/stage.schema.json>`_
+
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Section in network information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/campaign/LEAP_SECOND.INSU-IPGP.network.yaml>`_ . 
+
+.. code-block:: yaml
+
+ - clock_correct_leapsecond:
+                    time: "2016-12-31T23:59:60"
+                    type: "+"
+                    corrected_in_end_sync: True
+
+==================
+Class Navigation
+==================
+
+:ref:`ProcessingClockCorrections` \<\=\=
+
+           

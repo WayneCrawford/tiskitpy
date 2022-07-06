@@ -1,0 +1,120 @@
+.. _FIR11:
+
+*************
+FIR
+*************
+
+
+===============
+ Description
+===============
+
+A finite impulse response (FIR) filter is a :ref:`filter <Filter11>` whose impulse response (or response to any finite length input) is of finite duration, because it settles to zero in finite time.
+
+The impulse response (that is, the output in response to a Kronecker delta input) of an Nth-order discrete-time FIR filter lasts exactly N + 1 samples (from first nonzero element through last nonzero element) before it then settles to zero. FIR filters can be discrete-time or continuous-time, and digital or analog.
+
+Alternatively, FIR filters in *obsinfo* are also commonly documented using the Coefficients class, though FIR has the advantage of allowing representation of symmetric FIR coefficients without repeating them.
+
+For a more detailed discussion, `click here <https://ccrma.stanford.edu/~jos/filters/Pole_Zero_Analysis_I.html>`_.
+
+---------------------
+Python class:
+---------------------
+
+FIR
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+FIR
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+FIR
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+:ref:`Filter <Filter11>`
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is nested in :ref:`Stage <Stage>`
+
+==============================
+Attributes
+==============================
+
+.. _Symmetry: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#symmetry-required
+.. _NumeratorCoefficient: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#numeratorcoefficient
+
+======================== =============================== ============ ================= ========================== =========================================
+        **Name**                   **Type**              **Required**    **Default**    **Equivalent StationXML**                   **Remarks**
+------------------------ ------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+symmetry                   List of values:                    Y           *None*         `Symmetry`_
+                             ODD, EVEN, NONE
+------------------------ ------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+coefficients              List of numbers                     N           *None*         `NumeratorCoefficient`_
+------------------------ ------------------------------- ------------ ----------------- -------------------------- -----------------------------------------
+coefficient_divisor        number                             N             1.0           *NOT USED*
+
+======================== =============================== ============ ================= ========================== =========================================
+
+=============================
+JSON schema
+=============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+In filter information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/dataloggers/responses/FIR/TexasInstruments_ADS1281_FIR1.filter.yaml>`_
+
+.. code-block:: yaml
+
+ --
+ format_version: "0.107"
+ filter:
+    type: "FIR"
+    symmetry: "NONE"
+    delay.samples: 5
+    coefficient_divisor: 512
+    coefficients:
+        - 3
+        - 0
+        - -25
+        - 0
+        - 150
+        - 256
+        - 150
+        - 0
+        - -25
+        - 0
+        - 3
+
+==================
+Class Navigation
+==================
+
+:ref:`Filter11` \<\=\= 
+

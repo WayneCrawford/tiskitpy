@@ -1,0 +1,172 @@
+
+.. _Station:
+
+**************
+ Station
+**************
+   classes/
+
+===============
+ Description
+===============
+
+An OBS station is an actual implementation of one or several `instrumentation` in a given campaign and :ref:`network <Network>`.
+
+---------------------
+Python class:
+---------------------
+
+Station
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+stations
+   Pertaining to Network Information File
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Station
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Implements one or several :ref:`Instrumentations <Instrumentation>`
+* Is part of a :ref:`Network <Network>`
+* Is in one or several :ref:`Locations <Location1>`
+
+==============================
+Attributes
+==============================
+
+
+.. _code: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station
+.. _Site: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#site-required
+.. _OperatorFDSN: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station-operator
+.. _Description: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station-description
+.. _alternateCode: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station
+.. _Comment: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station-description
+.. _startDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station
+.. _endDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#station
+
+
+======================== ======================================================== ============= ============== ============================= ========================================================================================
+        **Name**                   **Type**                                       **Required**    **Default**   **Equivalent StationXML**     **Remarks**          
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  *code*                           string                                               Y           *None*            Station. `code`_         Code does not appear as a YAML/JSON attribute. It's simply the key of the station.
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  site                             string                                               Y           *None*            `Site`_
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  location_code                   string                                                Y           *None*            `alternateCode`_         See class :ref:`Location1` for details
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  locations                       Array of `Location`                                   Y           *None*            :ref:`Operator`                    The use of locations is not simple. See class :ref:`Location1` for details
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  instrumentation                :ref:`Instrumentation`                                 Y           *None*            *None*                   This is mostly contained in attribute Channel in StationXML
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  processing                      :ref:`ProcessingClockCorrections`                     N           *None*            `Description`_                  Will appear appended to Description in StationXML
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  restricted_state        List of values: "open", "closed", "partial", "unknown"        N         "unknown"            *None* 
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  comments                        string                                                N           *None*            `Comment`_
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  start_date                       date                                                 N           *None*            `startDate`_             All three instrument components have these dates. They're the same for all the station.                                                                                                        
+------------------------ -------------------------------------------------------- ------------- -------------- ----------------------------- ----------------------------------------------------------------------------------------
+  end_date                         date                                                 N           *None*            `endDate`_               All three instrument components have these dates. They're the same for all the station.                                                                    
+======================== ======================================================== ============= ============== ============================= ========================================================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/station.schema.json>`_
+
+==============================
+Example
+==============================
+
+
+* Part of network information file `<https://gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml>`_ corresponding to the stations, with an example of use of the anchor &LINEAR_CLOCK_DEFAULT. The ``instrumentations`` parts are explained under :ref:`Instrumentation <Instrumentation>`.
+
+.. code-block:: yaml
+
+  yaml_anchors:
+     obs_clock_correction_linear_defaults: &LINEAR_CLOCK_DEFAULTS #Definition of the anchor as the next three attributes.
+        time_base: "Seascan MCXO, ~1e-8 nominal drift"
+        reference: "GPS"
+        start_sync_instrument: 0
+ 
+    ...
+
+     stations:
+        "LSVW":
+            site: "Lucky Strike Volcano West"
+            start_date: "2015-04-22T12:00:00Z"
+            end_date: "2016-05-28T21:01:00Z"
+            location_code: "00"
+            instrumentations:
+                -
+                    base:
+                        $ref: "instrumentation/SPOBS2.instrumentation.yaml#instrumentation"
+                    datalogger_config: "125sps"
+            locations:
+                "00":
+                    base: {$ref: 'location_bases/SURFACE_DROP.location_base.yaml#location_base'}
+                    position: {lon: -32.32504, lat: 37.29744, elev: -2030}
+            processing:
+                - clock_correction_linear_drift:
+                    <<: *LINEAR_CLOCK_DEFAULTS
+                    start_sync_reference: "2015-04-21T21:06:00Z"
+                    end_sync_reference: "2016-05-28T20:59:00.32Z"
+                    end_sync_instrument: "2016-05-28T20:59:03Z"
+
+        "LSVE":
+            site: "Lucky Strike Volcano East"
+            start_date: "2015-04-22T12:00:00Z"
+            end_date: "2016-05-28T21:01:00Z"
+            location_code: "00"
+            instruments:
+                -
+                    base:
+                        $ref: "instrumentation/SPOBS2.instrumentation.yaml#instrumentation"
+                    datalogger_config: "125sps"
+            locations:
+                "00":
+                    base: {$ref: 'location_bases/ACOUSTIC_SURVEY.location_base.yaml#location_base'}
+                    position: {lon: -32.02504, lat: 37.25744, elev: -2130}
+            processing:
+                - clock_correct_linear_drift:
+                    <<: *LINEAR_CLOCK_DEFAULTS
+                    start_sync_reference: "2015-04-21T21:06:00Z"
+                    end_sync_reference: "2016-05-28T20:59:00.32Z"
+                    end_sync_instrument: "2016-05-28T20:59:01Z"
+
+===================
+Class Navigation
+===================
+
+:ref:`Network` \<\=\=\> :ref:`Instrumentation`
+
+\=\=\> :ref:`Location1`
+
+\=\=\> :ref:`ProcessingClockCorrections`

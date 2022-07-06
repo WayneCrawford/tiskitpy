@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PolesZeros &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Preamplifier" href="preamplifier.html" />
+    <link rel="prev" title="Operator" href="operator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../classes.html">Classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../classes.html#information-file-tree">Information File Tree</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html#filter-types">Filter Types</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="analog.html">Analog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="channel.html">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="coefficients.html">Coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datalogger.html">Datalogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="digital.html">Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FIR.html">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument.html">Instrument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="leap_second.html">LeapSecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location_base.html">LocationBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location.html">Location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="network.html">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="operator.html">Operator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">PolesZeros</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#object-hierarchy">Object Hierarchy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#json-schema">JSON schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#class-navigation">Class Navigation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_list.html">ResponseList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_stages.html">ResponseStages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sensor.html">Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="station.html">Station</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../classes.html">Classes</a> &raquo;</li>
+      <li>PolesZeros</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/classes/poleszeros.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="poleszeros">
+<span id="poleszeros11"></span><h1>PolesZeros<a class="headerlink" href="#poleszeros" title="Permalink to this headline"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>A Pole-Zero <a class="reference internal" href="filter.html#filter11"><span class="std std-ref">filter</span></a>. Every digital filter can be specified by its poles and zeros (together with a gain factor). Poles and zeros give useful insights into a filter’s response. For a more detailed discussion, <a class="reference external" href="https://ccrma.stanford.edu/~jos/filters/Pole_Zero_Analysis_I.html">click here</a>.</p>
+<section id="python-class">
+<h3>Python class:<a class="headerlink" href="#python-class" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>PolesZeros</p></li>
+</ul>
+</section>
+<section id="yaml-json-label">
+<h3>YAML / JSON label:<a class="headerlink" href="#yaml-json-label" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>PolesZeros</p></li>
+</ul>
+</section>
+<section id="corresponding-stationxml-structure">
+<h3>Corresponding StationXML structure<a class="headerlink" href="#corresponding-stationxml-structure" title="Permalink to this headline"></a></h3>
+<p>No direct correspondence. Mapped into subattribute <a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#poleszeros">PolesZeros</a> of attribute <a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#stage">Stage</a>.</p>
+</section>
+</section>
+<section id="object-hierarchy">
+<h2>Object Hierarchy<a class="headerlink" href="#object-hierarchy" title="Permalink to this headline"></a></h2>
+<section id="superclass">
+<h3>Superclass<a class="headerlink" href="#superclass" title="Permalink to this headline"></a></h3>
+<p><a class="reference internal" href="filter.html#filter11"><span class="std std-ref">Filter</span></a></p>
+</section>
+<section id="subclasses">
+<h3>Subclasses<a class="headerlink" href="#subclasses" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="analog.html#analog11"><span class="std std-ref">Analog</span></a></p></li>
+</ul>
+</section>
+<section id="relationships">
+<h3>Relationships<a class="headerlink" href="#relationships" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Is nested in <a class="reference internal" href="stage.html#stage"><span class="std std-ref">Stage</span></a></p></li>
+</ul>
+</section>
+</section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 21%" />
+<col style="width: 8%" />
+<col style="width: 11%" />
+<col style="width: 17%" />
+<col style="width: 27%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>Name</strong></p></td>
+<td><p><strong>Type</strong></p></td>
+<td><p><strong>Required</strong></p></td>
+<td><p><strong>Default</strong></p></td>
+<td><p><strong>Equivalent StationXML</strong></p></td>
+<td><p><strong>Remarks</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>transfer_function_type</p></td>
+<td><dl class="simple">
+<dt>List of Values:</dt><dd><p>LAPLACE (RADIANS/SECOND),
+LAPLACE (HERTZ),
+DIGITAL (Z-TRANFORM)</p>
+</dd>
+</dl>
+</td>
+<td><p>N</p></td>
+<td><p>LAPLACE
+(RADIANS/SECOND)</p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#pztransferfunctiontype-required">PzTransferFunctionType</a></p></td>
+<td><p><a class="reference external" href="https://ccrma.stanford.edu/~jos/filters/Transfer_Function_Analysis.html">More info…</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>zeros</p></td>
+<td><p>List of numbers</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#zero">Zero</a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>poles</p></td>
+<td><p>List of numbers</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#pole">Pole</a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>normalization_frequency</p></td>
+<td><p>number</p></td>
+<td><p>N</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#normalizationfrequency-required">NormalizationFrequency</a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>normalization_factor</p></td>
+<td><p>number</p></td>
+<td><p>N</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#normalizationfactor-required">NormalizationFactor</a></p></td>
+<td><p>Frequency at which the
+NormalizationFactor is valid.
+This should be the same for all stages
+and within the passband, if any.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="json-schema">
+<h2>JSON schema<a class="headerlink" href="#json-schema" title="Permalink to this headline"></a></h2>
+<p><a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/filter.schema.json</a></p>
+<p><a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json</a></p>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h2>
+<p>In the filter information file <a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/sensors/responses/PolesZeros/Trillium_T240_SN400-_generic.filter.yaml">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/instrumentation/sensors/responses/PolesZeros/Trillium_T240_SN400-_generic.filter.yaml</a> .</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2018-06-01&quot;</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+
+<span class="nt">filter</span><span class="p">:</span>
+   <span class="nt">type</span><span class="p">:</span> <span class="s">&quot;PolesZeros&quot;</span>
+   <span class="nt">transfer_function_type</span><span class="p">:</span> <span class="s">&quot;LAPLACE</span><span class="nv"> </span><span class="s">(RADIANS/SECOND)&quot;</span>
+   <span class="nt">zeros </span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>     <span class="p p-Indicator">[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>     <span class="p p-Indicator">[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>   <span class="p p-Indicator">[</span><span class="nv">-72.5</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-159.3</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-251</span><span class="p p-Indicator">,</span>    <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-3270.0</span><span class="p p-Indicator">,</span>  <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+   <span class="nt">poles </span><span class="p">:</span>
+       <span class="p p-Indicator">-</span>    <span class="p p-Indicator">[</span><span class="nv">-0.017699</span><span class="p p-Indicator">,</span>    <span class="nv">0.017604</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>    <span class="p p-Indicator">[</span><span class="nv">-0.017699</span><span class="p p-Indicator">,</span>   <span class="nv">-0.017604</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>   <span class="p p-Indicator">[</span><span class="nv">-85.3</span><span class="p p-Indicator">,</span>         <span class="nv">0.0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-155.4</span><span class="p p-Indicator">,</span>       <span class="nv">210.8</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-155.4</span><span class="p p-Indicator">,</span>      <span class="nv">-210.8</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span>  <span class="p p-Indicator">[</span><span class="nv">-713</span><span class="p p-Indicator">,</span>           <span class="nv">0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-1140</span><span class="p p-Indicator">,</span>          <span class="nv">-0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-4300</span><span class="p p-Indicator">,</span>          <span class="nv">-0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-5800</span><span class="p p-Indicator">,</span>          <span class="nv">-0</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-4300</span><span class="p p-Indicator">,</span>        <span class="nv">4400</span><span class="p p-Indicator">]</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span><span class="nv">-4300</span><span class="p p-Indicator">,</span>       <span class="nv">-4400</span><span class="p p-Indicator">]</span>
+   <span class="nt">offset</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+
+<span class="nt">notes</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">poles et zeros d&#39;un Trillium T240 no de serie 400+</span>
+   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">d&#39;apres le fichier Trillium240_UserGuide_15672R7.pdf de Nanometrics.</span>
+
+<span class="nt">extras</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+</pre></div>
+</div>
+</section>
+<section id="class-navigation">
+<h2>Class Navigation<a class="headerlink" href="#class-navigation" title="Permalink to this headline"></a></h2>
+<p><a class="reference internal" href="filter.html#filter11"><span class="std std-ref">Filter</span></a> &lt;==</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="operator.html" class="btn btn-neutral float-left" title="Operator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="preamplifier.html" class="btn btn-neutral float-right" title="Preamplifier" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

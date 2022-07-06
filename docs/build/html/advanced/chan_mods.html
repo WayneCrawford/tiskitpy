@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Channel modifications &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="AROL compatibility" href="arol.html" />
+    <link rel="prev" title="Advanced" href="../advanced.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced.html">Advanced</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Channel modifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arol.html">AROL compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="best_practice.html">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes.html">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="caveats.html">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addons.html">Addons</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced.html">Advanced</a> &raquo;</li>
+      <li>Channel modifications</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/advanced/chan_mods.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="channel-modifications">
+<h1>Channel modifications<a class="headerlink" href="#channel-modifications" title="Permalink to this headline"></a></h1>
+<p>The full power of <strong>obsinfo</strong> is achieved using channel modifications. Unlike other equipment, OBS are subject to a lot of variations in configuration, even changes of components in the field. The aim of <em>obsinfo</em> is to have a relatively stable database of information files for instrumentation. But in actual operation it is common to reassemble the instrumentation, substituting stages and even whole components. This needs to be reflected in the metadata without compromising the stability of the instrumentation database. The way to do this is through channel modifications, which can change <em>any</em> attribute in the configuration, down to serial numbers or pole/zeros of filters at the channel level.</p>
+<p>The attribute <code class="docutils literal notranslate"><span class="pre">channel_modifications</span></code> is used for this. Under this keyword the user can specify a complete hierarchy down to the filter level. Only the value(s) specified will be modified. So if a “leaf” value is changed, such as gain value, only the gain value for a particular stage will be changed. But if a complete sensor is specified, the whole component along with its stages and filters will be modified.</p>
+<p>A channel must be identified in order to apply particular modifications to it. Channel identification is performed <strong>not</strong> by the channel label in the <code class="docutils literal notranslate"><span class="pre">channels</span></code> attribute, but by a channel code formed by the orientation and the location in the form:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;&lt;orientation</span><span class="nv"> </span><span class="s">code&gt;-&lt;location</span><span class="nv"> </span><span class="s">code&gt;&quot;</span>
+</pre></div>
+</div>
+<p>Recall <a class="reference external" href="Channel">orientation codes</a> are defined as an FDSN standard.</p>
+<p>For example,</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;Z-02&quot;</span>
+</pre></div>
+</div>
+<p>If location code is omitted, a location code of “00” is assumed as default. Furthermore, it is possible to select all location codes and/or all orientation codes using the “*” notation:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 71%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>Channel Code</strong></p></td>
+<td><p><strong>Result</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><cite>“*”</cite> or <cite>“*-*”</cite></p></td>
+<td><p>All channels</p></td>
+</tr>
+<tr class="row-odd"><td><p><cite>“*-00”</cite></p></td>
+<td><p>All orientations with location “00”</p></td>
+</tr>
+<tr class="row-even"><td><p><cite>“H-*”</cite></p></td>
+<td><p>Channel with “orientation” H and all locations</p></td>
+</tr>
+<tr class="row-odd"><td><p><cite>“H”</cite></p></td>
+<td><p>Channel with “orientation” H and location “00”</p></td>
+</tr>
+<tr class="row-even"><td><p><cite>“1-01”</cite></p></td>
+<td><p>Channel with orientation 1 and location “01”</p></td>
+</tr>
+</tbody>
+</table>
+<p>Channel codes have priorities. The more specific code will take precedence over the less specific code,
+and the orientation code specification will take precedence over the location code specification. That is
+if both <cite>“*-*”</cite> and <cite>“1-01”</cite> are specified, <cite>“1-01”</cite> will take precedence. And if <cite>“*-00”</cite> and <cite>“H-*”</cite>
+are specified, <cite>“*-00”</cite> will take precedence.</p>
+<p>The question of how to specify a particular stage arises, since stages have no name. Stages will then be referenced by their number, which, starting with zero, specifies the position of the stage within a given component (sensor, preamplifier or datalogger). Modifications to stages are specified under the keyword <code class="docutils literal notranslate"><span class="pre">response_modifications</span></code>, as the keyword <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> will completely overwrite all stages.</p>
+<p>So, if we want to change the gain of a particular stage, the third one in the sensor, the hierarchy would look like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channel_modifications</span><span class="p">:</span>
+    <span class="nt">sensor</span><span class="p">:</span>
+        <span class="nt">response_modifications</span><span class="p">:</span>
+          <span class="s">&quot;2&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">gain</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">value</span><span class="p">:</span> <span class="nv">17</span><span class="p p-Indicator">}}</span>
+</pre></div>
+</div>
+<p>If we, however, want to replace all of the response stages, the file would look like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channel_modifications</span><span class="p">:</span>
+    <span class="nt">datalogger</span><span class="p">:</span>
+        <span class="nt">response_stages</span><span class="p">:</span>
+           <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5321_FIR1.stage.yaml#stage&quot;</span>
+           <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+           <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR2.stage.yaml#stage&quot;</span>
+           <span class="p p-Indicator">-</span> <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;responses/CS5322_FIR3.stage.yaml#stage&quot;</span>
+</pre></div>
+</div>
+<p>Finally, if we want to modify a complete component, the file would look something like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">channel_modifications</span><span class="p">:</span>
+    <span class="nt">datalogger</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;dataloggers/LC2000.datalogger.yaml#datalogger&quot;</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>Response modifications are very flexible. THe label can be any of several regular expressions. Either the single number, as above, a list, a range or a wildcard “*”, which means all:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 67%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>Stage Number</strong></p></td>
+<td><p><strong>Result</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><cite>“*”</cite></p></td>
+<td><p>All stages</p></td>
+</tr>
+<tr class="row-odd"><td><p>“[1,2,3]”</p></td>
+<td><p>Second, third and fourth stages (stages start at 0)</p></td>
+</tr>
+<tr class="row-even"><td><p>“[1-3]”</p></td>
+<td><p>Same as above</p></td>
+</tr>
+</tbody>
+</table>
+<p>Here is a complete example of a network file with channel_modifications:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">format_version</span><span class="p">:</span> <span class="s">&quot;0.110&quot;</span>
+<span class="nt">yaml_anchors</span><span class="p">:</span>
+   <span class="nt">obs_clock_correction_linear_defaults</span><span class="p">:</span> <span class="nl">&amp;LINEAR_CLOCK_DEFAULTS</span>
+       <span class="nt">time_base</span><span class="p">:</span> <span class="s">&quot;Seascan</span><span class="nv"> </span><span class="s">MCXO,</span><span class="nv"> </span><span class="s">~1e-8</span><span class="nv"> </span><span class="s">nominal</span><span class="nv"> </span><span class="s">drift&quot;</span>
+       <span class="nt">reference</span><span class="p">:</span> <span class="s">&quot;GPS&quot;</span>
+       <span class="nt">start_sync_instrument</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="nt">revision</span><span class="p">:</span>
+   <span class="nt">authors</span><span class="p">:</span>
+       <span class="p p-Indicator">-</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;authors/Wayne_Crawford.author.yaml#author&quot;</span><span class="p p-Indicator">}</span>
+   <span class="nt">date</span><span class="p">:</span> <span class="s">&quot;2019-12-19&quot;</span>
+<span class="nt">network</span><span class="p">:</span>
+   <span class="nt">facility</span><span class="p">:</span>
+       <span class="nt">reference_name</span><span class="p">:</span> <span class="s">&quot;INSU-IPGP&quot;</span>
+       <span class="nt">full_name</span><span class="p">:</span> <span class="s">&quot;INSU-IPGP</span><span class="nv"> </span><span class="s">OBS</span><span class="nv"> </span><span class="s">Park&quot;</span>
+       <span class="nt">contact</span><span class="p">:</span>
+          <span class="nt">first_name</span><span class="p">:</span> <span class="s">&quot;Wayne&quot;</span>
+          <span class="nt">last_name</span><span class="p">:</span> <span class="s">&quot;Crawford&quot;</span>
+
+       <span class="nt">email</span><span class="p">:</span>  <span class="s">&quot;crawford@ipgp.fr&quot;</span>
+
+       <span class="nt">website</span><span class="p">:</span>  <span class="s">&quot;http://ipgp.fr&quot;</span>
+
+   <span class="nt">campaign_ref_name</span><span class="p">:</span> <span class="s">&quot;MYCAMPAIGN&quot;</span>
+   <span class="nt">network_info</span><span class="p">:</span>
+       <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;network_info/EMSO-MOMAR.network_info.yaml#network_info&quot;</span>
+
+   <span class="nt">stations</span><span class="p">:</span>
+       <span class="s">&quot;BB_1&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">site</span><span class="p">:</span> <span class="s">&quot;My</span><span class="nv"> </span><span class="s">favorite</span><span class="nv"> </span><span class="s">site&quot;</span>
+           <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2015-04-23T10:00:00&quot;</span>
+           <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2016-05-28T15:37:00&quot;</span>
+           <span class="nt">location_code</span><span class="p">:</span> <span class="s">&quot;00&quot;</span>
+           <span class="nt">instrumentation</span><span class="p">:</span>
+               <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/BBOBS1_2012+.instrumentation.yaml#instrumentation&quot;</span>
+           <span class="nt">channel_modifications</span><span class="p">:</span>
+               <span class="s">&quot;*-*&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">datalogger_configuration</span><span class="p">:</span> <span class="s">&quot;62.5sps&quot;</span><span class="p p-Indicator">}</span>
+           <span class="nt">locations</span><span class="p">:</span>
+               <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+                   <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/BUC_DROP.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+                   <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.234</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.2806</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-1950</span><span class="p p-Indicator">}</span>
+           <span class="nt">processing</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">clock_corrections</span><span class="p">:</span>
+                   <span class="nt">linear_drift</span><span class="p">:</span>
+                       <span class="nt">&lt;&lt;</span><span class="p">:</span> <span class="nv">*LINEAR_CLOCK_DEFAULTS</span>
+                       <span class="nt">start_sync_reference</span><span class="p">:</span> <span class="s">&quot;2015-04-23T11:20:00&quot;</span>
+                       <span class="nt">start_sync_instrument</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+                       <span class="nt">end_sync_reference</span><span class="p">:</span> <span class="s">&quot;2016-05-27T14:00:00.2450&quot;</span>
+                       <span class="nt">end_sync_instrument</span><span class="p">:</span> <span class="s">&quot;22016-05-27T14:00:00&quot;</span>
+       <span class="s">&quot;BB_2&quot;</span><span class="p p-Indicator">:</span>
+           <span class="nt">notes</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;An</span><span class="nv"> </span><span class="s">example</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">changing</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">sensor&quot;</span><span class="p p-Indicator">]</span>
+           <span class="nt">site</span><span class="p">:</span> <span class="s">&quot;My</span><span class="nv"> </span><span class="s">other</span><span class="nv"> </span><span class="s">favorite</span><span class="nv"> </span><span class="s">site&quot;</span>
+           <span class="nt">start_date</span><span class="p">:</span> <span class="s">&quot;2015-04-23T10:00:00Z&quot;</span>
+           <span class="nt">end_date</span><span class="p">:</span> <span class="s">&quot;2016-05-28T15:37:00Z&quot;</span>
+           <span class="nt">location_code</span><span class="p">:</span> <span class="s">&quot;00&quot;</span>
+           <span class="nt">instrumentation</span><span class="p">:</span>
+               <span class="nt">$ref</span><span class="p">:</span> <span class="s">&quot;instrumentation/BBOBS1_2012+.instrumentation.yaml#instrumentation&quot;</span>
+           <span class="nt">channel_modifications</span><span class="p">:</span>
+              <span class="s">&quot;*-*&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">sensor</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">equipment</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">serial_number</span><span class="p">:</span> <span class="s">&quot;Sphere06&quot;</span><span class="p p-Indicator">}},</span><span class="nt"> datalogger_configuration</span><span class="p">:</span> <span class="s">&quot;62.5sps&quot;</span><span class="p p-Indicator">}</span>
+              <span class="s">&quot;H-*&quot;</span><span class="p p-Indicator">:</span>
+                 <span class="nt">sensor</span><span class="p">:</span>
+                   <span class="nt">equipment</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">serial_number</span><span class="p">:</span> <span class="s">&quot;IP007&quot;</span><span class="p p-Indicator">}</span>
+                   <span class="nt">response_modifications</span><span class="p">:</span>
+                     <span class="s">&quot;3&quot;</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="nt">gain</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">value</span><span class="p">:</span> <span class="nv">15</span><span class="p p-Indicator">}}</span>
+           <span class="nt">locations</span><span class="p">:</span>
+               <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+                   <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/BUC_DROP.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+                   <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.29756</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.26049</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-1887</span><span class="p p-Indicator">}</span>
+           <span class="nt">processing</span><span class="p">:</span>
+               <span class="p p-Indicator">-</span> <span class="nt">clock_correct_linear_drift</span><span class="p">:</span>
+                       <span class="nt">&lt;&lt;</span><span class="p">:</span> <span class="nv">*LINEAR_CLOCK_DEFAULTS</span>
+                       <span class="nt">start_sync_reference</span><span class="p">:</span> <span class="s">&quot;2015-04-22T12:24:00&quot;</span>
+                       <span class="nt">start_sync_instrument</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+                       <span class="nt">end_sync_reference</span><span class="p">:</span> <span class="s">&quot;2016-05-28T15:35:00.3660&quot;</span>
+                       <span class="nt">end_sync_instrument</span><span class="p">:</span> <span class="s">&quot;2016-05-28T15:35:02&quot;</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../advanced.html" class="btn btn-neutral float-left" title="Advanced" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="arol.html" class="btn btn-neutral float-right" title="AROL compatibility" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

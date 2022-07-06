@@ -1,0 +1,109 @@
+
+.. _Operator:
+
+******************
+Operator
+******************
+
+
+===============
+ Description
+===============
+
+Operator specifies the operator of the network, corresponding to the operator field in StationXML. It is also copied to the operator field in station in StationXML.
+
+---------------------
+Python class:
+---------------------
+
+Operator
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+operator
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+Operator
+ Both in Network and Station.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is part of a :ref:`Network <Network>`
+
+==============================
+Attributes
+==============================
+
+.. _Agency: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#agency-required
+.. _Name: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-operator-contact-name
+.. _Email: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-operator-contact-email 
+.. _Phone: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-operator-contact-phone
+.. _WebSite: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#website
+
+======================== ================================== ============ ================= =============================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**          **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  reference_name                   string                          Y           *None*        Operator. `Agency`_               Operating agency abbreviation
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  full_name                        number                          Y           *None*       Operator.Contact. `Name`_          Operating agency full name, used in contact name
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  contact_name                        number                       Y           *None*       Operator.Contact. `Name`_      
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  email                            email                           Y           *None*      Operator.Contact. `Email`_          Not required in StationXML
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  phone_number                     string                          N           *None*      Operator.Contact. `Phone`_
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  website                          URL                             N           *None*      Operator. `WebSite`_                
+======================== ================================== ============ ================= =============================== =============================================================
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+Operator section in network information file `<https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml>`_
+
+.. code-block:: yaml
+
+ operator:
+        reference_name: "INSU-IPGP"
+        full_name: "INSU-IPGP OBS Park"
+
+===================
+Class Navigation
+===================
+
+:ref:`Network` \<\=\=
+
+:ref:`Instrumentation` \<\=\=

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Channel modifications" href="advanced/chan_mods.html" />
+    <link rel="prev" title="Summary" href="tutorial/tutorial-9.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced/chan_mods.html">Channel modifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/arol.html">AROL compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/notes.html">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/caveats.html">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/addons.html">Addons</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Advanced</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/advanced.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="advanced">
+<h1>Advanced<a class="headerlink" href="#advanced" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="advanced/chan_mods.html">Channel modifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced/arol.html">AROL compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced/best_practice.html">Best practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#place-instrumentation-information-files-in-a-central-repository">Place instrumentation information files in a central repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#use-a-file-hierarchy-for-different-objects">Use a file hierarchy for different objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#validate-all-information-files-bottom-up">Validate all information files bottom up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#verification-of-response-stages-in-information-file">Verification of <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in information file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#reuse-information-files">Reuse information files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#document-information-files-with-notes-extras-and-comments">Document information files with notes, extras and comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#placement-of-response-stages-in-information-file">Placement of <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> in information file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#how-to-modify-individual-stages">How to modify individual stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#use-of-channel-modifications">Use of channel modifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#how-to-use-notes">How to use notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/best_practice.html#base-your-info-files-in-templates">Base your info files in templates</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced/notes.html">Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced/notes.html#date-formats">Date formats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced/caveats.html">Caveats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced/caveats.html#caveat-effect-of-ref">Caveat: Effect of <code class="docutils literal notranslate"><span class="pre">$ref</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/caveats.html#caveat-cryptic-syntax-messages">Caveat: Cryptic syntax messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/caveats.html#caveat-use-of-response-stages">Caveat: Use of response stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/caveats.html#caveat-treatment-of-sample-rates-in-response-stages">Caveat: Treatment of sample rates in response stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/caveats.html#caveat-always-follow-the-syntax-and-beware-of-ref-overwriting-your-attributes">Caveat: ALWAYS follow the syntax and beware of $ref overwriting your attributes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced/troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced/addons.html">Addons</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced/addons.html#lcheapo">LCHEAPO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/addons.html#sdpchain">SDPCHAIN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/addons.html#lc2sds">LC2SDS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced/addons.html#oca">OCA</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial/tutorial-9.html" class="btn btn-neutral float-left" title="Summary" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="advanced/chan_mods.html" class="btn btn-neutral float-right" title="Channel modifications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

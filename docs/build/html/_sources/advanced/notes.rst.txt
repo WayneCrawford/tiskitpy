@@ -1,0 +1,17 @@
+****************
+Notes
+****************
+
+Date formats
+**************************
+
+Dates can be entered in regular "dd/mm/yyyy" format or in UTC format, either "yyyy-mm-dd" or 
+"yyyy-mm-ddThh:mm:ss" or "yyyy-mm-ddThh:mm:ssZ", according to norm 
+`ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_. The difference between the latter two formats
+is that the first represents local time and the second UTC time. The norm allows you to specify
+hours respective to UTC by adding or subtracting. This particular format is not allowed in *obsinfo*. 
+Separators can be either "/" or "-". 
+
+Dates in other formats will result in an exception. 
+
+No effort is made to validate if dates are legal, i.e., to reject dates such as "31/02/2021".

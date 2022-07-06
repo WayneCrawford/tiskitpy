@@ -1,0 +1,114 @@
+
+.. _FDSNNetwork:
+
+********************
+ FDSNNetwork
+********************
+
+===============
+ Description
+===============
+
+FDSN network contains specifications compatible with the FDSN standards to describe the :ref:`Network <Network>`. This class is not actually implemented as such in the Python code, its attributes are assigned in the __init__() method of the Network class.
+
+---------------------
+Python class:
+---------------------
+
+*None*
+  These attributes are treated in :ref:`Network`.
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+network_info
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+*None*
+ Individual attributes in this class belong to the Network attribute.
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+* Is part of the specification of a :ref:`Network <Network>`
+
+==============================
+Attributes
+==============================
+
+.. _code: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-required
+.. _process: http://docs.fdsn.org/projects/source-identifiers/en/v1.0/network-codes.html
+.. _Description: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#description 
+.. _Comment: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#comment 
+.. _startDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-required
+.. _endDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#network-required
+
+======================== ================================== ============ ================= =============================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**          **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  code                             string                          Y           *None*             `code`_                     Codes are assigned by FDSN according to this `process`_
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  name                             string                          Y           *None*            *None*                       Will be added as a `Comment`_                   
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  description                      string                          Y           *None*             `Description`_              Not required in StationXML
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  comment                          string                          N           *None*                `Comment`_
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  start_date                        date                           Y           *None*                `startDate`_             Not required in StationXML            
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  end_date                          date                           Y           *None*                `endDate`_               Not required in StationXML                
+======================== ================================== ============ ================= =============================== =============================================================
+
+
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/obsinfo/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/obsinfo/obsinfo/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+FDSN Network_info section referred in network information file. 
+
+.. code-block:: yaml
+
+ network_info:
+        code: "4G"
+        name: "Short period OBSs"
+        start_date: "2007-07-01"
+        end_date: "2025-12-31"
+        description: "Short period OBS network example"
+        comments: ["Lucky Strike Volcano, North Mid-Atlantic Ridge"]
+
+===================
+Class Navigation
+===================
+
+:ref:`Network` \<\=\=
+

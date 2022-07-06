@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AROL compatibility &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Best practices" href="best_practice.html" />
+    <link rel="prev" title="Channel modifications" href="chan_mods.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../advanced.html">Advanced</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="chan_mods.html">Channel modifications</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">AROL compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="best_practice.html">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes.html">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="caveats.html">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addons.html">Addons</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../advanced.html">Advanced</a> &raquo;</li>
+      <li>AROL compatibility</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/advanced/arol.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="arol-compatibility">
+<h1>AROL compatibility<a class="headerlink" href="#arol-compatibility" title="Permalink to this headline"></a></h1>
+<p>One of the objectives of <em>obsinfo</em> is to be compatible with the AROL instrumentation database.
+AROL is a yaml-based instrumentation database which can be explored through the Yasmine application.
+Its syntax is heavily based on version v0.106 of <em>obsinfo</em>.
+Efforts are underway to make the syntax of the current version of <em>obsinfo</em> and of AROL be as close as possible.
+However, since the philosophy is somewhat different, some discrepancies will be inevitable.
+AROL builds a configuration out of user choices made with the Yasmine tool.
+<em>obsinfo</em> lists all available configurations and lets the user choose using the configuration fields (<code class="docutils literal notranslate"><span class="pre">sensor_configuration</span></code>, <code class="docutils literal notranslate"><span class="pre">preamplifier_configuration</span></code>, <code class="docutils literal notranslate"><span class="pre">datalogger_configuration</span></code>) in a station or network information file.</p>
+<p>The current effort is to make AROL yaml files readable by <em>obsinfo</em>. However, there are some outstanding issues:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>AROL does not have an offset field in its filter information files.
+It has a field called <code class="docutils literal notranslate"><span class="pre">delay.samples</span></code> which fulfills the same function.
+Proposed solution: let AROL change name.
+If not possible, read the AROL file and change within the <em>obsinfo</em> application.</p></li>
+<li><p>AROL uses <code class="docutils literal notranslate"><span class="pre">units</span></code> instead of <code class="docutils literal notranslate"><span class="pre">transfer_function_type</span></code> in Pole/Zero filters.
+Their value is directly translatable, via a table, to the <code class="docutils literal notranslate"><span class="pre">transfer_function_type</span></code> enumeration used by StationXML (see table below).
+Proposed solution: let AROL change names.
+If not possible, read the AROL file and change within the <em>obsinfo</em> application.</p></li>
+</ol>
+</div></blockquote>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 67%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>AROL unit</strong></p></td>
+<td><p><strong>obsinfo/StationXML equivalent</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>“rad/s”</p></td>
+<td><p>“LAPLACE (RADIANS/SECOND)”</p></td>
+</tr>
+<tr class="row-odd"><td><p>“hz”</p></td>
+<td><p>“LAPLACE (HERTZ)”</p></td>
+</tr>
+<tr class="row-even"><td><p>“z-transform”</p></td>
+<td><p>“DIGITAL (Z-TRANSFORM)”</p></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div><ol class="arabic simple" start="3">
+<li><p>AROL names of “fake” filters ANALOG, DIGITAL and AD_CONVERSION are in CamelCase in <em>obsinfo</em>: Analog, Digital, ADConversion to be consistent with StationXML.
+<strong>Proposed solution</strong>: let AROL change name.
+If not possible, read the AROL file and change within the <em>obsinfo</em> application.</p></li>
+<li><p>AROL specifies both <code class="docutils literal notranslate"><span class="pre">input_sample_rate</span></code> and <code class="docutils literal notranslate"><span class="pre">output_sample_rate</span></code> for all stages. <em>obsinfo</em> only specifies the input sample rate for the first stage in the whole instrument.
+It calculates all the other values out of decimation factors.
+This gives more flexibility to the definition of each individual stage in the <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> field of an information file.
+<strong>Proposed solution</strong>: read the AROL file and ignore these fields within the <em>obsinfo</em> application.</p></li>
+<li><p>AROL specifies response stages thus:</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">response</span><span class="p">:</span>
+  <span class="nt">decimation_info</span><span class="p">:</span>
+    <span class="nt">delay_correction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">stages</span><span class="p">:</span>
+</pre></div>
+</div>
+<p><em>obsinfo</em> simply specifies <code class="docutils literal notranslate"><span class="pre">response_stages</span></code> and the <code class="docutils literal notranslate"><span class="pre">delay_correction</span></code> attribute is specified at the <code class="docutils literal notranslate"><span class="pre">datalogger</span></code> level,
+as it is the only place where it makes sense for the global instrument.
+Also, <code class="docutils literal notranslate"><span class="pre">delay_correction</span></code> is specified as either  boolean in AROL or as a real number.
+In <em>obsinfo</em> a value of <code class="docutils literal notranslate"><span class="pre">None</span></code> is equivalent to AROL <code class="docutils literal notranslate"><span class="pre">False</span></code> and a numeric value is equivalent to AROL <code class="docutils literal notranslate"><span class="pre">True</span></code>.
+<strong>Proposed solution</strong>: make <em>obsinfo</em> read the AROL file and interpret this attribute.
+If found in a response other than the datalogger, give a warning and ignore.</p>
+</div></blockquote>
+</div></blockquote>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="chan_mods.html" class="btn btn-neutral float-left" title="Channel modifications" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="best_practice.html" class="btn btn-neutral float-right" title="Best practices" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+****************
+Best practices
+****************
+
+Place instrumentation information files in a central repository
+*******************************************************************************
+
+One of the main pillars of *obsinfo* philosophy is reuse and the DRY (don't repeat yourself) principle. In order to achieve this every effort has been made to ensure reusability, but the ultimate responsibiity for this lies with the user. It is strongly recommended to create a central repository of instrumentation information files which can then be reused by several campaigns. Instrumentations should be flexible enough, with several typical configurations, so the need to make modifications through ``channel_modifications`` is minimized.
+
+The use of a central repository will also permit information to be protected assigning modification writes only to the responsible parties.
+
+Campaign, network and station files can then be placed in different directories according to users and teams.
+
+Use a file hierarchy for different objects
+***********************************************************
+
+Although *obsinfo* gives you total flexibility to organize your files as you see fit, 
+it is recommended to use a hierarchy of directories and the ``obsinfo_datapath`` variable setup 
+with the ``obsinfo-setup`` application, whose used is explained in the :ref:`InstallStartup`. 
+
+Validate all information files bottom up
+***********************************************************
+
+Before trying to create a Station XML file, all information files should be validated individually. The best way to do this is to proceed bottom up: first validate filters, then stages, then components, then instrumentations, then networks. This way one can avoid very large output messages which are difficult to parse. 
+
+Files in central repositories should never be uploaded unless they're previously validated. Conversely, users can assume they don't have any need to validate central repositories.
+
+
+Verification of ``response_stages`` in information file
+************************************************************************
+
+All files in central repositories must be validated before being uploaded. It is good practice to validate your files from the bottom up. That is, validate filter files first, stage next, and so on to network, unless you're using (already verified) central repository files. This is to avoid long and unreadable messages from the validator.
+
+Reuse information files
+*****************************************
+
+Either create a repository of your own or use one of the central repository. If you plan on working offline, you can clone the GitLab repository locally.
+
+Document information files with notes, extras and comments
+*******************************************************************************
+
+A choice of documentation options are available in information files. Aside of the "#" comment mechanism of the YAML language, ``notes`` are used for *obsinfo* documentation that will **not** be reflected in the resulting StationXML file. On the other hand, ``comments`` can be used at the ``network``, ``station`` and ``channel`` levels which will be incorporated into the StationXML file. The reason to not extend this to ``stage`` and ``filter`` is that the resulting StationXML file would be cluttered with repeated comments. Similarly, at the same levels, ``extras`` can be specified. These take the form of key/value pairs to simulate attributes which are not actually present in StationXML but can be used for documentation. A typical example is:
+.. code-block:: yaml
+
+ DBIRD_response_type : "CALIBRATED" 
+  
+which is used in several filters. It should be specified at the channel level, though, perharps specifying to which filters it applies.
+
+Placement of ``response_stages`` in information file
+************************************************************************
+Although ``response_stages`` can be specified outside the ``configuration_definitions``, this is discouraged unless there is a single configuration. If there are several configurations, ``response_stages`` should be specified in the ``configuration_definitions``. Nevertheless, if ``response_stages`` is specified outside and there are several ``configuration_definitions``, the one selected will overwrite the ``response_stages``. If no configuration is specified, the ``response_stages`` outside will be used.
+
+In the following example, "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml" will *always* be overwritten by "responses/INSU_SPOBS_L28x128_theoretical.stage.yaml#stage", as there is a configuration default which corresponds to the configuration definition "128x gain".
+
+.. code-block:: yaml
+
+ preamplifier:
+     equipment:
+         model: "GEOPHONE-GAIN"
+         type: "Analog gain/filter card"
+         description: "SIO gain/filter card, seismo channel"
+         manufacturer: "SIO or IPGP"
+         vendor: ""
+     configuration_default: "128x gain"
+     response_stages: 
+         - $ref: "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage" # THIS WILL BE OVERWRITTEN
+     configuration_definitions:
+         "128x gain":
+             response_stages:
+                - $ref: "responses/INSU_SPOBS_L28x128_theoretical.stage.yaml#stage"
+
+Due to this, the best practice dictates that, in the presence of ``configuration_definitions``, 
+the ``response_stages`` in bold should be omitted. If ``configuration_default`` were not present and no configuration is selected at the channel/instrument level, a warning will be issued and the ``response_stages`` in bold will be used. If no response stages can be selected then an exception will be raised and the program will exit with error.
+
+.. code-block:: yaml
+
+The following example, though, is perfectly OK, as there is a single configuration and no need to specify ``configuration_definitions``: 
+
+ preamplifier:
+     equipment:
+         model: "GEOPHONE-GAIN"
+         type: "Analog gain/filter card"
+         description: "SIO gain/filter card, seismo channel"
+         manufacturer: "SIO or IPGP"
+         vendor: ""
+     response_stages:
+         - $ref: "responses/INSU_BBOBS_gain0.225_theoretical.stage.yaml#stage"
+
+
+How to modify individual stages
+*************************************************
+
+Individual stage modification must always be specified in ``response_modifications`` at the instrument component level. This will NOT work:
+
+.. code-block:: yaml  
+
+     preamplifier:  
+        {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"} 
+        gain: 
+           value: 34
+
+This will:
+
+.. code-block:: yaml
+
+     preamplifier:  
+        {$ref: "preamplifiers/LCHEAPO_BBOBS.preamplifier.yaml#preamplifier"} 
+        response_modifications:                                              
+           "*": gain: 
+                  value: 34
+
+Use of channel modifications
+*************************************************
+
+It should be the aim to create a large and flexible instrumentation database with lots of possible configurations. This way, channel modifications will be rarely used. In fact, it is recommended to use channel modifications sparingly. Ir they must be used, remember to **always** use the adequate syntax. No shortcuts are allowed. All the hierarchical syntax must be used. For example, to change the gain of a sensor stage you need to write:
+
+.. code-block:: yaml
+ 
+  channel_modifications:
+     sensor:  
+         {$ref: "sensors/SIO_DPG.sensor.yaml#sensor"}
+         response_modifications:                                              
+           "*": gain: 
+                  value: 34
+
+and not a shortcut such as:
+
+.. code-block:: yaml
+ 
+  channel_modifications:
+     gain: 
+       value: 34
+
+as there is no way *obsinfo* can determine to which stage of which component to apply the modification in gain.
+
+How to use notes
+***************************************
+
+There is a single ``notes`` attribute in JSON/YAML files, which contains a list of notes, in order to make documentation more systematic. However, sometimes a user may want to comment a piece of the file (for example, a single station in a network file). To do so we recommend using the YAML notation for comments, "#" followed by the comment text. Currently there is no way to do this in JSON files.
+
+Base your info files in templates
+*************************************************
+
+While syntax may be a challenge, we recommend strongly that, when starting a new information file, you use a template. That way at least you can guarantee that the indentation and spelling of attributes is right.

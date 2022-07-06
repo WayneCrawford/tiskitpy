@@ -1,0 +1,39 @@
+****************
+Caveats
+****************
+
+Caveat: Effect of ``$ref``
+*****************************
+
+In every case, the use of ``$ref`` is to totally substitute that line by the content referenced in the file path (under the "#" tag). It is completely equivalent to write the content of referenced file instead of the ``$ref`` line. This should be taken into account for syntax purposes. If syntax is not validated, a very good chance is that the ``$ref`` file syntax is either wrong or in the wrong place. Not finding the file also causes problems which are not evident at first glance; if you keep getting errors, check if the file is in the right place. 
+
+Caveat: Cryptic syntax messages
+**********************************
+
+Unfortunately, the JSON/YAML parser is very terse reporting syntax errors such as unmatched parentheses, brackets or curly brackets, single items instead of lists, etc., usually result in an exception with a cryptic message. It is *strongly* recommended that YAML files are edited in a suitable editor which can check at least basic syntax errors. See also the Troubleshooting section below. 
+
+Caveat: Use of response stages
+***********************************
+
+Although response stages are specified at the component (sensor, preamplifier and datalogger) level, in the end they are considered as a single response for the whole instrument. Response stages are taken in this order: sensor stages, preamplifier stages and datalogger stages, irrespective of the order in which components appear in the information file. Within a component, they are taken in the order specified in the information file. In the end, they are numbered from one to *n* for the whole response. 
+
+Caveat: Treatment of sample rates in response stages
+***********************************************************
+Only the input sample rate should be specified for a response, starting in the ADConversion stage. All other input and output rate are calculated using the decimation factor of each digital stage. Therefore, ``input_sample_rate`` and ``output_sample_rate`` should never be specified for later digital stages, and decimation factor should *always* be specified for them.
+
+Total sample rate is calculated for the whole response and checked against the sample rate specified in the datalogger. A warning will be issued if they are different.
+
+Caveat: ALWAYS follow the syntax and beware of $ref overwriting your attributes
+********************************************************************************
+
+A naïve approach to syntax might think that we can add fields, for example, to a $ref information file. For example, the file could be an instrumentation file and we could decide to add a datalogger configuration which is not present in the file:
+
+..block-code:: yaml
+
+ instrumentation:
+     "$ref" : "instrumentations/BBOBS1_2012+.instrumentation.yaml" 
+     datalogger_config: "62.5sps"
+
+This is wrong. First, it is the wrong syntax: what channel with the configuration be applied to? There is no indication of that. Remember: modifications should always follow the same syntax. If ``datalogger_config`` belongs under a channel, it should always be applied to a channel.
+
+But there is another problem. "$ref" will substitute all attributes at the same level, thus erasing the attribute ``datalogger_config``. If this happens it will be a silent error, since substitution occurs before validation and the application will never know ``datalogger_config`` was there. The correct way of applying ``datalogger_config`` is through ``channel_modifications`` at the station level.

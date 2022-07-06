@@ -1,0 +1,144 @@
+
+.. _Tutorial8:
+
+******************************************************************
+Building a filter information file for different filters
+******************************************************************
+
+As pointed out in the last section, all stages have an associated filter, even if we can't properly call it a filter, due to the ideosyncretic behavior of StationXML. Some of the normal filters are familiar:
+
+* :ref:`PolesZeros11` - Any kind of digital filter specified by its poles and its zeros. Use this for Laplace transforms and IIR filters.
+* :ref:`FIR11` - Finite Input Response digital filter
+* :ref:`Coefficients11` - A FIR expressed with coefficients of transfer function
+* :ref:`ResponseList` - A digital filter with all responses expressed as frequency, amplitude and phase.
+
+Others are not properly filters:
+
+* :ref:`ADConversion` - Analog to digital conversion stage
+* :ref:`Analog11` - gain only analog stage-
+* :ref:`Digital11`  gain only digital stage
+
+For more details on each one go to their corresponding Class pages. Here are some examples on how to express different filters (for examples of Analog and ADConversion, see last section).
+
+All filters have a type, which is specified in the list above, and digital ones have an ``offset``, which is the number of pulses to be skipped at the start of the signal input. ``offset`` is used to calculate delay, as explained in the last section.
+
+PolesZeros
+--------------
+
+A PolesZeros digital filter (as defined in the field ``type``) specifies a transfer function type, a normalization factor and frequency, and the respective poles and zeros:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ filter:
+    type: "PolesZeros"
+    transfer_function_type: "LAPLACE (RADIANS/SECOND)"
+    normalization_factor : 1
+    normalization_frequency : 0
+    zeros :
+        -     [0.0,  0.0]
+        -     [0.0,  0.0]
+        -   [-72.5,  0.0]
+        -  [-159.3,  0.0]
+        -  [-251,    0.0]
+        - [-3270.0,  0.0]
+    poles :
+        -    [-0.017699,    0.017604]
+        -    [-0.017699,   -0.017604]
+        -   [-85.3,         0.0]
+        -  [-155.4,       210.8]
+        -  [-155.4,      -210.8]
+        -  [-713,           0]
+        - [-1140,          -0]
+        - [-4300,          -0]
+        - [-5800,          -0]
+        - [-4300,        4400]
+        - [-4300,       -4400]
+    offset: 0
+
+ notes:
+    - poles et zeros d'un Trillium T240 no de serie 400+
+    - d'apres le fichier Trillium240_UserGuide_15672R7.pdf de Nanometrics.
+
+FIR
+--------------
+
+A FIR filter can be specified by a symmetry and a set of numerator coefficients of the transfer function. The symmetry specification permits to specify the filter without having to repeat values. But a FIR filter can also be specified by the numerator *and* denominator coefficients of the transfer function, in which case the type "Coefficients" is used. For more information, see the corresponding class. Finally, the specification can take the form of a list of responses, which uses the type "ResponseList". Again, this is straightforward. The syntax can be looked up in the corresponding class.
+
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ filter:
+    type: "FIR"
+    symmetry: "NONE"
+    offset: 6
+    coefficients:
+        - 2.44141E-4
+        - 0.00292969
+        - 0.0161133
+        - 0.0537109
+        - 0.12085
+        - 0.193359
+        - 0.225586
+        - 0.193359
+        - 0.12085
+        - 0.0537109
+        - 0.0161133
+        - 0.00292969
+        - 2.44141E-4
+
+Analog and Digital
+-------------------
+
+Analog and digital "filters" are stages that basically amplify the signal, whether analog or digital, with the gain specified, as usual, at the stage level. Analog filters can invert the polarity, so this needs to be specified with a ``polarity`` attribute.
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ filter:
+    type: "Analog"
+    polarity: "-"
+
+
+ANALOG to DIGITAL Converter
+---------------------------
+
+This is another type of pseudo-filter which has the input voltage range and the output voltage range as attributes:
+
+.. code-block:: yaml
+
+ ---
+ format_version: "0.110"
+ revision:
+    date: "2017-11-30"
+    authors:
+        -   $ref: "authors/Wayne_Crawford.author.yaml#author"
+
+ filter:
+    type: "ADConversion"
+    input_full_scale : 9 #  9 V pp
+    output_full_scale : 10485760 #  4FFFFF@Vref and B00000@-Vref
+
+* :ref:`Next page, Conclusion <Tutorial9>`
+* :ref:`Previous page <Tutorial7>`
+* :ref:`Back to start  <Tutorial1>`
+

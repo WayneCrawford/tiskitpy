@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Location &mdash; obsinfo 0.110 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Network" href="network.html" />
+    <link rel="prev" title="LocationBase" href="location_base.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> obsinfo
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Obsinfo Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../classes.html">Classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../classes.html#information-file-tree">Information File Tree</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html#filter-types">Filter Types</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="AD_conversion.html">ADConversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="analog.html">Analog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="channel.html">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="coefficients.html">Coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="datalogger.html">Datalogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="digital.html">Digital</a></li>
+<li class="toctree-l3"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FDSNNetwork.html">FDSNNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FIR.html">FIR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrumentation.html">Instrumentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument_component.html">InstrumentComponent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="instrument.html">Instrument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="leap_second.html">LeapSecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_drift.html">LinearDrift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="location_base.html">LocationBase</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Location</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#object-hierarchy">Object Hierarchy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#json-schema">JSON schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#class-navigation">Class Navigation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="network.html">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="operator.html">Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="poleszeros.html">PolesZeros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preamplifier.html">Preamplifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_list.html">ResponseList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="response_stages.html">ResponseStages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="seed_codes.html">SeedCodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sensor.html">Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="station.html">Station</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../general/installation.html">Installation and Startup Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/execution.html">Executing obsinfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced.html">Advanced</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Technical Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">README</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">obsinfo</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../classes.html">Classes</a> &raquo;</li>
+      <li>Location</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/classes/location.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="location">
+<span id="location1"></span><h1>Location<a class="headerlink" href="#location" title="Permalink to this headline"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline"></a></h2>
+<p>This class serves two purposes. If a single location is specified or if the location code “00” is specified, this will be geographic location of the corresponding <a class="reference internal" href="station.html#station"><span class="std std-ref">Station</span></a> in StationXML. The rest of locations serve to group channels that treat the signal of a single sensor. They can be physically in other geographic locations or not.</p>
+<section id="python-class">
+<h3>Python class:<a class="headerlink" href="#python-class" title="Permalink to this headline"></a></h3>
+<p>Location</p>
+</section>
+<section id="yaml-json-label">
+<h3>YAML / JSON label:<a class="headerlink" href="#yaml-json-label" title="Permalink to this headline"></a></h3>
+<p>location:</p>
+</section>
+<section id="corresponding-stationxml-structure">
+<h3>Corresponding StationXML structure<a class="headerlink" href="#corresponding-stationxml-structure" title="Permalink to this headline"></a></h3>
+<p><em>None</em></p>
+<blockquote>
+<div><p>Location codes appear in channels of a given instrumentation. All locations corresponding to these codes are specified as individual attributes in the channel section of StationXML.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="object-hierarchy">
+<h2>Object Hierarchy<a class="headerlink" href="#object-hierarchy" title="Permalink to this headline"></a></h2>
+<section id="superclass">
+<h3>Superclass<a class="headerlink" href="#superclass" title="Permalink to this headline"></a></h3>
+<p><em>None</em></p>
+</section>
+<section id="subclasses">
+<h3>Subclasses<a class="headerlink" href="#subclasses" title="Permalink to this headline"></a></h3>
+<p><em>None</em></p>
+</section>
+<section id="relationships">
+<h3>Relationships<a class="headerlink" href="#relationships" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Is assigned, as a code, to a <a class="reference internal" href="channel.html#channel"><span class="std std-ref">Channel</span></a></p></li>
+<li><p>Is assigned to a <a class="reference internal" href="station.html#station"><span class="std std-ref">Station</span></a></p></li>
+</ul>
+</section>
+</section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 17%" />
+<col style="width: 6%" />
+<col style="width: 9%" />
+<col style="width: 13%" />
+<col style="width: 44%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>Name</strong></p></td>
+<td><p><strong>Type</strong></p></td>
+<td><p><strong>Required</strong></p></td>
+<td><p><strong>Default</strong></p></td>
+<td><p><strong>Equivalent StationXML</strong></p></td>
+<td><p><strong>Remarks</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><em>code</em></p></td>
+<td><p>string</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel">location_code</a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>base</p></td>
+<td><p><a class="reference internal" href="location_base.html#locationbase"><span class="std std-ref">LocationBase</span></a></p></td>
+<td><p>N</p></td>
+<td><p><em>None</em></p></td>
+<td><p><em>None</em></p></td>
+<td><p>Individual fields of base in Station attribute. See <a class="reference internal" href="location_base.html#locationbase"><span class="std std-ref">LocationBase</span></a> for details.</p></td>
+</tr>
+<tr class="row-even"><td><p>position:</p></td>
+<td><p>Position</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><em>None</em></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>lat</p></li>
+</ul>
+</td>
+<td><p>number</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#latitude-required">Latitude</a></p></td>
+<td><p>Expressed in degrees/min/sec/fractions of sec.</p></td>
+</tr>
+<tr class="row-even"><td><ul class="simple">
+<li><p>lon</p></li>
+</ul>
+</td>
+<td><p>number</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#longitude-required">Longitude</a></p></td>
+<td><p>Expressed in degrees/min/sec/fractions of sec.</p></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>elev</p></li>
+</ul>
+</td>
+<td><p>number</p></td>
+<td><p>Y</p></td>
+<td><p><em>None</em></p></td>
+<td><p><a class="reference external" href="http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#elevation-required">Elevation</a></p></td>
+<td><p>Expressed in meters</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="json-schema">
+<h2>JSON schema<a class="headerlink" href="#json-schema" title="Permalink to this headline"></a></h2>
+<p><a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/network.schema.json</a></p>
+<p><a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/data/schemas/definitions.schema.json</a></p>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h2>
+<p>Facility section in network information file <a class="reference external" href="https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml">https://www.gitlab.com/resif/obsinfo/-/tree/master/obsinfo/_examples/Information_Files/network/SPOBS.INSU-IPGP.network.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">locations</span><span class="p">:</span>
+               <span class="s">&quot;00&quot;</span><span class="p p-Indicator">:</span>
+                   <span class="nt">base</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">$ref</span><span class="p">:</span> <span class="s">&#39;location_bases/SURFACE_DROP.location_base.yaml#location_base&#39;</span><span class="p p-Indicator">}</span>
+                   <span class="nt">position</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">lon</span><span class="p">:</span> <span class="nv">-32.32504</span><span class="p p-Indicator">,</span><span class="nt"> lat</span><span class="p">:</span> <span class="nv">37.29744</span><span class="p p-Indicator">,</span><span class="nt"> elev</span><span class="p">:</span> <span class="nv">-2030</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+</section>
+<section id="class-navigation">
+<h2>Class Navigation<a class="headerlink" href="#class-navigation" title="Permalink to this headline"></a></h2>
+<p><a class="reference internal" href="station.html#station"><span class="std std-ref">Station</span></a> &lt;==&gt; <a class="reference internal" href="../tutorial/tutorial-3.html#instrumentation"><span class="std std-ref">Instrumentation</span></a></p>
+<p>==&gt; <a class="reference internal" href="location_base.html#locationbase"><span class="std std-ref">LocationBase</span></a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="location_base.html" class="btn btn-neutral float-left" title="LocationBase" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="network.html" class="btn btn-neutral float-right" title="Network" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, IPGP.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+
+.. _Equipment:
+
+********************
+ Equipment
+********************
+
+===============
+ Description
+===============
+
+Equipment class describes the characteristics of a particular instrumentation or instrument component,
+such as the vendor, model, serial number and calibration dates.
+
+---------------------
+Python class:
+---------------------
+
+Equipment
+
+---------------------
+ YAML / JSON label:
+---------------------
+
+equipment
+
+------------------------------------------
+Corresponding StationXML structure
+------------------------------------------
+
+* Equipment
+* Datalogger
+* Sensor
+* Preamplifier
+
+All of these classes have the same attributes as the *obsinfo* class, which are populated from
+the ``Equipment`` subclass of ``Instrumentation``, ``Sensor``, ``Preamplifier`` and ``Datalogger`` in
+*obsinfo*
+
+==============================
+Object Hierarchy
+==============================
+
+-----------------------------------------
+Superclass
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Subclasses
+-----------------------------------------
+
+*None*
+
+-----------------------------------------
+Relationships
+-----------------------------------------
+
+Belongs to:
+
+* Instrumentation
+* Datalogger
+* Sensor
+* Preamplifier
+
+==============================
+Attributes
+==============================
+
+.. _type: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-type
+.. _manufacturer: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-manufacturer
+.. _Description: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-description
+.. _model: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-model
+.. _vendor: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-vendor
+.. _serial_number: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-serialnumber
+.. _startDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-installationdate
+.. _endDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-removaldate
+.. _calibDate: http://docs.fdsn.org/projects/stationxml/en/latest/reference.html#channel-equipment-calibrationdate
+
+
+======================== ================================== ============ ================= =============================== =============================================================
+        **Name**                   **Type**                 **Required**    **Default**    **Equivalent StationXML**          **Remarks**
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  type                             string                          Y           *None*             `type`_                     Not required in StationXML
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  description                      string                          Y           *None*             `Description`_              Not required in StationXML
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  manufacturer                     string                          Y           *None*             `manufacturer`_             Not required in StationXML
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  model                            string                          Y           *None*              `model`_                   Not required in StationXML                 
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  vendor                           string                          N           *None*              `vendor`_                  Not required in StationXML                 
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  serial_number                    string                          N           *None*               `serial_number`_          Not required in StationXML                   
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  installation_date                 date                           N           *None*               `startDate`_              Not required in StationXML            
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  remove_date                       date                           N           *None*               `endDate`_                Not required in StationXML                
+------------------------ ---------------------------------- ------------ ----------------- ------------------------------- -------------------------------------------------------------
+  calibration_date                  date                           N           *None*               `calibDate`_              Not required in StationXML                
+======================== ================================== ============ ================= =============================== =============================================================
+
+
+*  (str):
+        
+        
+        * vendor (str):
+        * serial_number (str):
+        
+        * resource_id (str):
+        * obspy_equipment (object of  class Equipment from *obspy.core.inventory.equipment*
+ 
+==============================
+JSON schema
+==============================
+
+`<https://www.gitlab.com/obsinfo/obsinfo/data/schemas/network.schema.json>`_
+
+`<https://www.gitlab.com/obsinfo/obsinfo/obsinfo/data/schemas/definitions.schema.json>`_
+
+==============================
+Example
+==============================
+
+FDSN Network_info section referred in network information file. 
+
+.. code-block:: yaml
+
+ network_info:
+        code: "4G"
+        name: "Short period OBSs"
+        start_date: "2007-07-01"
+        end_date: "2025-12-31"
+        description: "Short period OBS network example"
+        comments: ["Lucky Strike Volcano, North Mid-Atlantic Ridge"]
+
+===================
+Class Navigation
+===================
+
+:ref:`Network` \<\=\=
+
