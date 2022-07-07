@@ -37,7 +37,16 @@ from .fir_filter import FIRFilter
 
 @dataclass
 class Decimator:
-    """Decimate obspy stream in some intelligent way"""
+    """
+    Class to decimate obspy stream intelligenty
+    
+    Also allows one to update the station inventory with the filter responses used
+    
+    Args:
+        decimates (list): list of decimation factorst to use (integers between 2
+                        and 8, will be applied in order)
+        verbose (bool): Be chatty
+    """
 
     decimates: list
     verbose: bool = False
@@ -50,8 +59,8 @@ class Decimator:
         """
         Apply decimator to data
 
-        Arguments:
-            data (obspy Stream or Trace): waveform data
+        Argss:
+            data (:class:`obspy.Stream` or :class:`obspy.Trace`): waveform data
         """
         if isinstance(data, Stream):
             return self._run_stream(data)
