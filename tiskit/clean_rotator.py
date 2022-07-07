@@ -35,7 +35,7 @@ class CleanRotator():
     Class to clean tilt noise from OBS vertical channel using non-deforming rotation
 
     Args:
-        stream (Stream): input data, must have a *Z, *[1|N] and *[2|E] channel
+        stream (Stream): input data, must have a \*Z, \*[1|N] and \*[2|E] channel
         excludes: list of dictionaries containing time periods to avoid,
                      using "start" and "end" keys
         plot: Plot comparision of original and rotated vertical
