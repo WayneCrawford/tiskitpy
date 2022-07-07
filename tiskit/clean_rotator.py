@@ -36,13 +36,13 @@ class CleanRotator():
 
     Args:
         stream (Stream): input data, must have a *Z, *[1|N] and *[2|E] channel
-        remove_eq (str, True or False): filename of catalog to use to remove
-                earthquakes, will download catalog from USGS if True, not remove
-                EQs if False
         excludes: list of dictionaries containing time periods to avoid,
                      using "start" and "end" keys
         plot: Plot comparision of original and rotated vertical
         quickTest: Only run one day's data and do not save results
+        remove_eq (str, True or False): filename of catalog to use to remove
+                earthquakes, will download catalog from USGS if True, not remove
+                EQs if False
         uselogvar(bool): use logarithm of variance as metric
         filt_band (tuple): lower, upper frequency limits of band to filter data
                 before calculating rotation
