@@ -276,8 +276,10 @@ class SpectralDensity:
     @property
     def n_windows(self):
         """
+	The number of data windows used to calculate spectra
+	
         Returns:
-            (integer): the number of data windows used to calculate spectra
+            (int)
         """
         return(self._ds.n_windows)
 
