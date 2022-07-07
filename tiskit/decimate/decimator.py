@@ -44,7 +44,7 @@ class Decimator:
     
     Args:
         decimates (list): list of decimation factorst to use (integers between 2
-                        and 8, will be applied in order)
+                        and 7, will be applied in order)
         verbose (bool): Be chatty
     """
 
