@@ -19,7 +19,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=['obspy','PyYAML', 'numpy', 'scipy', 'matplotlib',
-                      'xarray', 'obstools'],
+                      'xarray'],
     entry_points={
          'console_scripts': [
          ]
