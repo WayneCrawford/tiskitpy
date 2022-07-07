@@ -24,12 +24,8 @@ class SpectralDensity:
     Class for spectral density functions.
     
     No public attributes, access data through provided methods
-    """
-    def __init__(self, chan_names: list, freqs: np.ndarray, chan_units: list,
-                 n_windows: int, window_type: str, starttimes: list = None,
-                 data: np.ndarray = None, responses: np.ndarray = None):
-        """
-        Args:
+    
+    Args:
             chan_names (list of str): channel names
             freqs (np.ndarray): frequencies
             chan_units (list of str): channel units
@@ -44,6 +40,11 @@ class SpectralDensity:
                 instrument response for each channel.
                 shape=(n_spects,n_freqs)
                 units=(counts/chan_units) 
+    """
+    def __init__(self, chan_names: list, freqs: np.ndarray, chan_units: list,
+                 n_windows: int, window_type: str, starttimes: list = None,
+                 data: np.ndarray = None, responses: np.ndarray = None):
+        """
         """
         # Validate Dimensions
         n_ch = len(chan_names)
