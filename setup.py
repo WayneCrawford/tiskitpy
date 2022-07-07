@@ -18,7 +18,8 @@ setuptools.setup(
     url="https://github.com/WayneCrawford/tiskit",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=['obspy','PyYAML', 'numpy', 'scipy', 'matplotlib'],
+    install_requires=['obspy','PyYAML', 'numpy', 'scipy', 'matplotlib',
+                      'xarray'],
     entry_points={
          'console_scripts': [
          ]
