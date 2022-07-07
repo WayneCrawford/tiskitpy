@@ -41,9 +41,8 @@ class SpectralDensity:
                 shape=(n_spects,n_freqs)
                 units=(counts/chan_units) 
     """
-    def __init__(self, chan_names: list, freqs: np.ndarray, chan_units: list,
-                 n_windows: int, window_type: str, starttimes: list = None,
-                 data: np.ndarray = None, responses: np.ndarray = None):
+    def __init__(self, chan_names, freqs, chan_units, n_windows, window_type,
+		 starttimes=None, data=None, responses=None):
         # Validate Dimensions
         n_ch = len(chan_names)
         n_f = len(freqs)
@@ -96,9 +95,9 @@ class SpectralDensity:
 
     @property
     def channels(self):
-	"""
+    """
     Returns:
-        ch_names (list of str): channel names
+        (list of str): channel names
     """
         assert (list(self._ds.coords['input'].values)
                 == list(self._ds.coords['output'].values))
@@ -108,7 +107,7 @@ class SpectralDensity:
     def freqs(self):
         """
         Returns:
-            f (:class:`numpy.ndarray`): frequencies of the spectral density functions
+            (:class:`numpy.ndarray`): frequencies of the spectral density functions
         """
         return self._ds.coords['f'].values
 
@@ -212,7 +211,7 @@ class SpectralDensity:
         Args:
             channel (str): channel name
         Returns
-            resp (:class:`numpy.ndarray()`: the instrument response
+            (:class:`numpy.ndarray()`: the instrument response
         """
         return self._ds["response"].sel(input=channel)
 
@@ -236,7 +235,7 @@ class SpectralDensity:
         Args:
             channel (str): the channel name
         Returns:
-            units (str): The input (physical) units of the given input or output channel
+            (str): The input (physical) units of the given input or output channel
         """
         return str(self._ds["spectra"].sel(input=channel).coords['in_units'].values)
 
@@ -516,7 +515,7 @@ class SpectralDensity:
                 units of (m/s^2)^2/Hz
             show_coherence (bool): show coherence as well
         Returns:
-            ax_array (:class:`numpy.ndarray`): array of axis pairs
+            (:class:`numpy.ndarray`): array of axis pairs
                 (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
@@ -590,8 +589,8 @@ class SpectralDensity:
 
         Returns:
             (tuple): tuple containing
-                ax_a (:class:`matplotlib.axes.axis`): amplitude plot axis
-                ax_p (:class:`matplotlib.axes.axis`): phase plot axis
+                (:class:`matplotlib.axes.axis`): amplitude plot axis
+                (:class:`matplotlib.axes.axis`): phase plot axis
         """
         # da = self._ds["spectra"].sel(input=key, output=subkey)
         # in_units = da.coords['in_units'].values
