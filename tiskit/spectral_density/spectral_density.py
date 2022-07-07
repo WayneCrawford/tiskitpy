@@ -548,11 +548,8 @@ class SpectralDensity:
         """
         Plot one autospectral density
         
-        Args:
-            key (str): channel
-            
-        all other arguments are the same as for plot_one_spectra(), except
-            there is no `subkey` argument and `show_phase` is ignored
+        Arguments are the same as for `plot_one_spectra()`, except
+        there is no `subkey` argument and `show_phase` is ignored
         """
         kwargs['show_phase'] = False
         self.plot_one_spectra(key, key, **kwargs)
