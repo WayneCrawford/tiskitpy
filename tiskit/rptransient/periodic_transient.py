@@ -24,6 +24,11 @@ class PeriodicTransient():
     """
     Class to determine parameters for and remove a periodic transient
     
+    The program will make transient slices starting between
+    transient_starttime and 1/3 of self.period earlier
+
+    transient_starttime must not be too late, a few seconds early is ok
+    
     Args:
         name (str): name of this periodic transient (e.g., 'hourly')
         period (float): seconds between each transient
@@ -34,13 +39,8 @@ class PeriodicTransient():
         transient_starttime (~class `obspy.core.UTCDateTime`): onset
                 time of earliest transient.
 
-        The program will make transient slices starting between
-        transient_starttime and 1/3 of self.period earlier
-
-        transient_starttime must not be too late, a few seconds early is ok
     """
-    def __init__(self, name: str, period: float, dp: float, clips: tuple,
-                 transient_starttime: UTCDateTime):
+    def __init__(self, name, period, dp, clips, transient_starttime):
         """Initialization"""
         self.name = name
         self.period = float(period)
@@ -85,8 +85,6 @@ class PeriodicTransient():
             eq_remover (class EQRemover):
             match (bool): match and cancel each pulse separately
             plots (bool): plot results
-        Returns:
-            ( ~class `obspy.stream.Trace`): cleaned data
         """
         slice_starttime = self._calc_slice_starttime(trace)
         if self.transient_starttime < trace.stats.starttime:
@@ -109,8 +107,11 @@ class PeriodicTransient():
         """
         Remove transient from trace
 
-        :param trace: data
-        :param match: match each transient individually
+        Args:
+            trace(:class:`obspy.Trace`): input data
+            match (bool): match each transient individually
+        Returns:
+            (:class:`obspy.Trace`): output data
         """
         assert self.transient_model is not None
 
