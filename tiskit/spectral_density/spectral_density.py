@@ -95,10 +95,10 @@ class SpectralDensity:
 
     @property
     def channels(self):
-    """
-    Returns:
-        (list of str): channel names
-    """
+        """
+        Returns:
+            (list of str): channel names
+        """
         assert (list(self._ds.coords['input'].values)
                 == list(self._ds.coords['output'].values))
         return list(self._ds.coords['input'].values)
