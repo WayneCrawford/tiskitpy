@@ -22,26 +22,26 @@ def_days_per_magnitude = 1.5
 
 class PeriodicTransient():
     """
-    Information about one periodic transient
-    """
-    def __init__(self, name: str, period: float, dp: float, clips: tuple,
-                 transient_starttime: UTCDateTime):
-        """
-        Args:
-            name (str): name of this periodic transient (e.g., 'hourly')
-            period (float): seconds between each transient
-            dp (float): how many seconds to change the period by when testing
+    Class to determine parameters for and remove a periodic transient
+    
+    Args:
+        name (str): name of this periodic transient (e.g., 'hourly')
+        period (float): seconds between each transient
+        dp (float): how many seconds to change the period by when testing
                    for better values
-            clips (tuple): clip values outside of this range (low, high).
+        clips (tuple): clip values outside of this range (low, high).
                 Should contain the max range of the transient
-            transient_starttime (~class `obspy.core.UTCDateTime`): onset
+        transient_starttime (~class `obspy.core.UTCDateTime`): onset
                 time of earliest transient.
 
         The program will make transient slices starting between
         transient_starttime and 1/3 of self.period earlier
 
         transient_starttime must not be too late, a few seconds early is ok
-        """
+    """
+    def __init__(self, name: str, period: float, dp: float, clips: tuple,
+                 transient_starttime: UTCDateTime):
+        """Initialization"""
         self.name = name
         self.period = float(period)
         self.dp = float(dp)
