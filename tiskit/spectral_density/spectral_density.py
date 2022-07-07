@@ -7,7 +7,7 @@ import pickle
 import xarray as xr
 import numpy as np
 from matplotlib import pyplot as plt
-from obstools.atacr import DayNoise, StaNoise
+# from obstools.atacr import DayNoise, StaNoise  # removed for readthedocs
 from .utils import _prol1pi, _prol4pi, coherence_significance_level
 from obspy.core.stream import Stream
 from obspy.core import UTCDateTime
@@ -233,70 +233,70 @@ class SpectralDensity:
         """Return number of data windows used"""
         return(self._ds.n_windows)
 
-    @classmethod
-    def from_ATACR(cls, objnoise, horizontal_format='separate'):
-        """
-        Initiate class from ATACR DayNoise or StaNoise class
-
-        Args:
-            objnoise (:class:`.DayNoise` or :class:`.StaNoise`):
-                noise spectra and frequencies
-            horizontal_format (str): which type of horizontal channels to use:
-                'aligned': one horizontal channel, aligned with highest noise
-                'separate': two orthogonal horizontal channels
-        """
-        if (not objnoise and not isinstance(objnoise, DayNoise) and
-                not isinstance(objnoise, StaNoise)):
-            raise TypeError("Error: A TFNoise object must be initialized with"
-                            " only one of type DayNoise or StaNoise object")
-
-        if not objnoise.av:
-            raise(Exception("Error: Noise object has not been processed (QC "
-                            "and averaging) - aborting"))
-
-        if horizontal_format == 'separate':
-            chans = ['1', '2', 'Z', 'P']
-            units = ['m/s^2', 'm/s^2', 'm/s^2', 'Pa']
-        elif horizontal_format == 'aligned':
-            chans = ['L', 'Z', 'P']
-            units = ['m/s^2', 'm/s^2', 'Pa']
-        else:
-            raise ValueError('horizontal_format not "separate" or "aligned"')
-        # shape = (len(chans), len(chans), len(objnoise.f))
-        if hasattr(objnoise, 'nwins'):
-            n_winds = np.sum(objnoise.nwins)
-        else:
-            n_winds = np.sum(objnoise.goodwins)
-
-        obj = cls(chans, objnoise.f, units, n_winds, 'hanning')
-        if horizontal_format == 'separate':
-            obj.put_crossspect('1', '1', objnoise.power.c11)
-            obj.put_crossspect('1', '2', objnoise.cross.c12)
-            obj.put_crossspect('1', 'Z', objnoise.cross.c1Z)
-            obj.put_crossspect('1', 'P', objnoise.cross.c1P)
-            obj.put_crossspect('2', '1', np.conj(objnoise.cross.c12))
-            obj.put_crossspect('2', '2', objnoise.power.c22)
-            obj.put_crossspect('2', 'Z', objnoise.cross.c2Z)
-            obj.put_crossspect('2', 'P', objnoise.cross.c2P)
-            obj.put_crossspect('Z', '1', np.conj(objnoise.cross.c1Z))
-            obj.put_crossspect('Z', '2', np.conj(objnoise.cross.c2Z))
-            obj.put_crossspect('Z', 'Z', objnoise.power.cZZ)
-            obj.put_crossspect('Z', 'P', objnoise.cross.cZP)
-            obj.put_crossspect('P', '1', np.conj(objnoise.cross.c1P))
-            obj.put_crossspect('P', '2', np.conj(objnoise.cross.c2P))
-            obj.put_crossspect('P', 'Z', np.conj(objnoise.cross.cZP))
-            obj.put_crossspect('P', 'P', objnoise.power.cPP)
-        elif horizontal_format == 'aligned':
-            obj.put_crossspect('L', 'L', objnoise.rotation.cHH)
-            obj.put_crossspect('L', 'Z', objnoise.rotation.cHZ)
-            obj.put_crossspect('L', 'P', objnoise.rotation.cHP)
-            obj.put_crossspect('Z', 'L', np.conj(objnoise.rotation.cHZ))
-            obj.put_crossspect('Z', 'Z', objnoise.power.cZZ)
-            obj.put_crossspect('Z', 'P', objnoise.cross.cZP)
-            obj.put_crossspect('P', 'L', np.conj(objnoise.rotation.cHP))
-            obj.put_crossspect('P', 'Z', np.conj(objnoise.cross.cZP))
-            obj.put_crossspect('P', 'P', objnoise.power.cPP)
-        return obj
+#     @classmethod
+#     def from_ATACR(cls, objnoise, horizontal_format='separate'):
+#         """
+#         Initiate class from ATACR DayNoise or StaNoise class
+# 
+#         Args:
+#             objnoise (:class:`.DayNoise` or :class:`.StaNoise`):
+#                 noise spectra and frequencies
+#             horizontal_format (str): which type of horizontal channels to use:
+#                 'aligned': one horizontal channel, aligned with highest noise
+#                 'separate': two orthogonal horizontal channels
+#         """
+#         if (not objnoise and not isinstance(objnoise, DayNoise) and
+#                 not isinstance(objnoise, StaNoise)):
+#             raise TypeError("Error: A TFNoise object must be initialized with"
+#                             " only one of type DayNoise or StaNoise object")
+# 
+#         if not objnoise.av:
+#             raise(Exception("Error: Noise object has not been processed (QC "
+#                             "and averaging) - aborting"))
+# 
+#         if horizontal_format == 'separate':
+#             chans = ['1', '2', 'Z', 'P']
+#             units = ['m/s^2', 'm/s^2', 'm/s^2', 'Pa']
+#         elif horizontal_format == 'aligned':
+#             chans = ['L', 'Z', 'P']
+#             units = ['m/s^2', 'm/s^2', 'Pa']
+#         else:
+#             raise ValueError('horizontal_format not "separate" or "aligned"')
+#         # shape = (len(chans), len(chans), len(objnoise.f))
+#         if hasattr(objnoise, 'nwins'):
+#             n_winds = np.sum(objnoise.nwins)
+#         else:
+#             n_winds = np.sum(objnoise.goodwins)
+# 
+#         obj = cls(chans, objnoise.f, units, n_winds, 'hanning')
+#         if horizontal_format == 'separate':
+#             obj.put_crossspect('1', '1', objnoise.power.c11)
+#             obj.put_crossspect('1', '2', objnoise.cross.c12)
+#             obj.put_crossspect('1', 'Z', objnoise.cross.c1Z)
+#             obj.put_crossspect('1', 'P', objnoise.cross.c1P)
+#             obj.put_crossspect('2', '1', np.conj(objnoise.cross.c12))
+#             obj.put_crossspect('2', '2', objnoise.power.c22)
+#             obj.put_crossspect('2', 'Z', objnoise.cross.c2Z)
+#             obj.put_crossspect('2', 'P', objnoise.cross.c2P)
+#             obj.put_crossspect('Z', '1', np.conj(objnoise.cross.c1Z))
+#             obj.put_crossspect('Z', '2', np.conj(objnoise.cross.c2Z))
+#             obj.put_crossspect('Z', 'Z', objnoise.power.cZZ)
+#             obj.put_crossspect('Z', 'P', objnoise.cross.cZP)
+#             obj.put_crossspect('P', '1', np.conj(objnoise.cross.c1P))
+#             obj.put_crossspect('P', '2', np.conj(objnoise.cross.c2P))
+#             obj.put_crossspect('P', 'Z', np.conj(objnoise.cross.cZP))
+#             obj.put_crossspect('P', 'P', objnoise.power.cPP)
+#         elif horizontal_format == 'aligned':
+#             obj.put_crossspect('L', 'L', objnoise.rotation.cHH)
+#             obj.put_crossspect('L', 'Z', objnoise.rotation.cHZ)
+#             obj.put_crossspect('L', 'P', objnoise.rotation.cHP)
+#             obj.put_crossspect('Z', 'L', np.conj(objnoise.rotation.cHZ))
+#             obj.put_crossspect('Z', 'Z', objnoise.power.cZZ)
+#             obj.put_crossspect('Z', 'P', objnoise.cross.cZP)
+#             obj.put_crossspect('P', 'L', np.conj(objnoise.rotation.cHP))
+#             obj.put_crossspect('P', 'Z', np.conj(objnoise.cross.cZP))
+#             obj.put_crossspect('P', 'P', objnoise.power.cPP)
+#         return obj
 
     @classmethod
     def from_stream(cls, stream, window_s=1000, windowtype='prol1pi',
@@ -779,39 +779,6 @@ class SpectralDensity:
 
         Args:
             filename (str): File name
-
-        Examples
-        --------
-
-        Run demo through all methods
-
-        >>> from obstools.atacr import DayNoise, StaNoise, TFNoise
-        >>> daynoise = DayNoise('demo')
-        Uploading demo data - March 04, 2012, station 7D.M08A
-        >>> daynoise.QC_daily_spectra()
-        >>> daynoise.average_daily_spectra()
-        >>> tfnoise_day = TFNoise(daynoise)
-        >>> tfnoise_day.transfer_func()
-        >>> stanoise = StaNoise('demo')
-        Uploading demo data - March 01 to 04, 2012, station 7D.M08A
-        >>> stanoise.QC_sta_spectra()
-        >>> stanoise.average_sta_spectra()
-        >>> tfnoise_sta = TFNoise(stanoise)
-        >>> tfnoise_sta.transfer_func()
-
-        Save object
-
-        >>> tfnoise_day.save('tf_daynoise_demo.pkl')
-        >>> tfnoise_sta.save('tf_stanoise_demo.pkl')
-
-        Check that everything has been saved
-
-        >>> import glob
-        >>> glob.glob("./tf_daynoise_demo.pkl")
-        ['./tf_daynoise_demo.pkl']
-        >>> glob.glob("./tf_stanoise_demo.pkl")
-        ['./tf_stanoise_demo.pkl']
-
         """
 
         if not self.transfunc:

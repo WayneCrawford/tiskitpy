@@ -4,6 +4,10 @@ TiSKit
 
 Routines for time series data processing
 
+Note that I had to remove `SpectralDensity.from_ATACR()` (never tested
+anyway) because readthedocs had a problem importing the `obstools` package
+using `pip`
+
 Classes
 =========================
 

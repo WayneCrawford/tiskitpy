@@ -6,7 +6,6 @@ import numpy as np
 import xarray as xr
 from matplotlib import pyplot as plt
 
-# from obstools.atacr import utils
 from .spectral_density.utils import coherence_significance_level
 from .spectral_density import SpectralDensity
 

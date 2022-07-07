@@ -174,18 +174,18 @@ def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
     return obj.apply(stream), obj.rot_angle, obj.rot_azimuth
 
 
-def extract_corr_z(evstream, tf_name):
-    """
-    Return a corrected stream from ATACR EventStream
-
-    Args:
-        evstream (:class:`obstools.atacr.EventStream`):
-        tf_name (str): transfer function key
-    Returns:
-        outstream (Stream): corrected Z stream
-    """
-    stream = evstream.sth.select(component='Z').copy()
-    stream[0].data = evstream.correct[tf_name].flatten()
-    return stream
+# def extract_corr_z(evstream, tf_name):
+#     """
+#     Return a corrected stream from ATACR EventStream
+# 
+#     Args:
+#         evstream (:class:`obstools.atacr.EventStream`):
+#         tf_name (str): transfer function key
+#     Returns:
+#         outstream (Stream): corrected Z stream
+#     """
+#     stream = evstream.sth.select(component='Z').copy()
+#     stream[0].data = evstream.correct[tf_name].flatten()
+#     return stream
 
 
