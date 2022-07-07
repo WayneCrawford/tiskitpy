@@ -44,8 +44,6 @@ class SpectralDensity:
     def __init__(self, chan_names: list, freqs: np.ndarray, chan_units: list,
                  n_windows: int, window_type: str, starttimes: list = None,
                  data: np.ndarray = None, responses: np.ndarray = None):
-        """
-        """
         # Validate Dimensions
         n_ch = len(chan_names)
         n_f = len(freqs)
@@ -98,22 +96,44 @@ class SpectralDensity:
 
     @property
     def channels(self):
+	"""
+    Returns:
+        ch_names (list of str): channel names
+    """
         assert (list(self._ds.coords['input'].values)
                 == list(self._ds.coords['output'].values))
         return list(self._ds.coords['input'].values)
 
     @property
     def freqs(self):
-        """Returns frequencies"""
+        """
+        Returns:
+            f (:class:`numpy.ndarray`): frequencies of the spectral density functions
+        """
         return self._ds.coords['f'].values
 
     def autospect(self, channel):
-        """Returns an auto-spectral_density"""
+        """
+	    Auto-spectral_density function for the given channel
+	
+	    Args:
+		    channel (str): channel name
+        Returns:
+            (:class:`numpy.ndarray`): auto-spectral density function
+	    """
         self._verify_channel(channel, "in_channel")
         return np.abs(self._ds["spectra"].sel(input=channel, output=channel).values.flatten())
 
     def crossspect(self, in_channel, out_channel):
-        """Returns a cross-spectral_density"""
+        """
+        Cross-spectral density function for the given channels
+	
+	    Args:
+            in_channel (str): input channel name
+            out_channel (str): output channel name
+        Returns:
+            (:class:`numpy.ndarray`): cross-spectral density function
+	    """
         self._verify_channel(in_channel, "in_channel")
         self._verify_channel(out_channel, "out_channel")
         return self._ds["spectra"].sel(input=in_channel, output=out_channel).values.flatten()
@@ -186,11 +206,26 @@ class SpectralDensity:
 
 
     def channel_response(self, channel):
-        """Returns a channel's instrument response"""
+        """
+        A channel's instrument response
+        
+        Args:
+            channel (str): channel name
+        Returns
+            resp (:class:`numpy.ndarray()`: the instrument response
+        """
         return self._ds["response"].sel(input=channel)
 
     def put_channel_response(self, channel, response):
-        """Put a channel's instrument response"""
+        """Put a channel's instrument response into the object
+        
+        Verifies that the response has the same shape as the object's
+        `frequency` property and that it is of type=`complex`
+        
+        Args:
+            channel (str): the channel name
+            response (:class:`numpy.ndarray
+        """
         assert response.shape == self.freqs.shape
         assert response.dtype == 'complex'
         assert channel in self.channels
@@ -198,20 +233,22 @@ class SpectralDensity:
 
     def channel_units(self, channel):
         """
-        Returns units of the given input or output channel
-        
         Args:
-            channel (str): channel
+            channel (str): the channel name
+        Returns:
+            units (str): The input (physical) units of the given input or output channel
         """
         return str(self._ds["spectra"].sel(input=channel).coords['in_units'].values)
 
     def units(self, in_channel, out_channel):
         """
-        Returns units of cross/autospect
+        The units of the given cross-  or auto-spectra
 
         Args:
             in_channel (str): input channel
             out_channel (str): output channel
+        Returns:
+            (str): the units
         """
         in_units = self.channel_units(in_channel)
         out_units = self.channel_units(out_channel)
@@ -221,17 +258,28 @@ class SpectralDensity:
 
     @property
     def window_type(self):
-        """Return window type"""
+        """
+        Returns:
+            (str): the type of window used
+                to calculate the spectral densities
+        """
         return(self._ds.window_type)
 
     @property
     def starttimes(self):
-        """Return list of starttimes"""
+        """
+        Returns:
+            stimes (list of :class:`obspy.UTCDateTimes`): Start times for 
+                each time-series data window used to calculate spectra
+        """
         return(self._ds.starttimes)
 
     @property
     def n_windows(self):
-        """Return number of data windows used"""
+        """
+        Returns:
+            (integer): the number of data windows used to calculate spectra
+        """
         return(self._ds.n_windows)
 
 #     @classmethod
@@ -367,7 +415,7 @@ class SpectralDensity:
 
     def coherence(self, in_chan, out_chan):
         """
-        Return the coherence for the given input and output channels
+        The coherence for the given input and output channels
 
         Args:
             in_chan (str): input channel.  Must match one of the
@@ -375,7 +423,7 @@ class SpectralDensity:
             out_chan (str): output channel.  Must match one of the
                 coordinates in _ds
         Returns:
-            coher (:class:`xr.DataArray`): Coherence absolute value
+            (:class:`xr.DataArray`): Coherence absolute value
 
         Coherence is a real-valued quantity, for the cross-spectral phase,
         use the cross-spectral density function.
@@ -390,10 +438,10 @@ class SpectralDensity:
 
     def coh_signif(self, prob=0.95):
         """
-        Return coherence significance level
-
         Args:
             prob (float): significance level (between 0 and 1)
+        Returns:
+            (float): the coherence significance level
         """
         return coherence_significance_level(self.n_windows, prob)
 
@@ -415,7 +463,7 @@ class SpectralDensity:
             outfile (str): save figure to this filename
             title (str): custom plot title
         Returns:
-            axes (:class:`numpy.ndarray`): array of axis pairs (amplitude,
+            (:class:`numpy.ndarray`): array of axis pairs (amplitude,
                 phase)
         """
         x = self._get_validate_channel_names(x)
