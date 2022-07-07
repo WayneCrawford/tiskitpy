@@ -113,26 +113,26 @@ class SpectralDensity:
 
     def autospect(self, channel):
         """
-	    Auto-spectral_density function for the given channel
-	
-	    Args:
-		    channel (str): channel name
+        Auto-spectral_density function for the given channel
+
+        Args:
+            channel (str): channel name
         Returns:
             (:class:`numpy.ndarray`): auto-spectral density function
-	    """
+        """
         self._verify_channel(channel, "in_channel")
         return np.abs(self._ds["spectra"].sel(input=channel, output=channel).values.flatten())
 
     def crossspect(self, in_channel, out_channel):
         """
         Cross-spectral density function for the given channels
-	
-	    Args:
+
+        Args:
             in_channel (str): input channel name
             out_channel (str): output channel name
         Returns:
             (:class:`numpy.ndarray`): cross-spectral density function
-	    """
+        """
         self._verify_channel(in_channel, "in_channel")
         self._verify_channel(out_channel, "out_channel")
         return self._ds["spectra"].sel(input=in_channel, output=out_channel).values.flatten()
@@ -216,14 +216,15 @@ class SpectralDensity:
         return self._ds["response"].sel(input=channel)
 
     def put_channel_response(self, channel, response):
-        """Put a channel's instrument response into the object
-        
+        """
+        Put a channel's instrument response into the object
+
         Verifies that the response has the same shape as the object's
         `frequency` property and that it is of type=`complex`
         
         Args:
             channel (str): the channel name
-            response (:class:`numpy.ndarray): the response
+            response (:class:`numpy.ndarray`): the response
         """
         assert response.shape == self.freqs.shape
         assert response.dtype == 'complex'
@@ -258,28 +259,30 @@ class SpectralDensity:
     @property
     def window_type(self):
         """
+        The type of window used to calculate the spectral densities
+        
         Returns:
-            (str): the type of window used
-                to calculate the spectral densities
+            (str):
         """
         return(self._ds.window_type)
 
     @property
     def starttimes(self):
         """
+        Start times for each data window used to calculate spectra
+        
         Returns:
-            stimes (list of :class:`obspy.UTCDateTimes`): Start times for 
-                each time-series data window used to calculate spectra
+            (list of :class:`obspy.UTCDateTimes`): 
         """
         return(self._ds.starttimes)
 
     @property
     def n_windows(self):
         """
-	The number of data windows used to calculate spectra
+	    The number of data windows used to calculate spectra
 	
         Returns:
-            (int)
+            (int):
         """
         return(self._ds.n_windows)
 
