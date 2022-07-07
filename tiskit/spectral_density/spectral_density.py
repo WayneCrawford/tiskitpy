@@ -223,7 +223,7 @@ class SpectralDensity:
         
         Args:
             channel (str): the channel name
-            response (:class:`numpy.ndarray
+            response (:class:`numpy.ndarray): the response
         """
         assert response.shape == self.freqs.shape
         assert response.dtype == 'complex'
@@ -447,7 +447,7 @@ class SpectralDensity:
         return coherence_significance_level(self.n_windows, prob)
 
     def plot(self, **kwargs):
-        """Shortcut for plot_autospectra"""
+        """Shortcut for `plot_autospectra()`"""
         self.plot_autospectra(**kwargs)
 
     def plot_autospectra(self, x=None, overlay=False, plot_peterson=True,
@@ -517,7 +517,7 @@ class SpectralDensity:
                 units of (m/s^2)^2/Hz
             show_coherence (bool): show coherence as well
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs
+            :class:`numpy.ndarray`: array of axis pairs
                 (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
@@ -591,8 +591,8 @@ class SpectralDensity:
 
         Returns:
             (tuple): tuple containing
-                (:class:`matplotlib.axes.axis`): amplitude plot axis
-                (:class:`matplotlib.axes.axis`): phase plot axis
+                - :class:`matplotlib.axes.axis`: amplitude plot axis
+                - :class:`matplotlib.axes.axis`: phase plot axis
         """
         # da = self._ds["spectra"].sel(input=key, output=subkey)
         # in_units = da.coords['in_units'].values
@@ -681,7 +681,8 @@ class SpectralDensity:
 
     def plot_coherences(self, x=None, y=None, overlay=False, show=True,
                         outfile=None):
-        """Plot coherences
+        """
+	    Plot coherences
 
         Args:
             x (list of str): limit to the listed input channels
@@ -691,7 +692,7 @@ class SpectralDensity:
             outfile (str): save to the named file
 
         Returns:
-            ax_array (:class:`numpy.ndarray`): array of axis pairs (amplitude,
+            (:class:`numpy.ndarray`): array of axis pairs (amplitude,
                 phase)
         """
         x = self._get_validate_channel_names(x)
@@ -767,8 +768,8 @@ class SpectralDensity:
 
         Returns:
             (tuple): tuple containing:
-                ax_a (:class:`matplotlib.axes.axis`): amplitude plot axis
-                ax_p (:class:`matplotlib.axes.axis`): phase plot axis
+                - (:class:`matplotlib.axes.axis`): amplitude plot axis
+                - (:class:`matplotlib.axes.axis`): phase plot axis
         """
         ds = self._ds['spectra'].sel(input=in_chan, output=out_chan)
         f = self._ds.coords['f'].values
@@ -830,7 +831,6 @@ class SpectralDensity:
         Args:
             filename (str): File name
         """
-
         if not self.transfunc:
             print("Warning: saving before having calculated the transfer "
                   "functions")
@@ -857,6 +857,7 @@ class SpectralDensity:
         """Remove loc code characters including and after first "-"
     
         Allows the use of "-?" in the loc code to specify removed coherent noise
+
         Args:
             id (str): seed ID code
     
