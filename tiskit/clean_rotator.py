@@ -31,6 +31,26 @@ def debug(s):
 
 
 class CleanRotator():
+    """
+    Class to clean tilt noise from OBS vertical channel using non-deforming rotation
+
+    Args:
+        stream (Stream): input data, must have a *Z, *[1|N] and *[2|E] channel
+        remove_eq (str, True or False): filename of catalog to use to remove
+                earthquakes, will download catalog from USGS if True, not remove
+                EQs if False
+        excludes: list of dictionaries containing time periods to avoid,
+                     using "start" and "end" keys
+        plot: Plot comparision of original and rotated vertical
+        quickTest: Only run one day's data and do not save results
+        uselogvar(bool): use logarithm of variance as metric
+        filt_band (tuple): lower, upper frequency limits of band to filter data
+                before calculating rotation
+        save_eq_file (bool): Passed onto TimeSpans.from_eqs()
+    Attributes:
+        angle (float): angle by which Z (or Z-X-Y) was rotated
+        azimuth (float): azimuth by which Z (or Z-X-Y) was rotated
+    """
     def __init__(self, stream, excludes=[], plot=False,
                  quickTest=False, remove_eq=True, uselogvar=False,
                  verbose=True, filt_band=(0.001, 0.01),
@@ -38,27 +58,6 @@ class CleanRotator():
         """
         Calculate rotation angles needed to minimize noise on vertical channel
 
-        Arguments:
-            stream (Stream): input data, must have a *Z, *[1|N] and *[2|E] channel
-            remove_eq (str, True or False): filename of catalog to use to remove
-                earthquakes, will download catalog from USGS if True, not remove
-                EQs if False
-            excludes: list of dictionaries containing time periods to avoid,
-                         using "start" and "end" keys
-            plot: Plot comparision of original and rotated vertical
-            quickTest: Only run one day's data and do not save results
-            uselogvar(bool): use logarithm of variance as metric
-            filt_band (tuple): lower, upper frequency limits of band to filter data
-                before calculating rotation
-            save_eq_file (bool): Passed onto TimeSpans.from_eqs()
-
-        Attributes:
-            angle: angle by which Z (or Z-X-Y) was rotated
-            azimuth: azimuth by which Z (or Z-X-Y) was rotated
-        Returns:
-            (tuple): 2-tuple containing:
-                (float): 
-                (float): azimuth by which Z (or Z-X-Y) was rotated
         """
         eq_spans = self._make_eq_spans(remove_eq, stream[0].stats, verbose,
                                        save_eq_file)
