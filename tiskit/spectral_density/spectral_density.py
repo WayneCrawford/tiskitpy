@@ -96,8 +96,10 @@ class SpectralDensity:
     @property
     def channels(self):
         """
+	Channel names
+	
         Returns:
-            (list of str): channel names
+            (list of str):
         """
         assert (list(self._ds.coords['input'].values)
                 == list(self._ds.coords['output'].values))
@@ -106,8 +108,10 @@ class SpectralDensity:
     @property
     def freqs(self):
         """
+        Frequencies of the spectral density functions
+
         Returns:
-            (:class:`numpy.ndarray`): frequencies of the spectral density functions
+            (:class:`numpy.ndarray`): 
         """
         return self._ds.coords['f'].values
 
@@ -149,7 +153,7 @@ class SpectralDensity:
 
         Args:
             channel (str): auto-spectra channel
-            auto_spect (:class:`numpy.ndarray`): a cross-spectral density
+            auto_spect (:class:`numpy.ndarray`): the auto-spectral density
         """
         if not auto_spect.shape == self.freqs.shape:
             raise ValueError('auto_spect has different shape than freqs ('
@@ -210,8 +214,8 @@ class SpectralDensity:
         
         Args:
             channel (str): channel name
-        Returns
-            (:class:`numpy.ndarray()`: the instrument response
+        Returns:
+            (:class:`numpy.ndarray`):
         """
         return self._ds["response"].sel(input=channel)
 
@@ -427,7 +431,7 @@ class SpectralDensity:
             out_chan (str): output channel.  Must match one of the
                 coordinates in _ds
         Returns:
-            (:class:`xr.DataArray`): Coherence absolute value
+            (:class:`numpy.ndarray`): Coherence absolute value
 
         Coherence is a real-valued quantity, for the cross-spectral phase,
         use the cross-spectral density function.
@@ -442,10 +446,12 @@ class SpectralDensity:
 
     def coh_signif(self, prob=0.95):
         """
+        The coherence significance level
+        
         Args:
             prob (float): significance level (between 0 and 1)
         Returns:
-            (float): the coherence significance level
+            (float):
         """
         return coherence_significance_level(self.n_windows, prob)
 
@@ -467,8 +473,7 @@ class SpectralDensity:
             outfile (str): save figure to this filename
             title (str): custom plot title
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs (amplitude,
-                phase)
+            (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
         if not overlay:
@@ -520,8 +525,7 @@ class SpectralDensity:
                 units of (m/s^2)^2/Hz
             show_coherence (bool): show coherence as well
         Returns:
-            :class:`numpy.ndarray`: array of axis pairs
-                (amplitude, phase)
+            :class:`numpy.ndarray`: array of axis pairs (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
         n_subkeys = len(x)
@@ -692,8 +696,7 @@ class SpectralDensity:
             outfile (str): save to the named file
 
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs (amplitude,
-                phase)
+            (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
         y = self._get_validate_channel_names(y)
@@ -823,22 +826,6 @@ class SpectralDensity:
         else:
             bottom_axis.set_xticklabels([])
         return ax_a, ax_p
-
-    def save(self, filename):
-        """
-        Method to save the object to file using `~Pickle`.
-
-        Args:
-            filename (str): File name
-        """
-        if not self.transfunc:
-            print("Warning: saving before having calculated the transfer "
-                  "functions")
-
-        # Remove traces to save disk space
-        file = open(filename, 'wb')
-        pickle.dump(self, file)
-        file.close()
 
     def _get_validate_channel_names(self, x):
         """
