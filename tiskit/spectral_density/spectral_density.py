@@ -23,12 +23,18 @@ class SpectralDensity:
     """
     Class for spectral density functions.
     
-    No public attributes, access data through provided methods
+    The standard constructor is rarely used, generate objects using
+    `SpectralDensity.from_stream()`
     
-    Args:
+    No public attributes, access data through provided methods
+    """
+    def __init__(self, chan_names, freqs, chan_units, n_windows, window_type,
+		 starttimes=None, data=None, responses=None):
+		"""
+		    Args:
             chan_names (list of str): channel names
             freqs (np.ndarray): frequencies
-            chan_units (list of str): channel units
+            chan_units (list of str): channel physical units (e.g m/s^2, Pa)
             n_windows (int): of windows used to calculate spectra
             windpw_type (str): type of window used
             starttimes (list of UTCDateTime): starttime for each window
@@ -40,9 +46,7 @@ class SpectralDensity:
                 instrument response for each channel.
                 shape=(n_spects,n_freqs)
                 units=(counts/chan_units) 
-    """
-    def __init__(self, chan_names, freqs, chan_units, n_windows, window_type,
-		 starttimes=None, data=None, responses=None):
+		"""
         # Validate Dimensions
         n_ch = len(chan_names)
         n_f = len(freqs)
@@ -121,7 +125,8 @@ class SpectralDensity:
             (:class:`numpy.ndarray`): auto-spectral density function
 	    """
         self._verify_channel(channel, "in_channel")
-        return np.abs(self._ds["spectra"].sel(input=channel, output=channel).values.flatten())
+        return np.abs(self._ds["spectra"].sel(
+            input=channel, output=channel).values.flatten())
 
     def crossspect(self, in_channel, out_channel):
         """
@@ -135,7 +140,8 @@ class SpectralDensity:
 	    """
         self._verify_channel(in_channel, "in_channel")
         self._verify_channel(out_channel, "out_channel")
-        return self._ds["spectra"].sel(input=in_channel, output=out_channel).values.flatten()
+        return self._ds["spectra"].sel(
+            input=in_channel, output=out_channel).values.flatten()
 
     def _verify_channel(self, channel, ch_name):
         if not isinstance(channel, str):
