@@ -100,8 +100,10 @@ class SpectralDensity:
     @property
     def channels(self):
         """
+	Channel names
+	
         Returns:
-            (list of str): channel names
+            (list of str):
         """
         assert (list(self._ds.coords['input'].values)
                 == list(self._ds.coords['output'].values))
@@ -110,20 +112,22 @@ class SpectralDensity:
     @property
     def freqs(self):
         """
+        Frequencies of the spectral density functions
+
         Returns:
-            (:class:`numpy.ndarray`): frequencies of the spectral density functions
+            (:class:`numpy.ndarray`): 
         """
         return self._ds.coords['f'].values
 
     def autospect(self, channel):
         """
-	    Auto-spectral_density function for the given channel
-	
-	    Args:
-		    channel (str): channel name
+        Auto-spectral_density function for the given channel
+
+        Args:
+            channel (str): channel name
         Returns:
             (:class:`numpy.ndarray`): auto-spectral density function
-	    """
+        """
         self._verify_channel(channel, "in_channel")
         return np.abs(self._ds["spectra"].sel(
             input=channel, output=channel).values.flatten())
@@ -131,13 +135,13 @@ class SpectralDensity:
     def crossspect(self, in_channel, out_channel):
         """
         Cross-spectral density function for the given channels
-	
-	    Args:
+
+        Args:
             in_channel (str): input channel name
             out_channel (str): output channel name
         Returns:
             (:class:`numpy.ndarray`): cross-spectral density function
-	    """
+        """
         self._verify_channel(in_channel, "in_channel")
         self._verify_channel(out_channel, "out_channel")
         return self._ds["spectra"].sel(
@@ -155,7 +159,7 @@ class SpectralDensity:
 
         Args:
             channel (str): auto-spectra channel
-            auto_spect (:class:`numpy.ndarray`): a cross-spectral density
+            auto_spect (:class:`numpy.ndarray`): the auto-spectral density
         """
         if not auto_spect.shape == self.freqs.shape:
             raise ValueError('auto_spect has different shape than freqs ('
@@ -216,20 +220,21 @@ class SpectralDensity:
         
         Args:
             channel (str): channel name
-        Returns
-            (:class:`numpy.ndarray()`: the instrument response
+        Returns:
+            (:class:`numpy.ndarray`):
         """
         return self._ds["response"].sel(input=channel)
 
     def put_channel_response(self, channel, response):
-        """Put a channel's instrument response into the object
-        
+        """
+        Put a channel's instrument response into the object
+
         Verifies that the response has the same shape as the object's
         `frequency` property and that it is of type=`complex`
         
         Args:
             channel (str): the channel name
-            response (:class:`numpy.ndarray
+            response (:class:`numpy.ndarray`): the response
         """
         assert response.shape == self.freqs.shape
         assert response.dtype == 'complex'
@@ -264,26 +269,30 @@ class SpectralDensity:
     @property
     def window_type(self):
         """
+        The type of window used to calculate the spectral densities
+        
         Returns:
-            (str): the type of window used
-                to calculate the spectral densities
+            (str):
         """
         return(self._ds.window_type)
 
     @property
     def starttimes(self):
         """
+        Start times for each data window used to calculate spectra
+        
         Returns:
-            stimes (list of :class:`obspy.UTCDateTimes`): Start times for 
-                each time-series data window used to calculate spectra
+            (list of :class:`obspy.UTCDateTimes`): 
         """
         return(self._ds.starttimes)
 
     @property
     def n_windows(self):
         """
+	    The number of data windows used to calculate spectra
+	
         Returns:
-            (integer): the number of data windows used to calculate spectra
+            (int):
         """
         return(self._ds.n_windows)
 
@@ -428,7 +437,7 @@ class SpectralDensity:
             out_chan (str): output channel.  Must match one of the
                 coordinates in _ds
         Returns:
-            (:class:`xr.DataArray`): Coherence absolute value
+            (:class:`numpy.ndarray`): Coherence absolute value
 
         Coherence is a real-valued quantity, for the cross-spectral phase,
         use the cross-spectral density function.
@@ -443,15 +452,17 @@ class SpectralDensity:
 
     def coh_signif(self, prob=0.95):
         """
+        The coherence significance level
+        
         Args:
             prob (float): significance level (between 0 and 1)
         Returns:
-            (float): the coherence significance level
+            (float):
         """
         return coherence_significance_level(self.n_windows, prob)
 
     def plot(self, **kwargs):
-        """Shortcut for plot_autospectra"""
+        """Shortcut for `plot_autospectra()`"""
         self.plot_autospectra(**kwargs)
 
     def plot_autospectra(self, x=None, overlay=False, plot_peterson=True,
@@ -468,8 +479,7 @@ class SpectralDensity:
             outfile (str): save figure to this filename
             title (str): custom plot title
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs (amplitude,
-                phase)
+            (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
         if not overlay:
@@ -521,8 +531,7 @@ class SpectralDensity:
                 units of (m/s^2)^2/Hz
             show_coherence (bool): show coherence as well
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs
-                (amplitude, phase)
+            :class:`numpy.ndarray`: array of axis pairs (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
         n_subkeys = len(x)
@@ -552,11 +561,8 @@ class SpectralDensity:
         """
         Plot one autospectral density
         
-        Args:
-            key (str): channel
-            
-        all other arguments are the same as for plot_one_spectra(), except
-            there is no `subkey` argument and `show_phase` is ignored
+        Arguments are the same as for `plot_one_spectra()`, except
+        there is no `subkey` argument and `show_phase` is ignored
         """
         kwargs['show_phase'] = False
         self.plot_one_spectra(key, key, **kwargs)
@@ -595,8 +601,8 @@ class SpectralDensity:
 
         Returns:
             (tuple): tuple containing
-                (:class:`matplotlib.axes.axis`): amplitude plot axis
-                (:class:`matplotlib.axes.axis`): phase plot axis
+                - :class:`matplotlib.axes.axis`: amplitude plot axis
+                - :class:`matplotlib.axes.axis`: phase plot axis
         """
         # da = self._ds["spectra"].sel(input=key, output=subkey)
         # in_units = da.coords['in_units'].values
@@ -685,7 +691,8 @@ class SpectralDensity:
 
     def plot_coherences(self, x=None, y=None, overlay=False, show=True,
                         outfile=None):
-        """Plot coherences
+        """
+	    Plot coherences
 
         Args:
             x (list of str): limit to the listed input channels
@@ -695,8 +702,7 @@ class SpectralDensity:
             outfile (str): save to the named file
 
         Returns:
-            ax_array (:class:`numpy.ndarray`): array of axis pairs (amplitude,
-                phase)
+            (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
         x = self._get_validate_channel_names(x)
         y = self._get_validate_channel_names(y)
@@ -771,8 +777,8 @@ class SpectralDensity:
 
         Returns:
             (tuple): tuple containing:
-                ax_a (:class:`matplotlib.axes.axis`): amplitude plot axis
-                ax_p (:class:`matplotlib.axes.axis`): phase plot axis
+                - (:class:`matplotlib.axes.axis`): amplitude plot axis
+                - (:class:`matplotlib.axes.axis`): phase plot axis
         """
         ds = self._ds['spectra'].sel(input=in_chan, output=out_chan)
         f = self._ds.coords['f'].values
@@ -827,23 +833,6 @@ class SpectralDensity:
             bottom_axis.set_xticklabels([])
         return ax_a, ax_p
 
-    def save(self, filename):
-        """
-        Method to save the object to file using `~Pickle`.
-
-        Args:
-            filename (str): File name
-        """
-
-        if not self.transfunc:
-            print("Warning: saving before having calculated the transfer "
-                  "functions")
-
-        # Remove traces to save disk space
-        file = open(filename, 'wb')
-        pickle.dump(self, file)
-        file.close()
-
     def _get_validate_channel_names(self, x):
         """
         If x is None, return list of all channel names
@@ -861,6 +850,7 @@ class SpectralDensity:
         """Remove loc code characters including and after first "-"
     
         Allows the use of "-?" in the loc code to specify removed coherent noise
+
         Args:
             id (str): seed ID code
     
