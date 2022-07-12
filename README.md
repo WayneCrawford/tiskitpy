@@ -5,6 +5,10 @@ Routines for time series data processing
 Uses the obspy seismological Trace, Stream (data) and Inventory (metadata)
 classes, but should work for non-seismology datasets as well
 
+
+[Documentation](https://tiskit.readthedocs.io/en/latest/index.html)
+
+
 ## Classes
 - `CleanRotator`: rotate data to minimize noise on vertical channel
 - `DataCleaner`: Transfer_Function-based data cleaning
