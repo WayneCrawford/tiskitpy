@@ -4,18 +4,20 @@ Clean tilt noise from OBS vertical channel using non-deforming rotation
 
 Is there any reason why rotate_clean isn't just rotate_calc + rotate_apply?
 """
-import sys
+# import sys
 import math as M
 from copy import deepcopy
 
 import numpy as np
 import scipy as sp
+
 # import matplotlib as mp
 import matplotlib.pyplot as plt
-import obspy
+# import obspy
 from obspy.signal.rotate import rotate2zne
 from obspy.core.stream import Stream  # , Trace
-from obspy import UTCDateTime
+# from obspy import UTCDateTime
+
 # from obspy.signal import rotate
 
 DEBUG = True
@@ -31,6 +33,7 @@ class SeisRotate:
     Class to clean tilt noise from OBS vertical channel through
     non-deforming rotation
     """
+
     def __init__(self, stream, uselogvar=False):
         """
         Create a seisRotate object from a 3-component obsPy Stream
@@ -51,14 +54,14 @@ class SeisRotate:
         self.fs = self.Z.stats.sampling_rate
         # Verify that all channels have same length
         if not len(self.Z.data) == len(self.N.data):
-            raise ValueError('Z and N vectors have different lengths')
+            raise ValueError("Z and N vectors have different lengths")
         if not len(self.Z.data) == len(self.E.data):
-            raise ValueError('Z and E vectors have different lengths')
+            raise ValueError("Z and E vectors have different lengths")
         # Verify that all channels have same sampling_rate
         if not self.Z.stats.sampling_rate == self.E.stats.sampling_rate:
-            raise ValueError('Z and E sampling rates are different')
+            raise ValueError("Z and E sampling rates are different")
         if not self.Z.stats.sampling_rate == self.N.stats.sampling_rate:
-            raise ValueError('Z and N sampling rates are different')
+            raise ValueError("Z and N sampling rates are different")
 
     def __len__(self):
         return len(self.Z.data)
@@ -74,7 +77,7 @@ class SeisRotate:
         return deepcopy(self)
 
     def stream(self):
-        """ Return obspy 3-component stream()"""
+        """Return obspy 3-component stream()"""
         return Stream(traces=[self.Z, self.N, self.E])
 
     def zrotate(self, angle, azimuth, horiz_also=True):
@@ -106,15 +109,28 @@ class SeisRotate:
         dip_E = angle * M.sin(np.deg2rad(azimuth))
 
         [self.Z.data, N, E] = rotate2zne(
-            self.Z.data, azimuth, dip_Z,
-            self.N.data, 0, dip_N,
-            self.E.data, 90, dip_E)
+            self.Z.data,
+            azimuth,
+            dip_Z,
+            self.N.data,
+            0,
+            dip_N,
+            self.E.data,
+            90,
+            dip_E,
+        )
         if horiz_also:
             self.N.data = N
             self.E.data = E
 
-    def calc_zrotate_opt(self, lowcut=0.001, hicut=0.005, eq_spans=None,
-                         uselogvar=None, verbose=False):
+    def calc_zrotate_opt(
+        self,
+        lowcut=0.001,
+        hicut=0.005,
+        eq_spans=None,
+        uselogvar=None,
+        verbose=False,
+    ):
         """
         Calculate the Z channel rotation angle that minimizes tilt noise
 
@@ -137,9 +153,9 @@ class SeisRotate:
             self.uselogvar = uselogvar
         # Filter data, cut off edge effects and detrend
         filt = self.copy()
-        filt.Z.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
-        filt.N.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
-        filt.E.filter('bandpass', freqmin=lowcut, freqmax=hicut, corners=5)
+        filt.Z.filter("bandpass", freqmin=lowcut, freqmax=hicut, corners=5)
+        filt.N.filter("bandpass", freqmin=lowcut, freqmax=hicut, corners=5)
+        filt.E.filter("bandpass", freqmin=lowcut, freqmax=hicut, corners=5)
         if eq_spans is not None:
             filt.Z = eq_spans.zero(filt.Z)
             filt.N = eq_spans.zero(filt.N)
@@ -150,8 +166,7 @@ class SeisRotate:
         startAngle, startAzi = (0, 0)
 
         # Search for the best angles
-        angle, azimuth = filt._searchBestAngles(startAngle, startAzi,
-                                                verbose)
+        angle, azimuth = filt._searchBestAngles(startAngle, startAzi, verbose)
         return angle, azimuth
 
     def _estimateAngles(self, verbose=False):
@@ -187,34 +202,33 @@ class SeisRotate:
         ZEratio = M.copysign(M.sqrt(np.median(ZoverE**2)), np.median(ZoverE))
         ZNratio = np.median(ZoverN)
         ZEratio = np.median(ZoverE)
-        plt.plot(ZoverN, 'x')
+        plt.plot(ZoverN, "x")
 
         if verbose:
-            print(f'    {ZNratio=}, {ZEratio=}')
+            print(f"    {ZNratio=}, {ZEratio=}")
 
-        ZNangle = (180/M.pi) * M.asin(ZNratio)
-        ZEangle = (180/M.pi) * M.asin(ZEratio)
-        azimuth = (180/M.pi) * M.atan(ZNratio / ZEratio)
-        azimuth = 90 - (180/M.pi) * M.atan2(ZNratio, ZEratio)
+        ZNangle = (180 / M.pi) * M.asin(ZNratio)
+        ZEangle = (180 / M.pi) * M.asin(ZEratio)
+        azimuth = (180 / M.pi) * M.atan(ZNratio / ZEratio)
+        azimuth = 90 - (180 / M.pi) * M.atan2(ZNratio, ZEratio)
         if verbose:
-            print(f'    ZNangle={ZNangle:<10g}, ZEangle={ZEangle:<10g}')
+            print(f"    ZNangle={ZNangle:<10g}, ZEangle={ZEangle:<10g}")
         # The angle from vertical below is just a guess, should developed
         # mathematically (or at least derived empirically from the searched
         # results)
         angle = M.sqrt(ZNangle**2 + ZEangle**2)
         if verbose:
-            print('    estAngle= {angle:<10g}, estAzim = {azimuth:<10g}')
+            print("    estAngle= {angle:<10g}, estAzim = {azimuth:<10g}")
 
         # Sanity check: do the dip equations from zrotate()
         # return ZN & ZE angles??
         dip_N = angle * M.cos(np.deg2rad(azimuth))
         dip_E = angle * M.sin(np.deg2rad(azimuth))
-        print(f'{dip_N=}, {dip_E=}')
+        print(f"{dip_N=}, {dip_E=}")
 
         return angle, azimuth
 
-    def _searchBestAngles(self, startAngle=0, startAzimuth=0,
-                          verbose=False):
+    def _searchBestAngles(self, startAngle=0, startAzimuth=0, verbose=False):
         """
         Find best Z rotation angles
 
@@ -234,27 +248,36 @@ class SeisRotate:
             print("Calculating best angle based on variance minimization")
         start_var = self._rotZ_variance([startAngle, startAzimuth])
         if verbose:
-            print(f'Starting variance = {start_var}')
+            print(f"Starting variance = {start_var}")
 
         xopt, fopt, iter, funcalls, warnflag, allvecs = sp.optimize.fmin(
-                                    func=self._rotZ_variance,
-                                    x0=[startAngle, startAzimuth],
-                                    disp=verbose,
-                                    full_output=True,
-                                    retall=True)
+            func=self._rotZ_variance,
+            x0=[startAngle, startAzimuth],
+            disp=verbose,
+            full_output=True,
+            retall=True,
+        )
         bestAngles = xopt
         if verbose:
-            print(f'{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}')
-            print("    best Angle,Azimuth = {:.2f},{:.2f}"
-                  .format(bestAngles[0], bestAngles[1]))
+            print(f"{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}")
+            print(
+                "    best Angle,Azimuth = {:.2f},{:.2f}".format(
+                    bestAngles[0], bestAngles[1]
+                )
+            )
             if self.uselogvar is False:
-                print("    variance reduced from {:.2e} to {:.2e} ({:.1f}% lower)"
-                      .format(start_var, fopt, 100*(1 - fopt/start_var)))
+                print(
+                    "    variance reduced from "
+                    "{:.2e} to {:.2e} ({:.1f}% lower)".format(
+                        start_var, fopt,
+                        100 * (1 - fopt / start_var)))
             if self.uselogvar is False:
-                print(" log variance reduced from {:.1f} to {:.1f} ({:.1f}% lower)"
-                      .format(start_var, fopt, 100*(1 - 10**(fopt-start_var))))
+                print(" log variance reduced from "
+                      "{:.1f} to {:.1f} ({:.1f}% lower)".format(
+                          start_var, fopt,
+                          100 * (1 - 10 ** (fopt - start_var))))
         if warnflag:
-            print(f'{allvecs=}')
+            print(f"{allvecs=}")
 
         return (bestAngles[0], bestAngles[1])
 
@@ -293,24 +316,23 @@ class SeisRotate:
         if len(stream) == 3:
             return stream.copy(), None
         other_stream = stream.copy()
-        seis_stream = Stream(traces=(Z,N,E))
+        seis_stream = Stream(traces=(Z, N, E))
         other_stream.remove(Z)
         other_stream.remove(N)
         other_stream.remove(E)
         return seis_stream, other_stream
-        
 
     @staticmethod
     def _get_seis_traces(stream):
-        Z = SeisRotate._get_one_trace(stream, 'Z')
+        Z = SeisRotate._get_one_trace(stream, "Z")
         try:
-            N = SeisRotate._get_one_trace(stream, 'N')
+            N = SeisRotate._get_one_trace(stream, "N")
         except IndexError:
-            N = SeisRotate._get_one_trace(stream, '1')
+            N = SeisRotate._get_one_trace(stream, "1")
         try:
-            E = SeisRotate._get_one_trace(stream, 'E')
+            E = SeisRotate._get_one_trace(stream, "E")
         except IndexError:
-            E = SeisRotate._get_one_trace(stream, '2')
+            E = SeisRotate._get_one_trace(stream, "2")
         return Z, N, E
 
     @staticmethod

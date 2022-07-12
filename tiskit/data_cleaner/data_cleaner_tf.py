@@ -22,19 +22,28 @@ from matplotlib import pyplot as plt
 
 from ..transfer_functions import TransferFunctions
 from ..spectral_density import SpectralDensity
-from .dctfs import DCTF, DCTFs, remove_str, strip_remove_str, strip_remove_one
+from .dctfs import DCTF, DCTFs, remove_str, strip_remove_str
 
 
-
-class DataCleaner():
+class DataCleaner:
     """
     Class for calculating and applying Transfer_Function-based data cleaning
-    
+
     Works on raw data, without instrument corrections
     """
-    def __init__(self, stream, remove_list, noise_channel="output",
-                 n_to_reject=3, min_freq=None, max_freq=None,
-                 show_progress=False, fast_calc=False, window_s=1000):
+
+    def __init__(
+        self,
+        stream,
+        remove_list,
+        noise_channel="output",
+        n_to_reject=3,
+        min_freq=None,
+        max_freq=None,
+        show_progress=False,
+        fast_calc=False,
+        window_s=1000,
+    ):
         """
         Args:
             stream (:class:`obspy.core.stream.Stream`): data to use
@@ -58,44 +67,60 @@ class DataCleaner():
                 functions
         """
         if not isinstance(stream, Stream):
-            raise ValueError('stream is a {type(stream)}, not an obspy Stream')
+            raise ValueError("stream is a {type(stream)}, not an obspy Stream")
         sdfs = [SpectralDensity.from_stream(stream, window_s=window_s)]
         self.DCTFs = DCTFs()
         # Calculate removal transfer functions
         out_chans = sdfs[0].channels
         in_list = [_list_match_pattern(ic, out_chans) for ic in remove_list]
-        remove_seq, remove_new = '', ''
+        remove_seq, remove_new = "", ""
         for in_chan in in_list:
             ic = in_chan + remove_seq
-            out_chans = [x for x in out_chans if not x == ic ]
-            tf = TransferFunctions(sdfs[-1], ic, out_chans, noise_channel,
-                                   n_to_reject, min_freq, max_freq,
-                                   show_progress=show_progress)
+            out_chans = [x for x in out_chans if not x == ic]
+            tf = TransferFunctions(
+                sdfs[-1],
+                ic,
+                out_chans,
+                noise_channel,
+                n_to_reject,
+                min_freq,
+                max_freq,
+                show_progress=show_progress,
+            )
             # Apply data cleaner and update channel names with removed channels
             remove_new = remove_str(in_chan, remove_seq)
             remove_seq += remove_new
             new_dctf = DCTF(ic, remove_seq, tf)
             self.DCTFs.append(new_dctf)
             if fast_calc:
-                sdfs.append(self._removeTF_SDF(
-                    sdfs[-1], tf, show_progress, add_suffix=remove_new))
+                sdfs.append(
+                    self._removeTF_SDF(
+                        sdfs[-1], tf, show_progress, add_suffix=remove_new
+                    )
+                )
             else:
-                sdfs.append(SpectralDensity.from_stream(stream,
-                                                        data_cleaner=self,
-                                                        window_s=window_s))
+                sdfs.append(
+                    SpectralDensity.from_stream(
+                        stream, data_cleaner=self, window_s=window_s
+                    )
+                )
             out_chans = [x + remove_new for x in out_chans]
         if show_progress:
-            print('Plotting sdfs after data cleaner applied')
+            print("Plotting sdfs after data cleaner applied")
             self._plot_sdfs(sdfs)
 
     def __str__(self):
-        s = 'DataCleaner object:\n'
-        s += '        Input channel | output channels\n'
-        s += '   ================== | ===============\n'
+        s = "DataCleaner object:\n"
+        s += "        Input channel | output channels\n"
+        s += "   ================== | ===============\n"
         for tf in self.DCTFs:
-            s += '   {:18s} | {}\n'.format(
-                tf.tfs.input_channel, [strip_remove_str(x) + f'{tf.remove_sequence}'
-                                       for x in tf.tfs.output_channels])
+            s += "   {:18s} | {}\n".format(
+                tf.tfs.input_channel,
+                [
+                    strip_remove_str(x) + f"{tf.remove_sequence}"
+                    for x in tf.tfs.output_channels
+                ],
+            )
         return s
 
     def clean_sdf(self, sdf, fast_calc=False):
@@ -113,8 +138,11 @@ class DataCleaner():
         """
         assert isinstance(sdf, SpectralDensity)
         for dctf in self.DCTFs:
-            sdf = self._removeTF_SDF(sdf, dctf.tfs,
-                                     add_suffix=dctf.remove_sequence.rsplit("-",1)[0])
+            sdf = self._removeTF_SDF(
+                sdf,
+                dctf.tfs,
+                add_suffix=dctf.remove_sequence.rsplit("-", 1)[0],
+            )
         return sdf
 
     def clean_stream_to_sdf(self, stream, fast_calc=False):
@@ -159,10 +187,10 @@ class DataCleaner():
         remove_seqs = {k: "" for k in seed_ids}
 
         if in_time_domain is True:
-            print('Correcting traces in the time domain')
+            print("Correcting traces in the time domain")
         else:
-            print('Correcting traces in the frequency domain')
-            
+            print("Correcting traces in the frequency domain")
+
         for dctf in self.DCTFs:
             tfs = dctf.tfs
             in_chan = tfs.input_channel
@@ -173,9 +201,12 @@ class DataCleaner():
                 out_trace = out_stream.select(id=oc)[0]
                 out_stream.remove(out_trace)
                 out_trace = self._correct_trace(
-                    in_trace, out_trace, tfs.freqs,
+                    in_trace,
+                    out_trace,
+                    tfs.freqs,
                     tfs.values_wrt_counts(out_chan),
-                    in_time_domain)
+                    in_time_domain,
+                )
                 remove_seqs[out_chan] = dctf.remove_sequence
                 out_stream += out_trace
         if stuff_locations:
@@ -188,7 +219,7 @@ class DataCleaner():
         Plot data cleaning transfer functions
         """
         self.DCTFs.plot()
-        
+
     def _correct_trace(self, in_trace, out_trace, f, tf, in_time_domain=True):
         """
         Correct a trace using an input trace and a transfer function
@@ -210,8 +241,8 @@ class DataCleaner():
         self._validate_streams_synchronized(in_trace, out_trace)
         in_trace = in_trace.copy()
         out_trace = out_trace.copy()
-        in_trace.detrend('linear')
-        out_trace.detrend('linear')
+        in_trace.detrend("linear")
+        out_trace.detrend("linear")
         if in_time_domain:
             return self._correct_trace_time(in_trace, out_trace, f, tf)
         else:
@@ -221,19 +252,22 @@ class DataCleaner():
     def _correct_trace_time(in_trace, out_trace, f, tf):
         """
         Correct trace in the time domain
-        
+
         Args:
             in_trace (:class:`obspy.core.trace.Trace`): input (noise) trace
             out_trace (:class:`obspy.core.trace.Trace`): trace to correct
             f (:class:`numpy.ndarray`): frequencies
             tf (:class:`numpy.ndarray`): out_trace/in_trace transfer function
         """
-        if not 2*f[-1] == in_trace.stats.sampling_rate:
-            raise ValueError('different tf ({}) & trace ({}) sample rates'
-                             .format(2*f[-1], in_trace.stats.sampling_rate))
+        if not 2 * f[-1] == in_trace.stats.sampling_rate:
+            raise ValueError(
+                "different tf ({}) & trace ({}) sample rates".format(
+                    2 * f[-1], in_trace.stats.sampling_rate
+                )
+            )
         # Time domain transform of transfer function
         # Why don't we need to use the complex conjugate of tf?
-        itf = np.fft.ifftshift(np.fft.irfft(tf))  
+        itf = np.fft.ifftshift(np.fft.irfft(tf))
         out_trace_corr = out_trace.copy()
         corr_data = np.convolve(in_trace.data.copy(), itf, mode="same")
         out_trace_corr.data -= signal.detrend(corr_data)
@@ -243,7 +277,7 @@ class DataCleaner():
     def _correct_trace_freq(in_trace, out_trace, f, tf):
         """
         Correct trace in the frequency domain
-        
+
         Args:
             in_trace (:class:`obspy.core.trace.Trace`): input (noise) trace
             out_trace (:class:`obspy.core.trace.Trace`): trace to correct
@@ -252,12 +286,12 @@ class DataCleaner():
         """
         npts = in_trace.stats.npts
         trace_sr = in_trace.stats.sampling_rate
-        fft_len = 2**int(np.ceil(npts)).bit_length()
-        buff = np.zeros(fft_len-npts)
+        fft_len = 2 ** int(np.ceil(npts)).bit_length()
+        buff = np.zeros(fft_len - npts)
         # Transform all to frequency domain
         in_rfft = np.fft.rfft(np.concatenate((in_trace.data, buff)))
         out_rfft = np.fft.rfft(np.concatenate((out_trace.data, buff)))
-        f_rfft = np.fft.rfftfreq(fft_len, 1./trace_sr)
+        f_rfft = np.fft.rfftfreq(fft_len, 1.0 / trace_sr)
         tf_interp = np.interp(f_rfft, f, tf)
         # Subract coherent part and convert to time domain
         # Why isn't the complex conjugate of the tf used?
@@ -271,15 +305,21 @@ class DataCleaner():
     @staticmethod
     def _validate_streams_synchronized(in_trace, out_trace):
         its, ots = in_trace.stats, out_trace.stats
-        errhdr = 'in_trace, out_trace have different '
+        errhdr = "in_trace, out_trace have different "
         if its.npts != ots.npts:
-            raise ValueError(errhdr + f'lengths ({its.npts}, {ots.npts})')
+            raise ValueError(errhdr + f"lengths ({its.npts}, {ots.npts})")
         if its.sampling_rate != ots.sampling_rate:
-            raise ValueError(errhdr + 'samp rates ({}, {})'
-                             .format(its.sampling_rate, ots.sampling_rate))
-        if abs(its.starttime - ots.starttime) > 1/its.sampling_rate:
-            raise ValueError(errhdr + 'start times ({}, {})'
-                             .format(its.starttime, ots.starttime))
+            raise ValueError(
+                errhdr
+                + "samp rates ({}, {})".format(
+                    its.sampling_rate, ots.sampling_rate
+                )
+            )
+        if abs(its.starttime - ots.starttime) > 1 / its.sampling_rate:
+            raise ValueError(
+                errhdr
+                + "start times ({}, {})".format(its.starttime, ots.starttime)
+            )
 
     def _removeTF_SDF(self, sdf, tf, show_progress=False, add_suffix=None):
         """
@@ -287,7 +327,7 @@ class DataCleaner():
 
         This is the ATACR method.  It works on the overall spectra, not
         individual windows.
-        
+
         Used for the "fast_calc" method and for data already in
         SpectralDensity format
 
@@ -315,16 +355,17 @@ class DataCleaner():
             out_auto = sdf.autospect(oc)
             crossspect = sdf.crossspect(ic, oc)
             if show_progress:
-                self._plot_removeTF_SDF(tf, sdf, in_auto, out_auto, tf_oc,
-                                        ic, oc)
+                self._plot_removeTF_SDF(
+                    tf, sdf, in_auto, out_auto, tf_oc, ic, oc
+                )
             # Bendat & Piersol eqs 6.35 and 6.36
             # in_auto = Gxx(f) = Gnn(f) + Guu(f) + Gum(f) + Gmu(f)
             # out_auto = Gyy(f) =  Gmm(f) + Gvv(f) + Gvn(f) + Gnv(f)
-            sdf.put_autospect(oc, out_auto - in_auto*np.abs(tf_oc)**2)
+            sdf.put_autospect(oc, out_auto - in_auto * np.abs(tf_oc) ** 2)
             # Bendat & Piersol eq6.36 with
-            sdf.put_crossspect(ic, oc, crossspect - in_auto*tf_oc)
+            sdf.put_crossspect(ic, oc, crossspect - in_auto * tf_oc)
             if add_suffix is not None:
-                sdf.replace_channel_name(oc, oc+add_suffix)
+                sdf.replace_channel_name(oc, oc + add_suffix)
         return sdf
 
     @staticmethod
@@ -333,22 +374,40 @@ class DataCleaner():
         f = tf.freqs
         fig, ax = plt.subplots(1, 1)
         ax2 = ax.twinx()
-        ax2.semilogx(f, np.abs(sdf.coherence(ic, oc)), 'k--', alpha=0.5,
-                     label='coherence')
-        ax2.axhline(np.abs(sdf.coh_signif(0.95)), color='k', ls=':',
-                    alpha=0.5, label='coherence significance level')
+        ax2.semilogx(
+            f,
+            np.abs(sdf.coherence(ic, oc)),
+            "k--",
+            alpha=0.5,
+            label="coherence",
+        )
+        ax2.axhline(
+            np.abs(sdf.coh_signif(0.95)),
+            color="k",
+            ls=":",
+            alpha=0.5,
+            label="coherence significance level",
+        )
         ax.loglog(f, np.abs(out_auto), label=oc)
         ax.loglog(f, np.abs(in_auto), alpha=0.5, label=ic)
         # ax.loglog(f, np.abs(tf_oc), label='tf^2')
-        ax.loglog(f, np.abs(in_auto * np.abs(tf_oc)**2), alpha=0.5,
-                  label=ic + '*tf^2')
-        ax.loglog(f, np.abs(out_auto - in_auto * np.abs(tf_oc)**2),
-                  alpha=0.5, label=f'{oc} - ({ic}*tf^2)')
-        ax.set_title(f'in={ic}, out={oc}')
-        ax.set_xlabel('Frequency (Hz)')
-        ax.set_ylabel('Autospectral Density (counts^2/Hz)')
+        ax.loglog(
+            f,
+            np.abs(in_auto * np.abs(tf_oc) ** 2),
+            alpha=0.5,
+            label=ic + "*tf^2",
+        )
+        ax.loglog(
+            f,
+            np.abs(out_auto - in_auto * np.abs(tf_oc) ** 2),
+            alpha=0.5,
+            label=f"{oc} - ({ic}*tf^2)",
+        )
+        ax.set_title(f"in={ic}, out={oc}")
+        ax.set_xlabel("Frequency (Hz)")
+        ax.set_ylabel("Autospectral Density (counts^2/Hz)")
         ax.legend()
-        ax2.set_ylabel('Coherence')
+        ax2.set_ylabel("Coherence")
         ax2.set_ylim(0, 1)
         plt.show()
 
@@ -377,14 +436,22 @@ class DataCleaner():
             if chan in inputs_base:
                 i = inputs_base.index(chan)
                 for sdf, rs in zip(sdfs[:i], remove_seqs[:i]):
-                    ax.loglog(sdf.freqs, np.abs(sdf.autospect(ch_base+rs)),
-                              alpha=0.75, label=ch_base + rs)
+                    ax.loglog(
+                        sdf.freqs,
+                        np.abs(sdf.autospect(ch_base + rs)),
+                        alpha=0.75,
+                        label=ch_base + rs,
+                    )
             else:
                 for sdf, rs in zip(sdfs, remove_seqs):
-                    ax.loglog(sdf.freqs, np.abs(sdf.autospect(ch_base+rs)),
-                              alpha=0.75, label=ch_base + rs)
-            if  irow==rows-1:
-                ax.set_xlabel('Frequency (Hz)')
+                    ax.loglog(
+                        sdf.freqs,
+                        np.abs(sdf.autospect(ch_base + rs)),
+                        alpha=0.75,
+                        label=ch_base + rs,
+                    )
+            if irow == rows - 1:
+                ax.set_xlabel("Frequency (Hz)")
             ax.legend()
             icol += 1
             if icol >= cols:
@@ -407,11 +474,15 @@ def _list_match_pattern(pattern, chan_list):
     if len(selected) == 0:
         raise ValueError(f'input pattern "{pattern}" not matched')
     elif len(selected) > 1:
-        raise ValueError('more than one match for input pattern "{}": {}'
-                         .format(pattern, selected))
+        raise ValueError(
+            'more than one match for input pattern "{}": {}'.format(
+                pattern, selected
+            )
+        )
     return selected[0]
 
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

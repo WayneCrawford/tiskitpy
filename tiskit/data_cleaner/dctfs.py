@@ -24,16 +24,21 @@ class DCTFs(UserList):
         """
         for dctf in self:
             tfs = dctf.tfs
-            mapping = dict()
+            # mapping = dict()
             in_chan = tfs.input_channel
             if not tfs.freqs.shape == fts[in_chan].shape:
-                ValueError('transfer function and ft have different shapes '
-                           f'({tfs.freqs.shape} vs {fts[in_chan].shape})')
+                ValueError(
+                    "transfer function and ft have different shapes "
+                    f"({tfs.freqs.shape} vs {fts[in_chan].shape})"
+                )
             for out_chan in tfs.output_channels:
-                new_out_chan = strip_remove_str(out_chan) + dctf.remove_sequence
+                new_out_chan = (
+                    strip_remove_str(out_chan) + dctf.remove_sequence
+                )
                 # EQ 8, Crawford & Webb 2000
-                fts[new_out_chan] = fts[out_chan] \
-                    - fts[in_chan] * np.conj(tfs.values(out_chan))
+                fts[new_out_chan] = fts[out_chan] - fts[in_chan] * np.conj(
+                    tfs.values(out_chan)
+                )
         return fts
 
     def update_channel_names(self, channel_names):
@@ -75,7 +80,7 @@ class DCTFs(UserList):
     def plot(self, outfile=None, title=None):
         """
         Plot transfer functions
-        
+
         Args:
             outfile (str): output file name.  If None, will plot to screen
             title (str): plot title.  If None, will use self[0].remove_channel
@@ -84,32 +89,37 @@ class DCTFs(UserList):
         nrows = len(self)
         # fig, axs = plt.subplots(nrows, ncols)
         fig, axs = plt.subplots()
-        row, col = 0,0
+        row, col = 0, 0
         for dctf in self:
             tfs = dctf.tfs
             for oc in tfs.output_channels:
                 ic = tfs.input_channel
-                tfs.plot_one(ic, oc, fig=fig,
-                             fig_grid=(nrows, ncols), plot_spot=(row,col),
-                             label=oc.split('.')[-1] + '/' + ic.split('.')[-1],
-                             show_ylabel=col==0, show_xlabel=row==nrows-1)
+                tfs.plot_one(
+                    ic,
+                    oc,
+                    fig=fig,
+                    fig_grid=(nrows, ncols),
+                    plot_spot=(row, col),
+                    label=oc.split(".")[-1] + "/" + ic.split(".")[-1],
+                    show_ylabel=col == 0,
+                    show_xlabel=row == nrows - 1,
+                )
                 col += 1
-            row +=1
+            row += 1
             col = 0
-        seed_idl = self[0].remove_channel.split('.')
+        seed_idl = self[0].remove_channel.split(".")
         if title is not None:
             fig.suptitle(title)
         elif len(seed_idl) > 1:
             title = ".".join(seed_idl[:2])
         else:
             title = self[0].remove_channel
-        fig.suptitle(f'{title} DataCleaner Transfer Functions')
+        fig.suptitle(f"{title} DataCleaner Transfer Functions")
         if outfile:
             fig.savefig(outfile)
         else:
             plt.show()
-            
-        
+
     def _channel_map(self):
         """
         Make a mapping dict between original and output channel names
@@ -128,7 +138,8 @@ class DCTFs(UserList):
                 orig_out = strip_remove_str(out_chan)
                 mapping[orig_out] = orig_out + dctf.remove_sequence
         return mapping
-        
+
+
 @dataclass
 class DCTF:
     """
@@ -136,6 +147,7 @@ class DCTF:
 
     Organizes and names TransferFunctions for DataCleaner
     """
+
     remove_channel: str
     remove_sequence: str
     tfs: TransferFunctions
@@ -159,14 +171,15 @@ def strip_remove_str(in_str):
     """
     if isinstance(in_str, list):
         return [strip_remove_str(x) for x in in_str]
-    return in_str.split('-')[0]
+    return in_str.split("-")[0]
+
 
 def strip_remove_one(in_str):
     """
     Strips last transfer function removal string from a string
 
     Also handles lists of strings
-    
+
     Example:
         >>> text = 'BHZ-1-2-H'
         >>> strip_remove_one(text)
@@ -177,9 +190,10 @@ def strip_remove_one(in_str):
     """
     if isinstance(in_str, list):
         return [strip_remove_one(x) for x in in_str]
-    return in_str.rsplit('-', 1)[0]
+    return in_str.rsplit("-", 1)[0]
 
-def remove_str(in_chan, prev_remove_seq=''):
+
+def remove_str(in_chan, prev_remove_seq=""):
     """
     Generate a string describing the TransferFunction removal chain
 
@@ -200,13 +214,14 @@ def remove_str(in_chan, prev_remove_seq=''):
         ...
         ValueError: new_name('X') already in prev_remove_seq('-X-Y')
     """
-    prev_components = prev_remove_seq.split('-')
+    prev_components = prev_remove_seq.split("-")
     offset = 1
     while (new_name := in_chan[-offset:]) in prev_components:
         offset += 1
         if offset > len(in_chan):
-            raise ValueError(f"new_name('{new_name}') already in "
-                             f"prev_remove_seq('{prev_remove_seq}')")
-    remove_elem = '-' + new_name
+            raise ValueError(
+                f"new_name('{new_name}') already in "
+                f"prev_remove_seq('{prev_remove_seq}')"
+            )
+    remove_elem = "-" + new_name
     return remove_elem
-

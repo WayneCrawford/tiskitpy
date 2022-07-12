@@ -27,8 +27,10 @@ import fnmatch
 from numpy import prod
 from obspy.core.stream import Stream, Trace
 from obspy.core.trace import Stats
-from obspy.core.inventory import (FIRResponseStage,
-                                  CoefficientsTypeResponseStage)
+from obspy.core.inventory import (
+    FIRResponseStage,
+    CoefficientsTypeResponseStage,
+)
 
 # from matplotlib import pyplot as plt
 
@@ -39,12 +41,12 @@ from .fir_filter import FIRFilter
 class Decimator:
     """
     Class to decimate obspy stream intelligenty
-    
-    Also allows one to update the station inventory with the filter responses used
-    
+
+    Can also update the station inventory with the used filter responses
+
     Args:
-        decimates (list): list of decimation factorst to use (integers between 2
-                        and 7, will be applied in order)
+        decimates (list): list of decimation factorst to use (integers between
+                        2 and 7, will be applied in order)
         verbose (bool): Be chatty
     """
 
@@ -69,8 +71,9 @@ class Decimator:
         else:
             raise TypeError("data is not a Stream or Trace")
 
-    def update_inventory(self, inv, st=None, normalize_firs=False,
-                         quiet=False):
+    def update_inventory(
+        self, inv, st=None, normalize_firs=False, quiet=False
+    ):
         """
         Update inventory for channels found in stream
 
@@ -111,15 +114,24 @@ class Decimator:
                 normalize_firs=normalize_firs,
             )
             if not new_cha.sample_rate == stats.sampling_rate:
-                raise ValueError("data and metadata sampling rates are "
-                                 "different!")
-            self._modify_chan(new_cha, net=stats.network, sta=stats.station,
-                              quiet=quiet)
+                raise ValueError(
+                    "data and metadata sampling rates are " "different!"
+                )
+            self._modify_chan(
+                new_cha, net=stats.network, sta=stats.station, quiet=quiet
+            )
         return inv
 
-    def update_inventory_from_nslc(self, inv, network="*", station="*",
-                                   channel="*", location="*", quiet=False,
-                                   normalize_firs=False):
+    def update_inventory_from_nslc(
+        self,
+        inv,
+        network="*",
+        station="*",
+        channel="*",
+        location="*",
+        quiet=False,
+        normalize_firs=False,
+    ):
         """
         Update inventory based on network, station, channel and location codes
 
@@ -140,8 +152,12 @@ class Decimator:
         may include wildcards as specified in obspy.core.stream.Stream.select
         """
         inv = inv.copy()  # Don't overwrite input inventory
-        inv_selected = inv.select(network=network, station=station,
-                                  location=location, channel=channel)
+        inv_selected = inv.select(
+            network=network,
+            station=station,
+            location=location,
+            channel=channel,
+        )
         for net in inv_selected:
             for sta in net:
                 old_sta = sta.copy()
@@ -154,12 +170,14 @@ class Decimator:
                         cha.code,
                         normalize_firs=normalize_firs,
                     )
-                    self._modify_chan(new_cha, net=network, sta=station,
-                                      quiet=quiet)
+                    self._modify_chan(
+                        new_cha, net=network, sta=station, quiet=quiet
+                    )
         return inv
 
-    def _modify_chan(self, cha, net="", sta="", normalize_firs=False,
-                     quiet=False):
+    def _modify_chan(
+        self, cha, net="", sta="", normalize_firs=False, quiet=False
+    ):
         """
         modify reponse and name of a channel to correspond to decimation
 
@@ -173,8 +191,10 @@ class Decimator:
         # By setting this here, no need to worry about order of the two methods
         seed_id = ".".join([net, sta, cha.location_code, cha.code])
         if quiet is not True:
-            print(f"channel modified from {seed_id} ({cha.sample_rate:g}sps)",
-                  end=" ")
+            print(
+                f"channel modified from {seed_id} ({cha.sample_rate:g}sps)",
+                end=" ",
+            )
         input_sample_rate = cha.sample_rate
         self._add_response(cha, input_sample_rate)
         self._change_chan_loc(cha, input_sample_rate)
@@ -201,17 +221,21 @@ class Decimator:
                 elif stg.symmetry == "EVEN":
                     coeff_sum = 2 * sum(stg.coefficients)
                 elif stg.symmetry == "ODD":
-                    coeff_sum = (2 * sum(stg.coefficients[:-1])
-                                 + stg.coefficients[-1])
+                    coeff_sum = (
+                        2 * sum(stg.coefficients[:-1]) + stg.coefficients[-1]
+                    )
                 else:
                     raise ValueError(
                         f"Unknown FIR coefficient symmetry: {stg.symmetry}"
                     )
                 if abs(coeff_sum - 1) > 0.01:
-                    print(f"DECIMATOR: Sum of FIR coeffs = {coeff_sum}, "
-                          "normalizing")
-                    stg.coefficients = [x / coeff_sum
-                                        for x in stg.coefficients]
+                    print(
+                        f"DECIMATOR: Sum of FIR coeffs = {coeff_sum}, "
+                        "normalizing"
+                    )
+                    stg.coefficients = [
+                        x / coeff_sum for x in stg.coefficients
+                    ]
             elif isinstance(stg, CoefficientsTypeResponseStage):
                 if sum(stg.denominator) == 0:
                     coeff_sum = sum(stg.numerator)
@@ -221,8 +245,10 @@ class Decimator:
                     coeff_sum = sum(stg.numerator) / sum(stg.denominator)
                 # descriptor = "Coeff numerator"
                 if abs(coeff_sum - 1) > 0.01:
-                    print(f"DECIMATOR: Sum(numerator coeffs)/sum(denom coeffs)"
-                          f" = {coeff_sum}, normalizing")
+                    print(
+                        f"DECIMATOR: Sum(numerator coeffs)/sum(denom coeffs)"
+                        f" = {coeff_sum}, normalizing"
+                    )
                     stg.numerator = [x / coeff_sum for x in stg.numerator]
 
     def _change_chan_loc(self, cha, in_sr, avoid_codes=[]):
@@ -269,8 +295,10 @@ class Decimator:
         # If chan_loc exists, increment loc_code until we find an empty one
         while True:
             for c in avoid_codes:
-                if (new_cha_code == c.split(":")[0]
-                        and new_loc_code == c.split(":")[1]):
+                if (
+                    new_cha_code == c.split(":")[0]
+                    and new_loc_code == c.split(":")[1]
+                ):
                     new_loc_code = f"{int(new_loc_code) + 1:02d}"
                     continue
             break
@@ -305,8 +333,9 @@ class Decimator:
             newtr.append(self._run_trace(tr))
         st.traces = newtr
         if self.verbose:
-            print("New data has {} samples".format([tr.data.size
-                                                    for tr in st]))
+            print(
+                "New data has {} samples".format([tr.data.size for tr in st])
+            )
         st.verify()
         return st
 
@@ -394,8 +423,9 @@ class Decimator:
                 if not fnmatch.fnmatch(sta.code.upper(), station.upper()):
                     continue
                 for cha in sta.channels:
-                    if not fnmatch.fnmatch(cha.location_code.upper(),
-                                           location.upper()):
+                    if not fnmatch.fnmatch(
+                        cha.location_code.upper(), location.upper()
+                    ):
                         continue
                     if not fnmatch.fnmatch(cha.code.upper(), channel.upper()):
                         continue

@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from .spectral_density.utils import coherence_significance_level
 from .spectral_density import SpectralDensity
 
-np.seterr(all='ignore')
+np.seterr(all="ignore")
 # np.set_printoptions(threshold=sys.maxsize)
 
 
@@ -17,9 +17,19 @@ class TransferFunctions(object):
     """
     Class of Transfer functions for a given input channel.
     """
-    def __init__(self, sdm, in_chan, out_chans=None, noise_chan='output',
-                 n_to_reject=3, min_freq=None, max_freq=None, quiet=False,
-                 show_progress=False):
+
+    def __init__(
+        self,
+        sdm,
+        in_chan,
+        out_chans=None,
+        noise_chan="output",
+        n_to_reject=3,
+        min_freq=None,
+        max_freq=None,
+        quiet=False,
+        show_progress=False,
+    ):
         """
         Args:
             sdm (:class:`.SpectralDensity`): Spectral density matrix objet
@@ -44,17 +54,17 @@ class TransferFunctions(object):
         """
         if sdm is None:
             if not quiet:
-                print('Creating test TransferFunction object (no data)')
+                print("Creating test TransferFunction object (no data)")
             if out_chans is None:
-                raise ValueError('cannot have empty out_chans for test object')
+                raise ValueError("cannot have empty out_chans for test object")
             f = np.array([1])
-            dims = ('input', 'output', 'f')
+            dims = ("input", "output", "f")
             shape = (1, len(out_chans), len(f))
             self._ds = xr.Dataset(
-                data_vars=dict(value=(dims, np.zeros(shape, dtype='complex'))),
-                coords=dict(input=[in_chan], output=out_chans, f=f)
+                data_vars=dict(value=(dims, np.zeros(shape, dtype="complex"))),
+                coords=dict(input=[in_chan], output=out_chans, f=f),
             )
-            
+
         else:
             if not isinstance(sdm, SpectralDensity):
                 raise TypeError("sdm is not a SpectralDensity object")
@@ -63,34 +73,48 @@ class TransferFunctions(object):
             out_units = [sdm.channel_units(x) for x in out_chans]
             f = sdm.freqs
             # Set properties
-            dims = ('input', 'output', 'f')
+            dims = ("input", "output", "f")
             shape = (1, len(out_chans), len(f))
             # tf units are out_chan_units/in_chan_units
             # response units are in_chan_units/out_chan_units
             # tf * response gives tf w.r.t. data counts
             self._ds = xr.Dataset(
                 data_vars=dict(
-                    value=(dims, np.zeros(shape, dtype='complex')),
+                    value=(dims, np.zeros(shape, dtype="complex")),
                     uncertainty=(dims, np.zeros(shape)),
-                    response=(dims, np.ones(shape, dtype='complex'))
+                    response=(dims, np.ones(shape, dtype="complex")),
                 ),
                 coords=dict(
                     input=[in_chan],
                     output=out_chans,
                     in_units=("input", [in_units]),
                     out_units=("output", out_units),
-                    noise_chan=('output', [noise_chan for x in out_chans]),
-                    f=f),
-                attrs=dict(n_winds=sdm.n_windows)
+                    noise_chan=("output", [noise_chan for x in out_chans]),
+                    f=f,
+                ),
+                attrs=dict(n_winds=sdm.n_windows),
             )
             for out_chan in out_chans:
-                xf, xferr = self._calcxf(sdm, in_chan, out_chan, noise_chan,
-                                         n_to_reject, min_freq, max_freq)
-                self._ds["value"].loc[dict(input=in_chan, output=out_chan)] = xf
-                self._ds["uncertainty"].loc[dict(input=in_chan,
-                                                 output=out_chan)] = xferr
-                self._ds["response"].loc[dict(input=in_chan, output=out_chan)] = \
-                    sdm.channel_response(out_chan) / sdm.channel_response(in_chan)
+                xf, xferr = self._calcxf(
+                    sdm,
+                    in_chan,
+                    out_chan,
+                    noise_chan,
+                    n_to_reject,
+                    min_freq,
+                    max_freq,
+                )
+                self._ds["value"].loc[
+                    dict(input=in_chan, output=out_chan)
+                ] = xf
+                self._ds["uncertainty"].loc[
+                    dict(input=in_chan, output=out_chan)
+                ] = xferr
+                self._ds["response"].loc[
+                    dict(input=in_chan, output=out_chan)
+                ] = sdm.channel_response(out_chan) / sdm.channel_response(
+                    in_chan
+                )
             if show_progress:
                 self._plot_progress(sdm)
 
@@ -105,32 +129,32 @@ class TransferFunctions(object):
     @property
     def freqs(self):
         """Transfer function frequencies"""
-        return self._ds.coords['f'].values
+        return self._ds.coords["f"].values
 
     @property
     def input_channel(self):
         """Transfer function input channel"""
-        return str(self._ds.coords['input'].values[0])
+        return str(self._ds.coords["input"].values[0])
 
     @property
     def output_channels(self):
         """Transfer function output channels"""
-        return list(self._ds.coords['output'].values)
+        return list(self._ds.coords["output"].values)
 
     @property
     def input_units(self):
         """Transfer function input channel units"""
-        return str(self._ds.coords['in_units'].values[0])
+        return str(self._ds.coords["in_units"].values[0])
 
     @property
     def n_windows(self):
         """Number of time series data windows used"""
-        return self._ds.attrs['n_winds']
+        return self._ds.attrs["n_winds"]
 
     @property
     def noise_channels(self):
         """Number of time series data windows used"""
-        return list(self._ds.coords['noise_chan'].values)
+        return list(self._ds.coords["noise_chan"].values)
 
     def coh_signif(self, prob=0.95):
         """
@@ -144,17 +168,17 @@ class TransferFunctions(object):
     def output_units(self, output_channel):
         """Transfer function output channel units"""
         oc = self._match_out_chan(output_channel)
-        return str(self._ds.sel(output=oc).coords['out_units'].values)
+        return str(self._ds.sel(output=oc).coords["out_units"].values)
 
     def noise_channel(self, output_channel):
         """Transfer function noise channel string"""
         oc = self._match_out_chan(output_channel)
-        return str(self._ds.sel(output=oc).coords['noise_chan'].values)
+        return str(self._ds.sel(output=oc).coords["noise_chan"].values)
 
     def values(self, output_channel, zero_as_none=False, wrt_counts=False):
         """
         Return transfer function for the given output channel
-        
+
         Args:
             output_channel (str): output channel name
             zero_as_none (bool): return non-calculated values as Nones instead
@@ -169,7 +193,7 @@ class TransferFunctions(object):
     def values_wrt_counts(self, output_channel, zero_as_none=False):
         """
         Return transfer function with respect to raw data counts
-        
+
         Args:
             output_channel (str): output channel name
             zero_as_none (bool): return non-calculated values as Nones instead
@@ -180,7 +204,7 @@ class TransferFunctions(object):
     def response(self, output_channel, zero_as_none=False):
         """
         Return tf response (output_channel_response/input_channel_response)
-        
+
         Divide count-based response by this to get unit-based response
         Multiply unit-based response by this to get count-based response
         """
@@ -190,8 +214,9 @@ class TransferFunctions(object):
     def uncert(self, output_channel):
         """Return transfer function uncertainty for the given output channel"""
         oc = self._match_out_chan(output_channel)
-        xferr = (np.squeeze(self._ds["uncertainty"].sel(output=oc).values) /
-                 np.squeeze(self._ds["response"].sel(output=oc).values))
+        xferr = np.squeeze(
+            self._ds["uncertainty"].sel(output=oc).values
+        ) / np.squeeze(self._ds["response"].sel(output=oc).values)
         return xferr
 
     def uncert_wrt_counts(self, output_channel):
@@ -212,14 +237,15 @@ class TransferFunctions(object):
         if len(in_chans) == 0:
             raise ValueError(f'No matches for "{in_chan}" in {sdm.channels}')
         elif len(in_chans) > 1:
-            raise ValueError(f'Multiple channel matches for "{in_chan}": {in_chans}')
+            raise ValueError(
+                f'Multiple channel matches for "{in_chan}": {in_chans}'
+            )
         in_chan = in_chans[0]
 
         # Validate out_chan
         if out_chans is None:
             # Select all channels except in_chan
-            out_chans = [x for x in sdm.channels
-                         if not x == in_chan]
+            out_chans = [x for x in sdm.channels if not x == in_chan]
         if not isinstance(out_chans, list):
             raise TypeError("Error: out_chans is not a list")
         return in_chan, out_chans
@@ -237,12 +263,23 @@ class TransferFunctions(object):
         if len(out_chans) == 0:
             ValueError(f'No output channel matches "{value}"')
         elif len(out_chans) > 1:
-            ValueError('Multiple output channels match "{}": {}'.format(
-                value, out_chans))
+            ValueError(
+                'Multiple output channels match "{}": {}'.format(
+                    value, out_chans
+                )
+            )
         return out_chans[0]
 
-    def _calcxf(self, spect_density, input, output, noise_chan="output",
-                n_to_reject=1, min_freq=None, max_freq=None):
+    def _calcxf(
+        self,
+        spect_density,
+        input,
+        output,
+        noise_chan="output",
+        n_to_reject=1,
+        min_freq=None,
+        max_freq=None,
+    ):
         """
         Calculate transfer function between a given input and output channel
 
@@ -268,23 +305,25 @@ class TransferFunctions(object):
         coh_mag_sq = abs(coh) * abs(coh)
         H = Gxy / Gxx  # B&P Equation 6.69
         H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
-        errbase = np.sqrt((np.ones(coh.shape) - coh_mag_sq)
-                          / (2 * self.n_windows * coh_mag_sq))
-        if noise_chan == 'output':
+        errbase = np.sqrt(
+            (np.ones(coh.shape) - coh_mag_sq)
+            / (2 * self.n_windows * coh_mag_sq)
+        )
+        if noise_chan == "output":
             xf = H * coh
             xferr = np.abs(xf) * errbase
-        elif noise_chan == 'input':
+        elif noise_chan == "input":
             xf = H / coh
             xferr = np.abs(xf) * errbase
-        elif noise_chan == 'equal':
+        elif noise_chan == "equal":
             xf = H
             xferr = np.abs(xf) * errbase
-        elif noise_chan == 'unknown':
+        elif noise_chan == "unknown":
             xf = H
             # VERY ad-hoc error guesstimate
-            maxerr = np.abs(coh**(-1)) + errbase
+            maxerr = np.abs(coh ** (-1)) + errbase
             minerr = np.abs(coh) - errbase
-            xferr = np.abs(xf * (maxerr-minerr)/2)
+            xferr = np.abs(xf * (maxerr - minerr) / 2)
         else:
             raise ValueError(f'unknown noise channel: "{noise_chan}"')
         return xf, xferr
@@ -304,11 +343,16 @@ class TransferFunctions(object):
         fig, axs = plt.subplots(rows, cols, sharex=True)
         in_suffix = self._find_str_suffix(inp, outputs)
         for out_chan, j in zip(outputs, range(len(outputs))):
-            axa, axp = self.plot_one(inp, out_chan,
-                                     fig, (rows, cols), (0, j),
-                                     show_ylabel=j==0,
-                                     title=f"{out_chan}/{in_suffix}",
-                                     show_xlabel=True)
+            axa, axp = self.plot_one(
+                inp,
+                out_chan,
+                fig,
+                (rows, cols),
+                (0, j),
+                show_ylabel=j == 0,
+                title=f"{out_chan}/{in_suffix}",
+                show_xlabel=True,
+            )
         ax_array[0, j] = (axa, axp)
         if show:
             plt.show()
@@ -333,13 +377,26 @@ class TransferFunctions(object):
         in_suffix = self._find_str_suffix(inp, outputs)
         for out_chan, j in zip(outputs, range(len(outputs))):
             axa, axp = self.plot_one(
-                inp, out_chan, fig, shape, (0, j),
-                show_ylabel=j==0, show_xlabel=True,
-                title=f"{out_chan}/{in_suffix}")
+                inp,
+                out_chan,
+                fig,
+                shape,
+                (0, j),
+                show_ylabel=j == 0,
+                show_xlabel=True,
+                title=f"{out_chan}/{in_suffix}",
+            )
             ax_array[0, j] = (axa, axp)
             axa, axp = spect_dens.plot_one_coherence(
-                inp, out_chan, fig, shape, (1, j),
-                show_ylabel=j==0, show_xlabel=True, show_phase=False)
+                inp,
+                out_chan,
+                fig,
+                shape,
+                (1, j),
+                show_ylabel=j == 0,
+                show_xlabel=True,
+                show_phase=False,
+            )
             ax_array[1, j] = axa
         if show:
             plt.show()
@@ -348,25 +405,34 @@ class TransferFunctions(object):
     def _find_str_suffix(self, inp, outps):
         """
         Find longest non-common suffix of inp, outps
-        
+
         Args:
             inp (str): string to reduce
             outps: (list of str): list of base strings to compare
         Returns:
             result (str): longest non-commmon suffix
         """
-        ii_ind = len(inp)-1
+        ii_ind = len(inp) - 1
         for oc, j in zip(outps, range(len(outps))):
             for ii in range(0, len(oc)):
                 if not inp[ii] == oc[ii]:
                     break
-            if (ii < ii_ind):
+            if ii < ii_ind:
                 ii_ind = ii
             return inp[ii:]
 
-    def plot_one(self, in_chan, out_chan, fig=None, fig_grid=(1, 1),
-                 plot_spot=(0, 0), label=None, title=None,
-                 show_xlabel=True, show_ylabel=True):
+    def plot_one(
+        self,
+        in_chan,
+        out_chan,
+        fig=None,
+        fig_grid=(1, 1),
+        plot_spot=(0, 0),
+        label=None,
+        title=None,
+        show_xlabel=True,
+        show_ylabel=True,
+    ):
         """
         Plot one transfer function
 
@@ -397,13 +463,15 @@ class TransferFunctions(object):
             fig = plt.gcf()
         # Plot amplitude
         fig.suptitle("Transfer Functions")
-        ax_a = plt.subplot2grid((3*fig_grid[0], 1*fig_grid[1]),
-                                (3*plot_spot[0]+0, plot_spot[1]+0),
-                                rowspan=2)
+        ax_a = plt.subplot2grid(
+            (3 * fig_grid[0], 1 * fig_grid[1]),
+            (3 * plot_spot[0] + 0, plot_spot[1] + 0),
+            rowspan=2,
+        )
         xf[xf == 0] = None
-        ax_a.loglog(f, np.abs(xf+xferr), color='blue', linewidth=0.5)
-        ax_a.loglog(f, np.abs(xf-xferr), color='blue', linewidth=0.5)
-        ax_a.loglog(f, np.abs(xf), color='black', label=label)
+        ax_a.loglog(f, np.abs(xf + xferr), color="blue", linewidth=0.5)
+        ax_a.loglog(f, np.abs(xf - xferr), color="blue", linewidth=0.5)
+        ax_a.loglog(f, np.abs(xf), color="black", label=label)
         # ax_a.loglog(f, np.abs(xf), label=f"'{out_chan}' / '{in_chan}'")
         ax_a.set_xlim(f[1], f[-1])
         if title is not None:
@@ -412,22 +480,24 @@ class TransferFunctions(object):
             ax_a.legend()
 
         if show_ylabel:
-            ax_a.set_ylabel('TF')
+            ax_a.set_ylabel("TF")
         ax_a.set_xticklabels([])
         # Plot phase
-        ax_p = plt.subplot2grid((3*fig_grid[0], 1*fig_grid[1]),
-                                (3*plot_spot[0]+2, plot_spot[1]+0),
-                                sharex=ax_a)
+        ax_p = plt.subplot2grid(
+            (3 * fig_grid[0], 1 * fig_grid[1]),
+            (3 * plot_spot[0] + 2, plot_spot[1] + 0),
+            sharex=ax_a,
+        )
         ax_p.semilogx(f, np.degrees(np.angle(xf)))
         ax_p.set_ylim(-180, 180)
         ax_p.set_xlim(f[1], f[-1])
         ax_p.set_yticks((-180, 0, 180))
         if show_ylabel:
-            ax_p.set_ylabel('Phase')
+            ax_p.set_ylabel("Phase")
         else:
             ax_p.set_yticklabels([])
         if show_xlabel:
-            ax_p.set_xlabel('Frequency (Hz)')
+            ax_p.set_xlabel("Frequency (Hz)")
         return ax_a, ax_p
 
     def save(self, filename):
@@ -471,7 +541,7 @@ class TransferFunctions(object):
 
         """
         # Remove traces to save disk space
-        file = open(filename, 'wb')
+        file = open(filename, "wb")
         pickle.dump(self, file)
         file.close()
 
@@ -492,7 +562,7 @@ class TransferFunctions(object):
         assert isinstance(coh, np.ndarray)
         if min_freq is not None and max_freq is not None:
             if min_freq >= max_freq:
-                raise ValueError('min_freq >= max_freq')
+                raise ValueError("min_freq >= max_freq")
         goods = np.full(coh.shape, True)
         if min_freq is not None:
             goods[f < min_freq] = False
@@ -506,13 +576,21 @@ class TransferFunctions(object):
             if n_to_reject > 1:
                 goods_orig = goods.copy()
                 # calc n values for both sides: 2=>0, 3,4=>1, 5,6->2, etc
-                both_sides = int(np.floor((n_to_reject-1)/2))
+                both_sides = int(np.floor((n_to_reject - 1) / 2))
                 # Shift to both sides
-                for n in range(1, both_sides+1):
-                    goods = xr.ufuncs.logical_and(goods, np.roll(goods_orig, n))
-                    goods = xr.ufuncs.logical_and(goods, np.roll(goods_orig, -n))
-                if n_to_reject % 2 == 0:    # IF EVEN, roll in one from above
-                    goods = xr.ufuncs.logical_and(goods, goods_orig.roll(
-                        f=-both_sides-1, fill_value=goods_orig[-1]))
+                for n in range(1, both_sides + 1):
+                    goods = xr.ufuncs.logical_and(
+                        goods, np.roll(goods_orig, n)
+                    )
+                    goods = xr.ufuncs.logical_and(
+                        goods, np.roll(goods_orig, -n)
+                    )
+                if n_to_reject % 2 == 0:  # IF EVEN, roll in one from above
+                    goods = xr.ufuncs.logical_and(
+                        goods,
+                        goods_orig.roll(
+                            f=-both_sides - 1, fill_value=goods_orig[-1]
+                        ),
+                    )
             H[~goods] = 0
         return H

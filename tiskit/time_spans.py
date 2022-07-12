@@ -16,6 +16,7 @@ class TimeSpans:
     """
     A class specifying time spans, to be removed, kept, zeroed, etc.
     """
+
     start_times: list
     end_times: list
 
@@ -28,8 +29,12 @@ class TimeSpans:
     def __eq__(self, other):
         if not len(self.start_times) == len(other.start_times):
             return False
-        for sta, eta, stb, etb in zip(self.start_times, self.end_times,
-                                      other.start_times, other.end_times):
+        for sta, eta, stb, etb in zip(
+            self.start_times,
+            self.end_times,
+            other.start_times,
+            other.end_times,
+        ):
             if not sta == stb:
                 return False
             if not eta == etb:
@@ -37,19 +42,26 @@ class TimeSpans:
         return True
 
     def __str__(self):
-        s = 'TimeSpans: start            |            end\n'
-        s += '===========================+===============================\n'
+        s = "TimeSpans: start            |            end\n"
+        s += "===========================+===============================\n"
         for st, et in zip(self.start_times, self.end_times):
-            s += f' {st} | {et}\n'
+            s += f" {st} | {et}\n"
         return s
 
     @classmethod
-    def from_eqs(cls, starttime, endtime, minmag=5.85,
-                      days_per_magnitude=1.5, eq_file=None,
-                      save_eq_file=True, quiet=False):
+    def from_eqs(
+        cls,
+        starttime,
+        endtime,
+        minmag=5.85,
+        days_per_magnitude=1.5,
+        eq_file=None,
+        save_eq_file=True,
+        quiet=False,
+    ):
         """
         Generate timespans to avoid because of earthquakes
-    
+
         Will read earthquakes from the USGS online catalog the first time,
         saving the information to a file that can be subsequently used
 
@@ -70,40 +82,48 @@ class TimeSpans:
             try:
                 starttime = UTCDateTime(starttime)
             except Exception:
-                raise ValueError(f'UTCDateTime() could not read {starttime=}')
+                raise ValueError(f"UTCDateTime() could not read {starttime=}")
         if isinstance(endtime, str):
             try:
                 endtime = UTCDateTime(endtime)
             except Exception:
-                raise ValueError(f'UTCDateTime() could not read {endtime=}')
+                raise ValueError(f"UTCDateTime() could not read {endtime=}")
         if eq_file is None:
             eq_file = _eq_filename(starttime, endtime, minmag)
         if Path(eq_file).is_file():
-            cat = read_events(eq_file, format='quakeml')
+            cat = read_events(eq_file, format="quakeml")
         else:
             if not quiet:
-                print('Reading EQs from USGS online catalog...', end='',
-                      flush=True)
+                print(
+                    "Reading EQs from USGS online catalog...",
+                    end="",
+                    flush=True,
+                )
             cat = Client("USGS").get_events(
-                starttime=starttime - _calc_eq_cut(9, minmag, days_per_magnitude),
+                starttime=starttime
+                - _calc_eq_cut(9, minmag, days_per_magnitude),
                 endtime=endtime,
                 minmagnitude=minmag,
-                orderby='time-asc')
+                orderby="time-asc",
+            )
             if not quiet:
-                print('Done', flush=True)
+                print("Done", flush=True)
                 print(f'writing catalog to "{eq_file}"')
             if save_eq_file:
-                cat.write(eq_file, format='quakeml')
+                cat.write(eq_file, format="quakeml")
 
-        new_cat = Catalog(events=[x for x in cat
-                                  if x.preferred_magnitude().mag >= minmag])
+        new_cat = Catalog(
+            events=[x for x in cat if x.preferred_magnitude().mag >= minmag]
+        )
         start_times = [x.preferred_origin().time for x in new_cat]
-        end_times = [x.preferred_origin().time
-                     + _calc_eq_cut(x.preferred_magnitude().mag, minmag,
-                                    days_per_magnitude)
-                     for x in new_cat]
+        end_times = [
+            x.preferred_origin().time
+            + _calc_eq_cut(
+                x.preferred_magnitude().mag, minmag, days_per_magnitude
+            )
+            for x in new_cat
+        ]
         return cls(start_times, end_times)
-
 
     def validate(self):
         """
@@ -116,18 +136,20 @@ class TimeSpans:
             - not every object in start_times and end_times is a UTCDateTime
         """
         if not len(self.start_times) == len(self.end_times):
-            raise ValueError("starttimes[] and end_times[] are not the "
-                             "same length")
+            raise ValueError(
+                "starttimes[] and end_times[] are not the " "same length"
+            )
         for x in self.start_times:
             if not isinstance(x, UTCDateTime):
-                raise ValueError('There is a non-UTCDateTime starttime value')
+                raise ValueError("There is a non-UTCDateTime starttime value")
         for x in self.end_times:
             if not isinstance(x, UTCDateTime):
-                raise ValueError('There is a non-UTCDateTime endtime value')
+                raise ValueError("There is a non-UTCDateTime endtime value")
         if not sorted(self.start_times) == self.start_times:
             return False
-        for startafter, endbefore in zip(self.start_times[1:],
-                                         self.end_times[:-2]):
+        for startafter, endbefore in zip(
+            self.start_times[1:], self.end_times[:-2]
+        ):
             if startafter < endbefore:
                 return False
 
@@ -140,8 +162,9 @@ class TimeSpans:
             return
 
         # sort by time
-        self.end_times = [x for _, x in sorted(zip(self.start_times,
-                                                   self.end_times))]
+        self.end_times = [
+            x for _, x in sorted(zip(self.start_times, self.end_times))
+        ]
         self.start_times = sorted(self.start_times)
 
         # remove any overlaps
@@ -186,17 +209,17 @@ class TimeSpans:
         elif isinstance(inp, Stream):
             stream = inp.copy()
         else:
-            raise(ValueError, 'inp is not an obspy Trace or Stream')
+            raise (ValueError, "inp is not an obspy Trace or Stream")
         for tr in stream:
-            tr.stats.channel = 'XX' + tr.stats.channel[2]
+            tr.stats.channel = "XX" + tr.stats.channel[2]
 
             for st, et in zip(self.start_times, self.end_times):
                 start_addr, end_addr = self._get_addrs(st, et, tr.stats)
                 if start_addr is None:
                     continue
-                tr.data[start_addr:end_addr+1] = 0.
+                tr.data[start_addr : end_addr + 1] = 0.0
         if plot:
-            (stream + inp).plot(color='blue', equal_scale=False)
+            (stream + inp).plot(color="blue", equal_scale=False)
         if isinstance(inp, Trace):
             return stream[0]
         return stream
@@ -235,34 +258,39 @@ class TimeSpans:
         elif isinstance(inp, Stream):
             stream = inp.copy()
         else:
-            raise(ValueError, 'inp is not an obspy Trace or Stream')
+            raise (ValueError, "inp is not an obspy Trace or Stream")
         for tr in stream:
-            tr.stats.channel = 'XX' + tr.stats.channel[2]
+            tr.stats.channel = "XX" + tr.stats.channel[2]
 
             for st, et in zip(self.start_times, self.end_times):
                 start_addr, end_addr = self._get_addrs(st, et, tr.stats)
                 if start_addr is None:
                     continue
-                tr.data[start_addr:end_addr+1] = np.linspace(
-                    tr.data[start_addr], tr.data[end_addr],
-                    end_addr - start_addr + 1)
+                tr.data[start_addr : end_addr + 1] = np.linspace(
+                    tr.data[start_addr],
+                    tr.data[end_addr],
+                    end_addr - start_addr + 1,
+                )
         if plot:
-            (stream + inp).plot(color='blue', equal_scale=False)
+            (stream + inp).plot(color="blue", equal_scale=False)
         if isinstance(inp, Trace):
             return stream[0]
         return stream
 
     def _get_addrs(self, starttime, endtime, stats):
         if not isinstance(starttime, UTCDateTime):
-            raise TypeError(f'starttime is {type(starttime)}, not UTCDateTime')
+            raise TypeError(f"starttime is {type(starttime)}, not UTCDateTime")
         if not isinstance(endtime, UTCDateTime):
-            raise TypeError(f'endtime is {type(endtime)}, not UTCDateTime')
+            raise TypeError(f"endtime is {type(endtime)}, not UTCDateTime")
         if endtime < stats.starttime or starttime > stats.endtime:
             return None, None
-        start_addr = max(np.floor((starttime - stats.starttime)
-                         * stats.sampling_rate), 0)
-        end_addr = min(np.ceil((endtime - stats.starttime)
-                       * stats.sampling_rate), stats.npts)
+        start_addr = max(
+            np.floor((starttime - stats.starttime) * stats.sampling_rate), 0
+        )
+        end_addr = min(
+            np.ceil((endtime - stats.starttime) * stats.sampling_rate),
+            stats.npts,
+        )
         # print(st, et, start_sample, end_sample)
         return int(start_addr), int(end_addr)
 
@@ -277,10 +305,10 @@ class TimeSpans:
             new Trace or Stream
         """
         if not isinstance(inp, Trace) and not isinstance(inp, Stream):
-            raise(ValueError, 'inp is not an obspy Trace or Stream')
+            raise (ValueError, "inp is not an obspy Trace or Stream")
         outp = inp.copy()
         for tr in outp:
-            tr.stats.channel = 'XX' + tr.stats.channel[2]
+            tr.stats.channel = "XX" + tr.stats.channel[2]
 
             for st, et in zip(self.start_times, self.end_times):
                 # Skip events that don't cover the trace time range
@@ -290,13 +318,13 @@ class TimeSpans:
                     continue
                 start_sample = max(st - tr.stats.starttime, 0)
                 end_sample = min(et - tr.stats.starttime, tr.stats.npts)
-                tr.data[start_sample:end_sample] = 0.
+                tr.data[start_sample:end_sample] = 0.0
         if plot:
-            (outp + inp).plot(color='blue', equal_scale=False)
+            (outp + inp).plot(color="blue", equal_scale=False)
         if isinstance(inp, Trace):
             return outp[0]
         return outp
-    
+
     def plot(self, trace=None, ax=None, show=None):
         """
         Plot representation of selected time periods as yellow highlights
@@ -309,8 +337,8 @@ class TimeSpans:
                 any existing plot).  If specifed, will not "show" by default
         """
         if ax is None:
-            ax_existed  =False
-            _, ax = plt.subplots(1,1)
+            ax_existed = False
+            _, ax = plt.subplots(1, 1)
             if show is None:
                 show = True
         else:
@@ -318,17 +346,19 @@ class TimeSpans:
             if show is None:
                 show = False
         for st, et in zip(self.start_times, self.end_times):
-            ax.axvspan(st.datetime, et.datetime, facecolor='red', alpha=0.25)
+            ax.axvspan(st.datetime, et.datetime, facecolor="red", alpha=0.25)
         if trace is not None:
-            assert isinstance(trace, Trace), 'trace is not an obspy Trace'
+            assert isinstance(trace, Trace), "trace is not an obspy Trace"
             ax.plot(trace.times(), trace.data)
         if show:
-            plt.show()        
-    
+            plt.show()
+
+
 def _calc_eq_cut(mag, minmag, days_per_magnitude):
     if mag < minmag:
         return None
     return (mag - minmag) * 86400 * days_per_magnitude
+
 
 def _eq_filename(starttime, endtime, minmag):
     """
@@ -341,6 +371,7 @@ def _eq_filename(starttime, endtime, minmag):
     Returns:
         filename (string):
     """
-    tfmt = '%Y%m%dT%H%M%S'
-    return '{}-{}_MM{:g}_eqcat.qml'.format(starttime.strftime(tfmt),
-                                           endtime.strftime(tfmt), minmag)
+    tfmt = "%Y%m%dT%H%M%S"
+    return "{}-{}_MM{:g}_eqcat.qml".format(
+        starttime.strftime(tfmt), endtime.strftime(tfmt), minmag
+    )
