@@ -30,9 +30,9 @@ class TestMethods(unittest.TestCase):
         stream = stream_read(str(self.test_path / 'XS.S10D.LH.mseed'))
         rotator = CleanRotator(
             stream, verbose=False,
-            remove_eq=str(self.test_path
-                          / "20161205T-20161207T_MM5.85_eqcat.qml"),
-                          save_eq_file=False)
+            remove_eq=str(self.test_path /
+                          "20161205T-20161207T_MM5.85_eqcat.qml"),
+            save_eq_file=False)
         self.assertAlmostEqual(rotator.angle, -0.18, delta=0.01)
         self.assertAlmostEqual(rotator.azimuth, 61.67, delta=0.01)
 

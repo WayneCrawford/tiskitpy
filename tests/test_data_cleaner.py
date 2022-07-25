@@ -3,82 +3,73 @@
 """
 Functions to test spectral functions
 """
-# from os import system
 import unittest
-import inspect
-from pathlib import Path
-import fnmatch
+# from pathlib import Path
+# import inspect
 
-from crawtools.spectral import (DCTFs, DCTF, remove_str, strip_remove_str,
-                                TransferFunctions as TF)
+from obspy.core.stream import read
+
+from tiskit import SpectralDensity, DataCleaner
+from make_test_stream import make_test_stream
 
 
 class TestMethods(unittest.TestCase):
     """
     Test suite
     """
+
     def setUp(self):
-        self.path = Path(
-            inspect.getfile(inspect.currentframe())).resolve().parent
+        # self.path = (Path(inspect.getfile(inspect.currentframe()))
+        #              .resolve().parent)
+        # self.test_path = self.path / "data" / "data_cleaner"
+        self.window_s = 100.0
 
-    def _DCTFs_create(self):
-        """
-        Create a test DCTF object
+        self.stream, self.sineparms = make_test_stream()
+        self.dc = DataCleaner(self.stream, remove_list=["XX.STA.00.BX1"],
+                              window_s=self.window_s)
 
-        Has no transfer function, just the channels information
-        """
-        channels = ['A.BH1', 'A.BH2', 'A.BHZ', 'A.BDH']
-        dctfs = DCTFs()
-        remove_seq = ''
-        out_channels = channels.copy()
-        for component in ("*BDH", '*BH1', '*BH2'):
-            in_channel = fnmatch.filter(channels, component)[0]
-            # print(f'{channels=}, {component=}, {channel=}')
-            ic = in_channel + remove_seq
-            remove_new = remove_str(in_channel, remove_seq)
-            remove_seq += remove_new
-            out_channels = [x + remove_seq
-                            for x in strip_remove_str(out_channels)
-                            if not x == strip_remove_str(in_channel)]
-            tf = TF(None, ic, out_channels, quiet=True)
-            dctfs.append(DCTF(ic, remove_seq, tf))
-        return dctfs
+    def test_str(self):
+        """Test __str__ function"""
+        # print(self.dc)
+        self.assertEqual(
+            self.dc.__str__(),
+            "DataCleaner object:\n"
+            "        Input channel | output channels\n"
+            "   ================== | ===============\n"
+            "   XX.STA.00.BX1      | ['XX.STA.00.BX2-1', 'XX.STA.00.BX3-1']\n",
+        )
 
-    def test_DCTFs_channel_map(self):
-        dctfs = self._DCTFs_create()
-        mapper = dctfs._channel_map()
-        self.assertTrue(mapper == {'A.BH1': 'A.BH1-H',
-                                   'A.BH2': 'A.BH2-H-1',
-                                   'A.BHZ': 'A.BHZ-H-1-2'})
+    def test_clean_sdf(self):
+        """Test clean_sdf function"""
+        sdf = SpectralDensity.from_stream(self.stream, window_s=self.window_s)
+        for fast_calc in (False, True):
+            cleaned = self.dc.clean_sdf(sdf, fast_calc=fast_calc)
+            # cleaned.plot(overlay=True)
+            # self.assertTrue(np.all(self.xf.freqs
+            #                        == np.arange(1, num+1)*stop/num))
 
-    def test_DCTFs_update_channel_names(self):
-        dctfs = self._DCTFs_create()
-        channel_names = ['A.BH1', 'A.BH2', 'A.BHZ', 'A.BDH']
-        new_channel_names = dctfs.update_channel_names(channel_names)
-        self.assertTrue(new_channel_names == ['A.BH1-H', 'A.BH2-H-1',
-                                              'A.BHZ-H-1-2', 'A.BDH'])
-        channel_names = ['A.BH1', 'A.BH2', 'A.BDH']  # no BHZ
-        self.assertRaises(ValueError, dctfs.update_channel_names,
-                          channel_names)
+    def test_clean_stream_to_sdf(self):
+        """Test clean_stream_to_sdf function"""
+        for fast_calc in (False, True):
+            # cleaned = self.dc.clean_stream_to_sdf(self.stream)
+            cleaned = self.dc.clean_stream_to_sdf(self.stream,
+                                                  window_s=self.window_s)
+            # cleaned.plot(overlay=True)
+            # self.assertTrue(np.all(self.xf.freqs
+            #                 == np.arange(1, num+1)*stop/num))
 
-    def test_DCTFs_update_channel_keys(self):
-        dctfs = self._DCTFs_create()
-        in_dict = {'A.BH1': 'hi', 'A.BH2': 'ho', 'A.BHZ': 'he', 'A.BDH': 'hu'}
-        out_dict = dctfs.update_channel_keys(in_dict)
-        # Verify new keys added
-        self.assertTrue(out_dict['A.BH1-H'] == in_dict['A.BH1'])
-        self.assertTrue(out_dict['A.BH2-H-1'] == in_dict['A.BH2'])
-        self.assertTrue(out_dict['A.BHZ-H-1-2'] == in_dict['A.BHZ'])
-        # Verify old keys kept
-        self.assertTrue(out_dict['A.BH1'] == in_dict['A.BH1'])
-        self.assertTrue(out_dict['A.BH2'] == in_dict['A.BH2'])
-        self.assertTrue(out_dict['A.BHZ'] == in_dict['A.BHZ'])
-        self.assertTrue(out_dict['A.BDH'] == in_dict['A.BDH'])
-
+    def test_clean_stream(self):
+        """Test clean_stream function"""
+        for itd in (False, True):
+            cleaned = self.dc.clean_stream(self.stream, in_time_domain=itd)
+            # cleaned.plot(end_time=cleaned[0].stats.starttime + 10)
+            sdf_cleaned = SpectralDensity.from_stream(self.stream,
+                                                      window_s=self.window_s)
+        
 
 def suite():
-    return unittest.makeSuite(TestMethods, 'test')
+    return unittest.makeSuite(TestMethods, "test")
 
 
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')
+if __name__ == "__main__":
+    unittest.main(defaultTest="suite")

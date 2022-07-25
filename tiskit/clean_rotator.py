@@ -24,14 +24,6 @@ from obspy import UTCDateTime
 from .time_spans import TimeSpans
 from .utils import SeisRotate
 
-DEBUG = True
-
-
-def debug(s):
-    if DEBUG:
-        print(s)
-
-
 class CleanRotator:
     """
     Class to clean tilt noise from OBS vertical channel using non-deforming rotation

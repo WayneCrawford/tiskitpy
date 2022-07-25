@@ -8,6 +8,8 @@ Plot instrument sensitivity
 """
 import sys
 import argparse
+import logging
+
 from obspy import read_inventory  # , UTCDateTime
 from obspy.signal.spectral_estimation import get_nlnm, get_nhnm
 import numpy as np
@@ -25,17 +27,15 @@ def main():
             network=net, station=sta, location=loc, channel=arguments.component
         )[0][0][0]
     except Exception:
-        print(f"{SEED_id} not found in {arguments.sta_file}")
+        logging.error(f"{SEED_id} not found in {arguments.sta_file}")
     SEED_id = f"{net}.{sta}.{loc}.{channel.code}"
     if not arguments.min_freq:
-        print("Calculating minimum frequency from lowest frequency pole:")
+        logging.info("Calculating minimum frequency from lowest frequency pole:")
         paz = channel.response.get_paz()
         min_pole = np.min(np.abs(paz.poles)) / (2 * np.pi)
-        print(f"    LF pole found at {min_pole:.2g} Hz ({1/min_pole:.2g} s)")
+        logging.info(f"    LF pole found at {min_pole:.2g} Hz ({1/min_pole:.2g} s)")
         arguments.min_freq = (min_pole) / 10
 
-    # print(channel)
-    # print(inv)
     outf_base = f"{SEED_id}"
     if arguments.gain_mult:
         outf_base = outf_base + f"_x{arguments.gain_mult:g}"
@@ -155,12 +155,12 @@ def _plot_sensitivity(channel, seed_id, args):
     if args.dyn_is_min_counts:
         min_counts = args.dyn_range
         args.dyn_range = 20 * np.log10(args.max_counts / min_counts)
-        print(f"minimum A/D counts provided:  {min_counts:d}")
-        print(f"A/D Dynamic range calculated: {args.dyn_range:.0f}dB")
+        logging.info(f"minimum A/D counts provided:  {min_counts:d}")
+        logging.info(f"A/D Dynamic range calculated: {args.dyn_range:.0f}dB")
     else:
         min_counts = args.max_counts / np.power(10, args.dyn_range / 20)
-        print(f"A/D dynamic range provided:  {args.dyn_range:.0f}dB")
-        print(f"min_counts calculated:       {min_counts:.1f}")
+        logging.info(f"A/D dynamic range provided:  {args.dyn_range:.0f}dB")
+        logging.info(f"min_counts calculated:       {min_counts:.1f}")
 
     # Plot reference values
     t, vals = get_nlnm()

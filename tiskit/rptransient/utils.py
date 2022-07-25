@@ -3,17 +3,9 @@ Utilities used for transient detection/removal
 """
 import sys
 import math as M
-# import time
+import logging
 
-# import obspy.core
 import numpy as np
-# import scipy as sp
-# import matplotlib.pyplot as plt
-# from scipy.signal import convolve
-# from scipy.signal import correlate, deconvolve
-# from scipy.fftpack import ifft
-
-# DEBUG = False
 
 
 def stack_data(data, slice_len):
@@ -23,11 +15,11 @@ def stack_data(data, slice_len):
     If the offset is non-integer, finds the best compromise for each slice
     (may lose a sample here or there)
 
-    :param data: 1-D array of data
-    :type data: numpy.ndarray
-    :param slice_len: the number of samples per slice (may be non-integer)
-    :returns: a 2-D array with one slice in each column
-    :rtype: numpy.ndarray
+    Args:
+        data (:class:`numpy.ndarray`): 1-D array of data
+        slice_len (float): the number of samples per slice (may be non-integer)
+    Returns:
+        (:class:`numpy.ndarray`): a 2-D array with one slice in each column
     """
     n = data.size
     nCols = int(M.floor(n/slice_len))
@@ -45,11 +37,11 @@ def prep_filter(trace, filtparms=[0.002, 2, 0.03, 6]):
     """
     Prefilter parameters used by Wielandt (Bandpass and demean)
 
-    :param trace: input trace
-    :param filtparms: hipass freq, npoles, lowpass freq, npoles
-    :returns: new trace, filtered
-
-    # The default filt parms [0.002, 2, 0.03, 6] each give dt = 1.6s
+    Args:
+        trace (:class:`obspy.core.stream.Trace`): input trace
+        filtparms (tuple): hipass freq, npoles, lowpass freq, npoles
+    Returns:
+        (:class:`obspy.core.stream.Trace`): new trace, filtered
     """
     lpf, lpc = filtparms[2:]
     hpf, hpc = filtparms[:2]
@@ -69,7 +61,7 @@ def input_float(text, default):
     try:
         _ = float(default)
     except Exception:
-        print('The default value is not numeric!')
+        logging.critical('The default value is not numeric!')
         sys.exit(2)
     while True:
         inp = input(f'{text}  (RETURN uses current value) [{default:g}]: ')
@@ -84,7 +76,7 @@ def input_float(text, default):
 
 def _is_float_tuple(inp, nvals=None):
     if not isinstance(inp, (tuple, list)):
-        print(type(inp))
+        print(f'input type = {type(inp)}')
         return False
     else:
         if nvals is not None:

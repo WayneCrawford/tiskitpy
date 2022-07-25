@@ -17,7 +17,7 @@ class DCTFs(UserList):
         Args:
             fts (dict): dictionary containing Fourier transforms for each
                 channel. Each Fourier transform is N*ws, where ws is the
-                window size and N is the mumber of windows
+                window size and N is the number of windows
         Returns:
             fts (dict): dictionary containg corrected Fourier transforms for
                 each channel.
@@ -27,18 +27,20 @@ class DCTFs(UserList):
             # mapping = dict()
             in_chan = tfs.input_channel
             if not tfs.freqs.shape == fts[in_chan].shape:
-                ValueError(
-                    "transfer function and ft have different shapes "
-                    f"({tfs.freqs.shape} vs {fts[in_chan].shape})"
-                )
+                ValueError("transfer function and ft have different shapes "
+                           f"({tfs.freqs.shape} vs {fts[in_chan].shape})")
             for out_chan in tfs.output_channels:
-                new_out_chan = (
-                    strip_remove_str(out_chan) + dctf.remove_sequence
-                )
+                if not fts[out_chan].shape == fts[in_chan].shape:
+                    ValueError(f"ft[in_chan={in_chan}] and "
+                               f"ft[out_chan={out_chan}] have different "
+                               f"shapes ({fts[in_chan].shape} vs "
+                               f"{fts[out_chan].shape})")
+                new_out_chan = (strip_remove_str(out_chan)
+                                + dctf.remove_sequence)
                 # EQ 8, Crawford & Webb 2000
-                fts[new_out_chan] = fts[out_chan] - fts[in_chan] * np.conj(
-                    tfs.values(out_chan)
-                )
+                fts[new_out_chan] = (
+                    fts[out_chan] 
+                    - fts[in_chan] * tfs.values(out_chan))
         return fts
 
     def update_channel_names(self, channel_names):

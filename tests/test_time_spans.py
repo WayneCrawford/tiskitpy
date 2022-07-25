@@ -31,7 +31,7 @@ class TestMethods(unittest.TestCase):
                        UTCDateTime(2011, 11, 2),
                        UTCDateTime(2011, 12, 1)]
         end_times = [x + 100000 for x in start_times]
-        ts = TimeSpans(start_times, end_times) # , save_eq_file=False, quiet=True)
+        ts = TimeSpans(start_times, end_times)
         self.assertEqual(len(ts), 2)
         self.assertEqual(ts,
                          TimeSpans([UTCDateTime(2011, 11, 1),
@@ -46,7 +46,7 @@ class TestMethods(unittest.TestCase):
         stream = stream_read(str(self.test_path / 'XS.S10D.LH.mseed'))
         st = UTCDateTime(2016, 12, 5, 6)
         et = UTCDateTime(2016, 12, 5, 12)
-        ts = TimeSpans([st], [et]) # , save_eq_file=False, quiet=True)
+        ts = TimeSpans([st], [et])  # , save_eq_file=False, quiet=True)
         zeroed = ts.zero(stream)
         self.assertEqual(zeroed[0].trim(st, et).data[0], 0)
         interped = ts.interp(stream)

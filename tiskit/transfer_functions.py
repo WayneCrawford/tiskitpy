@@ -16,20 +16,18 @@ np.seterr(all="ignore")
 class TransferFunctions(object):
     """
     Class of Transfer functions for a given input channel.
+    
+    From Bendat & Piersol, chapter 6.  The frequency response function is
+    the relation between coherent parts of the signal: if the measured
+    input x(t) = u(t) + m(t) and the measured output y(t) = v(t) + n(t),
+    where u(t) and v(t) are coherent and m(t) and n(t) are not, then the 
+    frequency response function H(f) is such that v(t) = H(f)*u(t).  As
+    to spectra, G_vv(f) = abs(H(f))^2 * G_uu(f)
     """
 
-    def __init__(
-        self,
-        sdm,
-        in_chan,
-        out_chans=None,
-        noise_chan="output",
-        n_to_reject=3,
-        min_freq=None,
-        max_freq=None,
-        quiet=False,
-        show_progress=False,
-    ):
+    def __init__(self, sdm, in_chan, out_chans=None, noise_chan="output",
+                 n_to_reject=3, min_freq=None, max_freq=None,
+                 quiet=False, show_progress=False):
         """
         Args:
             sdm (:class:`.SpectralDensity`): Spectral density matrix objet
@@ -120,10 +118,10 @@ class TransferFunctions(object):
 
     def __str__(self):
         s = "TransferFunctions object:\n"
-        s += f"\tinput_channel = {self.input_channel}\n"
-        s += f"\toutput_channels = {self.output_channels}\n"
-        s += f"\tnoise_channels = {self.noise_channels}\n"
-        s += f"\tn_windows = {self.n_windows}"
+        s += f"\tinput_channel='{self.input_channel}'\n"
+        s += f"\toutput_channels={self.output_channels}\n"
+        s += f"\tnoise_channels={self.noise_channels}\n"
+        s += f"\tn_windows={self.n_windows}"
         return s
 
     @property
@@ -153,7 +151,7 @@ class TransferFunctions(object):
 
     @property
     def noise_channels(self):
-        """Number of time series data windows used"""
+        """Names of the noise channel for each xf"""
         return list(self._ds.coords["noise_chan"].values)
 
     def coh_signif(self, prob=0.95):
@@ -261,29 +259,20 @@ class TransferFunctions(object):
             raise TypeError("Error: value is not a str")
         out_chans = fnmatch.filter(self.output_channels, value)
         if len(out_chans) == 0:
-            ValueError(f'No output channel matches "{value}"')
+            raise ValueError(f'No output channel matches "{value}"')
         elif len(out_chans) > 1:
-            ValueError(
-                'Multiple output channels match "{}": {}'.format(
-                    value, out_chans
-                )
-            )
+            raise ValueError('Multiple output channels match "{}": {}'
+                             .format(value, out_chans))
         return out_chans[0]
 
-    def _calcxf(
-        self,
-        spect_density,
-        input,
-        output,
-        noise_chan="output",
-        n_to_reject=1,
-        min_freq=None,
-        max_freq=None,
-    ):
+    def _calcxf(self, spect_density, input, output, noise_chan="output",
+                n_to_reject=1, min_freq=None, max_freq=None):
         """
-        Calculate transfer function between a given input and output channel
-
+        Calculate frequency response function between two channels
+        
         Returns 0 for values where coherence is beneath signif level
+        
+        Uses equations from Bendat&Piersol, 1986 (BP86)
 
         Args:
             spect_density(:class: ~SpectralDensity): cross-spectral density
@@ -294,39 +283,70 @@ class TransferFunctions(object):
             n_to_reject (int): only use values for which more than this
                 many consecutive coherences are above the 95% significance
                 level (0 = use all)
+            min_freq (float): set to zero for frequencies below this value
+            max_freq (float): set to zero for frequencies above this value 
         """
-        # Gxx = spect_density.sdf.sel(input=input, output=input)
-        # Gxy = spect_density.sdf.sel(input=input, output=output)
-        Gxx = spect_density.autospect(input)
-        Gxy = spect_density.crossspect(input, output)
         coh = spect_density.coherence(input, output)
         f = spect_density.freqs
-        # Shouldn't need abs() here, coh is real positive
-        coh_mag_sq = abs(coh) * abs(coh)
-        H = Gxy / Gxx  # B&P Equation 6.69
-        H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
-        errbase = np.sqrt(
-            (np.ones(coh.shape) - coh_mag_sq)
-            / (2 * self.n_windows * coh_mag_sq)
-        )
-        if noise_chan == "output":
-            xf = H * coh
-            xferr = np.abs(xf) * errbase
+        # H = Gxy / Gxx  # B&P Equation 6.69
+        # H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
+        # if noise_chan == "output":
+        #     xf = H * coh
+        #     xferr = np.abs(xf) * errbase
+        # elif noise_chan == "input":
+        #     xf = H / coh
+        #     xferr = np.abs(xf) * errbase
+        # elif noise_chan == "equal":
+        #     xf = H
+        #     xferr = np.abs(xf) * errbase
+        # elif noise_chan == "unknown":
+        #     xf = H
+        #     # VERY ad-hoc error guesstimate
+        #     maxerr = np.abs(coh ** (-1)) + errbase
+        #     minerr = np.abs(coh) - errbase
+        #     xferr = np.abs(xf * (maxerr - minerr) / 2)
+        # else:
+        #     raise ValueError(f'unknown noise channel: "{noise_chan}"')
+        # return xf, xferr
+        
+        # Calculate Frequency Response Function (Incorrectly called
+        # transfer function)
+        if noise_chan == "output" or noise_chan == "equal":
+            Gxx = spect_density.autospect(input)
+            Gxy = spect_density.crossspect(input, output)
+            if noise_chan == "output":
+                H = Gxy / Gxx  # BP86 eqn 6.37
+                corr_mult = np.ones(H.shape)
+            elif noise_chan == "equal":
+                # Derived from BP86 eqns 6.48, 6.49, 6.51 and 6.52
+                H = (Gxy / Gxx) / np.sqrt(coh)
+                corr_mult = np.sqrt(coh)
         elif noise_chan == "input":
-            xf = H / coh
-            xferr = np.abs(xf) * errbase
-        elif noise_chan == "equal":
-            xf = H
-            xferr = np.abs(xf) * errbase
-        elif noise_chan == "unknown":
-            xf = H
-            # VERY ad-hoc error guesstimate
-            maxerr = np.abs(coh ** (-1)) + errbase
-            minerr = np.abs(coh) - errbase
-            xferr = np.abs(xf * (maxerr - minerr) / 2)
+            Gyy = spect_density.autospect(output)
+            Gyx = spect_density.crossspect(output, input)
+            H = Gyy / Gyx # BP86 eqn 6.42
+            corr_mult =  coh # derived from BP86 eqns 6.44 and 6.46
+        # elif noise_chan == "unknown":
+        #     xf = H
+        #     # VERY ad-hoc error guesstimate
+        #     maxerr = np.abs(coh ** (-1)) + errbase
+        #     minerr = np.abs(coh) - errbase
+        #     xferr = np.abs(xf * (maxerr - minerr) / 2)
         else:
             raise ValueError(f'unknown noise channel: "{noise_chan}"')
-        return xf, xferr
+        H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
+        
+        # Calculate uncertainty
+        # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
+        errbase = (np.sqrt((np.ones(coh.shape) - coh) / (2*self.n_windows))
+                   / np.sqrt(coh))
+        # coh_mag_sq = abs(coh)*abs(coh)  # False! coherence already squared
+        # errbase = np.sqrt(
+        #     (np.ones(coh.shape) - coh_mag_sq)
+        #     / (2 * self.n_windows * coh_mag_sq)
+        # )
+        H_err = np.abs(H) * errbase
+        return H, H_err
 
     def plot(self, show=True):
         """
@@ -569,7 +589,7 @@ class TransferFunctions(object):
         if max_freq is not None:
             goods[f > max_freq] = False
         if n_to_reject > 0:
-            goods = xr.ufuncs.logical_and(goods, coh > self.coh_signif(0.95))
+            goods = np.logical_and(goods, coh > self.coh_signif(0.95))
             # goods = coh > self.coh_signif(0.95)
 
             # for n == 1, should do nothing, for n == 2, shift once, etc
@@ -579,14 +599,14 @@ class TransferFunctions(object):
                 both_sides = int(np.floor((n_to_reject - 1) / 2))
                 # Shift to both sides
                 for n in range(1, both_sides + 1):
-                    goods = xr.ufuncs.logical_and(
+                    goods = np.logical_and(
                         goods, np.roll(goods_orig, n)
                     )
-                    goods = xr.ufuncs.logical_and(
+                    goods = np.logical_and(
                         goods, np.roll(goods_orig, -n)
                     )
                 if n_to_reject % 2 == 0:  # IF EVEN, roll in one from above
-                    goods = xr.ufuncs.logical_and(
+                    goods = np.logical_and(
                         goods,
                         goods_orig.roll(
                             f=-both_sides - 1, fill_value=goods_orig[-1]

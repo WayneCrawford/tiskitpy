@@ -4,28 +4,16 @@ Clean tilt noise from OBS vertical channel using non-deforming rotation
 
 Is there any reason why rotate_clean isn't just rotate_calc + rotate_apply?
 """
-# import sys
 import math as M
 from copy import deepcopy
+import logging
 
 import numpy as np
 import scipy as sp
 
-# import matplotlib as mp
 import matplotlib.pyplot as plt
-# import obspy
 from obspy.signal.rotate import rotate2zne
 from obspy.core.stream import Stream  # , Trace
-# from obspy import UTCDateTime
-
-# from obspy.signal import rotate
-
-DEBUG = True
-
-
-def debug(s):
-    if DEBUG:
-        print(s)
 
 
 class SeisRotate:
@@ -188,15 +176,11 @@ class SeisRotate:
         """
         if verbose:
             print("Estimating preliminary angle based on signal ratios")
-        # s=obspy.core.stream.Stream([self.Z,self.N])
-        # s.plot()
         ZoverN = np.divide(self.Z.data, self.N.data)
         ZoverE = np.divide(self.Z.data, self.E.data)
         # Throw out not-a-numbers
         ZoverN = ZoverN[~np.isnan(ZoverN)]
         ZoverE = ZoverE[~np.isnan(ZoverE)]
-        # if verbose:
-        #   print("    ",np.median(ZoverN),np.median(ZoverE))
 
         ZNratio = M.copysign(M.sqrt(np.median(ZoverN**2)), np.median(ZoverN))
         ZEratio = M.copysign(M.sqrt(np.median(ZoverE**2)), np.median(ZoverE))
@@ -224,7 +208,7 @@ class SeisRotate:
         # return ZN & ZE angles??
         dip_N = angle * M.cos(np.deg2rad(azimuth))
         dip_E = angle * M.sin(np.deg2rad(azimuth))
-        print(f"{dip_N=}, {dip_E=}")
+        logging.info(f"{dip_N=}, {dip_E=}")
 
         return angle, azimuth
 

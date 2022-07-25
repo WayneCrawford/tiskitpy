@@ -14,6 +14,7 @@ us to confirm that we are working on the properly prepared data
 """
 import fnmatch
 from copy import deepcopy
+import logging
 
 import numpy as np
 from scipy import signal
@@ -32,18 +33,9 @@ class DataCleaner:
     Works on raw data, without instrument corrections
     """
 
-    def __init__(
-        self,
-        stream,
-        remove_list,
-        noise_channel="output",
-        n_to_reject=3,
-        min_freq=None,
-        max_freq=None,
-        show_progress=False,
-        fast_calc=False,
-        window_s=1000,
-    ):
+    def __init__(self, stream, remove_list, noise_channel="output",
+                 n_to_reject=3, min_freq=None, max_freq=None,
+                 show_progress=False, fast_calc=False, **kwargs):
         """
         Args:
             stream (:class:`obspy.core.stream.Stream`): data to use
@@ -60,7 +52,8 @@ class DataCleaner:
             show_progress (bool): Show progress plots
             fast_calc (bool): Calculate corrected spectra directly from
                 previous spectra (ATACR-style).
-            window_s (float): desired window length in seconds
+            kwargs (:class:`SpectralDensity.from_stream()` properties):
+                 window_s, windowtype, z_threshold...
 
         Attributes:
             DCTFs (list of :class:`DCTF`): list of data cleaner transfer
@@ -68,7 +61,7 @@ class DataCleaner:
         """
         if not isinstance(stream, Stream):
             raise ValueError("stream is a {type(stream)}, not an obspy Stream")
-        sdfs = [SpectralDensity.from_stream(stream, window_s=window_s)]
+        sdfs = [SpectralDensity.from_stream(stream, **kwargs)]
         self.DCTFs = DCTFs()
         # Calculate removal transfer functions
         out_chans = sdfs[0].channels
@@ -99,11 +92,8 @@ class DataCleaner:
                     )
                 )
             else:
-                sdfs.append(
-                    SpectralDensity.from_stream(
-                        stream, data_cleaner=self, window_s=window_s
-                    )
-                )
+                sdfs.append(SpectralDensity.from_stream(
+                    stream, data_cleaner=self, **kwargs))
             out_chans = [x + remove_new for x in out_chans]
         if show_progress:
             print("Plotting sdfs after data cleaner applied")
@@ -133,19 +123,17 @@ class DataCleaner:
         Args:
             sdf (:class:`.SpectralDensity`): data to apply to
         Return:
-            sdf (:class:`.SpectralDensity`): corrected spectral density
-                functions
+            sdf (:class:`.SpectralDensity`): corrected spectral densities
         """
-        assert isinstance(sdf, SpectralDensity)
+        if not isinstance(sdf, SpectralDensity):
+            raise TypeError('sdf is not a SpectralDensity object')
         for dctf in self.DCTFs:
             sdf = self._removeTF_SDF(
-                sdf,
-                dctf.tfs,
-                add_suffix=dctf.remove_sequence.rsplit("-", 1)[0],
-            )
+                sdf, dctf.tfs,
+                add_suffix=dctf.remove_sequence.rsplit("-", 1)[0])
         return sdf
 
-    def clean_stream_to_sdf(self, stream, fast_calc=False):
+    def clean_stream_to_sdf(self, stream, fast_calc=False, **kwargs):
         """
         Calculate corrected spectral density functions
 
@@ -153,16 +141,20 @@ class DataCleaner:
             stream (:class:`obspy.core.stream.Stream`): data to apply to
             fast_calc (bool): Calculate corrected spectra directly from
                 previous spectra.
+            **kwargs (dict): keyword arguments for SpectralDensity.from_stream()
         Return:
             sdf (:class:`.SpectralDensity`): corrected spectral density
                 functions
         """
         assert isinstance(stream, Stream)
         if fast_calc:
-            sdf = SpectralDensity.from_stream(stream)
+            sdf = SpectralDensity.from_stream(stream, **kwargs)
             sdf = self.clean_sdf(sdf)
         else:
-            sdf = SpectralDensity.from_stream(stream, dctfs=self.DCTFs)
+            # sdf = SpectralDensity.from_stream(stream, dctfs=self.DCTFs,
+            #                                   **kwargs)
+            sdf = SpectralDensity.from_stream(stream, data_cleaner=self,
+                                              **kwargs)
         return sdf
 
     def clean_stream(self, stream, in_time_domain=False, stuff_locations=True):
@@ -182,14 +174,18 @@ class DataCleaner:
         """
         assert isinstance(stream, Stream)
 
+        # Make sure that the array is not masked
+        if np.any([np.ma.count_masked(tr.data) for tr in stream]):
+            logging.warning('Unmasking masked data (usually a gap or overlap)')
+            stream = stream.split().merge(fill_value='interpolate')
         out_stream = stream.copy()
         seed_ids = [tr.id for tr in out_stream]
         remove_seqs = {k: "" for k in seed_ids}
 
         if in_time_domain is True:
-            print("Correcting traces in the time domain")
+            logging.info("Correcting traces in the time domain")
         else:
-            print("Correcting traces in the frequency domain")
+            logging.info("Correcting traces in the frequency domain")
 
         for dctf in self.DCTFs:
             tfs = dctf.tfs
@@ -220,7 +216,7 @@ class DataCleaner:
         """
         self.DCTFs.plot()
 
-    def _correct_trace(self, in_trace, out_trace, f, tf, in_time_domain=True):
+    def _correct_trace(self, in_trace, out_trace, f, tf, in_time_domain=False):
         """
         Correct a trace using an input trace and a transfer function
 
@@ -358,9 +354,7 @@ class DataCleaner:
                 self._plot_removeTF_SDF(
                     tf, sdf, in_auto, out_auto, tf_oc, ic, oc
                 )
-            # Bendat & Piersol eqs 6.35 and 6.36
-            # in_auto = Gxx(f) = Gnn(f) + Guu(f) + Gum(f) + Gmu(f)
-            # out_auto = Gyy(f) =  Gmm(f) + Gvv(f) + Gvn(f) + Gnv(f)
+            # Bendat & Piersol 1986 eqs 6.35 and 6.41
             sdf.put_autospect(oc, out_auto - in_auto * np.abs(tf_oc) ** 2)
             # Bendat & Piersol eq6.36 with
             sdf.put_crossspect(ic, oc, crossspect - in_auto * tf_oc)
@@ -374,35 +368,17 @@ class DataCleaner:
         f = tf.freqs
         fig, ax = plt.subplots(1, 1)
         ax2 = ax.twinx()
-        ax2.semilogx(
-            f,
-            np.abs(sdf.coherence(ic, oc)),
-            "k--",
-            alpha=0.5,
-            label="coherence",
-        )
-        ax2.axhline(
-            np.abs(sdf.coh_signif(0.95)),
-            color="k",
-            ls=":",
-            alpha=0.5,
-            label="coherence significance level",
-        )
+        ax2.semilogx(f, np.abs(sdf.coherence(ic, oc)),
+                     "k--", alpha=0.5, label="coherence")
+        ax2.axhline(np.abs(sdf.coh_signif(0.95)), color="k", ls=":",
+                    alpha=0.5, label="coherence significance level")
         ax.loglog(f, np.abs(out_auto), label=oc)
         ax.loglog(f, np.abs(in_auto), alpha=0.5, label=ic)
         # ax.loglog(f, np.abs(tf_oc), label='tf^2')
-        ax.loglog(
-            f,
-            np.abs(in_auto * np.abs(tf_oc) ** 2),
-            alpha=0.5,
-            label=ic + "*tf^2",
-        )
-        ax.loglog(
-            f,
-            np.abs(out_auto - in_auto * np.abs(tf_oc) ** 2),
-            alpha=0.5,
-            label=f"{oc} - ({ic}*tf^2)",
-        )
+        ax.loglog(f, np.abs(in_auto * np.abs(tf_oc) ** 2), alpha=0.5,
+                  label=ic + "*tf^2")
+        ax.loglog(f, np.abs(out_auto - in_auto * np.abs(tf_oc) ** 2),
+                  alpha=0.5, label=f"{oc} - ({ic}*tf^2)")
         ax.set_title(f"in={ic}, out={oc}")
         ax.set_xlabel("Frequency (Hz)")
         ax.set_ylabel("Autospectral Density (counts^2/Hz)")

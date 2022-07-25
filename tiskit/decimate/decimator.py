@@ -21,18 +21,13 @@ from inspect import getfile, currentframe
 from pathlib import Path
 import warnings
 import fnmatch
-
-# import glob
+import logging
 
 from numpy import prod
 from obspy.core.stream import Stream, Trace
 from obspy.core.trace import Stats
-from obspy.core.inventory import (
-    FIRResponseStage,
-    CoefficientsTypeResponseStage,
-)
-
-# from matplotlib import pyplot as plt
+from obspy.core.inventory import (FIRResponseStage,
+                                  CoefficientsTypeResponseStage)
 
 from .fir_filter import FIRFilter
 
@@ -229,13 +224,10 @@ class Decimator:
                         f"Unknown FIR coefficient symmetry: {stg.symmetry}"
                     )
                 if abs(coeff_sum - 1) > 0.01:
-                    print(
-                        f"DECIMATOR: Sum of FIR coeffs = {coeff_sum}, "
-                        "normalizing"
-                    )
-                    stg.coefficients = [
-                        x / coeff_sum for x in stg.coefficients
-                    ]
+                    logging.info(f"DECIMATOR: Sum of FIR coeffs = "
+                                 f"{coeff_sum}, normalizing")
+                    stg.coefficients = [x / coeff_sum
+                                        for x in stg.coefficients]
             elif isinstance(stg, CoefficientsTypeResponseStage):
                 if sum(stg.denominator) == 0:
                     coeff_sum = sum(stg.numerator)
@@ -245,10 +237,9 @@ class Decimator:
                     coeff_sum = sum(stg.numerator) / sum(stg.denominator)
                 # descriptor = "Coeff numerator"
                 if abs(coeff_sum - 1) > 0.01:
-                    print(
-                        f"DECIMATOR: Sum(numerator coeffs)/sum(denom coeffs)"
-                        f" = {coeff_sum}, normalizing"
-                    )
+                    logging.info(
+                        f"DECIMATOR: sum(numerator coeffs)/sum(denom coeffs)"
+                        f" = {coeff_sum}, normalizing")
                     stg.numerator = [x / coeff_sum for x in stg.numerator]
 
     def _change_chan_loc(self, cha, in_sr, avoid_codes=[]):
@@ -333,9 +324,8 @@ class Decimator:
             newtr.append(self._run_trace(tr))
         st.traces = newtr
         if self.verbose:
-            print(
-                "New data has {} samples".format([tr.data.size for tr in st])
-            )
+            print("New data has {} samples".format([tr.data.size
+                                                    for tr in st]))
         st.verify()
         return st
 
@@ -348,11 +338,9 @@ class Decimator:
         tr = trace.copy()
         sr = tr.stats.sampling_rate
         if self.verbose:
-            print(
-                "Decimating data from {:g} to {:g} Hz ({:d}x)... ".format(
-                    sr, sr / self.decimation_factor, self.decimation_factor
-                )
-            )
+            print("Decimating data from {:g} to {:g} Hz ({:d}x)... "
+                  .format(sr, sr / self.decimation_factor,
+                          self.decimation_factor))
         tic = time.time()
         for d in self.decimates:
             fir_filter = FIRFilter.from_SAC(d)
@@ -361,8 +349,7 @@ class Decimator:
         tr.stats.channel, tr.stats.location = self._get_chan_loc(
             tr.stats.channel,
             tr.stats.location,
-            tr.stats.sampling_rate * self.decimation_factor,
-        )
+            tr.stats.sampling_rate * self.decimation_factor)
         if self.verbose:
             print("Took {:.1f} seconds".format(time.time() - tic))
         return tr

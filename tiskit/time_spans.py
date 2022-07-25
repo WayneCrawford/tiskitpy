@@ -94,11 +94,8 @@ class TimeSpans:
             cat = read_events(eq_file, format="quakeml")
         else:
             if not quiet:
-                print(
-                    "Reading EQs from USGS online catalog...",
-                    end="",
-                    flush=True,
-                )
+                print("Reading EQs from USGS online catalog...",
+                      end="", flush=True)
             cat = Client("USGS").get_events(
                 starttime=starttime
                 - _calc_eq_cut(9, minmag, days_per_magnitude),
@@ -291,7 +288,6 @@ class TimeSpans:
             np.ceil((endtime - stats.starttime) * stats.sampling_rate),
             stats.npts,
         )
-        # print(st, et, start_sample, end_sample)
         return int(start_addr), int(end_addr)
 
     def cutout(self, inp, plot=False):

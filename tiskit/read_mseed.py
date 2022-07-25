@@ -42,7 +42,6 @@ def read_MSEED(filenames, starttime, endtime, verbose=False):
                                         starttime=starttime,
                                         endtime=endtime)
                     # Do something useful!
-                    # print(st)
                     if len(st) > 0:
                         if madeStream:
                             stream = stream + st
