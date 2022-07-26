@@ -117,16 +117,9 @@ class Decimator:
             )
         return inv
 
-    def update_inventory_from_nslc(
-        self,
-        inv,
-        network="*",
-        station="*",
-        channel="*",
-        location="*",
-        quiet=False,
-        normalize_firs=False,
-    ):
+    def update_inventory_from_nslc(self, inv, network="*", station="*",
+                                   channel="*", location="*", quiet=False,
+                                   normalize_firs=False):
         """
         Update inventory based on network, station, channel and location codes
 
@@ -170,9 +163,74 @@ class Decimator:
                     )
         return inv
 
-    def _modify_chan(
-        self, cha, net="", sta="", normalize_firs=False, quiet=False
-    ):
+    @staticmethod
+    def get_band_code(in_band_code, sample_rate):
+        """
+        Return the channel band code based on an input band_code
+
+        :param in_band_code: input band code
+        :param sample_rate: input sample rate (sps)
+        """
+        if len(in_band_code) != 1:
+            raise ValueError(f'"{in_band_code=}" is more than one character')
+        if in_band_code in "FCHBMLVURPTQ":
+            if sample_rate >= 1000:
+                return "F"
+            elif sample_rate >= 250:
+                return "C"
+            elif sample_rate >= 80:
+                return "H"
+            elif sample_rate >= 10:
+                return "B"
+            elif sample_rate > 1:
+                return "M"
+            elif sample_rate > 0.3:
+                return "L"
+            elif sample_rate > 0.03:
+                return "V"
+            elif sample_rate > 0.003:
+                return "U"
+            elif sample_rate >= 0.0001:
+                return "R"
+            elif sample_rate >= 0.00001:
+                return "P"
+            elif sample_rate >= 0.000001:
+                return "T"
+            else:
+                return "Q"
+        elif in_band_code in "GDES":
+            if sample_rate >= 1000:
+                return "G"
+            elif sample_rate >= 250:
+                return "D"
+            elif sample_rate >= 80:
+                return "E"
+            elif sample_rate >= 10:
+                return "S"
+            else:
+                warnings.warn("Short period sensor sample rate < 10 sps")
+                return "X"
+        else:
+            raise TypeError(f'Unknown band base code: "{in_band_code}"')
+
+    def _get_new_band_code(self, in_band_code, in_sample_rate,
+                           out_sample_rate):
+        """
+        Return the channel band code
+
+        :param in_band_code: input band code
+        :param in_sample_rate: input sample rate (sps)
+        :param out_sample_rate: output sample rate (sps)
+        """
+        if in_band_code != self.get_band_code(in_band_code, in_sample_rate):
+            warnings.warn(
+                f"Input band code ({in_band_code}) does not match "
+                f" input sampling rate ({in_sample_rate})"
+            )
+        return self.get_band_code(in_band_code, out_sample_rate)
+
+    def _modify_chan(self, cha, net="", sta="", normalize_firs=False,
+                     quiet=False):
         """
         modify reponse and name of a channel to correspond to decimation
 
@@ -183,23 +241,18 @@ class Decimator:
             normalize_firs (bool): normalizes any FIR channel that isn't
                 already
         """
-        # By setting this here, no need to worry about order of the two methods
-        seed_id = ".".join([net, sta, cha.location_code, cha.code])
         if quiet is not True:
-            print(
-                f"channel modified from {seed_id} ({cha.sample_rate:g}sps)",
-                end=" ",
-            )
+            print("channel modified from {} ({}sps)".format(
+                  ".".join([net, sta, cha.location_code, cha.code]),
+                  cha.sample_rate), end=" ")
         input_sample_rate = cha.sample_rate
         self._add_response(cha, input_sample_rate)
         self._change_chan_loc(cha, input_sample_rate)
         cha.sample_rate /= self.decimation_factor
         if quiet is not True:
-            print(
-                "to {}.{} ({:g}sps) ".format(
-                    cha.location_code, cha.code, cha.sample_rate
-                )
-            )
+            print("to {} ({:g}sps)".format(
+                  ".".join([net, sta, cha.location_code, cha.code]),
+                  cha.sample_rate))
 
     @staticmethod
     def _normalize_firs(cha):
@@ -273,7 +326,7 @@ class Decimator:
         if self.decimation_factor == 1:
             raise ValueError("Decimation == 1!")
         out_sr = in_sr / self.decimation_factor
-        new_band_code = _get_new_band_code(cha_code[0], in_sr, out_sr)
+        new_band_code = self._get_new_band_code(cha_code[0], in_sr, out_sr)
         new_cha_code = new_band_code + cha_code[1:]
         if new_cha_code == cha_code:
             # Have to change location code
@@ -435,70 +488,3 @@ class Decimator:
         new_cha = channels[0].copy()
         stations[0].channels.append(new_cha)
         return new_cha
-
-
-def _get_new_band_code(in_band_code, in_sample_rate, out_sample_rate):
-    """
-    Return the channel band code
-
-    :param in_band_code: input band code
-    :param in_sample_rate: input sample rate (sps)
-    :param out_sample_rate: output sample rate (sps)
-    """
-    if in_band_code != _get_band_code(in_band_code, in_sample_rate):
-        warnings.warn(
-            f"Input band code ({in_band_code}) does not match "
-            f" input sampling rate ({in_sample_rate})"
-        )
-    return _get_band_code(in_band_code, out_sample_rate)
-
-
-def _get_band_code(in_band_code, sample_rate):
-    """
-    Return the channel band code based on an input band_code
-
-    :param in_band_code: input band code
-    :param sample_rate: input sample rate (sps)
-    """
-    if len(in_band_code) != 1:
-        raise ValueError(f'Band base code "{in_band_code}" not a single char')
-
-    if in_band_code in "FCHBMLVURPTQ":
-        if sample_rate >= 1000:
-            return "F"
-        elif sample_rate >= 250:
-            return "C"
-        elif sample_rate >= 80:
-            return "H"
-        elif sample_rate >= 10:
-            return "B"
-        elif sample_rate > 1:
-            return "M"
-        elif sample_rate > 0.3:
-            return "L"
-        elif sample_rate > 0.03:
-            return "V"
-        elif sample_rate > 0.003:
-            return "U"
-        elif sample_rate >= 0.0001:
-            return "R"
-        elif sample_rate >= 0.00001:
-            return "P"
-        elif sample_rate >= 0.000001:
-            return "T"
-        else:
-            return "Q"
-    elif in_band_code in "GDES":
-        if sample_rate >= 1000:
-            return "G"
-        elif sample_rate >= 250:
-            return "D"
-        elif sample_rate >= 80:
-            return "E"
-        elif sample_rate >= 10:
-            return "S"
-        else:
-            warnings.warn("Short period sensor sample rate < 10 sps")
-            return "X"
-    else:
-        raise TypeError(f'Unknown band base code: "{in_band_code}"')

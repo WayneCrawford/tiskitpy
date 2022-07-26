@@ -22,6 +22,7 @@ setuptools.setup(
                       'xarray'],
     entry_points={
          'console_scripts': [
+            'tiskit_decimate_SDS=tiskit.decimate.decimate_SDS:main'
          ]
     },
     python_requires='>=3.8',
