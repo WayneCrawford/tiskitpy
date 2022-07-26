@@ -187,6 +187,7 @@ class SpectralDensity:
         """
         if not isinstance(stream, Stream):
             raise ValueError(f"stream is a {type(stream)}, not obspy Stream")
+        stream = stream.copy()  # avoid modifying original stream
         stream = _align_traces(stream)
 
         # Select windows
@@ -223,10 +224,11 @@ class SpectralDensity:
                 tr.stats.response = resp
         ft, sts = cls._remove_outliers(ft, sts, z_threshold)
         n_winds = len(sts)
+
         if data_cleaner is not None:  # clean data using correlated noise
             dctfs = data_cleaner.DCTFs
             old_ids = ids
-            ft = dctfs.ft_subtract_tfs(ft)
+            ft = dctfs.ft_subtract_tfs(ft, evalresps)
             ids = dctfs.update_channel_names(old_ids)
             evalresps = dctfs.update_channel_keys(evalresps)
         # Create DataArray
@@ -237,14 +239,9 @@ class SpectralDensity:
             if evalresps[inp] is not None:
                 obj.put_channel_response(inp, evalresps[inp])
             for outp in ids:
-                # obj.put_crossspect(
-                #     inp, outp,
-                #     np.mean(ft[inp] * np.conj(ft[outp]), axis=0) * multfac)
-
                 # (p 547, Bendat and Piersol, 2010)
-                obj.put_crossspect(
-                    inp, outp,
-                    2 * np.mean(np.conj(ft[inp]) * ft[outp], axis=0) * multfac)
+                obj.put_crossspect(inp, outp, 2 * multfac * np.mean(
+                    np.conj(ft[inp])*ft[outp], axis=0))
         return obj
 
     @staticmethod
@@ -1048,6 +1045,19 @@ class SpectralDensity:
         return ".".join(comps)
 
     @staticmethod
+    def _remove_subtracted_chan(id):
+        """
+        Remove chan code characters including and after first "-"
+        """
+        comps = id.split(".")
+        if not len(comps) == 4:
+            return id
+        if "-" not in comps[3]:
+            return id
+        comps[3] = comps[3].partition("-")[0]
+        return ".".join(comps)
+
+    @staticmethod
     def _sliding_window(a, ws, ss=None, win_taper="hanning"):
         """
         Split a data array into overlapping, tapered sub-windows
@@ -1232,13 +1242,13 @@ def _subtract_tfs(fts, subtract_tfs):
 
 def _correct_response(ft, f, id, stats, inv=None):
     """
-    Convert fourier transform into channel in_units
+    Convert Fourier transform into channel in_units
 
     Args:
         ft (:class:`numpy.ndarray`): fourier transforms for one channel
         f (:class:`numpy.ndarray`): frequencies
         id (str): channel id
-        tr (:class:`obspy.core.stream.stats`): trace statistics
+        stats (:class:`obspy.core.stream.stats`): trace statistics
         inv (:class:`obspy.core.inventory.Inventory`): station inventory
     Returns:
         ft: corrected fourier transforms
@@ -1255,7 +1265,11 @@ def _correct_response(ft, f, id, stats, inv=None):
             try:
                 resp = inv.get_response(new_id, stats.starttime)
             except Exception:
-                raise ValueError(f'No match found for "{new_id}" in inv')
+                new_id = SpectralDensity._remove_subtracted_chan(id)
+                try:
+                    resp = inv.get_response(new_id, stats.starttime)
+                except Exception:
+                    raise ValueError(f'No match found for "{new_id}" in inv')
     if resp is None and "response" in stats:
         resp = stats.response
     if resp is not None:

@@ -61,6 +61,10 @@ class DataCleaner:
         """
         if not isinstance(stream, Stream):
             raise ValueError("stream is a {type(stream)}, not an obspy Stream")
+        stream=stream.copy()   # Do not change values in original stream
+        # Remove any response from stream 
+        for tr in stream:
+            tr.stats.response=None
         sdfs = [SpectralDensity.from_stream(stream, **kwargs)]
         self.DCTFs = DCTFs()
         # Calculate removal transfer functions

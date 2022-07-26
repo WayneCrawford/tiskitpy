@@ -12,35 +12,46 @@ class DCTFs(UserList):
     list of DCTFs
     """
 
-    def ft_subtract_tfs(self, fts):
+    def ft_subtract_tfs(self, fts, evalresps=None):
         """
+        Remove effect of channels on each other.  Modifies channel names
+        to reflect the transfer function sequence.
         Args:
-            fts (dict): dictionary containing Fourier transforms for each
-                channel. Each Fourier transform is N*ws, where ws is the
-                window size and N is the number of windows
+            fts (dict): Fourier transforms for each channel.
+                        Each Fourier transform is N*ws, where ws is the
+                        window size and N is the number of windows
+            evalresps (dict): instrument responses for each channel (if
+                fts are response-corrected)
         Returns:
-            fts (dict): dictionary containg corrected Fourier transforms for
-                each channel.
+            (tuple):
+                fts (dict): corrected Fourier transforms for
+                    each channel.
+                evalresps (dict): dict with modified keys
         """
         for dctf in self:
             tfs = dctf.tfs
             # mapping = dict()
-            in_chan = tfs.input_channel
-            if not tfs.freqs.shape == fts[in_chan].shape:
+            id_in = tfs.input_channel
+            if not tfs.freqs.shape == fts[id_in].shape:
                 ValueError("transfer function and ft have different shapes "
-                           f"({tfs.freqs.shape} vs {fts[in_chan].shape})")
-            for out_chan in tfs.output_channels:
-                if not fts[out_chan].shape == fts[in_chan].shape:
-                    ValueError(f"ft[in_chan={in_chan}] and "
-                               f"ft[out_chan={out_chan}] have different "
-                               f"shapes ({fts[in_chan].shape} vs "
-                               f"{fts[out_chan].shape})")
-                new_out_chan = (strip_remove_str(out_chan)
+                           f"({tfs.freqs.shape} vs {fts[id_in].shape})")
+            for id_out in tfs.output_channels:
+                if not fts[id_out].shape == fts[id_in].shape:
+                    ValueError(f"ft[{id_in=}] and ft[{id_out=}] "
+                               "have different shapes "
+                               f"({fts[id_in].shape} vs {fts[id_out].shape})")
+                new_id_out = (strip_remove_str(id_out)
                                 + dctf.remove_sequence)
                 # EQ 8, Crawford & Webb 2000
-                fts[new_out_chan] = (
-                    fts[out_chan] 
-                    - fts[in_chan] * tfs.values(out_chan))
+                multiplier = np.ones(fts[id_in].shape)
+                if evalresps is not None:
+                    oid = strip_remove_str(id_out)
+                    iid = strip_remove_str(id_in)
+                    if evalresps[iid] is not None:
+                        if evalresps[oid] is not None:
+                            multiplier = evalresps[iid] / evalresps[oid]
+                fts[new_id_out] = (fts[id_out] - fts[id_in]
+                                   * multiplier * tfs.values(id_out))
         return fts
 
     def update_channel_names(self, channel_names):
