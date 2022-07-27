@@ -13,6 +13,8 @@ TiSKit` documentation
   :glob:
   
   intro
+  classes
+  example
   code
   api
 
