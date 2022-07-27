@@ -52,11 +52,11 @@ class Decimator:
     def decimation_factor(self):
         return prod(self.decimates)
 
-    def run(self, data):
+    def decimate(self, data):
         """
         Apply decimator to data
 
-        Argss:
+        Args:
             data (:class:`obspy.Stream` or :class:`obspy.Trace`): waveform data
         """
         if isinstance(data, Stream):
@@ -242,7 +242,7 @@ class Decimator:
                 already
         """
         if quiet is not True:
-            print("channel modified from {} ({}sps)".format(
+            print("channel modified from {} ({} sps)".format(
                   ".".join([net, sta, cha.location_code, cha.code]),
                   cha.sample_rate), end=" ")
         input_sample_rate = cha.sample_rate
@@ -250,7 +250,7 @@ class Decimator:
         self._change_chan_loc(cha, input_sample_rate)
         cha.sample_rate /= self.decimation_factor
         if quiet is not True:
-            print("to {} ({:g}sps)".format(
+            print("to {} ({:g} sps)".format(
                   ".".join([net, sta, cha.location_code, cha.code]),
                   cha.sample_rate))
 
@@ -363,7 +363,11 @@ class Decimator:
         try:
             cha.response.recalculate_overall_sensitivity()
         except Exception:
-            pass
+            i_u = cha.response.instrument_sensitivity.input_units
+            if i_u.upper() == 'PA':
+                cha.response.instrument_sensitivity.input_units = "M/S"
+                cha.response.recalculate_overall_sensitivity()
+                cha.response.instrument_sensitivity.input_units = i_u
 
     def _run_stream(self, stream):
         """

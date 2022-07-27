@@ -38,15 +38,13 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
     if in_band_code == out_band_code:
         raise ValueError('identical input & output band codes: {in_band_code}')
 
-    for year_dir in SDS_root.iterdir():
-        if not year_dir.is_dir():
-            continue
+    for year_dir in [x for x in SDS_root.iterdir() if x.is_dir()]:
         logging.info('Working on year {str(year_dir.name)}')
-        for net_dir in year_dir.iterdir():
+        for net_dir in [x for x in year_dir.iterdir() if x.is_dir()]:
             logging.info('\tWorking on net {str(net_dir.name)}')
-            for sta_dir in net_dir.iterdir():
+            for sta_dir in [x for x in net_dir.iterdir() if x.is_dir()]:
                 logging.info('\t\tWorking on station {str(sta_dir.name)}')
-                for cha_dir in sta_dir.iterdir():
+                for cha_dir in [x for x in sta_dir.iterdir() if x.is_dir()]:
                     logging.info('\t\t\tWorking on channel {}'
                                  .format(str(sta_dir.name)))
                     cha_name = cha_dir.name
@@ -70,7 +68,7 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
                                 f"{str(f)} first block's sampling rate != "
                                 "{input_sample_rate}, skipping...")
                         net, sta, loc, ich, typ, yr, dy = str(f.name).split('.')
-                        d_stream = decimator.run(stream)
+                        d_stream = decimator.decimate(stream)
                         och = out_band_code + ich[1:]
                         outfname = f'{net}.{sta}.{loc}.{och}.{typ}.{yr}.{dy}'
                         d_stream.write(out_cha_dir / outfname, 'MSEED')
