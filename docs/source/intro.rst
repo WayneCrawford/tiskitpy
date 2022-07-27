@@ -4,9 +4,6 @@ TiSKit
 
 Routines for time series data processing
 
-Note that I had to remove `SpectralDensity.from_ATACR()` (never tested
-anyway) because readthedocs had a problem importing the `obstools` package
-using `pip`
 
 Classes
 =========================
@@ -30,10 +27,13 @@ Functions
                  for obspy's read() function
 :Peterson_noise_model: return the Peterson High and Low Noise Models
 
-`seismo_tools` submodule:
+Command-line programs
 =========================
 
-seismology-specific functions
+:tiskit_decimate_SDS: decimate data in a SeisComp Data Structure database.
+    Inserts the data into the same database and creates a new StationXML file
+    (based on an existing StationXML file for the original database)
 
-:plot_response: plot instrument response (command line?)
-:plot_sensitivity: plot instrument sensitivity (command line?)
+*I had to remove `SpectralDensity.from_ATACR()` (never tested
+anyway) because readthedocs had a problem importing the `obstools` package
+using `pip`*
