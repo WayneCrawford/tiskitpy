@@ -143,8 +143,10 @@ class CleanRotator:
         Rotates vertical channel to minimize noise
 
         Arguments:
-            stream (Stream): data, must have *Z, *[1|N] and *[2|E] channels
-            horiz_too: rotate horizontals also (if channels truly orthogonal)
+            stream (Stream): data, must have \*Z, \*[1|N] and \*[2|E] channels
+            horiz_too: (bool) rotate horizontals also (use if you believe
+                channels are truly orthogonal, probably a bad idea anyway
+                as long as we use a 2-value rotation)
         Returns:
             strm_rot (Stream): rotated stream
         """

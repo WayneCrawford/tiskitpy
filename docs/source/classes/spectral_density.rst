@@ -32,7 +32,7 @@ Get Methods
 :`channel_response(channel)`: get the instrument response for the given channel
 :`channel_units(channel)`: get the input (physical) units for the given channel
 :`units(in_channel, out_channel)`: get the units of the corresponding cross- or auto-spectra
-:`coh_signal(probability)`: return the *probability*% coherence significance level
+:`coh_signal(probability)`: return the *probability* % coherence significance level
 
 Set Methods
 ---------------------

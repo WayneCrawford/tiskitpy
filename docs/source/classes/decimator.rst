@@ -15,10 +15,10 @@ Constructor
 
 Properties
 ---------------------
-`decimates`: returns the decimates list
-`decimation_factor`: the total decimation of the object (the product of
+:`decimates`: returns the decimates list
+:`decimation_factor`: the total decimation of the object (the product of
     the `decimates` values`)
-`verbose`: True if object is in verbose mode.
+:`verbose`: True if object is in verbose mode.
 
 
 Methods
@@ -30,7 +30,7 @@ Methods
     ("B" or other broadband band codes) or short period ("S" or other short-period
     band codes).
 :`update_inventory(inv, ...)`: Return an inventory with decimated channels added
-`update_inventory_from_nslc(inv ...)` Return an inventory with only the specified
+:`update_inventory_from_nslc(inv ...)`: Return an inventory with only the specified
  network, station, channel, location(s) updated
  
 
