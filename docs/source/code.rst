@@ -1,3 +1,5 @@
+.. _TechnicalDocumentation:
+
 Technical Documentation
 =============================
 

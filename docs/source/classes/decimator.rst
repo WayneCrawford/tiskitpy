@@ -3,7 +3,7 @@ Decimator class
 
 Decimate data and put decimation information in instrument responses.
 
-Detailed information is in :ref: `tiskit.Decimator`
+Detailed information is in :ref:`tiskit.Decimator`
 
 The main methods are:
 

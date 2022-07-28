@@ -4,7 +4,7 @@ CleanRotator class
 Calculates angle and azimuth to rotate the vertical channel to minimize
 vertical noise [#f1]_. 
 
-Detailed information is in :ref: `tiskit.CleanRotator`
+Detailed information is in :ref:`tiskit.CleanRotator`
 
 The main methods are:
 

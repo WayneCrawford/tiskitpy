@@ -2,7 +2,7 @@
 Classes Overview
 =============================
 
-More detailed information is in :ref: `Technical Documentation`
+More detailed information is in :ref:`TechnicalDocumentation`
 
 .. toctree::
    :maxdepth: 1
