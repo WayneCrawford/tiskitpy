@@ -4,7 +4,7 @@ CleanRotator class
 Calculates angle and azimuth to rotate the vertical channel to minimize
 vertical noise. 
 
-* Note: THIS IS SUFFICIENT FOR THE VERTICAL CHANNEL, BUT WILL
+*Note: THIS IS OK FOR THE VERTICAL CHANNEL, BUT WILL
 MIS-ALIGN THE HORIZONTAL CHANNELS, SHOULD CHANGE TO 3-value rotation*
 
 The main methods are:

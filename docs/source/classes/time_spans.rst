@@ -21,10 +21,6 @@ Properties
 `start_times`: returns list of start_times
 `end_times`: returns list of end_times
 
-Get Methods
-----------------------
-
-
 Set Methods
 ----------------------
 

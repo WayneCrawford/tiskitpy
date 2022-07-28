@@ -2,7 +2,7 @@
 TiSKit
 *******************************
 
-Routines for time series data processing
+Routines for time series data processing, based on [BP2010]_
 
 
 Classes
@@ -37,3 +37,6 @@ Command-line programs
 *I had to remove `SpectralDensity.from_ATACR()` (never tested
 anyway) because readthedocs had a problem importing the `obstools` package
 using `pip`*
+
+.. [BP2010] Bendat J. S. and A. G. Piersol (1986), Random Data:
+    Analysis and Measurement Procedures, 566 pp.

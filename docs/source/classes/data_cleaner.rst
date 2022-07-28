@@ -1,31 +1,31 @@
 DataCleaner class
 =======================
 
-Blah blah blah.
+Remove coherent noise seen on another channel
+
 The main methods are:
 
 Constructor
 ---------------------
 
-:`TransferFunction(...)`: blah
+:`DataCleaner(stream, remove_list,...)`: Calculate the DataCleaner object using
+    the data stram and a list of channels to remove (in order)
 
-Properties
+Cleaning Methods
 ---------------------
 
+:`clean_sdf(sdf)`: Clean an existing spectral density function.  Always an
+    approximation, because a SpectralDensity object does not contain enough
+    information for a full analysis
+:`clean_stream(stream, ...)`: Clean a data stream
+:`clean_stream_to_sdf(stream, ...)`: Calculate SpectralDensity function directly
+    from the input stream, applying the DataCleaner values to each FFT
 
-Get Methods
+
+Other Methods
 ---------------------
 
-
-Set Methods
----------------------
-
-You probably won't ever use these (should I put a `_` before?)
-
-
-Other
----------------------
-
+:`plot()`: plot the transfer functions in the DataCleaner
 
 Example
 ---------------------

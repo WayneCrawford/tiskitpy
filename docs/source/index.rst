@@ -16,7 +16,6 @@ TiSKit documentation
   classes
   example
   code
-  api
 
 Indices and tables
 ==================

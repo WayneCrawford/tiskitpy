@@ -1,4 +1,4 @@
-tiskit classes
+TiSKit classes
 ======================
 
 tiskit.DataCleaner
