@@ -4,6 +4,8 @@ TimeSpans class
 A class to cut out "undesired" data.  Mostly used by the other classes, you
 may never use this!
 
+Detailed information is in :ref: `tiskit.TimeSpans`
+
 The main methods are:
 
 Constructor

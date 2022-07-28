@@ -4,6 +4,8 @@ TransferFunctions class
 Calculate transfer functions (actually, frequency response functions, according
 to [BP2010]_) for a given input channel and a range of output channels.
 
+Detailed information is in :ref: `tiskit.TransferFunctions`
+
 The main methods are:
 
 Constructor

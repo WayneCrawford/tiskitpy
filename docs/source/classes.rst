@@ -1,6 +1,8 @@
 
-TiSKit Classes
+Classes Overview
 =============================
+
+More detailed information is in :ref: `Technical Documentation`
 
 .. toctree::
    :maxdepth: 1

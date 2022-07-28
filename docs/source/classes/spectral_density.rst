@@ -1,7 +1,12 @@
 SpectralDensity class
 =======================
 
-Calculates auto- and cross-spectral densities for a data stream.  Outputs coherences as well.  Plots any of the above.   The main methods are:
+Calculates auto- and cross-spectral densities for a data stream.
+Also outputs coherences as well.  Plots any of the above.   
+
+Detailed information is in :ref: `tiskit.SpectralDensity`
+
+The main methods are:
 
 Constructor
 ---------------------

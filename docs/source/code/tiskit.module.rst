@@ -1,7 +1,4 @@
-tiskit module
+Module
 ======================
-
-tiskit
------------------------------
 
 .. automodule:: tiskit

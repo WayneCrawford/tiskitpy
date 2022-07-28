@@ -3,6 +3,8 @@ DataCleaner class
 
 Remove coherent noise seen on another channel
 
+Detailed information is in :ref: `tiskit.DataCleaner`
+
 The main methods are:
 
 Constructor

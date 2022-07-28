@@ -2,10 +2,9 @@ CleanRotator class
 =======================
 
 Calculates angle and azimuth to rotate the vertical channel to minimize
-vertical noise. 
+vertical noise [#f1]. 
 
-*Note: THIS IS OK FOR THE VERTICAL CHANNEL, BUT WILL
-MIS-ALIGN THE HORIZONTAL CHANNELS, SHOULD CHANGE TO 3-value rotation*
+Detailed information is in :ref: `tiskit.CleanRotator`
 
 The main methods are:
 
@@ -46,3 +45,6 @@ Example
   from obspy.core.inventory import read_inventory
   from tiskit import CleanRotator
   
+.. [#f1]  THIS IS OK FOR THE VERTICAL CHANNEL, BUT WILL
+   MIS-ALIGN THE HORIZONTAL CHANNELS, SHOULD CHANGE TO 3-value rotation
+
