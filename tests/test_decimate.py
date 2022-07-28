@@ -96,7 +96,7 @@ class TestMethods(unittest.TestCase):
         st = stream_read(str(self.test_path / 'XS.S10D.20161212T2053.mseed'))
         # st.plot()
         decim = Decimator([5])
-        st2 = decim.run(st)
+        st2 = decim.decimate(st)
         # st2.plot()
         self.assertTrue(len(st[0].data == 5 * len(st2[0].data)))
 
@@ -110,7 +110,7 @@ class TestMethods(unittest.TestCase):
             tr.data = np.zeros(tr.data.shape)
             tr.data[int(len(tr.data)/2)] = 1
             decim = Decimator([d])
-            tr2 = decim.run(tr)
+            tr2 = decim.decimate(tr)
             if plot:
                 plot_compare(tr, tr2, d,
                              '2016-12-12T20:54:27', '2016-12-12T20:54:33',

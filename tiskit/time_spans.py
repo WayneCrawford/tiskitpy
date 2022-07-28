@@ -21,7 +21,7 @@ class TimeSpans:
     end_times: list
 
     def __post_init__(self):
-        self.organize()
+        self._organize()
 
     def __len__(self):
         return len(self.start_times)
@@ -122,61 +122,6 @@ class TimeSpans:
         ]
         return cls(start_times, end_times)
 
-    def validate(self):
-        """
-        Returns false if there is a problem
-
-        Problems:
-            - start_times are not ordered
-            - there are overlaps
-            - len(start_times) ~= len(end_times)
-            - not every object in start_times and end_times is a UTCDateTime
-        """
-        if not len(self.start_times) == len(self.end_times):
-            raise ValueError(
-                "starttimes[] and end_times[] are not the " "same length"
-            )
-        for x in self.start_times:
-            if not isinstance(x, UTCDateTime):
-                raise ValueError("There is a non-UTCDateTime starttime value")
-        for x in self.end_times:
-            if not isinstance(x, UTCDateTime):
-                raise ValueError("There is a non-UTCDateTime endtime value")
-        if not sorted(self.start_times) == self.start_times:
-            return False
-        for startafter, endbefore in zip(
-            self.start_times[1:], self.end_times[:-2]
-        ):
-            if startafter < endbefore:
-                return False
-
-    def organize(self):
-        """
-        Order starttimes and endtimes by increasing starttime, and consolidate
-        overlapping time spans
-        """
-        if self.validate() is True:
-            return
-
-        # sort by time
-        self.end_times = [
-            x for _, x in sorted(zip(self.start_times, self.end_times))
-        ]
-        self.start_times = sorted(self.start_times)
-
-        # remove any overlaps
-        start_times = [self.start_times[0]]
-        end_times = [self.end_times[0]]
-        for st, et in zip(self.start_times[1:], self.end_times[1:]):
-            if st > end_times[-1]:
-                start_times.append(st)
-                end_times.append(et)
-            # otherwise extend the previous entry
-            else:
-                end_times[-1] = et
-        self.start_times = start_times
-        self.end_times = end_times
-
     def append(self, new_time_spans):
         """
         Appends TimeSpan object to self
@@ -184,11 +129,11 @@ class TimeSpans:
         Args:
             new_time_spans (~class `TimeSpans`): time spans to append
         """
-        new_time_spans.validate()
-        self.validate()
+        new_time_spans._validate()
+        self._validate()
         self.start_times.extend(new_time_spans.start_times)
         self.end_times.extend(new_time_spans.end_times)
-        self.organize()
+        self._organize()
 
     def zero(self, inp, plot=False):
         """
@@ -248,7 +193,7 @@ class TimeSpans:
             plot: plot traces with spans cut out
 
         Returns:
-            trace with spans set to zero
+            trace with interpolated data in each time span
         """
         if isinstance(inp, Trace):
             stream = Stream([inp])
@@ -273,22 +218,6 @@ class TimeSpans:
         if isinstance(inp, Trace):
             return stream[0]
         return stream
-
-    def _get_addrs(self, starttime, endtime, stats):
-        if not isinstance(starttime, UTCDateTime):
-            raise TypeError(f"starttime is {type(starttime)}, not UTCDateTime")
-        if not isinstance(endtime, UTCDateTime):
-            raise TypeError(f"endtime is {type(endtime)}, not UTCDateTime")
-        if endtime < stats.starttime or starttime > stats.endtime:
-            return None, None
-        start_addr = max(
-            np.floor((starttime - stats.starttime) * stats.sampling_rate), 0
-        )
-        end_addr = min(
-            np.ceil((endtime - stats.starttime) * stats.sampling_rate),
-            stats.npts,
-        )
-        return int(start_addr), int(end_addr)
 
     def cutout(self, inp, plot=False):
         """
@@ -348,6 +277,77 @@ class TimeSpans:
             ax.plot(trace.times(), trace.data)
         if show:
             plt.show()
+
+    def _get_addrs(self, starttime, endtime, stats):
+        if not isinstance(starttime, UTCDateTime):
+            raise TypeError(f"starttime is {type(starttime)}, not UTCDateTime")
+        if not isinstance(endtime, UTCDateTime):
+            raise TypeError(f"endtime is {type(endtime)}, not UTCDateTime")
+        if endtime < stats.starttime or starttime > stats.endtime:
+            return None, None
+        start_addr = max(
+            np.floor((starttime - stats.starttime) * stats.sampling_rate), 0
+        )
+        end_addr = min(
+            np.ceil((endtime - stats.starttime) * stats.sampling_rate),
+            stats.npts,
+        )
+        return int(start_addr), int(end_addr)
+
+    def _organize(self):
+        """
+        Order starttimes and endtimes by increasing starttime, and consolidate
+        overlapping time spans
+        """
+        if self._validate() is True:
+            return
+
+        # sort by time
+        self.end_times = [
+            x for _, x in sorted(zip(self.start_times, self.end_times))
+        ]
+        self.start_times = sorted(self.start_times)
+
+        # remove any overlaps
+        start_times = [self.start_times[0]]
+        end_times = [self.end_times[0]]
+        for st, et in zip(self.start_times[1:], self.end_times[1:]):
+            if st > end_times[-1]:
+                start_times.append(st)
+                end_times.append(et)
+            # otherwise extend the previous entry
+            else:
+                end_times[-1] = et
+        self.start_times = start_times
+        self.end_times = end_times
+
+    def _validate(self):
+        """
+        Returns false if there is a problem
+
+        Problems:
+            - start_times are not ordered
+            - there are overlaps
+            - len(start_times) ~= len(end_times)
+            - not every object in start_times and end_times is a UTCDateTime
+        """
+        if not len(self.start_times) == len(self.end_times):
+            raise ValueError(
+                "starttimes[] and end_times[] are not the " "same length"
+            )
+        for x in self.start_times:
+            if not isinstance(x, UTCDateTime):
+                raise ValueError("There is a non-UTCDateTime starttime value")
+        for x in self.end_times:
+            if not isinstance(x, UTCDateTime):
+                raise ValueError("There is a non-UTCDateTime endtime value")
+        if not sorted(self.start_times) == self.start_times:
+            return False
+        for startafter, endbefore in zip(
+            self.start_times[1:], self.end_times[:-2]
+        ):
+            if startafter < endbefore:
+                return False
 
 
 def _calc_eq_cut(mag, minmag, days_per_magnitude):

@@ -3,10 +3,10 @@
 """
 Functions to test the lcheapo functions
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-from future.builtins import *  # NOQA @UnusedWildImport
-
+# from __future__ import (absolute_import, division, print_function,
+#                         unicode_literals)
+# from future.builtins import *  # NOQA @UnusedWildImport
+# 
 import unittest
 import inspect
 from pathlib import Path

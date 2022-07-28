@@ -476,10 +476,8 @@ class Decimator:
                     stations.append(sta)
                     channels.append(cha)
         if len(stations) == 0:
-            raise ValueError(
-                f'trace waveformid "{network}.{station}.{location}'
-                '.{channel}" not found in inventory'
-            )
+            raise ValueError(f'trace waveformid "{network}.{station}.'
+                             f'{location}.{channel}" not found in inventory')
             return None, None
         if len(stations) > 1:
             raise ValueError(
