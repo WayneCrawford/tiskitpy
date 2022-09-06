@@ -25,7 +25,7 @@ class TestMethods(unittest.TestCase):
 
     def test_time_spans(self):
         """
-        Test TimeSpan object.
+        Test TimeSpan object, including combining overlaps
         """
         start_times = [UTCDateTime(2011, 11, 1),
                        UTCDateTime(2011, 11, 2),
@@ -33,15 +33,44 @@ class TestMethods(unittest.TestCase):
         end_times = [x + 100000 for x in start_times]
         ts = TimeSpans(start_times, end_times)
         self.assertEqual(len(ts), 2)
-        self.assertEqual(ts,
-                         TimeSpans([UTCDateTime(2011, 11, 1),
-                                    UTCDateTime(2011, 12, 1)],
-                                   [UTCDateTime(2011, 11, 2) + 100000,
-                                    UTCDateTime(2011, 12, 1) + 100000]))
+        self.assertEqual(ts, TimeSpans([UTCDateTime(2011, 11, 1),
+                                        UTCDateTime(2011, 12, 1)],
+                                       [UTCDateTime(2011, 11, 2) + 100000,
+                                        UTCDateTime(2011, 12, 1) + 100000]))
+
+    def test_invert(self):
+        """
+        Test TimeSpan object's invert() method'.
+        """
+        start_times = [UTCDateTime(2011, 11, 1),
+                       UTCDateTime(2011, 11, 2),
+                       UTCDateTime(2011, 12, 1)]
+        end_times = [x + 1200 for x in start_times]  # 20-minute windows
+        time_spans = TimeSpans(start_times, end_times)
+        ts_start = UTCDateTime(2011, 10, 30)
+        ts_end = UTCDateTime(2011, 12, 2)
+        
+        # Should raise error when time series start time is AFTER the first
+        # time span
+        with self.assertRaises(ValueError):
+            time_spans.invert(start_times[1], ts_end)
+
+        # Should raise error when given time series end time is BEFORE the end
+        # of the last time span
+        with self.assertRaises(ValueError):
+            time_spans.invert(ts_start, start_times[-1])
+        
+        # now check that invert() does what is expected
+        new_starts= [ts_start]
+        new_starts.extend(time_spans.end_times)
+        new_ends = time_spans.start_times
+        new_ends.append(ts_end)
+        self.assertEqual(time_spans.invert(ts_start, ts_end),
+                         TimeSpans(new_starts, new_ends))
 
     def test_time_spans_zero_interp(self):
         """
-        Test TimeSpan object's zero() method'.
+        Test TimeSpan object's zero() and interp() methods.
         """
         stream = stream_read(str(self.test_path / 'XS.S10D.LH.mseed'))
         st = UTCDateTime(2016, 12, 5, 6)

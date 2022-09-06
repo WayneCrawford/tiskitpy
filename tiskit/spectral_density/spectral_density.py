@@ -1,10 +1,7 @@
 """
 Spectral Density Functions
 """
-# import pickle
 import logging
-
-# from dataclasses import dataclass
 
 import xarray as xr
 import numpy as np
@@ -17,8 +14,11 @@ from obspy.core import UTCDateTime
 from scipy import signal, stats
 
 from .Peterson_noise_model import Peterson_noise_model
+from ..time_spans import TimeSpans
 
 np.seterr(all="ignore")
+
+logging.basicConfig(level=logging.INFO)
 
 
 class SpectralDensity:
@@ -31,14 +31,20 @@ class SpectralDensity:
     No public attributes, access data through provided methods
     """
     def __init__(self, chan_names, freqs, chan_units, n_windows, window_type,
-                 starttimes=None, data=None, responses=None):
+                 window_s, ts_starttime=None, ts_endtime=None, starttimes=None,
+                 data=None, responses=None):
         """
         Args:
             chan_names (list of str): channel names
             freqs (np.ndarray): frequencies
             chan_units (list of str): channel physical units (e.g m/s^2, Pa)
             n_windows (int): of windows used to calculate spectra
-            windpw_type (str): type of window used
+            window_type (str): type of window used
+            window_s (float): length of data windows in seconds
+            ts_starttime (:class:`obspy.core.UTCDateTime`): start of time series
+                used for this object
+            ts_endtime (:class:`obspy.core.UTCDateTime`): end of time series
+                used for this object
             starttimes (list of UTCDateTime): starttime for each window
             data (:class:`np.ndarray`):
                 one-sided spectral density functions.
@@ -88,7 +94,10 @@ class SpectralDensity:
             attrs={
                 "n_windows": n_windows,
                 "window_type": window_type,
+                "ts_starttime": ts_starttime,
+                "ts_endtime": ts_endtime,
                 "starttimes": starttimes,
+                "window_s": window_s,
                 "long_name": "spectral density function",
                 "units": "input units * output units / Hz",
                 "description": "One-sided spectral density functions",
@@ -143,6 +152,16 @@ class SpectralDensity:
         return self._ds.window_type
 
     @property
+    def window_seconds(self):
+        """
+        length of each window, in seconds
+
+        Returns:
+            (float):
+        """
+        return self._ds.window_s
+
+    @property
     def starttimes(self):
         """
         Start times for each data window used to calculate spectra
@@ -151,6 +170,40 @@ class SpectralDensity:
             (list of :class:`obspy.UTCDateTimes`):
         """
         return self._ds.starttimes
+
+    @property
+    def used_times(self):
+        """
+        TimeSpans object containing time_spans used during processing
+
+        Returns:
+            (:class:`obspy.TimeSpans`):
+        """
+        st = [x for x in self.starttimes]
+        et = [x + self.window_seconds for x in self.starttimes]
+            
+        return TimeSpans(st, et)
+
+    @property
+    def unused_times(self):
+        """
+        TimeSpans object containing time_spans rejected during processing
+
+        Returns:
+            (:class:`obspy.TimeSpans`):
+        """
+        if self._ds.ts_starttime is not None:
+            ts_start = self._ds.ts_starttime
+        else:
+            ts_start = self.starttimes[0]
+            print('no time series starttime information, using first used window')
+        if self._ds.ts_endtime is not None:
+            ts_end = self._ds.ts_endtime
+        else:
+            ts_start = self.starttimes[-1] + self.window_seconds
+            print('no time series endtime information, using end of last used window')
+            
+        return self.used_times.invert(ts_start, ts_end)
 
     @property
     def n_windows(self):
@@ -222,8 +275,15 @@ class SpectralDensity:
             evalresps[id] = evalresp
             if resp is not None:
                 tr.stats.response = resp
+        n_winds_orig = len(sts)
         ft, sts = cls._remove_outliers(ft, sts, z_threshold)
         n_winds = len(sts)
+        if n_winds < n_winds_orig:
+            rejected = n_winds_orig - n_winds
+            logging.info(
+                '"z_threshold={:g}" rejected {:d} of {:d} windows ({:.0f}%)'
+                .format(z_threshold, rejected, n_winds_orig,
+                        100.*rejected/n_winds_orig))
 
         if data_cleaner is not None:  # clean data using correlated noise
             dctfs = data_cleaner.DCTFs
@@ -232,7 +292,9 @@ class SpectralDensity:
             ids = dctfs.update_channel_names(old_ids)
             evalresps = dctfs.update_channel_keys(evalresps)
         # Create DataArray
-        obj = cls(ids, f, units, n_winds, windowtype,
+        obj = cls(ids, f, units, n_winds, windowtype, ws,
+                  ts_starttime=min([x.stats.starttime for x in stream]),
+                  ts_endtime=max([x.stats.endtime for x in stream]),
                   starttimes=sts)
         # Fill DataArray with Cross-Spectral Density Functions
         for inp in ids:
@@ -258,7 +320,7 @@ class SpectralDensity:
         n_reject = 1  # Just starting the motor...
         while n_reject > 0:
             # norm should have as many columns as windows, as many rows as keys
-            norm = np.array([np.mean(np.abs(ft[id]*np.conj(ft[id])), axis=1)
+            norm = np.array([np.mean(np.log10(np.abs(ft[id]*np.conj(ft[id]))), axis=1)
                              for id in ft.keys()])
             # calculate a score for each channel (row) and window(column)
             z_scores = stats.zscore(norm, axis=1)
@@ -266,7 +328,7 @@ class SpectralDensity:
             z_scores = np.max(np.abs(z_scores), axis=0)
             n_reject = np.count_nonzero(np.abs(z_scores) > z_threshold)
             if n_reject > 0:
-                logging.info('{:d} of {:d} had z_score > {:g}: rejected'
+                logging.debug('{:d} of {:d} had z_score > {:g}: rejected'
                     .format(n_reject, len(z_scores), z_threshold))
                 keepers = z_scores <= z_threshold
                 sts = [x for x, keep in zip(sts, keepers.tolist())
@@ -825,9 +887,32 @@ class SpectralDensity:
             plt.savefig(outfile)
         return ax_a, ax_p
 
-    def plot_coherences(
-        self, x=None, y=None, overlay=False, show=True, outfile=None
-    ):
+    @staticmethod
+    def _seedid_chan(inp):
+        return inp.split('.')[-1]
+
+    @staticmethod
+    def _seedid_full(inp):
+        return inp
+
+    @staticmethod
+    def _seedid_loc_chan(inp):
+        return '.'.join(inp.split('.')[-2:])
+
+    def _seedid_strfun(self, inp_type):
+        """Choose the function that will be used to modify a seedid string"""
+        allowed_inps = ('full', 'chan', 'loc-chan')
+        if inp_type not in allowed_inps:
+            raise ValueError(f'{inp_type} not in {allowed_inps}')
+        if inp_type == 'chan':
+            return self._seedid_chan
+        elif inp_type == 'loc-chan':
+            return self._seedid_loc_chan
+        else:
+            return self._seedid_full
+
+    def plot_coherences(self, x=None, y=None, overlay=False, show=True,
+                        outfile=None, labels="full", sort_by="full"):
         """
         Plot coherences
 
@@ -837,20 +922,26 @@ class SpectralDensity:
             overlay (bool): put all coherences on one plot
             show (bool): show on desktop
             outfile (str): save to the named file
+            labels (str): labels to put on x and y axes ('full', 'chan' or 'loc-chan')
+            sort_by (str): how to sort x and y axes ('full', 'chan' or 'loc-chan')
 
         Returns:
             (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
-        x = self._get_validate_channel_names(x)
-        y = self._get_validate_channel_names(y)
+        strfun=self._seedid_strfun(sort_by)
+        x = sorted(self._get_validate_channel_names(x), key=strfun)
+        y = sorted(self._get_validate_channel_names(y), key=strfun)
         if not overlay:
             rows, cols = len(x), len(y)
             ax_array = np.ndarray((rows, cols), dtype=tuple)
             fig, axs = plt.subplots(rows, cols, sharex=True)
             fig.suptitle("Coherences")
+            strfun=self._seedid_strfun(labels)
             for in_chan, i in zip(x, range(len(x))):
                 for out_chan, j in zip(y, range(len(y))):
-                    title = out_chan if i == 0 else None
+                    in_chan_label = strfun(in_chan)
+                    out_chan_label = strfun(out_chan)
+                    title = out_chan_label if i == 0 else None
                     axa, axp = self.plot_one_coherence(
                         in_chan,
                         out_chan,
@@ -859,7 +950,7 @@ class SpectralDensity:
                         (i, j),
                         show_ylabel=j == 0,
                         show_xlabel=i == rows - 1,
-                        ylabel=in_chan,
+                        ylabel=in_chan_label,
                         title=title,
                     )
                     ax_array[i, j] = (axa, axp)
@@ -1135,10 +1226,10 @@ def _align_traces(stream):
     if last_start >= first_end:
         raise ValueError("There are non-overlapping traces")
     if last_start - first_start > 1 / sampling_rate:
-        logging.info("Cutting up to {}s from trace starts".format(
+        logging.debug("Cutting up to {}s from trace starts".format(
             last_start-first_start))
     if last_end - first_end > 1 / sampling_rate:
-        logging.info("Cutting up to {last_start-first_start}s from trace ends")
+        logging.debug("Cutting up to {last_start-first_start}s from trace ends")
     stream.trim(last_start, first_end)
     min_len = min([tr.stats.npts for tr in stream])
     max_len = max([tr.stats.npts for tr in stream])

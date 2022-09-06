@@ -20,3 +20,19 @@ Made sure that all of the equations correspond to equations in Bendat&Piersol
 (2010).  Verified that we now get as good of results as the old Matlab code.
 Set up testing for the different sub-modules.  Probably changed some
 method call parameters.  Created a readthedocs page.
+
+## 0.3:
+
+MAJOR
+
+- Added required argument `window_s` to SpectralDensity() creator
+
+MINOR
+
+- Added arguments `ts_starttime` and `ts_endtime` to SpectralDensity() creator
+- Added `TimeSpans.invert()` method
+- Added `SpectralDensity` `used()`, `unused()` methods and `window_seconds`
+  property
+- Changed SpectralDensity.from_stream() z_threshold to apply to log10(spectra)
+  rather than (spectra) (otherwise, zthreshold=3 rejects more than half of
+  "normal" data)

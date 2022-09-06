@@ -520,51 +520,6 @@ class TransferFunctions(object):
             ax_p.set_xlabel("Frequency (Hz)")
         return ax_a, ax_p
 
-    def save(self, filename):
-        """
-        Method to save the object to file using `~Pickle`.
-
-        Args:
-            filename (str): File name
-
-        Examples
-        --------
-
-        Run demo through all methods
-
-        >>> from obstools.atacr import DayNoise, StaNoise, TFNoise
-        >>> daynoise = DayNoise('demo')
-        Uploading demo data - March 04, 2012, station 7D.M08A
-        >>> daynoise.QC_daily_spectra()
-        >>> daynoise.average_daily_spectra()
-        >>> tfnoise_day = TFNoise(daynoise)
-        >>> tfnoise_day.transfer_func()
-        >>> stanoise = StaNoise('demo')
-        Uploading demo data - March 01 to 04, 2012, station 7D.M08A
-        >>> stanoise.QC_sta_spectra()
-        >>> stanoise.average_sta_spectra()
-        >>> tfnoise_sta = TFNoise(stanoise)
-        >>> tfnoise_sta.transfer_func()
-
-        Save object
-
-        >>> tfnoise_day.save('tf_daynoise_demo.pkl')
-        >>> tfnoise_sta.save('tf_stanoise_demo.pkl')
-
-        Check that everything has been saved
-
-        >>> import glob
-        >>> glob.glob("./tf_daynoise_demo.pkl")
-        ['./tf_daynoise_demo.pkl']
-        >>> glob.glob("./tf_stanoise_demo.pkl")
-        ['./tf_stanoise_demo.pkl']
-
-        """
-        # Remove traces to save disk space
-        file = open(filename, "wb")
-        pickle.dump(self, file)
-        file.close()
-
     def _zero_bad(self, H, coh, n_to_reject, f, min_freq, max_freq):
         """
         Set non-significant elements to zero

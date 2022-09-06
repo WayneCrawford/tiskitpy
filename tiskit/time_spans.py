@@ -9,44 +9,30 @@ from obspy.core import UTCDateTime
 from obspy.core.stream import Stream, Trace
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.dates import date2num
 
 
-@dataclass
 class TimeSpans:
     """
     A class specifying time spans, to be removed, kept, zeroed, etc.
     """
-
-    start_times: list
-    end_times: list
-
-    def __post_init__(self):
+    def __init__(self, start_times:list, end_times:list):
+        if not len(start_times) == len(end_times):
+            raise ValueError(
+                f'{len(start_times)=} != {len(end_times)=}')
+        self._start_times = start_times
+        self._end_times = end_times
         self._organize()
 
-    def __len__(self):
-        return len(self.start_times)
+    @property
+    def start_times(self):
+        """avoid people setting the internal value by accident"""
+        return self._start_times.copy()
 
-    def __eq__(self, other):
-        if not len(self.start_times) == len(other.start_times):
-            return False
-        for sta, eta, stb, etb in zip(
-            self.start_times,
-            self.end_times,
-            other.start_times,
-            other.end_times,
-        ):
-            if not sta == stb:
-                return False
-            if not eta == etb:
-                return False
-        return True
-
-    def __str__(self):
-        s = "TimeSpans: start            |            end\n"
-        s += "===========================+===============================\n"
-        for st, et in zip(self.start_times, self.end_times):
-            s += f" {st} | {et}\n"
-        return s
+    @property
+    def end_times(self):
+        """avoid people setting the internal value by accident"""
+        return self._end_times.copy()
 
     @classmethod
     def from_eqs(
@@ -122,6 +108,109 @@ class TimeSpans:
         ]
         return cls(start_times, end_times)
 
+    # INFORMATION METHODS
+    def __len__(self):
+        return len(self.start_times)
+
+    def __eq__(self, other):
+        if not len(self.start_times) == len(other.start_times):
+            return False
+        for sta, eta, stb, etb in zip(
+            self.start_times,
+            self.end_times,
+            other.start_times,
+            other.end_times,
+        ):
+            if not sta == stb:
+                return False
+            if not eta == etb:
+                return False
+        return True
+
+    def __repr__(self):
+        return f"TimeSpans({len(self._start_times):d} start_times, end_times)"
+
+    def __str__(self):
+        s = "TimeSpans: start            |            end\n"
+        s += "===========================+===============================\n"
+        for st, et in zip(self.start_times, self.end_times):
+            s += f" {st} | {et}\n"
+        return s
+
+    def _get_addrs(self, starttime, endtime, stats):
+        if not isinstance(starttime, UTCDateTime):
+            raise TypeError(f"starttime is {type(starttime)}, not UTCDateTime")
+        if not isinstance(endtime, UTCDateTime):
+            raise TypeError(f"endtime is {type(endtime)}, not UTCDateTime")
+        if endtime < stats.starttime or starttime > stats.endtime:
+            return None, None
+        start_addr = max(
+            np.floor((starttime - stats.starttime) * stats.sampling_rate), 0
+        )
+        end_addr = min(
+            np.ceil((endtime - stats.starttime) * stats.sampling_rate),
+            stats.npts,
+        )
+        return int(start_addr), int(end_addr)
+
+    def _validate(self):
+        """
+        Returns false if there is a problem
+
+        Problems:
+            - start_times are not ordered
+            - there are overlaps
+            - len(start_times) ~= len(end_times)
+            - not every object in start_times and end_times is a UTCDateTime
+        """
+        if not len(self.start_times) == len(self.end_times):
+            raise ValueError(
+                f"{len(self.start_times)=} != {len(self.end_times)=}")
+        for x in self.start_times:
+            if not isinstance(x, UTCDateTime):
+                raise ValueError("There is a non-UTCDateTime starttime value")
+        for x in self.end_times:
+            if not isinstance(x, UTCDateTime):
+                raise ValueError("There is a non-UTCDateTime endtime value")
+        if not sorted(self.start_times) == self.start_times:
+            return False
+        for startafter, endbefore in zip(
+            self.start_times[1:], self.end_times[:-2]
+        ):
+            if startafter < endbefore:
+                return False
+
+    # METHODS OPERATING ON THE TIMESPANS OBJECT
+    def invert(self, ts_starttime, ts_endtime):
+        """
+        Return inverted time spans
+
+        If input TimeSpan had spans from A->B, C->D and E->F, output TimeSpan
+        will have spans from starttime->A, B->C, D->E and F->endtime
+
+        Args:
+            ts_startime (:class:`obspy.core.UTCDateTime`): timeseries start
+                time (should be <= start of first span)
+            ts_startime (:class:`obspy.core.UTCDateTime`): timeseries end time
+                (should be >= end of last span)
+        Returns:
+            (:class:`TimeSpans`)
+        """
+        self._organize()
+
+        if ts_starttime > self.start_times[0]:
+            raise ValueError(f'{ts_starttime=} > {self.start_times[0]}')
+            return None
+        if ts_endtime < self.end_times[-1]:
+            raise ValueError(f'{ts_endtime=} > {self.end_times[0]}')
+            return None
+        new_st = [ts_starttime]
+        new_st.extend(self.end_times)
+        new_et = self.start_times
+        new_et.append(ts_endtime)
+
+        return TimeSpans(new_st, new_et)
+
     def append(self, new_time_spans):
         """
         Appends TimeSpan object to self
@@ -131,10 +220,38 @@ class TimeSpans:
         """
         new_time_spans._validate()
         self._validate()
-        self.start_times.extend(new_time_spans.start_times)
-        self.end_times.extend(new_time_spans.end_times)
+        self._start_times.extend(new_time_spans.start_times)
+        self._end_times.extend(new_time_spans.end_times)
         self._organize()
 
+    def _organize(self):
+        """
+        Order starttimes and endtimes by increasing starttime, and consolidate
+        overlapping time spans
+        """
+        if self._validate() is True:
+            return
+
+        # sort by time
+        self._end_times = [
+            x for _, x in sorted(zip(self.start_times, self.end_times))
+        ]
+        self._start_times = sorted(self.start_times)
+
+        # remove any overlaps
+        start_times = [self.start_times[0]]
+        end_times = [self.end_times[0]]
+        for st, et in zip(self.start_times[1:], self.end_times[1:]):
+            if st > end_times[-1]:
+                start_times.append(st)
+                end_times.append(et)
+            # otherwise extend the previous entry
+            else:
+                end_times[-1] = et
+        self._start_times = start_times
+        self._end_times = end_times
+
+    # METHODS OPERATING ON OUTSIDE OBJECTS
     def zero(self, inp, plot=False):
         """
         Zero out data in the time spans
@@ -159,7 +276,7 @@ class TimeSpans:
                 start_addr, end_addr = self._get_addrs(st, et, tr.stats)
                 if start_addr is None:
                     continue
-                tr.data[start_addr : end_addr + 1] = 0.0
+                tr.data[start_addr: end_addr + 1] = 0.0
         if plot:
             (stream + inp).plot(color="blue", equal_scale=False)
         if isinstance(inp, Trace):
@@ -208,7 +325,7 @@ class TimeSpans:
                 start_addr, end_addr = self._get_addrs(st, et, tr.stats)
                 if start_addr is None:
                     continue
-                tr.data[start_addr : end_addr + 1] = np.linspace(
+                tr.data[start_addr: end_addr + 1] = np.linspace(
                     tr.data[start_addr],
                     tr.data[end_addr],
                     end_addr - start_addr + 1,
@@ -250,105 +367,74 @@ class TimeSpans:
             return outp[0]
         return outp
 
-    def plot(self, trace=None, ax=None, show=None):
+#     def plot_trace(self, trace=None, ax=None, show=None):
+#         """
+#         Plot representation of selected time periods as yellow highlights
+# 
+#         Args:
+#             trace (:class:`obspy.core.trace.Trace`): trace to plot along with
+#                 selected time periods
+#             show (bool): show the plot on the screen
+#             ax (:class:`matplotlib.pyplot.Axis`): axis to plot on (plot with
+#                 any existing plot).  If specifed, will not "show" by default
+#         """
+#         if ax is None:
+#             ax_existed = False
+#             _, ax = plt.subplots(1, 1)
+#             if show is None:
+#                 show = True
+#         else:
+#             ax_existed = True
+#             if show is None:
+#                 show = False
+#         for st, et in zip(self.start_times, self.end_times):
+#             ax.axvspan(st.datetime, et.datetime, facecolor="red", alpha=0.25)
+#         if trace is not None:
+#             assert isinstance(trace, Trace), "trace is not an obspy Trace"
+#             ax.plot(trace.times(), trace.data)
+#         if show:
+#             plt.show()
+
+    def plot(self, stream=None, savefig=None, color="red",
+             alpha=0.25, **kwargs):
         """
-        Plot representation of selected time periods as yellow highlights
+        Make a stream or trace plot with highlighted time spans
 
         Args:
-            trace (:class:`obspy.core.trace.Trace`): trace to plot along with
-                selected time periods
-            show (bool): show the plot on the screen
-            ax (:class:`matplotlib.pyplot.Axis`): axis to plot on (plot with
-                any existing plot).  If specifed, will not "show" by default
+            stream (:class:`obspy.core.trace.Stream` or
+                :class:`obspy.core.trace.Trace`): obspy stream/trace to plot
+            color (str): highlight color
+            alpha (float): highlight transparency alpha (1=opaque, 0 = invisible)
+            **kwargs (**dict): arguments to stream or trace plot program
         """
-        if ax is None:
-            ax_existed = False
-            _, ax = plt.subplots(1, 1)
-            if show is None:
-                show = True
-        else:
-            ax_existed = True
-            if show is None:
-                show = False
-        for st, et in zip(self.start_times, self.end_times):
-            ax.axvspan(st.datetime, et.datetime, facecolor="red", alpha=0.25)
-        if trace is not None:
-            assert isinstance(trace, Trace), "trace is not an obspy Trace"
-            ax.plot(trace.times(), trace.data)
-        if show:
-            plt.show()
+        if alpha < 0:
+            raise ValueError("alpha < 0")
+        elif alpha >1:
+            raise ValueError("alpha > 1")
+        # Delay plotting or saving until after we decorate the graph
+        outfile = kwargs.pop('outfile', None)
+        show = kwargs.pop('show', True)
+        block = kwargs.pop('block', True)
+        kwargs['handle'] = True
 
-    def _get_addrs(self, starttime, endtime, stats):
-        if not isinstance(starttime, UTCDateTime):
-            raise TypeError(f"starttime is {type(starttime)}, not UTCDateTime")
-        if not isinstance(endtime, UTCDateTime):
-            raise TypeError(f"endtime is {type(endtime)}, not UTCDateTime")
-        if endtime < stats.starttime or starttime > stats.endtime:
-            return None, None
-        start_addr = max(
-            np.floor((starttime - stats.starttime) * stats.sampling_rate), 0
-        )
-        end_addr = min(
-            np.ceil((endtime - stats.starttime) * stats.sampling_rate),
-            stats.npts,
-        )
-        return int(start_addr), int(end_addr)
-
-    def _organize(self):
-        """
-        Order starttimes and endtimes by increasing starttime, and consolidate
-        overlapping time spans
-        """
-        if self._validate() is True:
-            return
-
-        # sort by time
-        self.end_times = [
-            x for _, x in sorted(zip(self.start_times, self.end_times))
-        ]
-        self.start_times = sorted(self.start_times)
-
-        # remove any overlaps
-        start_times = [self.start_times[0]]
-        end_times = [self.end_times[0]]
-        for st, et in zip(self.start_times[1:], self.end_times[1:]):
-            if st > end_times[-1]:
-                start_times.append(st)
-                end_times.append(et)
-            # otherwise extend the previous entry
-            else:
-                end_times[-1] = et
-        self.start_times = start_times
-        self.end_times = end_times
-
-    def _validate(self):
-        """
-        Returns false if there is a problem
-
-        Problems:
-            - start_times are not ordered
-            - there are overlaps
-            - len(start_times) ~= len(end_times)
-            - not every object in start_times and end_times is a UTCDateTime
-        """
-        if not len(self.start_times) == len(self.end_times):
-            raise ValueError(
-                "starttimes[] and end_times[] are not the " "same length"
-            )
-        for x in self.start_times:
-            if not isinstance(x, UTCDateTime):
-                raise ValueError("There is a non-UTCDateTime starttime value")
-        for x in self.end_times:
-            if not isinstance(x, UTCDateTime):
-                raise ValueError("There is a non-UTCDateTime endtime value")
-        if not sorted(self.start_times) == self.start_times:
-            return False
-        for startafter, endbefore in zip(
-            self.start_times[1:], self.end_times[:-2]
-        ):
-            if startafter < endbefore:
-                return False
-
+        # Plot the stream or trace
+        fig = stream.plot(**kwargs)
+       
+        # Add colors for time spans
+        for ax in fig.get_axes():
+            for st, et in zip(self.start_times, self.end_times):
+                xmin=date2num(st)
+                xmax=date2num(et)
+                ax.axvspan(xmin, xmax, facecolor=color, alpha=0.25)
+        
+        # Plot to screen or save to file
+        if outfile:
+            fig.savefig(outfile)
+        elif show is True:
+            try:
+                plt.show(block=block)
+            except Exception:
+                plt.show()
 
 def _calc_eq_cut(mag, minmag, days_per_magnitude):
     if mag < minmag:

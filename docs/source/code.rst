@@ -1,10 +1,11 @@
 .. _TechnicalDocumentation:
 
+=============================
 Technical Documentation
 =============================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    code/tiskit.module
    code/tiskit.classes
