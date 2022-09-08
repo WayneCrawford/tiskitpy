@@ -1,8 +1,6 @@
 """
 Clean data using transfer functions between channels
 
-By default, calculates corrected spectra (intermediate and final) directly
-from the stream data, applying the transfer functions to each FFT.
 Test using spectra (ATACR-style) and time-series (TisKit style):  is there a
 difference?  If not, will be a lot faster to remove noise after calculating
 spectra!
@@ -28,33 +26,40 @@ from .dctfs import DCTF, DCTFs, remove_str, strip_remove_str
 
 class DataCleaner:
     """
-    Class for calculating and applying Transfer_Function-based data cleaning
+    Calculate and applying Transfer_Function-based data cleaner
 
+    By default, calculates corrected intermediate and final spectra directly
+    from the stream data, applying the transfer functions to each FFT.
+
+    The channel names are updated with each removal of correlated noise
+    from another channel, by adding '-x', where 'x' is the shortest unique string
+    taken from the input channel's name.  This complicates bookkeeping, but allows
+    us to confirm that we are working on the properly prepared data
     Works on raw data, without instrument corrections
+
+    Args:
+        stream (:class:`obspy.core.stream.Stream`): time series data used
+            to calculate cleaner
+        remove_list (list): list of channels to remove, in order.  Can use
+            "*" and "?" as wildcards
+        noise_channel (str): which channel the noise is on.  Choices are:
+            "input", "output", "equal", "unknown", "model"
+        n_to_reject (int): Number of neighboring frequencies for which
+            the coherence must be above the 95% signifcance level in order
+            to use for cleaning (0 means use all frequencies)
+        min_freq (float): Do not process frequencies below this value
+        max_freq (float): Do not process frequencies above this value
+        show_progress (bool): Show progress plots
+        fast_calc (bool): Calculate corrected spectra directly from
+            previous spectra (ATACR-style).
+        kwargs (:class:`SpectralDensity.from_stream()` properties):
+             window_s, windowtype, z_threshold...
     """
 
     def __init__(self, stream, remove_list, noise_channel="output",
                  n_to_reject=3, min_freq=None, max_freq=None,
                  show_progress=False, fast_calc=False, **kwargs):
         """
-        Args:
-            stream (:class:`obspy.core.stream.Stream`): data to use
-                to calculate cleaning tfs
-            remove_list (list): list of channels to remove, in order.  Can use
-                "*" and "?" as wildcards
-            noise_channel (str): which channel the noise is on.  Choices are:
-                "input", "output", "equal", "unknown", "model"
-            n_to_reject (int): Number of neighboring frequencies for which
-                the coherence must be above the 95% signifcance level in order
-                to use for cleaning (0 means use all frequencies)
-            min_freq (float): Do not process frequencies below this value
-            max_freq (float): Do not process frequencies above this value
-            show_progress (bool): Show progress plots
-            fast_calc (bool): Calculate corrected spectra directly from
-                previous spectra (ATACR-style).
-            kwargs (:class:`SpectralDensity.from_stream()` properties):
-                 window_s, windowtype, z_threshold...
-
         Attributes:
             DCTFs (list of :class:`DCTF`): list of data cleaner transfer
                 functions

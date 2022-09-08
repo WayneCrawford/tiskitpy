@@ -395,8 +395,7 @@ class TimeSpans:
 #         if show:
 #             plt.show()
 
-    def plot(self, stream=None, savefig=None, color="red",
-             alpha=0.25, **kwargs):
+    def plot(self, stream=None, color="red", alpha=0.25, **kwargs):
         """
         Make a stream or trace plot with highlighted time spans
 
