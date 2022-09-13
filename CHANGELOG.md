@@ -23,16 +23,33 @@ method call parameters.  Created a readthedocs page.
 
 ## 0.3:
 
-MAJOR
+### MAJOR
 
 - Added required argument `window_s` to SpectralDensity() creator
+- Renamed `TransferFunction.values` to `TransferFunction.frf` (frequency
+  cresponse function)
+- Renamed  `TransferFunction.channels` to `TransferFunction.channel_names`
+- DataCleaner always renames cleaned channels, putting information in the
+  location code slot (second from last element in string separated by '.'s)
 
-MINOR
+### BUGFIXES
+
+- Changed SpectralDensity.from_stream() z_threshold to apply to log10(spectra)
+  rather than (spectra) (otherwise, "standard" zthreshold=3 rejects more than
+  half of typical data)
+- TransferFunction() now provides a "value" (transfer function) and "corrector"
+  (for data cleaning) property, because the two are only the same in the case
+  where all noise is on the output channel (see Bendat and Piersol chapter 6)
+- DataCleaner uses TransferFunction's "corrector" property.
+  
+### MINOR
 
 - Added arguments `ts_starttime` and `ts_endtime` to SpectralDensity() creator
 - Added `TimeSpans.invert()` method
+- Allowed `TimeSpans.plot()` to include a trace or stream
 - Added `SpectralDensity` `used()`, `unused()` methods and `window_seconds`
   property
-- Changed SpectralDensity.from_stream() z_threshold to apply to log10(spectra)
-  rather than (spectra) (otherwise, zthreshold=3 rejects more than half of
-  "normal" data)
+- Updated documentation
+- `SpectralDensity.autospect()` and `.crossspect()` now accept wildcards
+- New `SpectralDensity.channel_name()` method
+- Created CleanerString class to help with DataCleaner cleaned channel names

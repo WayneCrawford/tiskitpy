@@ -3,7 +3,8 @@
 Classes Overview
 =============================
 
-More detailed information is in :ref:`TechnicalDocumentation`
+The :ref:`TechnicalDocumentation` contains detailed class constructor, method
+and property descriptions
 
 .. toctree::
    :maxdepth: 1

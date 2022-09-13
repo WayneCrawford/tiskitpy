@@ -2,6 +2,7 @@
 Spectral Density Functions
 """
 import logging
+import fnmatch
 
 import xarray as xr
 import numpy as np
@@ -41,8 +42,8 @@ class SpectralDensity:
             n_windows (int): of windows used to calculate spectra
             window_type (str): type of window used
             window_s (float): length of data windows in seconds
-            ts_starttime (:class:`obspy.core.UTCDateTime`): start of time series
-                used for this object
+            ts_starttime (:class:`obspy.core.UTCDateTime`): start of time
+                series used for this object
             ts_endtime (:class:`obspy.core.UTCDateTime`): end of time series
                 used for this object
             starttimes (list of UTCDateTime): starttime for each window
@@ -106,9 +107,9 @@ class SpectralDensity:
 
     def __str__(self):
         s = "SpectralDensity object:\n"
-        s += f"\tchannels={self.channels}\n"
+        s += f"\tchannel_names={self.channel_names}\n"
         s += "\tchannel_units={}\n".format([self.channel_units(ch)
-                                            for ch in self.channels])
+                                            for ch in self.channel_names])
         f = self.freqs
         s += f"\t{len(f)} frequencies, from {f[0]:.3g} to {f[-1]:.3g}Hz\n"
         s += f"\tn_windows={self.n_windows}\n"
@@ -119,7 +120,7 @@ class SpectralDensity:
         return self._ds == other._ds
 
     @property
-    def channels(self):
+    def channel_names(self):
         """
         Channel names
 
@@ -181,7 +182,7 @@ class SpectralDensity:
         """
         st = [x for x in self.starttimes]
         et = [x + self.window_seconds for x in self.starttimes]
-            
+
         return TimeSpans(st, et)
 
     @property
@@ -196,13 +197,13 @@ class SpectralDensity:
             ts_start = self._ds.ts_starttime
         else:
             ts_start = self.starttimes[0]
-            print('no time series starttime information, using first used window')
+            print('no starttime information, using first used window')
         if self._ds.ts_endtime is not None:
             ts_end = self._ds.ts_endtime
         else:
             ts_start = self.starttimes[-1] + self.window_seconds
-            print('no time series endtime information, using end of last used window')
-            
+            print('no endtime information, using end of last used window')
+
         return self.used_times.invert(ts_start, ts_end)
 
     @property
@@ -217,7 +218,8 @@ class SpectralDensity:
 
     @classmethod
     def from_stream(cls, stream, window_s=1000, windowtype="prol1pi",
-                    inv=None, data_cleaner=None, z_threshold=3):
+                    inv=None, data_cleaner=None, starttimes=None,
+                    time_spans=None, z_threshold=3):
         """
         Calculate spectral density functions from the provided stream
 
@@ -233,6 +235,11 @@ class SpectralDensity:
                 will look in the channel's stats.response object
             data_cleaner (:class:`DataCleaner`): Data cleaner to
                 apply to channels as ffts are calculated
+            starttimes (list of :class:`obspy.UTCDateTime`): Use provided
+                start window times (ignores z_threshold). Incompatible with
+                `time_spans`
+            time_spans (:class:`TimeSpans`): only use windows in the provided
+                time spans.  Incompatible with `starttimes`
             subtract_tf_suffix (str): suffix to add to channel names if tf
                 is subtracted
             z_threshold (float): reject windows with z-score greater than this
@@ -240,6 +247,9 @@ class SpectralDensity:
         """
         if not isinstance(stream, Stream):
             raise ValueError(f"stream is a {type(stream)}, not obspy Stream")
+        if starttimes is not None and time_spans is not None:
+            raise RuntimeError("cannot provide both time_spans and starttimes")
+
         stream = stream.copy()  # avoid modifying original stream
         stream = _align_traces(stream)
 
@@ -267,7 +277,8 @@ class SpectralDensity:
             raise ValueError("stream has duplicate IDs")
         for id in ids:  # Calculate Fourier transforms
             tr = stream.select(id=id)[0]
-            ft[id], f, sts = _calculate_windowed_rfft(tr, ws, ws, windowtype)
+            ft[id], f, sts = SpectralDensity._windowed_rfft(
+                tr, ws, ws, windowtype, starttimes, time_spans)
             # Transform fft to physical units
             ft[id], resp, evalresp, ft_units = _correct_response(
                 ft[id], f, id, tr.stats, inv)
@@ -275,15 +286,16 @@ class SpectralDensity:
             evalresps[id] = evalresp
             if resp is not None:
                 tr.stats.response = resp
-        n_winds_orig = len(sts)
-        ft, sts = cls._remove_outliers(ft, sts, z_threshold)
-        n_winds = len(sts)
-        if n_winds < n_winds_orig:
-            rejected = n_winds_orig - n_winds
-            logging.info(
-                '"z_threshold={:g}" rejected {:d} of {:d} windows ({:.0f}%)'
-                .format(z_threshold, rejected, n_winds_orig,
-                        100.*rejected/n_winds_orig))
+        # Remove outliers if starttimes not forced
+        if starttimes is None:
+            n_winds_orig = len(sts)
+            ft, sts = cls._remove_outliers(ft, sts, z_threshold)
+            n_winds = len(sts)
+            if n_winds < n_winds_orig:
+                rejected = n_winds_orig - n_winds
+                logging.info(f'"{z_threshold=:g}" rejected {rejected:d} of '
+                             f'{n_winds_orig:d} windows '
+                             f'({100.*rejected/n_winds_orig:.0f}%)')
 
         if data_cleaner is not None:  # clean data using correlated noise
             dctfs = data_cleaner.DCTFs
@@ -309,7 +321,7 @@ class SpectralDensity:
     @staticmethod
     def _remove_outliers(ft, sts, z_threshold=3, recursive=True):
         """Remove  windows with z-score above z_threshold
-        
+
         Args:
             ft (dict): each value is an np.array where axis 0 = windows and
                 axis 1 = frequencies m windows x n frequencies
@@ -320,8 +332,8 @@ class SpectralDensity:
         n_reject = 1  # Just starting the motor...
         while n_reject > 0:
             # norm should have as many columns as windows, as many rows as keys
-            norm = np.array([np.mean(np.log10(np.abs(ft[id]*np.conj(ft[id]))), axis=1)
-                             for id in ft.keys()])
+            norm = np.array([np.mean(np.log10(np.abs(ft[id]*np.conj(ft[id]))),
+                                     axis=1) for id in ft.keys()])
             # calculate a score for each channel (row) and window(column)
             z_scores = stats.zscore(norm, axis=1)
             # flatten down to one score for each window
@@ -329,7 +341,7 @@ class SpectralDensity:
             n_reject = np.count_nonzero(np.abs(z_scores) > z_threshold)
             if n_reject > 0:
                 logging.debug('{:d} of {:d} had z_score > {:g}: rejected'
-                    .format(n_reject, len(z_scores), z_threshold))
+                              .format(n_reject, len(z_scores), z_threshold))
                 keepers = z_scores <= z_threshold
                 sts = [x for x, keep in zip(sts, keepers.tolist())
                        if keep is True]
@@ -341,23 +353,20 @@ class SpectralDensity:
 
     def autospect(self, channel):
         """
-        Auto-spectral_density function for the given channel
+        Get auto-spectral_density function for the channel
 
         Args:
             channel (str): channel name
         Returns:
             (:class:`numpy.ndarray`): auto-spectral density function
         """
-        self._verify_channel(channel, "in_channel")
-        return np.abs(
-            self._ds["spectra"]
-            .sel(input=channel, output=channel)
-            .values.flatten()
-        )
+        ch_name = self.channel_name(channel, "in_channel")
+        return np.abs(self._ds["spectra"].sel(input=ch_name,
+                                              output=ch_name).values.flatten())
 
     def crossspect(self, in_channel, out_channel):
         """
-        Cross-spectral density function for the given channels
+        Get cross-spectral density function for the channels
 
         Args:
             in_channel (str): input channel name
@@ -365,21 +374,33 @@ class SpectralDensity:
         Returns:
             (:class:`numpy.ndarray`): cross-spectral density function
         """
-        self._verify_channel(in_channel, "in_channel")
-        self._verify_channel(out_channel, "out_channel")
-        return (
-            self._ds["spectra"]
-            .sel(input=in_channel, output=out_channel)
-            .values.flatten()
-        )
+        ichn = self.channel_name(in_channel, "in_channel")
+        ochn = self.channel_name(out_channel, "out_channel")
+        return (self._ds["spectra"].sel(input=ichn,
+                                        output=ochn).values.flatten())
 
-    def _verify_channel(self, channel, ch_identifier):
+    def channel_name(self, channel, ch_identifier='chname'):
+        """
+        Return channel name, verifying that it exists and is unique
+
+        Can expand wildcards, if they match only one channel
+        
+        Args:
+            channel (str): channel name to search for
+            ch_identifier (str): description of the kind of channel (input,
+                output...), useful for error messages
+        """
         if not isinstance(channel, str):
             raise TypeError(f"{ch_identifier} is a {type(channel)}, not a str")
-        if channel not in self.channels:
-            raise ValueError(
-                f'{ch_identifier} "{channel}" not in channels {self.channels}'
-            )
+        names = fnmatch.filter(self.channel_names, channel)
+        if len(names) == 0:
+            raise ValueError(f'{ch_identifier} "{channel}" not in '
+                             f'{self.channel_names=}')
+        elif len(names) > 1:
+            raise ValueError(f'{ch_identifier} "{channel}" matches more than '
+                             f'one {self.channel_names=}')
+        else:
+            return names[0]
 
     def put_autospect(self, channel, auto_spect):
         """
@@ -400,10 +421,10 @@ class SpectralDensity:
             except Exception:
                 raise ValueError(
                     'auto_spect could not be converted to dtype=complex')
-        if channel not in self.channels:
+        if channel not in self.channel_names:
             raise ValueError(
-                'channel "{}" is not in channels {}'.format(
-                    channel, self.channels
+                'channel "{}" is not in channel_names {}'.format(
+                    channel, self.channel_names
                 )
             )
         self._ds["spectra"].loc[
@@ -416,7 +437,7 @@ class SpectralDensity:
             channel (str): original channel name
             replacement (str): replacement channel name
         """
-        channel_names = self.channels
+        channel_names = self.channel_names
         channel_names[channel_names.index(channel)] = replacement
         self._ds["input"] = channel_names
         self._ds["output"] = channel_names
@@ -433,8 +454,8 @@ class SpectralDensity:
         """
         assert cross_spect.shape == self.freqs.shape
         assert cross_spect.dtype == "complex"
-        assert in_channel in self.channels
-        assert out_channel in self.channels
+        assert in_channel in self.channel_names
+        assert out_channel in self.channel_names
         self._ds["spectra"].loc[
             dict(input=in_channel, output=out_channel)
         ] = cross_spect
@@ -445,7 +466,7 @@ class SpectralDensity:
 
     def channel_response(self, channel):
         """
-        A channel's instrument response
+        Get channel's instrument response
 
         Args:
             channel (str): channel name
@@ -467,15 +488,17 @@ class SpectralDensity:
         """
         assert response.shape == self.freqs.shape
         assert response.dtype == "complex"
-        assert channel in self.channels
+        assert channel in self.channel_names
         self._ds["response"].loc[dict(input=channel)] = response
 
     def channel_units(self, channel):
         """
+        Get channel's input (physical) units
+        
         Args:
             channel (str): the channel name
         Returns:
-            (str): Input (physical) units of the given channel
+            (str): Channel's input units
         """
         return str(
             self._ds["spectra"].sel(input=channel).coords["in_units"].values
@@ -568,7 +591,7 @@ class SpectralDensity:
 
     def coherence(self, in_chan, out_chan):
         """
-        The coherence for the given input and output channels
+        Get coherence between the channels
 
         Args:
             in_chan (str): input channel.  Must match one of the
@@ -582,20 +605,23 @@ class SpectralDensity:
         use the cross-spectral density function.
         From Bendat & Piersol (1986), Appendix B, gamma_xy^2 (f)
         """
+        in_chan = self.channel_name(in_chan, 'in_chan')
+        out_chan = self.channel_name(out_chan, 'out_chan')
         if in_chan not in self._ds.input:
-            raise ValueError('"in_chan" not in spectral density matrix')
+            raise ValueError(f'{in_chan=} not in spectral density matrix {self._ds.input}')
         if out_chan not in self._ds.output:
-            raise ValueError('"out_chan" not in spectral density matrix')
+            raise ValueError(f'{out_chan=} not in spectral density matrix {self._ds.output}')
         coherence = (np.abs(self.crossspect(in_chan, out_chan))**2
                      / (self.autospect(in_chan) * self.autospect(out_chan)))
         return np.abs(coherence)  # shouldn't be necessary
 
     def coh_signif(self, prob=0.95):
         """
-        The coherence significance level
+        Get the coherence significance level
 
         Args:
-            prob (float): significance level (between 0 and 1)
+            prob (float): probability of an incoherent frequency
+                passing this value (between 0 and 1)
         Returns:
             (float):
         """
@@ -922,13 +948,15 @@ class SpectralDensity:
             overlay (bool): put all coherences on one plot
             show (bool): show on desktop
             outfile (str): save to the named file
-            labels (str): labels to put on x and y axes ('full', 'chan' or 'loc-chan')
-            sort_by (str): how to sort x and y axes ('full', 'chan' or 'loc-chan')
+            labels (str): labels to put on x and y axes ('full', 'chan' or
+                'loc-chan')
+            sort_by (str): how to sort x and y axes ('full', 'chan' or
+                'loc-chan')
 
         Returns:
             (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
-        strfun=self._seedid_strfun(sort_by)
+        strfun = self._seedid_strfun(sort_by)
         x = sorted(self._get_validate_channel_names(x), key=strfun)
         y = sorted(self._get_validate_channel_names(y), key=strfun)
         if not overlay:
@@ -936,7 +964,7 @@ class SpectralDensity:
             ax_array = np.ndarray((rows, cols), dtype=tuple)
             fig, axs = plt.subplots(rows, cols, sharex=True)
             fig.suptitle("Coherences")
-            strfun=self._seedid_strfun(labels)
+            strfun = self._seedid_strfun(labels)
             for in_chan, i in zip(x, range(len(x))):
                 for out_chan, j in zip(y, range(len(y))):
                     in_chan_label = strfun(in_chan)
@@ -1001,6 +1029,7 @@ class SpectralDensity:
         label=None,
         title=None,
         show_phase=True,
+        **kwargs
     ):
         """
         Plot one coherence
@@ -1024,12 +1053,15 @@ class SpectralDensity:
             ax_p (Axis): use this existing axis for the phase plot
             title (str): title to put on this subplot
             show_phase (bool): show phase as well as amplitude
+            kwargs (**dict): values to pass on to plotting routines
 
         Returns:
             (tuple): tuple containing:
                 - (:class:`matplotlib.axes.axis`): amplitude plot axis
                 - (:class:`matplotlib.axes.axis`): phase plot axis
         """
+        in_chan = self.channel_name(in_chan,'in_chan')
+        out_chan = self.channel_name(out_chan, 'out_chan')
         ds = self._ds["spectra"].sel(input=in_chan, output=out_chan)
         f = self._ds.coords["f"].values
         if fig is None:
@@ -1047,7 +1079,7 @@ class SpectralDensity:
                     (fig_grid[0], fig_grid[1]), (plot_spot[0], plot_spot[1])
                 )
         ax_a.semilogx(
-            f, np.abs(self.coherence(in_chan, out_chan)), label=label
+            f, np.abs(self.coherence(in_chan, out_chan)), label=label, **kwargs
         )
         ax_a.axhline(
             self.coh_signif(0.95),
@@ -1075,7 +1107,7 @@ class SpectralDensity:
                     (3 * fig_grid[0], 1 * fig_grid[1]),
                     (3 * plot_spot[0] + 2, plot_spot[1] + 0),
                 )
-            ax_p.semilogx(f, np.degrees(np.angle(ds)))
+            ax_p.semilogx(f, np.angle(ds, deg=True), **kwargs)
             ax_p.set_ylim(-180, 180)
             ax_p.set_xlim(f[1], f[-1])
             ax_p.set_yticks((-180, 0, 180))
@@ -1149,35 +1181,77 @@ class SpectralDensity:
         return ".".join(comps)
 
     @staticmethod
-    def _sliding_window(a, ws, ss=None, win_taper="hanning"):
+    def _windowed_rfft(trace, ws, ss=None, win_taper="hanning",
+                       starttimes=None, time_spans=None):
         """
-        Split a data array into overlapping, tapered sub-windows
+        Calculates windowed Fourier transform of real data
 
         Args:
-            a (:class:`numpy.ndarray`): 1D array of data to split
-            ws (int): Window size in samples
-            ss (int): Step size in samples. If not provided, window and step
-                size are equal.
-            win_taper (str): taper to apply to data ['hanning', 'prol4pi',
+            trace (:class:`obspy.core.Trace`): Input trace data
+            ws (int): Window size, in number of samples
+            ss (int): Step size, or number of samples until next window
+            win_taper (str): taper to apply to data  ['hanning', 'prol4pi',
                 'prol1pi', 'bartlett', 'blackman', 'hamming']
+            starttimes (list of :class:`obspy.UTCDateTime`): Use provided
+                start window times (ignores z_threshold). Incompatible with
+                `time_spans`
+            time_spans (:class:`TimeSpans`): only use windows in the provided
+                time spans.  Incompatible with `starttimes`
 
         Returns:
-            (tuple): tuple conaining
-                out (:class:`numpy.ndarray`): 1D array of windowed data
-                nd (int): Number of windows
-                offsets (list): list of sample offsets for window starts
+            (tuple): tuple containing:
+                ft (:class:`numpy.ndarray`): Fourier transforms of trace, first
+                    index corresponds to each window, second index to each freq
+                f (:class:`numpy.ndarray`): Frequency axis in Hz
+                t (list of UTCDateTime): Times of window starts
         """
-        if ss is None:
-            # no step size was provided. Return non-overlapping windows
-            ss = ws
-        ws = int(ws)
-        if (ws > len(a)):
-            raise ValueError('window size > data length ({} > {})'.format(
-                             ws, len(a)))
-        # Calculate the number of windows to return, ignoring leftover samples,
-        # and allocate memory to contain the samples
-        nd = 1 + (len(a) - ws) // ss
-        out = np.ndarray((nd, ws), dtype=a.dtype)
+        # Extract data windows
+        a, starttimes = SpectralDensity._make_windows(trace, ws, ss, win_taper,
+                                           starttimes, time_spans)
+        sr = trace.stats.sampling_rate
+        # Fourier transform
+        n2 = _npow2(ws)
+        ft = np.fft.rfft(a, n=n2)
+        f = np.fft.rfftfreq(ws, 1.0 / sr)
+        # f = np.linspace(0., 1., int(n2/2) + 1) * trace.stats.sampling_rate/2.
+        # Don't return zero frequency
+        return ft[:, 1:], f[1:], starttimes
+
+    @staticmethod
+    def _make_windows(trace, ws, ss, win_taper, starttimes, time_spans):
+        """
+        Returns:
+            (tuple):
+                windows (numpy.array): array of tapered windows (n_wind x ws)
+                starttimes (list of :class:`obspy.UTCDateTime`): starttimes
+                    for each window
+        """
+        st = trace.stats.starttime
+        et = trace.stats.endtime
+        sr = trace.stats.sampling_rate
+        npts = trace.stats.npts
+
+        # Calculate offsets
+        if starttimes is not None:
+            if time_spans is not None:
+                raise RuntimeError("cannot provide time_spans AND starttimes")
+            # Verify that times don't overrun data
+            if np.any(starttimes < st):
+                raise ValueError('provided starttimes before data start time')
+            if np.any([x + ws/sr for x in starttimes] > et):
+                raise ValueError('provided starttimes+ws after data end time')
+            offsets = [int((x-st)*sr) for x in starttimes]
+        elif time_spans is not None:
+            offsets = []
+            for s, e in zip(time_spans.start_times, time_spans.end_times):
+                spanoffsets = SpectralDensity._sliding_window(int((e-s)*sr),
+                                                              ws, ss)
+                reloffsets = [int(x + (s-st)*sr) for x in spanoffsets]
+                offsets.extend([x for x in reloffsets if x >= 0 and x+ws<=npts])
+        else:
+            offsets = SpectralDensity._sliding_window(trace.stats.npts, ws, ss)
+
+        # make window taper
         if win_taper in ["hanning", "hamming", "blackman", "bartlett"]:
             taper = eval(f"np.{win_taper}(ws)")
         elif win_taper == "prol1pi":
@@ -1186,18 +1260,50 @@ class SpectralDensity:
             taper = _prol4pi(ws)
         else:
             raise ValueError(f'Unknown taper type "{win_taper}"')
+
+        if len(offsets)==0:
+            logging.warning('No offsets returned')
+            return None, None
+        # Make tapered windows
+        a = np.ndarray((len(offsets), ws), dtype=trace.data.dtype)
+        for offset, i in zip(offsets, range(len(offsets))):
+            if offset < 0:
+                raise ValueError(f'{(offset+ws)=} > {trace.stats.npts=}')
+            if offset+ws > trace.stats.npts:
+                raise ValueError(f'{(offset+ws)=} > {trace.stats.npts=}')
+            a[i] = signal.detrend(trace.data[offset:offset+ws]) * taper
+        if starttimes is None:
+            starttimes = [st + x/sr for x in offsets]
+
+        return a, starttimes
+
+    @staticmethod
+    def _sliding_window(npts, ws, ss=None):
+        """
+        Return offsets for overlapping sub-windows
+
+        Args:
+            npts (int): number of data samples
+            ws (int): Window size in samples
+            ss (int): Step size in samples. If not provided, ss=ws
+
+        Returns:
+            offsets (list): list of sample offsets for window starts
+        """
+        if ss is None:
+            ss = ws
+        ws = int(ws)
+        if (ws > npts):
+            raise ValueError(f'window size > data length ({ws} > {npts})')
+        # Calculate the number of windows to return, ignoring leftover samples,
+        nd = 1 + (npts - ws) // ss
         offsets = []
         if nd == 0:
-            out = signal.detrend(a) * taper
             offsets.append(0)
         for i in range(nd):
             # "slide" the window along the samples
-            start = i * ss
-            stop = start + ws
-            out[i] = signal.detrend(a[start:stop]) * taper
-            offsets.append(start)
-        return out, nd, offsets
-
+            offsets.append(i*ss)
+        return offsets
 
 def _align_traces(stream):
     """Trim stream so that all traces are aligned and same length"""
@@ -1222,14 +1328,15 @@ def _align_traces(stream):
     if np.any([np.ma.count_masked(x.data) for x in stream]):
         logging.warning('Unmasking masked data (usually a gap or overlap)')
         stream = stream.split().merge(fill_value='interpolate')
-    
+
     if last_start >= first_end:
         raise ValueError("There are non-overlapping traces")
     if last_start - first_start > 1 / sampling_rate:
-        logging.debug("Cutting up to {}s from trace starts".format(
-            last_start-first_start))
+        logging.debug(f"Cutting up to {last_start-first_start} seconds "
+                      "from trace starts")
     if last_end - first_end > 1 / sampling_rate:
-        logging.debug("Cutting up to {last_start-first_start}s from trace ends")
+        logging.debug(f"Cutting up to {last_end-first_end} seconds "
+                      "from trace ends")
     stream.trim(last_start, first_end)
     min_len = min([tr.stats.npts for tr in stream])
     max_len = max([tr.stats.npts for tr in stream])
@@ -1239,41 +1346,8 @@ def _align_traces(stream):
     return stream
 
 
-# COPIED FROM ATACR, but other tapers added/allowed and assumes data are real
-def _calculate_windowed_rfft(trace, ws, ss=None, win_taper="hanning"):
-    """
-    Calculates windowed Fourier transform of real data
-
-    Args:
-        trace (:class:`obspy.core.Trace`): Input trace data
-        ws (int): Window size, in number of samples
-        ss (int): Step size, or number of samples until next window
-        win_taper (str): taper to apply to data ['hanning', 'prol4pi',
-            'prol1pi']
-
-    Returns:
-        (tuple): tuple containing:
-            ft (:class:`numpy.ndarray`): Fourier transforms of trace, first
-                index corresponds to each window, second index to each freq
-            f (:class:`numpy.ndarray`): Frequency axis in Hz
-            t (list of UTCDateTime): Times of window starts
-    """
-    # Extract sliding windows
-    a, nd, offs = SpectralDensity._sliding_window(trace.data, ws, ss,
-                                                  win_taper)
-    # Fourier transform
-    n2 = _npow2(ws)
-    ft = np.fft.rfft(a, n=n2)
-    sr = trace.stats.sampling_rate
-    f = np.fft.rfftfreq(ws, 1.0 / sr)
-    # f = np.linspace(0., 1., int(n2/2) + 1) * trace.stats.sampling_rate/2.
-    # Don't return zero frequency
-    st = trace.stats.starttime
-    t = [st + x/sr for x in offs]
-    return ft[:, 1:], f[1:], t
-
-
 def _npow2(x):
+    """ Returns power of 2 >= x"""
     return 1 if x == 0 else 2 ** int(x - 1).bit_length()
 
 
@@ -1327,7 +1401,7 @@ def _subtract_tfs(fts, subtract_tfs):
                        f"({tfs.freqs.shape} vs {fts[fts_ic].shape})")
         for out_chan in tfs.output_channels:
             fts_oc = out_chan.split("-")[0]
-            fts[fts_oc] -= fts[fts_ic] * tfs.values(out_chan)
+            fts[fts_oc] -= fts[fts_ic] * tfs.corrector(out_chan)
     return fts
 
 

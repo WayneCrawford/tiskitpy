@@ -1,7 +1,6 @@
 #!env python3
 """Class of time spans to remove, keep, zero, etc. in Trace or Stream data"""
 from pathlib import Path
-from dataclasses import dataclass
 
 from obspy.clients.fdsn import Client
 from obspy.core.event import Catalog, read_events
@@ -16,7 +15,7 @@ class TimeSpans:
     """
     A class specifying time spans, to be removed, kept, zeroed, etc.
     """
-    def __init__(self, start_times:list, end_times:list):
+    def __init__(self, start_times: list, end_times: list):
         if not len(start_times) == len(end_times):
             raise ValueError(
                 f'{len(start_times)=} != {len(end_times)=}')
@@ -367,34 +366,6 @@ class TimeSpans:
             return outp[0]
         return outp
 
-#     def plot_trace(self, trace=None, ax=None, show=None):
-#         """
-#         Plot representation of selected time periods as yellow highlights
-# 
-#         Args:
-#             trace (:class:`obspy.core.trace.Trace`): trace to plot along with
-#                 selected time periods
-#             show (bool): show the plot on the screen
-#             ax (:class:`matplotlib.pyplot.Axis`): axis to plot on (plot with
-#                 any existing plot).  If specifed, will not "show" by default
-#         """
-#         if ax is None:
-#             ax_existed = False
-#             _, ax = plt.subplots(1, 1)
-#             if show is None:
-#                 show = True
-#         else:
-#             ax_existed = True
-#             if show is None:
-#                 show = False
-#         for st, et in zip(self.start_times, self.end_times):
-#             ax.axvspan(st.datetime, et.datetime, facecolor="red", alpha=0.25)
-#         if trace is not None:
-#             assert isinstance(trace, Trace), "trace is not an obspy Trace"
-#             ax.plot(trace.times(), trace.data)
-#         if show:
-#             plt.show()
-
     def plot(self, stream=None, color="red", alpha=0.25, **kwargs):
         """
         Make a stream or trace plot with highlighted time spans
@@ -403,12 +374,13 @@ class TimeSpans:
             stream (:class:`obspy.core.trace.Stream` or
                 :class:`obspy.core.trace.Trace`): obspy stream/trace to plot
             color (str): highlight color
-            alpha (float): highlight transparency alpha (1=opaque, 0 = invisible)
+            alpha (float): highlight transparency alpha (1=opaque, 0 =
+                invisible)
             **kwargs (**dict): arguments to stream or trace plot program
         """
         if alpha < 0:
             raise ValueError("alpha < 0")
-        elif alpha >1:
+        elif alpha > 1:
             raise ValueError("alpha > 1")
         # Delay plotting or saving until after we decorate the graph
         outfile = kwargs.pop('outfile', None)
@@ -418,14 +390,14 @@ class TimeSpans:
 
         # Plot the stream or trace
         fig = stream.plot(**kwargs)
-       
+
         # Add colors for time spans
         for ax in fig.get_axes():
             for st, et in zip(self.start_times, self.end_times):
-                xmin=date2num(st)
-                xmax=date2num(et)
+                xmin = date2num(st)
+                xmax = date2num(et)
                 ax.axvspan(xmin, xmax, facecolor=color, alpha=0.25)
-        
+
         # Plot to screen or save to file
         if outfile:
             fig.savefig(outfile)
@@ -434,6 +406,7 @@ class TimeSpans:
                 plt.show(block=block)
             except Exception:
                 plt.show()
+
 
 def _calc_eq_cut(mag, minmag, days_per_magnitude):
     if mag < minmag:

@@ -19,8 +19,11 @@ Properties
 :`channels`: a list of the channels
 :`freqs`: get an array of the frequencies
 :`n_windows`: the number of data windows used to calculate the spectra
-:`starttimes`: get a list containing the starttimes for each data window
 :`window_type`: The type of tapering window used when calculating the spectral densities
+:`window_seconds`: Length of each window, in seconds
+:`starttimes`: get a list containing the starttimes for each data window
+:`used_times`: time spans used to calculate spectra
+:`unused_times`: time spans rejected or otherwise unused to calculate spectra
 
 
 Get Methods
@@ -32,17 +35,7 @@ Get Methods
 :`channel_response(channel)`: get the instrument response for the given channel
 :`channel_units(channel)`: get the input (physical) units for the given channel
 :`units(in_channel, out_channel)`: get the units of the corresponding cross- or auto-spectra
-:`coh_signal(probability)`: return the *probability* % coherence significance level
-
-Set Methods
----------------------
-
-You probably won't ever use these (should I put a `_` before?)
-
-:`put_autospect(channel, spect)`: equivalent to `put_crossspect(channel, channel, spect)`
-:`put_crossspect(in_channel, out_channel, spect)`: put a cross-spectral density in the given slot
-:`put_channel_response(channel, response)`: put a channel response in the given slot
-:`replace_channel_name(channel, replacement)`: change a channel name
+:`coh_signif(probability)`: get the coherence significance level
 
 Other
 ---------------------
@@ -54,6 +47,16 @@ Other
 :`plot_one_autospectra(channel, ...)`: plot autospectra for one channel
 :`plot_one_spectra(in_channel, out_channel, ...)`: plot cross-spectra for the given channels
 :`plot_one_coherence(in_channel, out_channel, ...)`: plot coherence for the given channels
+
+Set Methods
+---------------------
+
+You probably won't ever use these (should I put a `_` before?)
+
+:`put_crossspect(in_channel, out_channel, spect)`: put a cross-spectral density in the given slot
+:`put_autospect(channel, spect)`: same as `put_crossspect(channel, channel, spect)`
+:`put_channel_response(channel, response)`: put a channel response in the given slot
+:`replace_channel_name(channel, replacement)`: change a channel name
 
 Example
 ---------------------

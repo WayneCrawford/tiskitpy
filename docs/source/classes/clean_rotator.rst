@@ -11,12 +11,7 @@ The main methods are:
 Constructor
 ---------------------
 
-:`CleanRotator(...)`: Determines the rotation necessary to minimize variance
-    on the vertical channel.  As earthquakes can dominate the variance,
-    the routine downloads a list of earthquakes from the time period and only
-    uses windows outside of the earthquakes' influence (using
-    `.TimeSpans.from_eqs`).  It saves the earthquake file locally for future
-    runs
+:`CleanRotator(...)`:
 
 Properties
 ---------------------

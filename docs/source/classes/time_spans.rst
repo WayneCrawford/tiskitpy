@@ -20,13 +20,14 @@ Constructor
 Properties
 ----------------------
 
-`start_times`: returns list of start_times
-`end_times`: returns list of end_times
+:`start_times`: returns list of start_times
+:`end_times`: returns list of end_times
 
 Set Methods
 ----------------------
 
 :`append(new_TimeSpans)`: appends two `.TimeSpan` objects
+:`invert(start_time, end_time)`: return inverted time spans
 
 
 Trace/Stream modifying
@@ -43,8 +44,8 @@ Other
 
 :`has_zeros(starttime, endtime)`: does the given time range intersect any of
     the TimeSpans?
-:`plot()`: plot a representation of the total time span, with individual
-    time-spans highlighted in yellow
+:`plot(stream=None)`: plot the total time range, stream or trace, higlighting
+    the time spans.
 
 Example
 ----------------------

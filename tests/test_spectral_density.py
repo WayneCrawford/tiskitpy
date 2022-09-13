@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
-from tiskit import SpectralDensity
+from tiskit import SpectralDensity, TimeSpans
 from make_test_stream import make_test_stream
 
 
@@ -32,17 +32,17 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(
             self.sd.__str__(),
             "SpectralDensity object:\n"
-            "\tchannels=['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3']\n"
-            "\tchannel_units=['Counts', 'Counts', 'Counts']\n"
+            "\tchannel_names=['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
+            "\tchannel_units=['Counts', 'Counts', 'Counts', 'Counts']\n"
             "\t8192 frequencies, from 0.0061 to 50Hz\n"
             "\tn_windows=6\n"
             "\twindow_type=prol1pi",
         )
 
-    def test_channels(self):
-        """Test channels derived property"""
-        self.assertEqual(self.sd.channels, ["XX.STA.00.BX1", "XX.STA.00.BX2",
-                                            "XX.STA.00.BX3"])
+    def test_channel_names(self):
+        """Test channel names derived property"""
+        self.assertEqual(self.sd.channel_names, ["XX.STA.00.BX1", "XX.STA.00.BX2",
+                                            "XX.STA.00.BX3",  "XX.STA.00.BDH"])
 
     def test_freqs(self):
         """Test freqs derived property"""
@@ -91,27 +91,27 @@ class TestMethods(unittest.TestCase):
             )
         )
 
-    def test_verify_channel(self):
-        """Test _verify_channel function"""
+    def test_channel_name(self):
+        """Test channel_name() function"""
         # Verify that a bad channel name raises a ValueError
-        self.assertRaises(
-            ValueError, self.sd._verify_channel, *["blah", "fake_channel"]
-        )
+        with self.assertRaises(ValueError):
+            self.sd.channel_name("blah")
         # Verify that a bad channel type raises a TypeError
-        self.assertRaises(
-            TypeError, self.sd._verify_channel, *[2, "fake_channel"]
-        )
+        with self.assertRaises(TypeError):
+            self.sd.channel_name(2)
         # Verify that a good channel name returns nothing
-        self.assertEqual(
-            self.sd._verify_channel("XX.STA.00.BX1", "fake_channel"), None
-        )
+        self.assertEqual(self.sd.channel_name("XX.STA.00.BX1"), "XX.STA.00.BX1")
+        self.assertEqual(self.sd.channel_name("*BX1"), "XX.STA.00.BX1")
+        # Verify that multiple fitting channel name raises a ValueError
+        with self.assertRaises(ValueError):
+            self.sd.channel_name("*.BX*")
 
     def test_replace_channel_name(self):
         """Test replace_channel_name function"""
         x = copy.deepcopy(self.sd)
         x.replace_channel_name("XX.STA.00.BX1", "toto")
-        self.assertEqual(x.channels, ["toto", "XX.STA.00.BX2",
-                                      "XX.STA.00.BX3"])
+        self.assertEqual(x.channel_names, ["toto", "XX.STA.00.BX2",
+                                      "XX.STA.00.BX3", 'XX.STA.00.BDH'])
         self.assertTrue(
             np.all(x.autospect("toto") == self.sd.autospect("XX.STA.00.BX1"))
         )
@@ -167,26 +167,87 @@ class TestMethods(unittest.TestCase):
         """Test the _sliding_window() function"""
         # Test a window = data but whos power of two is larger
         logging.disable()
-        a = self.stream[0].data  # 1000 s at 100 sps
+        # a = self.stream[0].data  # 1000 s at 100 sps
+        npts = 100000
         logging.disable(logging.NOTSET)
         # Test a window longer than the data
-        self.assertRaises(
-            ValueError, SpectralDensity._sliding_window, *[a, 200000]
-        )
+        with self.assertRaises(ValueError):
+            SpectralDensity._sliding_window(npts, 200000)
+        # self.assertRaises(
+        #     ValueError, SpectralDensity._sliding_window, *[a, 200000]
+        # )
         # Test a window almost as long as the data
-        _, nd, _ = SpectralDensity._sliding_window(a, 65536)
-        self.assertEqual(nd, 1)
+        offsets = SpectralDensity._sliding_window(npts, 65536)
+        self.assertEqual(len(offsets), 1)
         # Test a window much smaller than the data
-        _, nd, _ = SpectralDensity._sliding_window(a, 64)
-        self.assertEqual(nd, 1562)
+        offsets = SpectralDensity._sliding_window(npts, 64)
+        self.assertEqual(len(offsets), 1562)
         # Test normal window size
-        _, nd, _ = SpectralDensity._sliding_window(a, 10000)
-        self.assertEqual(nd, 10)
-        _, nd, _ = SpectralDensity._sliding_window(a, 10001)
-        self.assertEqual(nd, 9)
+        offsets = SpectralDensity._sliding_window(npts, 10000)
+        self.assertEqual(len(offsets), 10)
+        offsets = SpectralDensity._sliding_window(npts, 10001)
+        self.assertEqual(len(offsets), 9)
         # Test overlap
-        _, nd, _ = SpectralDensity._sliding_window(a, 10000, ss=9000)
-        self.assertEqual(nd, 11)
+        offsets = SpectralDensity._sliding_window(npts, 10000, ss=9000)
+        self.assertEqual(len(offsets), 11)
+
+    def test_make_windows(self):
+        """Test the _make_windows() function"""
+        # Test a window = data but whos power of two is larger
+        logging.disable()
+        tr = self.stream[0]  # 1000 s at 100 sps
+        logging.disable(logging.NOTSET)
+        cls = SpectralDensity
+        tr_start = tr.stats.starttime
+        tr_end = tr.stats.endtime
+        sr = 100
+        wind_s = 100
+        ws = sr*wind_s  # Standard window length in samples
+        ws_toolong = 200000  # Window length > data
+
+        # Test error cases
+        # Window longer than the data
+        with self.assertRaises(ValueError):
+            cls._make_windows(tr, ws_toolong, ws_toolong, "hanning", None, None)
+        # no TimeSpan within the data
+        ts = TimeSpans(start_times=[tr_end+wind_s], end_times=[tr_end+10*wind_s])
+        a, sts = cls._make_windows(tr, ws, ws, "hanning", None, ts)
+        # starttimes outside of trace times
+        starttimes = [tr_start + x for x in (-1, 100, 200)]
+        with self.assertRaises(ValueError):
+            cls._make_windows(tr, ws, ws, "hanning", starttimes, None)
+        starttimes = [tr_start + x for x in (0, 100, 2000)]
+        with self.assertRaises(ValueError):
+            cls._make_windows(tr, ws, ws, "hanning", starttimes, None)
+        
+        # Test non-errors
+        starttimes = [tr_start + x for x in (0, 100, 200, 300)]
+        ts = TimeSpans(start_times=[tr_start], end_times=[tr_end+1])
+        a, sts = cls._make_windows(tr, ws, ws, "hanning", None, None)
+        self.assertEqual(a.shape, (10, ws))
+        self.assertEqual(a.shape[0], len(sts))
+        a, sts = cls._make_windows(tr, ws, ws, "hanning", None, ts)
+        self.assertEqual(a.shape, (10, ws))
+        self.assertEqual(a.shape[0], len(sts))
+        a, sts = cls._make_windows(tr, ws, ws, "hanning", starttimes, None)
+        self.assertEqual(a.shape, (len(starttimes), ws))
+        self.assertEqual(a.shape[0], len(sts))
+        # time_spans outside of specified range (just skips bad times)
+        ts = TimeSpans(start_times=[tr_start+wind_s], end_times=[tr_end+wind_s])
+        a, sts = cls._make_windows(tr, ws, ws, "hanning", None, ts)
+        self.assertEqual(a.shape, (9, ws))
+        ts = TimeSpans(start_times=[tr_start-wind_s], end_times=[tr_end-wind_s+1])
+        a, sts = cls._make_windows(tr, ws, ws, "hanning", None, ts)
+        self.assertEqual(a.shape, (9, ws))
+       
+        # Test other errors
+        # Bad window_taper name
+        with self.assertRaises(ValueError):
+            cls._make_windows(tr, ws, ws, "harpo", None, None)
+        # Both starttimes and time_spans specified
+        with self.assertRaises(RuntimeError):
+            cls._make_windows(tr, ws, ws, "hanning", starttimes, ts)
+       
 
     def test_remove_outliers(self):
         """Test the _remove_outliers() method"""
@@ -205,9 +266,9 @@ class TestMethods(unittest.TestCase):
         
         # Test the method
         ft, newsts = SpectralDensity._remove_outliers(fts, sts)
-        self.assertEqual(len(newsts), 11)
-        ft, newsts = SpectralDensity._remove_outliers(fts, sts, z_threshold=3.5)
         self.assertEqual(len(newsts), 13)
+        ft, newsts = SpectralDensity._remove_outliers(fts, sts, z_threshold=3.5)
+        self.assertEqual(len(newsts), 15)
         ft, newsts = SpectralDensity._remove_outliers(fts, sts, z_threshold=2.2)
         self.assertEqual(len(newsts), 9)
 

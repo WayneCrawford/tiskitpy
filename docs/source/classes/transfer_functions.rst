@@ -11,9 +11,7 @@ The main methods are:
 Constructor
 ---------------------
 
-:`TransferFunction(SpectralDensity, in_chan, ...)`: Calculate transfer functions
-    based on the Spectral Density Matrix and for a given input (source)
-    channel
+:`TransferFunction(SpectralDensity, in_chan, ...)`: 
 
 Properties
 ---------------------
@@ -22,14 +20,13 @@ Properties
 :`n_windows`: Number of time series data windows used
 :`input_channel`: Transfer function input channel
 :`input_units`: Transfer function input channel units
-:`output_channels`: List of the output channel
-:`noise_channels`: List of which channel is assumed to have incoherent noise for each xf
+:`output_channels`: List of the output channels
+:`noise_channels`: Noise channels for each xf
 
 Get Methods
 ---------------------
 
-:`coh_signif(probability=0.95)`: Coherence significance level with the given
-    probability
+:`coh_signif(prob)`: Coherence significance level with the given probability
 :`noise_channel(output_channel)`: Which channel ("input", "output" or "equal")
     is assumed to have incoherent noise for the given xf
 :`output_units(output_channel)`: output channel units
