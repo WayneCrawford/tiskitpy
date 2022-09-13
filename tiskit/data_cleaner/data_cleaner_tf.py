@@ -170,7 +170,7 @@ class DataCleaner:
                                               **kwargs)
         return sdf
 
-    def clean_stream(self, stream, in_time_domain=False, stuff_locations=True):
+    def clean_stream(self, stream, in_time_domain=False):
         """
         Calculate corrected data stream
 
@@ -178,8 +178,6 @@ class DataCleaner:
             stream (Stream): list of channels to remove, in order
             in_time_domain(bool): do work in time domain (default is freq
                 domain, time_domain is much slower)
-            stuff_locations (bool): stuff string representation of removal
-                sequence into location code
         Returns:
             stream (:class:`obspy.core.stream.Stream`): corrected data
 
@@ -200,14 +198,33 @@ class DataCleaner:
         else:
             logging.info("Correcting traces in the frequency domain")
 
+        # for dctf in self.DCTFs:
+        #     tfs = dctf.tfs
+        #     in_chan = tfs.input_channel
+        #     ic = CS.strip(in_chan)
+        #     for out_chan in tfs.output_channels:
+        #         oc = CS.strip(out_chan)
+        #         in_trace = out_stream.select(id=ic)[0]
+        #         out_trace = out_stream.select(id=oc)[0]
+        #         out_stream.remove(out_trace)
+        #         out_trace = self._correct_trace(
+        #             in_trace,
+        #             out_trace,
+        #             tfs.freqs,
+        #             tfs.corrector_wrt_counts(out_chan),
+        #             in_time_domain,
+        #         )
+        #         out.trace.id = CS.
+        #         remove_seqs[out_chan] = dctf.remove_sequence
+        #         out_stream += out_trace
+        # for tr in out_stream:
+        #    tr.stats.location += remove_seqs[tr.id]
         for dctf in self.DCTFs:
             tfs = dctf.tfs
             in_chan = tfs.input_channel
-            ic = CS.strip(in_chan)
             for out_chan in tfs.output_channels:
-                oc = CS.strip(out_chan)
-                in_trace = out_stream.select(id=ic)[0]
-                out_trace = out_stream.select(id=oc)[0]
+                in_trace = out_stream.select(id=in_chan)[0]
+                out_trace = out_stream.select(id=out_chan)[0]
                 out_stream.remove(out_trace)
                 out_trace = self._correct_trace(
                     in_trace,
@@ -216,11 +233,9 @@ class DataCleaner:
                     tfs.corrector_wrt_counts(out_chan),
                     in_time_domain,
                 )
-                remove_seqs[out_chan] = dctf.remove_sequence
+                out_trace.id = CS.insert(dctf.remove_sequence,
+                                         CS.strip(out_trace.id))
                 out_stream += out_trace
-        if stuff_locations:
-            for tr in out_stream:
-                tr.stats.location += remove_seqs[tr.id]
         return out_stream
 
     def plot(self):

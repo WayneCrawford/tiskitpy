@@ -197,12 +197,12 @@ class SpectralDensity:
             ts_start = self._ds.ts_starttime
         else:
             ts_start = self.starttimes[0]
-            print('no starttime information, using first used window')
+            logging.info('no starttime information, using first used window')
         if self._ds.ts_endtime is not None:
             ts_end = self._ds.ts_endtime
         else:
             ts_start = self.starttimes[-1] + self.window_seconds
-            print('no endtime information, using end of last used window')
+            logging.info('no endtime information, using end of last used window')
 
         return self.used_times.invert(ts_start, ts_end)
 

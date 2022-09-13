@@ -78,10 +78,30 @@ class TestMethods(unittest.TestCase):
         # Time domain too slow for these tests
         for itd in (False,):
             cleaned = self.dc1.clean_stream(self.stream, in_time_domain=itd)
+            self.assertEqual(
+                [x.id for x in cleaned],
+                ['XX.STA.00.BX1', 'XX.STA.00-1.BX2',
+                 'XX.STA.00-1.BX3', 'XX.STA.00-1.BDH'])
             # cleaned.plot(end_time=cleaned[0].stats.starttime + 10)
             sdf_cleaned = SpectralDensity.from_stream(self.stream,
+                                                      data_cleaner=self.dc1,
                                                       window_s=self.window_s)
-        
+            self.assertEqual(sdf_cleaned.channel_names,
+                             ['XX.STA.00.BX1', 'XX.STA.00-1.BX2',
+                              'XX.STA.00-1.BX3', 'XX.STA.00-1.BDH'])
+
+            cleaned = self.dc12.clean_stream(self.stream, in_time_domain=itd)
+            self.assertEqual(
+                [x.id for x in cleaned],
+                ['XX.STA.00.BX1', 'XX.STA.00-1.BX2',
+                 'XX.STA.00-1-2.BX3', 'XX.STA.00-1-2.BDH'])
+            # cleaned.plot(end_time=cleaned[0].stats.starttime + 10)
+            sdf_cleaned = SpectralDensity.from_stream(self.stream,
+                                                      data_cleaner=self.dc12,
+                                                      window_s=self.window_s)
+            self.assertEqual(sdf_cleaned.channel_names,
+                             ['XX.STA.00.BX1', 'XX.STA.00-1.BX2',
+                              'XX.STA.00-1-2.BX3', 'XX.STA.00-1-2.BDH'])
 
 def suite():
     return unittest.makeSuite(TestMethods, "test")
