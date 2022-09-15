@@ -33,7 +33,7 @@ class DataCleaner:
         Channel names are updated with each removal of noise correlated
         with another channel, in the "location" slot of the seed_id
         (NET.STA.LOC.CHAN) by adding '-x' to LOC, where 'x' is the shortest
-        unique string from the end of the input channel's name.  IF the channel
+        unique string from the end of the input channel's name.  If the channel
         name has no '.', one is added at the beginning to allow the cleaning
         codes to be added before
 
@@ -126,7 +126,7 @@ class DataCleaner:
             )
         return s
 
-    def clean_sdf(self, sdf, fast_calc=False):
+    def clean_sdf(self, sdf):
         """
         Correct spectral density functions
 
@@ -198,27 +198,6 @@ class DataCleaner:
         else:
             logging.info("Correcting traces in the frequency domain")
 
-        # for dctf in self.DCTFs:
-        #     tfs = dctf.tfs
-        #     in_chan = tfs.input_channel
-        #     ic = CS.strip(in_chan)
-        #     for out_chan in tfs.output_channels:
-        #         oc = CS.strip(out_chan)
-        #         in_trace = out_stream.select(id=ic)[0]
-        #         out_trace = out_stream.select(id=oc)[0]
-        #         out_stream.remove(out_trace)
-        #         out_trace = self._correct_trace(
-        #             in_trace,
-        #             out_trace,
-        #             tfs.freqs,
-        #             tfs.corrector_wrt_counts(out_chan),
-        #             in_time_domain,
-        #         )
-        #         out.trace.id = CS.
-        #         remove_seqs[out_chan] = dctf.remove_sequence
-        #         out_stream += out_trace
-        # for tr in out_stream:
-        #    tr.stats.location += remove_seqs[tr.id]
         for dctf in self.DCTFs:
             tfs = dctf.tfs
             in_chan = tfs.input_channel

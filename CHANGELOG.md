@@ -31,6 +31,7 @@ method call parameters.  Created a readthedocs page.
 - Renamed  `TransferFunction.channels` to `TransferFunction.channel_names`
 - DataCleaner always renames cleaned channels, putting information in the
   location code slot (second from last element in string separated by '.'s)
+- Removed unused `fast_calc` parameter from `DataCleaner.clean_sdf()`
 
 ### BUGFIXES
 
@@ -53,3 +54,5 @@ method call parameters.  Created a readthedocs page.
 - `SpectralDensity.autospect()` and `.crossspect()` now accept wildcards
 - New `SpectralDensity.channel_name()` method
 - Created CleanerString class to help with DataCleaner cleaned channel names
+- Added `spans` property to `TimeSpans`
+- TimeSpans.plot() now works if there is no stream or trace

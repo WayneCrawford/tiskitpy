@@ -14,24 +14,43 @@ from matplotlib.dates import date2num
 class TimeSpans:
     """
     A class specifying time spans, to be removed, kept, zeroed, etc.
+    
+    Times are obspy UTCDateTimes
+    
+    You can initialize using:
+    - A list of UTCDateTime start_times and a list of UTCDateTime end_times
+      (the lists must be the same length), or
+    - A list of (start_time, end_time) pairs (start_time and end_time can
+      be any input to UTCDateTime, including UTCDateTime)
     """
-    def __init__(self, start_times: list, end_times: list):
-        if not len(start_times) == len(end_times):
-            raise ValueError(
-                f'{len(start_times)=} != {len(end_times)=}')
-        self._start_times = start_times
-        self._end_times = end_times
+    def __init__(self, start_times: list=None, end_times: list=None, spans: list=None):
+        if start_times is not None and end_times is not None and spans is None:
+            if not len(start_times) == len(end_times):
+                raise ValueError(
+                    f'{len(start_times)=} != {len(end_times)=}')
+            self._start_times = start_times
+            self._end_times = end_times
+        elif start_times is None and end_times is None and spans is not None:
+            self._start_times = [UTCDateTime(x[0]) for x in spans]
+            self._end_times = [UTCDateTime(x[1]) for x in spans]
+        else:
+            raise ValueError('You must provide either start_times and end_times, or spans')
         self._organize()
 
     @property
     def start_times(self):
-        """avoid people setting the internal value by accident"""
+        """list of span end times"""
         return self._start_times.copy()
 
     @property
     def end_times(self):
-        """avoid people setting the internal value by accident"""
+        """list of span start times"""
         return self._end_times.copy()
+
+    @property
+    def spans(self):
+        """list of spans [start_time, end_time]"""
+        return [[x, y] for x, y in zip(self._start_times, self._end_times)]
 
     @classmethod
     def from_eqs(
@@ -100,11 +119,14 @@ class TimeSpans:
         start_times = [x.preferred_origin().time for x in new_cat]
         end_times = [
             x.preferred_origin().time
-            + _calc_eq_cut(
-                x.preferred_magnitude().mag, minmag, days_per_magnitude
-            )
-            for x in new_cat
-        ]
+            + _calc_eq_cut(x.preferred_magnitude().mag,
+                           minmag, days_per_magnitude)
+            for x in new_cat]
+        # spans = [[x.preferred_origin().time,
+        #           x.preferred_origin().time
+        #           + _calc_eq_cut(x.preferred_magnitude().mag,
+        #                          minmag, days_per_magnitude)]
+        #          for x in new_cat]
         return cls(start_times, end_times)
 
     # INFORMATION METHODS
@@ -366,7 +388,7 @@ class TimeSpans:
             return outp[0]
         return outp
 
-    def plot(self, stream=None, color="red", alpha=0.25, **kwargs):
+    def plot(self, stream=None, color="red", alpha=0.25, title=None, **kwargs):
         """
         Make a stream or trace plot with highlighted time spans
 
@@ -376,7 +398,12 @@ class TimeSpans:
             color (str): highlight color
             alpha (float): highlight transparency alpha (1=opaque, 0 =
                 invisible)
-            **kwargs (**dict): arguments to stream or trace plot program
+            title (str): figure title
+            **kwargs (**dict): arguments to stream/trace plot program
+        Returns:
+            (tuple):
+                fig (matplotlib Figure):
+                ax (list): list of axes
         """
         if alpha < 0:
             raise ValueError("alpha < 0")
@@ -388,8 +415,12 @@ class TimeSpans:
         block = kwargs.pop('block', True)
         kwargs['handle'] = True
 
-        # Plot the stream or trace
-        fig = stream.plot(**kwargs)
+        if stream is not None:
+            # Plot the stream or trace
+            fig = stream.plot(**kwargs)
+        else:
+            fig, ax = plt.subplots()
+            ax.xaxis.axis_date()
 
         # Add colors for time spans
         for ax in fig.get_axes():
@@ -397,6 +428,9 @@ class TimeSpans:
                 xmin = date2num(st)
                 xmax = date2num(et)
                 ax.axvspan(xmin, xmax, facecolor=color, alpha=0.25)
+        
+        if title is not None:
+            fig.suptitle(title)
 
         # Plot to screen or save to file
         if outfile:
@@ -406,7 +440,7 @@ class TimeSpans:
                 plt.show(block=block)
             except Exception:
                 plt.show()
-
+        return fig, fig.get_axes()
 
 def _calc_eq_cut(mag, minmag, days_per_magnitude):
     if mag < minmag:

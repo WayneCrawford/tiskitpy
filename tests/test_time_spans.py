@@ -38,6 +38,20 @@ class TestMethods(unittest.TestCase):
                                        [UTCDateTime(2011, 11, 2) + 100000,
                                         UTCDateTime(2011, 12, 1) + 100000]))
 
+    def test_properties(self):
+        """
+        Test TimeSpan object, including combining overlaps
+        """
+        start_times = [UTCDateTime(2011, 11, 1),
+                       UTCDateTime(2011, 11, 2),
+                       UTCDateTime(2011, 12, 1)]
+        end_times = [x + 1000 for x in start_times]
+        ts = TimeSpans(start_times, end_times)
+        self.assertEqual(start_times, ts.start_times)
+        self.assertEqual(end_times, ts.end_times)
+        self.assertEqual(ts.spans,
+                         [[x, y] for x, y in zip(start_times, end_times)])
+
     def test_invert(self):
         """
         Test TimeSpan object's invert() method'.
