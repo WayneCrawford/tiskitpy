@@ -109,7 +109,7 @@ class TimeSpans:
             )
             if not quiet:
                 print("Done", flush=True)
-                print(f'writing catalog to "{eq_file}"')
+                logging.info(f'writing catalog to "{eq_file}"')
             if save_eq_file:
                 cat.write(eq_file, format="quakeml")
 
@@ -157,6 +157,18 @@ class TimeSpans:
         for st, et in zip(self.start_times, self.end_times):
             s += f" {st} | {et}\n"
         return s
+
+    def __add__(self, other_span):
+        """
+        Appends TimeSpan object to self
+
+        Args:
+            other_span (~class `TimeSpans`): time spans to append
+        """
+        if not isinstance(other_span, TimeSpans):
+            raise TypeError(f"Tried to add a {type(other_span)} to a TimeSpans")
+        return TimeSpans(self.start_times + other_span.start_times,
+                         self.end_times + other_span.end_times)
 
     def _get_addrs(self, starttime, endtime, stats):
         if not isinstance(starttime, UTCDateTime):
