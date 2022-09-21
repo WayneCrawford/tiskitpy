@@ -23,20 +23,58 @@ class TestMethods(unittest.TestCase):
             inspect.currentframe())).resolve().parent
         self.test_path = self.path / "data" / "time_spans"
 
-    def test_time_spans(self):
+    def test_overlaps(self):
         """
-        Test TimeSpan object, including combining overlaps
+        Test overlaps in a TimeSpan object
         """
         start_times = [UTCDateTime(2011, 11, 1),
                        UTCDateTime(2011, 11, 2),
                        UTCDateTime(2011, 12, 1)]
         end_times = [x + 100000 for x in start_times]
-        ts = TimeSpans(start_times, end_times)
+        ts = TimeSpans(start_times=start_times, end_times=end_times)
         self.assertEqual(len(ts), 2)
-        self.assertEqual(ts, TimeSpans([UTCDateTime(2011, 11, 1),
-                                        UTCDateTime(2011, 12, 1)],
-                                       [UTCDateTime(2011, 11, 2) + 100000,
-                                        UTCDateTime(2011, 12, 1) + 100000]))
+        self.assertEqual(
+            ts, TimeSpans(start_times=[UTCDateTime(2011, 11, 1),
+                                       UTCDateTime(2011, 12, 1)],
+                          end_times=[UTCDateTime(2011, 11, 2) + 100000,
+                                     UTCDateTime(2011, 12, 1) + 100000]))
+
+    def test_creator(self):
+        """
+        Test TimeSpan creator
+        """
+        start_times = [UTCDateTime(2011, 11, 1), UTCDateTime(2011, 12, 1)]
+        end_times = [x + 86400 for x in start_times]
+        spans = [[x, x+86400] for x in start_times]
+        ts1 = TimeSpans(start_times=start_times, end_times=end_times)
+        ts2 = TimeSpans(spans)
+        ts3 = TimeSpans(start_times=['2011-11-01', '2011-12-01'],
+                        end_times=['2011-11-02', '2011-12-02'])
+        ts4 = TimeSpans([['2011-11-01', '2011-11-02'],
+                         ['2011-12-01', '2011-12-02']])
+        self.assertEqual(ts1, ts2)
+        self.assertEqual(ts2, ts3)
+        self.assertEqual(ts3, ts4)
+        # Does this belong here?
+        self.assertEqual(ts1.start_times, start_times)
+        self.assertEqual(ts1.end_times, end_times)
+        self.assertEqual(ts1.spans, spans)
+
+        # CHECK ERRORS
+        # Input value that can't be converted to a UTCDateTime
+        with self.assertRaises(TypeError):
+            TimeSpans([['2011-11-01', '2011-11-02'],
+                       ['2011-12-01', 'BLAH']])
+        # Non-increasing span
+        with self.assertRaises(ValueError):
+            TimeSpans([['2011-11-01', '2011-11-02'],
+                       ['2011-12-04', '2011-12-02']])
+            TimeSpans(starttimes=['2011-11-01', '2011-12-04'],
+                      end_times=['2011-11-02', '2011-12-02'])
+        # Different-length start_times and end_times
+        with self.assertRaises(ValueError):
+            TimeSpans(start_times=['2011-11-01'],
+                      end_times=['2011-11-02', '2011-12-02'])
 
     def test_properties(self):
         """
@@ -46,7 +84,7 @@ class TestMethods(unittest.TestCase):
                        UTCDateTime(2011, 11, 2),
                        UTCDateTime(2011, 12, 1)]
         end_times = [x + 1000 for x in start_times]
-        ts = TimeSpans(start_times, end_times)
+        ts = TimeSpans(start_times=start_times, end_times=end_times)
         self.assertEqual(start_times, ts.start_times)
         self.assertEqual(end_times, ts.end_times)
         self.assertEqual(ts.spans,
@@ -60,7 +98,7 @@ class TestMethods(unittest.TestCase):
                        UTCDateTime(2011, 11, 2),
                        UTCDateTime(2011, 12, 1)]
         end_times = [x + 1200 for x in start_times]  # 20-minute windows
-        time_spans = TimeSpans(start_times, end_times)
+        time_spans = TimeSpans(start_times=start_times, end_times=end_times)
         ts_start = UTCDateTime(2011, 10, 30)
         ts_end = UTCDateTime(2011, 12, 2)
         
@@ -80,7 +118,7 @@ class TestMethods(unittest.TestCase):
         new_ends = time_spans.start_times
         new_ends.append(ts_end)
         self.assertEqual(time_spans.invert(ts_start, ts_end),
-                         TimeSpans(new_starts, new_ends))
+                         TimeSpans(start_times=new_starts, end_times=new_ends))
 
     def test_time_spans_zero_interp(self):
         """
@@ -89,7 +127,7 @@ class TestMethods(unittest.TestCase):
         stream = stream_read(str(self.test_path / 'XS.S10D.LH.mseed'))
         st = UTCDateTime(2016, 12, 5, 6)
         et = UTCDateTime(2016, 12, 5, 12)
-        ts = TimeSpans([st], [et])  # , save_eq_file=False, quiet=True)
+        ts = TimeSpans([[st, et]])  # , save_eq_file=False, quiet=True)
         zeroed = ts.zero(stream)
         self.assertEqual(zeroed[0].trim(st, et).data[0], 0)
         interped = ts.interp(stream)

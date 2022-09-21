@@ -18,23 +18,39 @@ class TimeSpans:
     Times are obspy UTCDateTimes
     
     You can initialize using:
-    - A list of UTCDateTime start_times and a list of UTCDateTime end_times
-      (the lists must be the same length), or
     - A list of (start_time, end_time) pairs (start_time and end_time can
       be any input to UTCDateTime, including UTCDateTime)
+    - A list of UTCDateTime start_times and a list of UTCDateTime end_times
+      (the lists must be the same length), or
     """
-    def __init__(self, start_times: list=None, end_times: list=None, spans: list=None):
-        if start_times is not None and end_times is not None and spans is None:
+    def __init__(self, spans: list=None, start_times: list=None, end_times: list=None):
+        if spans is not None:
+            if start_times is not None or end_times is not None:
+                raise ValueError('You provided spans AND start_times '
+                                 'and/or end_times')
+            try:
+                self._start_times = [UTCDateTime(x[0]) for x in spans]
+                self._end_times = [UTCDateTime(x[1]) for x in spans]
+            except Exception as err:
+                raise TypeError('Could not convert at least one of the span '
+                                f'input values to UTCDateTime')
+        elif start_times is not None and end_times is not None:
             if not len(start_times) == len(end_times):
                 raise ValueError(
                     f'{len(start_times)=} != {len(end_times)=}')
-            self._start_times = start_times
-            self._end_times = end_times
-        elif start_times is None and end_times is None and spans is not None:
-            self._start_times = [UTCDateTime(x[0]) for x in spans]
-            self._end_times = [UTCDateTime(x[1]) for x in spans]
+            try:
+                self._start_times = [UTCDateTime(x) for x in start_times]
+            except Exception as err:
+                raise TypeError('Could not convert at least one of the '
+                                f'start_times to UTCDateTime(): {err}')
+            try:
+                self._end_times = [UTCDateTime(x) for x in end_times]
+            except Exception as err:
+                raise TypeError('Could not convert at least one of the '
+                                f'end_times to UTCDateTime(): {err}')
         else:
-            raise ValueError('You must provide either start_times and end_times, or spans')
+            raise ValueError('You must provide spans or start_times '
+                                 'and end_times')
         self._organize()
 
     @property
@@ -127,7 +143,7 @@ class TimeSpans:
         #           + _calc_eq_cut(x.preferred_magnitude().mag,
         #                          minmag, days_per_magnitude)]
         #          for x in new_cat]
-        return cls(start_times, end_times)
+        return cls(start_times=start_times, end_times=end_times)
 
     # INFORMATION METHODS
     def __len__(self):
@@ -149,7 +165,7 @@ class TimeSpans:
         return True
 
     def __repr__(self):
-        return f"TimeSpans({len(self._start_times):d} start_times, end_times)"
+        return f"TimeSpans({len(self._start_times):d} spans)"
 
     def __str__(self):
         s = "TimeSpans: start            |            end\n"
@@ -167,8 +183,8 @@ class TimeSpans:
         """
         if not isinstance(other_span, TimeSpans):
             raise TypeError(f"Tried to add a {type(other_span)} to a TimeSpans")
-        return TimeSpans(self.start_times + other_span.start_times,
-                         self.end_times + other_span.end_times)
+        return TimeSpans(start_times=self.start_times + other_span.start_times,
+                         end_times=self.end_times + other_span.end_times)
 
     def _get_addrs(self, starttime, endtime, stats):
         if not isinstance(starttime, UTCDateTime):
@@ -188,14 +204,18 @@ class TimeSpans:
 
     def _validate(self):
         """
-        Returns false if there is a problem
+        Raises error if there is a problem, returns false if not organized
 
-        Problems:
-            - start_times are not ordered
-            - there are overlaps
-            - len(start_times) ~= len(end_times)
-            - not every object in start_times and end_times is a UTCDateTime
+        Raises:
+            (ValueError): if
+                - len(start_times) ~= len(end_times)
+                - not every object in start_times and end_times is a UTCDateTime
+                - start_times[i] >= end_times[i]
+        Returns:
+            (bool): False if start times are not ordered, or there are overlaps
+                 between time spans.  True otherwise
         """
+        # Look for errors
         if not len(self.start_times) == len(self.end_times):
             raise ValueError(
                 f"{len(self.start_times)=} != {len(self.end_times)=}")
@@ -205,13 +225,20 @@ class TimeSpans:
         for x in self.end_times:
             if not isinstance(x, UTCDateTime):
                 raise ValueError("There is a non-UTCDateTime endtime value")
+        for (s, e) in self.spans:
+            if s >= e:
+                raise ValueError(f"start_time >= end_time ({s}, {e})")
+        
+        # Look for unorganized data
+        # start_times not sorted
         if not sorted(self.start_times) == self.start_times:
             return False
-        for startafter, endbefore in zip(
-            self.start_times[1:], self.end_times[:-2]
-        ):
+        # overlapping windows
+        for startafter, endbefore in zip(self.start_times[1:],
+                                         self.end_times[:-2]):
             if startafter < endbefore:
                 return False
+        return True
 
     # METHODS OPERATING ON THE TIMESPANS OBJECT
     def invert(self, ts_starttime, ts_endtime):
@@ -242,7 +269,7 @@ class TimeSpans:
         new_et = self.start_times
         new_et.append(ts_endtime)
 
-        return TimeSpans(new_st, new_et)
+        return TimeSpans(start_times=new_st, end_times=new_et)
 
     def append(self, new_time_spans):
         """

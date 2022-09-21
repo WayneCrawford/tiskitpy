@@ -180,10 +180,10 @@ class SpectralDensity:
         Returns:
             (:class:`obspy.TimeSpans`):
         """
-        st = [x for x in self.starttimes]
-        et = [x + self.window_seconds for x in self.starttimes]
+        spans = [[x, x + self.window_seconds] for x in self.starttimes]
 
-        return TimeSpans(st, et)
+        return TimeSpans([[x, x + self.window_seconds]
+                          for x in self.starttimes])
 
     @property
     def unused_times(self):
