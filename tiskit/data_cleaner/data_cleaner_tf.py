@@ -53,7 +53,7 @@ class DataCleaner:
         fast_calc (bool): Calculate corrected spectra directly from
             previous spectra (ATACR-style).
         kwargs (:class:`SpectralDensity.from_stream()` properties):
-             window_s, windowtype, z_threshold...
+             window_s, windowtype, z_threshold, avoid_spans, ...
     """
 
     def __init__(self, stream, remove_list, noise_channel="output",

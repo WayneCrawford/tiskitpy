@@ -183,7 +183,7 @@ class SpectralDensity:
         spans = [[x, x + self.window_seconds] for x in self.starttimes]
 
         return TimeSpans([[x, x + self.window_seconds]
-                          for x in self.starttimes])
+                           for x in self.starttimes])
 
     @property
     def unused_times(self):
@@ -219,7 +219,7 @@ class SpectralDensity:
     @classmethod
     def from_stream(cls, stream, window_s=1000, windowtype="prol1pi",
                     inv=None, data_cleaner=None, starttimes=None,
-                    time_spans=None, z_threshold=3):
+                    time_spans=None, avoid_spans=None, z_threshold=3):
         """
         Calculate spectral density functions from the provided stream
 
@@ -240,15 +240,25 @@ class SpectralDensity:
                 `time_spans`
             time_spans (:class:`TimeSpans`): only use windows in the provided
                 time spans.  Incompatible with `starttimes`
+            avoid_spans (:class:`TimeSpans`): Do NOT use data from the provided
+                time spans.  Incompatible with `starttimes` and "time_spans"
             subtract_tf_suffix (str): suffix to add to channel names if tf
                 is subtracted
-            z_threshold (float): reject windows with z-score greater than this
-                                 value
+            z_threshold (float or None): reject windows with z-score greater than this
+                value.  None: no rejection
         """
         if not isinstance(stream, Stream):
             raise ValueError(f"stream is a {type(stream)}, not obspy Stream")
+        if avoid_spans is not None:
+            if time_spans is not None:
+                raise RuntimeError("Provided both time_spans and avoid_spans")
+            time_spans = avoid_spans.invert(stream[0].stats.starttime,
+            stream[0].stats.endtime)
         if starttimes is not None and time_spans is not None:
-            raise RuntimeError("cannot provide both time_spans and starttimes")
+            if avoid_spans is not None:
+                raise RuntimeError("Provided both starttimes and avoid_spans")
+            else:
+                raise RuntimeError("Provided both starttimes and time_spans")
 
         stream = stream.copy()  # avoid modifying original stream
         stream = _align_traces(stream)
@@ -286,14 +296,14 @@ class SpectralDensity:
             evalresps[id] = evalresp
             if resp is not None:
                 tr.stats.response = resp
-        # Remove outliers if starttimes not forced
-        if starttimes is None:
+        # Remove outliers if starttimes not forced and z_threshold specified
+        if starttimes is None and z_threshold is not None:
             n_winds_orig = len(sts)
             ft, sts = cls._remove_outliers(ft, sts, z_threshold)
             n_winds = len(sts)
             if n_winds < n_winds_orig:
                 rejected = n_winds_orig - n_winds
-                logging.info(f'"{z_threshold=:g}" rejected {rejected:d} of '
+                logging.info(f'"{z_threshold=}" rejected {rejected:d} of '
                              f'{n_winds_orig:d} windows '
                              f'({100.*rejected/n_winds_orig:.0f}%)')
 
@@ -323,8 +333,12 @@ class SpectralDensity:
         """Remove  windows with z-score above z_threshold
 
         Args:
-            ft (dict): each value is an np.array where axis 0 = windows and
-                axis 1 = frequencies m windows x n frequencies
+            ft (dict): Fourier transforms.  Each value is an np.array where
+                axis 0 = windows and axis 1 = frequencies m windows x n
+                frequencies
+            sts (list of :class:`UTCDateTime``): starttimes for each Fourier
+                transform
+            z_threshold (float): threshold.
             recursive (bool): repeat the test until there are no outliers
         """
         ft = ft.copy()
@@ -1294,7 +1308,7 @@ class SpectralDensity:
             ss = ws
         ws = int(ws)
         if (ws > npts):
-            raise ValueError(f'window size > data length ({ws} > {npts})')
+            return []
         # Calculate the number of windows to return, ignoring leftover samples,
         nd = 1 + (npts - ws) // ss
         offsets = []

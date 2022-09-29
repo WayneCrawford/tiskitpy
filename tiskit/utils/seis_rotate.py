@@ -115,7 +115,7 @@ class SeisRotate:
         self,
         lowcut=0.001,
         hicut=0.005,
-        eq_spans=None,
+        ignore_spans=None,
         uselogvar=None,
         verbose=False,
     ):
@@ -126,7 +126,7 @@ class SeisRotate:
             lowcut (float): low passband frequency in which to lood for energy
                              reduction
             hicut (float): high passpand frequency "" "" ""
-            eq_spans (TimeSpans): information on time spans to ignore
+            ignore_spans (:class:`TimeSpans``): time spans to ignore
             uselogvar(bool): use logarithmic variance estimate
             verbose (bool): output information about the angles tested?
 
@@ -144,10 +144,10 @@ class SeisRotate:
         filt.Z.filter("bandpass", freqmin=lowcut, freqmax=hicut, corners=5)
         filt.N.filter("bandpass", freqmin=lowcut, freqmax=hicut, corners=5)
         filt.E.filter("bandpass", freqmin=lowcut, freqmax=hicut, corners=5)
-        if eq_spans is not None:
-            filt.Z = eq_spans.zero(filt.Z)
-            filt.N = eq_spans.zero(filt.N)
-            filt.E = eq_spans.zero(filt.E)
+        if ignore_spans is not None:
+            filt.Z = ignore_spans.zero(filt.Z)
+            filt.N = ignore_spans.zero(filt.N)
+            filt.E = ignore_spans.zero(filt.E)
 
         # Quick estimate of angles using Z/E and Z/N ratios. DOESN'T HELP: SKIP
         # (startAngle,startAzimuth)=filt._estimateAngles(verbose)
@@ -174,8 +174,7 @@ class SeisRotate:
         Arguments:
             verbose (bool): display extra information?
         """
-        if verbose:
-            print("Estimating preliminary angle based on signal ratios")
+        logging.debug("Estimating preliminary angle based on signal ratios")
         ZoverN = np.divide(self.Z.data, self.N.data)
         ZoverE = np.divide(self.Z.data, self.E.data)
         # Throw out not-a-numbers
@@ -188,21 +187,18 @@ class SeisRotate:
         ZEratio = np.median(ZoverE)
         plt.plot(ZoverN, "x")
 
-        if verbose:
-            print(f"    {ZNratio=}, {ZEratio=}")
+        logging.debug(f"    {ZNratio=}, {ZEratio=}")
 
         ZNangle = (180 / M.pi) * M.asin(ZNratio)
         ZEangle = (180 / M.pi) * M.asin(ZEratio)
         azimuth = (180 / M.pi) * M.atan(ZNratio / ZEratio)
         azimuth = 90 - (180 / M.pi) * M.atan2(ZNratio, ZEratio)
-        if verbose:
-            print(f"    ZNangle={ZNangle:<10g}, ZEangle={ZEangle:<10g}")
+        logging.debug(f"    ZNangle={ZNangle:<10g}, ZEangle={ZEangle:<10g}")
         # The angle from vertical below is just a guess, should developed
         # mathematically (or at least derived empirically from the searched
         # results)
         angle = M.sqrt(ZNangle**2 + ZEangle**2)
-        if verbose:
-            print("    estAngle= {angle:<10g}, estAzim = {azimuth:<10g}")
+        logging.debug("    estAngle= {angle:<10g}, estAzim = {azimuth:<10g}")
 
         # Sanity check: do the dip equations from zrotate()
         # return ZN & ZE angles??
@@ -228,11 +224,9 @@ class SeisRotate:
 
         Searches for minimum Z energy as function of angle
         """
-        if verbose:
-            print("Calculating best angle based on variance minimization")
+        logging.debug("Calculating best angle based on variance minimization")
         start_var = self._rotZ_variance([startAngle, startAzimuth])
-        if verbose:
-            print(f"Starting variance = {start_var}")
+        logging.debug(f"Starting variance = {start_var}")
 
         xopt, fopt, iter, funcalls, warnflag, allvecs = sp.optimize.fmin(
             func=self._rotZ_variance,
@@ -242,26 +236,23 @@ class SeisRotate:
             retall=True,
         )
         bestAngles = xopt
-        if verbose:
-            print(f"{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}")
-            print(
-                "    best Angle,Azimuth = {:.2f},{:.2f}".format(
-                    bestAngles[0], bestAngles[1]
-                )
-            )
-            if self.uselogvar is False:
-                print(
-                    "    variance reduced from "
-                    "{:.2e} to {:.2e} ({:.1f}% lower)".format(
-                        start_var, fopt,
-                        100 * (1 - fopt / start_var)))
-            if self.uselogvar is False:
-                print(" log variance reduced from "
-                      "{:.1f} to {:.1f} ({:.1f}% lower)".format(
-                          start_var, fopt,
-                          100 * (1 - 10 ** (fopt - start_var))))
+
+        logging.debug(f"{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}")
+        logging.debug("    best Angle,Azimuth = {:.2f},{:.2f}".format(
+                      bestAngles[0], bestAngles[1]))
+        if self.uselogvar is False:
+            logging.info(
+                "    variance reduced from "
+                "{:.2e} to {:.2e} ({:.1f}% lower)".format(
+                    start_var, fopt,
+                    100 * (1 - fopt / start_var)))
+        else:
+            logging.info(" log variance reduced from "
+                  "{:.1f} to {:.1f} ({:.1f}% lower)".format(
+                      start_var, fopt,
+                      100 * (1 - 10 ** (fopt - start_var))))
         if warnflag:
-            print(f"{allvecs=}")
+            logging.info(f"{allvecs=}")
 
         return (bestAngles[0], bestAngles[1])
 
@@ -325,5 +316,6 @@ class SeisRotate:
         if len(sel_stream) == 0:
             raise IndexError(f'no "{component}" channel found')
         elif len(sel_stream) > 1:
-            raise ValueError(f'more than one "{component}" channel')
+            raise ValueError('more than one "{}" channel: {}'.format(
+                component, [x.id for x in sel_stream]))
         return sel_stream[0].copy()

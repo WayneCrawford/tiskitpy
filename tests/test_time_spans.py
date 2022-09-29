@@ -94,32 +94,62 @@ class TestMethods(unittest.TestCase):
         """
         Test TimeSpan object's invert() method'.
         """
-        start_times = [UTCDateTime(2011, 11, 1),
-                       UTCDateTime(2011, 11, 2),
-                       UTCDateTime(2011, 12, 1)]
-        end_times = [x + 1200 for x in start_times]  # 20-minute windows
-        time_spans = TimeSpans(start_times=start_times, end_times=end_times)
-        ts_start = UTCDateTime(2011, 10, 30)
-        ts_end = UTCDateTime(2011, 12, 2)
-        
-        # Should raise error when time series start time is AFTER the first
-        # time span
+        base = UTCDateTime(2011, 11, 1)
+        ts = TimeSpans([[base, base+100],
+                         [base+1000, base+1100],
+                         [base+2000, base + 2100]])
+                                
+        # Start and End Times before and after time_spans
+        self.assertEqual(ts.invert(base-100, base+3000),
+                         TimeSpans([[base-100, base],
+                                    [base+100, base+1000],
+                                    [base+1100, base+2000],
+                                    [base+2100, base+3000]]))
+        # Start after start of time_spans
+        self.assertEqual(ts.invert(base+50, base+3000),
+                         TimeSpans([[base+100, base+1000],
+                                    [base+1100, base+2000],
+                                    [base+2100, base+3000]]))
+        self.assertEqual(ts.invert(base+150, base+3000),
+                         TimeSpans([[base+150, base+1000],
+                                    [base+1100, base+2000],
+                                    [base+2100, base+3000]]))
+        # End before end of time_spans
+        self.assertEqual(ts.invert(base-100, base+2000),
+                         TimeSpans([[base-100, base],
+                                    [base+100, base+1000],
+                                    [base+1100, base+2000]]))
+        self.assertEqual(ts.invert(base-100, base+2500),
+                          TimeSpans([[base-100, base],
+                                    [base+100, base+1000],
+                                    [base+1100, base+2000],
+                                    [base+2100, base+2500]]))
+        # Start after time_spans start and end before time_spans end
+        self.assertEqual(ts.invert(base+200, base+2100),
+                         TimeSpans([[base+200, base+1000],
+                                    [base+1100, base+2000]]))
+        # Start and end between two time spans
+        self.assertEqual(ts.invert(base+200, base+900),
+                         TimeSpans([[base+200, base+900]]))
+        # Unspecified Start and End Times: use first end_time as start and
+        # last start_time as end
+        self.assertEqual(ts.invert(None, None),
+                         TimeSpans([[base+100, base+1000],
+                                    [base+1100, base+2000]]))
+        # Start after time_spans
+        self.assertEqual(ts.invert(base+5000, base+6000),
+                         TimeSpans([[base+5000, base+6000]]))
+        # End before time_spans
+        self.assertEqual(ts.invert(base-5000, base-2000),
+                         TimeSpans([[base-5000, base-2000]]))
+        # ERRORS:
+        # Start after end
         with self.assertRaises(ValueError):
-            time_spans.invert(start_times[1], ts_end)
-
-        # Should raise error when given time series end time is BEFORE the end
-        # of the last time span
+            ts.invert(base+1000, base+100)
+        # Start equals end
         with self.assertRaises(ValueError):
-            time_spans.invert(ts_start, start_times[-1])
-        
-        # now check that invert() does what is expected
-        new_starts= [ts_start]
-        new_starts.extend(time_spans.end_times)
-        new_ends = time_spans.start_times
-        new_ends.append(ts_end)
-        self.assertEqual(time_spans.invert(ts_start, ts_end),
-                         TimeSpans(start_times=new_starts, end_times=new_ends))
-
+            ts.invert(base+1000, base+1000)
+       
     def test_time_spans_zero_interp(self):
         """
         Test TimeSpan object's zero() and interp() methods.

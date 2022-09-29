@@ -165,29 +165,23 @@ class TestMethods(unittest.TestCase):
 
     def test_sliding_window(self):
         """Test the _sliding_window() function"""
-        # Test a window = data but whos power of two is larger
         logging.disable()
-        # a = self.stream[0].data  # 1000 s at 100 sps
         npts = 100000
         logging.disable(logging.NOTSET)
-        # Test a window longer than the data
-        with self.assertRaises(ValueError):
-            SpectralDensity._sliding_window(npts, 200000)
-        # self.assertRaises(
-        #     ValueError, SpectralDensity._sliding_window, *[a, 200000]
-        # )
-        # Test a window almost as long as the data
+        # Window longer than the data
+        self.assertEqual(SpectralDensity._sliding_window(npts, 200000), [])
+        # Window almost as long as the data
         offsets = SpectralDensity._sliding_window(npts, 65536)
         self.assertEqual(len(offsets), 1)
-        # Test a window much smaller than the data
+        # Window much smaller than the data
         offsets = SpectralDensity._sliding_window(npts, 64)
         self.assertEqual(len(offsets), 1562)
-        # Test normal window size
+        # Normal window size
         offsets = SpectralDensity._sliding_window(npts, 10000)
         self.assertEqual(len(offsets), 10)
         offsets = SpectralDensity._sliding_window(npts, 10001)
         self.assertEqual(len(offsets), 9)
-        # Test overlap
+        # Overlap
         offsets = SpectralDensity._sliding_window(npts, 10000, ss=9000)
         self.assertEqual(len(offsets), 11)
 
@@ -206,9 +200,6 @@ class TestMethods(unittest.TestCase):
         ws_toolong = 200000  # Window length > data
 
         # Test error cases
-        # Window longer than the data
-        with self.assertRaises(ValueError):
-            cls._make_windows(tr, ws_toolong, ws_toolong, "hanning", None, None)
         # no TimeSpan within the data
         ts = TimeSpans(start_times=[tr_end+wind_s], end_times=[tr_end+10*wind_s])
         a, sts = cls._make_windows(tr, ws, ws, "hanning", None, ts)
@@ -239,6 +230,9 @@ class TestMethods(unittest.TestCase):
         ts = TimeSpans(start_times=[tr_start-wind_s], end_times=[tr_end-wind_s+1])
         a, sts = cls._make_windows(tr, ws, ws, "hanning", None, ts)
         self.assertEqual(a.shape, (9, ws))
+        # Window longer than the data
+        self.assertEqual(cls._make_windows(tr, ws_toolong, ws_toolong,
+                         "hanning",None, None), (None, None))
        
         # Test other errors
         # Bad window_taper name

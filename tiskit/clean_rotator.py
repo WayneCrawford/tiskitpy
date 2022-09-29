@@ -4,6 +4,8 @@ Clean tilt noise from OBS vertical channel using non-deforming rotation
 
 Is there any reason why rotate_clean isn't just rotate_calc + rotate_apply?
 """
+import logging
+
 import numpy as np
 from obspy.core.stream import Stream
 from obspy import UTCDateTime
@@ -24,10 +26,9 @@ class CleanRotator:
     Args:
         stream (Stream): input data, must have a \\*Z, \\*[1|N] and \\*[2|E]
             channel
-        excludes: list of dictionaries containing time periods to avoid,
-                     using "start" and "end" keys
-        plot: Plot comparision of original and rotated vertical
-        quickTest: Only run one day's data and do not save results
+        avoid_spans (:class:`TimeSpans`): timespans to avoid
+        plot (bool): Plot comparision of original and rotated vertical
+        quickTest (bool): Only run one day's data and do not save results
         remove_eq (str, True or False): filename of catalog to use to remove
                 earthquakes, will download catalog from USGS if True, not
                 remove EQs if False
@@ -40,23 +41,25 @@ class CleanRotator:
         azimuth (float): azimuth by which Z (or Z-X-Y) was rotated
     """
 
-    def __init__(self, stream, excludes=[], plot=False, quickTest=False,
+    def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,
                  remove_eq=True, uselogvar=False, verbose=True,
                  filt_band=(0.001, 0.01), save_eq_file=True):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
 
         """
-        eq_spans = self._make_eq_spans(
+        ignore_spans = self._make_eq_spans(
             remove_eq, stream[0].stats, verbose, save_eq_file
         )
-        filtstream = self._filtstream(stream, excludes, filt_band)
+        if avoid_spans is not None:
+            ignore_spans += avoid_spans
+        filtstream = self._filtstream(stream, filt_band)
         srData = SeisRotate(filtstream)
         (ang, azi) = srData.calc_zrotate_opt(
-            verbose=verbose, eq_spans=eq_spans, uselogvar=uselogvar
+            verbose=verbose, ignore_spans=ignore_spans, uselogvar=uselogvar
         )
         if verbose:
-            print(f"Best angle, azimuth is ({ang:.2f}, {azi:.2f})")
+            logging.info(f"Best angle, azimuth is ({ang:.2f}, {azi:.2f})")
         self.angle = ang
         self.azimuth = azi
         if plot:
@@ -67,13 +70,9 @@ class CleanRotator:
             self.angle, self.azimuth
         )
 
-    def _filtstream(self, stream, excludes, filt_band):
+    def _filtstream(self, stream, filt_band):
         """Filter data to tilt noise band for best Angle calc"""
         filtstream = stream.copy()
-        for interval in excludes:
-            filtstream.cutout(
-                UTCDateTime(interval["start"]), UTCDateTime(interval["end"])
-            )
         filtstream.detrend("demean")
         filtstream.detrend("linear")
         filtstream.filter(
@@ -154,7 +153,7 @@ class CleanRotator:
         return Z1_ratio, Z2_ratio
 
 
-def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
+def rotate_clean(stream, avoid_spans=None, horiz_too=False, plot=False,
                  quickTest=False, remove_eq=True, uselogvar=False,
                  verbose=True, filt_band=(0.001, 0.01)):
     """
@@ -168,7 +167,7 @@ def rotate_clean(stream, excludes=[], horiz_too=False, plot=False,
             (float): angle by which Z (or Z-X-Y) was rotated
             (float): azimuth by which Z (or Z-X-Y) was rotated
     """
-    obj = CleanRotator(stream, excludes, plot, quickTest, remove_eq,
+    obj = CleanRotator(stream, avoid_spans, plot, quickTest, remove_eq,
                        uselogvar, verbose, filt_band)
     return obj.apply(stream), obj.rot_angle, obj.rot_azimuth
 

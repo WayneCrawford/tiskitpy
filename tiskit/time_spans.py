@@ -1,6 +1,7 @@
 #!env python3
 """Class of time spans to remove, keep, zero, etc. in Trace or Stream data"""
 from pathlib import Path
+import logging
 
 from obspy.clients.fdsn import Client
 from obspy.core.event import Catalog, read_events
@@ -174,17 +175,23 @@ class TimeSpans:
             s += f" {st} | {et}\n"
         return s
 
-    def __add__(self, other_span):
+    def __add__(self, other):
         """
         Appends TimeSpan object to self
 
         Args:
-            other_span (~class `TimeSpans`): time spans to append
+            other (~class `TimeSpans`): time spans to append
         """
-        if not isinstance(other_span, TimeSpans):
-            raise TypeError(f"Tried to add a {type(other_span)} to a TimeSpans")
-        return TimeSpans(start_times=self.start_times + other_span.start_times,
-                         end_times=self.end_times + other_span.end_times)
+        if not isinstance(other, TimeSpans):
+            raise TypeError(f"Tried to add a {type(other)} to a TimeSpans")
+        return TimeSpans(start_times=self.start_times + other.start_times,
+                         end_times=self.end_times + other.end_times)
+
+    def __radd__(self, other):  # Allows us to use sum()
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
 
     def _get_addrs(self, starttime, endtime, stats):
         if not isinstance(starttime, UTCDateTime):
@@ -236,7 +243,7 @@ class TimeSpans:
         # overlapping windows
         for startafter, endbefore in zip(self.start_times[1:],
                                          self.end_times[:-2]):
-            if startafter < endbefore:
+            if startafter <= endbefore:
                 return False
         return True
 
@@ -245,29 +252,47 @@ class TimeSpans:
         """
         Return inverted time spans
 
-        If input TimeSpan had spans from A->B, C->D and E->F, output TimeSpan
-        will have spans from starttime->A, B->C, D->E and F->endtime
+        If input TimeSpan had spans from A->A'', B->B'and C->C'', output
+        TimeSpan will have spans from ts_starttime->A, A'->B, B'->C and
+        C'->ts_endtime  if ts_starttime < A and ts_endtime > B.
+        If ts_start_time -> ts_endtime, is outside of the time spans, will
+        simply use them for the time span
 
         Args:
             ts_startime (:class:`obspy.core.UTCDateTime`): timeseries start
-                time (should be <= start of first span)
-            ts_startime (:class:`obspy.core.UTCDateTime`): timeseries end time
-                (should be >= end of last span)
+                time.  If None, inverted TimeSpans will start at the first
+                end_time
+            ts_startime (:class:`obspy.core.UTCDateTime`): timeseries end time.
+                If None, inverted TimeSpans will end at the last start_time
         Returns:
             (:class:`TimeSpans`)
         """
         self._organize()
-
-        if ts_starttime > self.start_times[0]:
-            raise ValueError(f'{ts_starttime=} > {self.start_times[0]}')
-            return None
-        if ts_endtime < self.end_times[-1]:
-            raise ValueError(f'{ts_endtime=} > {self.end_times[0]}')
-            return None
-        new_st = [ts_starttime]
-        new_st.extend(self.end_times)
-        new_et = self.start_times
-        new_et.append(ts_endtime)
+        
+        if not isinstance(ts_starttime, (UTCDateTime, type(None))):
+            raise TypeError('ts_starttime is not a UTCDateTime or None')
+        if not isinstance(ts_endtime, (UTCDateTime, type(None))):
+            raise TypeError('ts_starttime is not a UTCDateTime or None')
+        
+        if ts_starttime is None:
+            ts_starttime = self.end_times[0]
+        if ts_endtime is None:
+            ts_endtime = self.start_times[-1]
+        if ts_starttime >= ts_endtime:
+            raise ValueError('ts_starttime > ts_endtime')
+        new_spans = [x for x in self.spans if x[1] > ts_starttime and x[0] < ts_endtime]
+        if len(new_spans) == 0:
+            if ts_starttime > self.end_times[-1]:
+                logging.info(f'{ts_starttime=} after end of TimeSpans')
+            elif ts_endtime < self.start_times[0]:
+                logging.info(f'{ts_endtime=} before start of TimeSpans')
+            return TimeSpans([[ts_starttime, ts_endtime]])
+        if ts_starttime < new_spans[0][0]:
+            new_spans = [[ts_starttime, ts_starttime]] + new_spans
+        if ts_endtime > new_spans[-1][1]:
+            new_spans.append([ts_endtime, ts_endtime])
+        new_st = [x[1] for x in new_spans[:-1]]
+        new_et = [x[0] for x in new_spans[1:]]
 
         return TimeSpans(start_times=new_st, end_times=new_et)
 
