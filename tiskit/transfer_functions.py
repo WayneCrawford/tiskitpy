@@ -237,7 +237,7 @@ class TransferFunctions(object):
         oc = self._match_out_chan(output_channel)
         return np.squeeze(self._ds["response"].sel(output=oc).values)
 
-    def uncert(self, output_channel):
+    def uncertainty(self, output_channel):
         """Return transfer function uncertainty for the given output channel"""
         oc = self._match_out_chan(output_channel)
         xferr = np.squeeze(
@@ -245,11 +245,11 @@ class TransferFunctions(object):
         ) / np.squeeze(self._ds["response"].sel(output=oc).values)
         return xferr
 
-    def uncert_wrt_counts(self, output_channel):
+    def uncertainty_wrt_counts(self, output_channel):
         """
         Return transfer function uncertainty with respect to counts
         """
-        return self.uncert(output_channel) * self.response(output_channel)
+        return self.uncertainty(output_channel) * self.response(output_channel)
 
     @staticmethod
     def _check_chans(sdm, in_chan, out_chans):
@@ -378,10 +378,13 @@ class TransferFunctions(object):
         H_err = np.abs(H) * errbase
         return H, H_err, corr_mult
 
-    def plot(self, show=True):
+    def plot(self, errorbars=True, show=True):
         """
         Plot transfer functions
 
+        Args:
+            errorbars (bool): plot error bars
+            show (bool): show on the screen
         Returns:
             (numpy.ndarray): array of axis pairs (amplitude, phase)
         """
@@ -393,16 +396,11 @@ class TransferFunctions(object):
         fig, axs = plt.subplots(rows, cols, sharex=True)
         in_suffix = self._find_str_suffix(inp, outputs)
         for out_chan, j in zip(outputs, range(len(outputs))):
-            axa, axp = self.plot_one(
-                inp,
-                out_chan,
-                fig,
-                (rows, cols),
-                (0, j),
-                show_ylabel=j == 0,
-                title=f"{out_chan}/{in_suffix}",
-                show_xlabel=True,
-            )
+            axa, axp = self.plot_one(inp, out_chan, fig, (rows, cols),
+                                     (0, j), show_ylabel=j == 0,
+                                     errorbars=errorbars,
+                                     title=f"{out_chan}/{in_suffix}",
+                                     show_xlabel=True)
         ax_array[0, j] = (axa, axp)
         if show:
             plt.show()
@@ -471,18 +469,9 @@ class TransferFunctions(object):
                 ii_ind = ii
             return inp[ii:]
 
-    def plot_one(
-        self,
-        in_chan,
-        out_chan,
-        fig=None,
-        fig_grid=(1, 1),
-        plot_spot=(0, 0),
-        label=None,
-        title=None,
-        show_xlabel=True,
-        show_ylabel=True,
-    ):
+    def plot_one(self, in_chan, out_chan,
+                 fig=None, fig_grid=(1, 1), plot_spot=(0, 0), errorbars=False,
+                 label=None, title=None, show_xlabel=True, show_ylabel=True):
         """
         Plot one transfer function
 
@@ -493,9 +482,10 @@ class TransferFunctions(object):
                 None this method will plot on the current figure or create
                 a new figure.
             fig_grid (tuple): this plot sits in a grid of this many
-                              (rows, columns)
-            subplot_spot (tuple): put this plot at this (row,column) of
-                                  the figure grid
+                (rows, columns)
+            plot_spot (tuple): put this plot at this (row, column) of
+                the figure grid
+            errorbars (bool): plot as error bars
             label (str): string to put in legend
             title (str): string to put in title
             show_xlabel (bool): put an xlabel on this subplot
@@ -507,7 +497,7 @@ class TransferFunctions(object):
                 transfer function phase plot
         """
         xf = self.frf(out_chan).copy()
-        xferr = self.uncert(out_chan).copy()
+        xferr = self.uncertainty(out_chan).copy()
         f = self.freqs
         if fig is None:
             fig = plt.gcf()
@@ -521,7 +511,7 @@ class TransferFunctions(object):
         xf[xf == 0] = None
         ax_a.loglog(f, np.abs(xf + xferr), color="blue", linewidth=0.5)
         ax_a.loglog(f, np.abs(xf - xferr), color="blue", linewidth=0.5)
-        ax_a.loglog(f, np.abs(xf), color="black", label=label)
+        # ax_a.loglog(f, np.abs(xf), color="black", label=label)
         # ax_a.loglog(f, np.abs(xf), label=f"'{out_chan}' / '{in_chan}'")
         ax_a.set_xlim(f[1], f[-1])
         if title is not None:

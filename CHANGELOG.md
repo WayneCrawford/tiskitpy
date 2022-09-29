@@ -25,34 +25,40 @@ method call parameters.  Created a readthedocs page.
 
 ### MAJOR
 
-- Added required argument `window_s` to SpectralDensity() creator
-- Renamed `TransferFunction.values` to `TransferFunction.frf` (frequency
-  cresponse function)
-- Renamed  `TransferFunction.channels` to `TransferFunction.channel_names`
-- DataCleaner always renames cleaned channels, putting information in the
-  location code slot (second from last element in string separated by '.'s)
-- Removed unused `fast_calc` parameter from `DataCleaner.clean_sdf()`
+- `SpectralDensity`:
+    - Added required argument `window_s` to creator
+- Renamed `TransferFunction` properties:
+    - `values` to `frf` (frequency response function)
+    - `uncert` to `uncertainty`
+    - `channels` to `channel_names`
+- `TimeSpans`:
+    - Now created using `spans` by default
+- `DataCleaner`
+    - always renames cleaned channels, putting information in the
+      location code slot (second from last element in string separated by '.'s)
+    - Removed unused `fast_calc` parameter from `clean_sdf()`
 
 ### BUGFIXES
 
-- Changed SpectralDensity.from_stream() z_threshold to apply to log10(spectra)
+- Changed `SpectralDensity.from_stream()` z_threshold to apply to log10(spectra)
   rather than (spectra) (otherwise, "standard" zthreshold=3 rejects more than
   half of typical data)
-- TransferFunction() now provides a "value" (transfer function) and "corrector"
-  (for data cleaning) property, because the two are only the same in the case
-  where all noise is on the output channel (see Bendat and Piersol chapter 6)
-- DataCleaner uses TransferFunction's "corrector" property.
+- `TransferFunction()` now provides a "frequency response function" (`frf`)
+  and a `corrector` (for data cleaning): the two are the same only if
+  all noise is on the output channel (see Bendat and Piersol chapter 6)
+- `DataCleaner` uses `TransferFunction`'s `corrector` property.
   
 ### MINOR
 
-- Added arguments `ts_starttime` and `ts_endtime` to SpectralDensity() creator
-- Added `TimeSpans.invert()` method
-- Allowed `TimeSpans.plot()` to include a trace or stream
-- Added `SpectralDensity` `used()`, `unused()` methods and `window_seconds`
-  property
+- `SpectralDensity`:
+    - Added arguments `ts_starttime` and `ts_endtime` to creator
+    - Added ``used()`, `unused()` methods and `window_seconds` property
+    - `autospect()` and `.crossspect()` now accept wildcards in channel names
+    - Added `channel_name()` method
+- `TimeSpans`:
+    - Added `spans` property
+    - Added `invert()` method
+    -  `plot()` can include a trace or stream
 - Updated documentation
-- `SpectralDensity.autospect()` and `.crossspect()` now accept wildcards
-- New `SpectralDensity.channel_name()` method
-- Created CleanerString class to help with DataCleaner cleaned channel names
-- Added `spans` property to `TimeSpans`
-- TimeSpans.plot() now works if there is no stream or trace
+- `DataCleaner`:
+    - Created `CleanerString` class to help with channel names
