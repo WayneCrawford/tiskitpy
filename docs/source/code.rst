@@ -8,5 +8,5 @@ Technical Documentation
    :maxdepth: 2
 
    code/tiskit.module
-   code/tiskit.classes
+   code/tiskit.autoclasses
    code/tiskit.functions
