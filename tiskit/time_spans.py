@@ -169,10 +169,10 @@ class TimeSpans:
         return f"TimeSpans({len(self._start_times):d} spans)"
 
     def __str__(self):
-        s = "TimeSpans: start            |            end\n"
-        s += "===========================+===============================\n"
+        s =  "TimeSpans: start              |            end\n"
+        s += "==============================+===============================\n"
         for st, et in zip(self.start_times, self.end_times):
-            s += f" {st} | {et}\n"
+            s += f" {str(st):28} | {str(et):28}\n"
         return s
 
     def __add__(self, other):
@@ -269,10 +269,20 @@ class TimeSpans:
         """
         self._organize()
         
-        if not isinstance(ts_starttime, (UTCDateTime, type(None))):
-            raise TypeError('ts_starttime is not a UTCDateTime or None')
+        if isinstance(ts_starttime, str):
+            try:
+                ts_starttime = UTCDateTime(ts_starttime)
+            except Exception:
+                raise RunTimeError(f'Could not convert  {ts_starttime=} to UTCDateTime')
+        elif not isinstance(ts_starttime, (UTCDateTime, type(None))):
+            raise TypeError('ts_starttime is not a UTCDateTime, str or None')
+        if isinstance(ts_endtime, str):
+            try:
+                ts_endtime = UTCDateTime(ts_endtime)
+            except Exception:
+                raise RunTimeError(f'Could not convert {ts_endtime=} to UTCDateTime')
         if not isinstance(ts_endtime, (UTCDateTime, type(None))):
-            raise TypeError('ts_starttime is not a UTCDateTime or None')
+            raise TypeError('ts_endtime is not a UTCDateTime, str or None')
         
         if ts_starttime is None:
             ts_starttime = self.end_times[0]

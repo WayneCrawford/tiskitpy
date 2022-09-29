@@ -44,7 +44,6 @@ class Decimator:
                         2 and 7, will be applied in order)
         verbose (bool): Be chatty
     """
-
     decimates: list
     verbose: bool = False
 

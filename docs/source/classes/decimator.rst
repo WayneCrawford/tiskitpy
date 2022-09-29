@@ -16,7 +16,7 @@ Constructor
 Properties
 ---------------------
 :`decimates`: the list of decimation factors
-:`decimation_factor`: total decimation  product of `decimates` values`)
+:`decimation_factor`: total decimation (product of `decimates`)
 :`verbose`: True if object is chatty.
 
 
