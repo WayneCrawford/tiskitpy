@@ -1,3 +1,5 @@
+.. _TimeSpans:
+
 TimeSpans class
 =======================
 

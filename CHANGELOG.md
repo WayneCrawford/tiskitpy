@@ -43,9 +43,11 @@ method call parameters.  Created a readthedocs page.
 - Changed `SpectralDensity.from_stream()` z_threshold to apply to log10(spectra)
   rather than (spectra) (otherwise, "standard" zthreshold=3 rejects more than
   half of typical data)
-- `TransferFunction()` now provides a "frequency response function" (`frf`)
-  and a `corrector` (for data cleaning): the two are the same only if
-  all noise is on the output channel (see Bendat and Piersol chapter 6)
+- `TransferFunction()`
+    - now provides a "frequency response function" (`frf`)
+      and a `corrector` (for data cleaning): the two are the same only if
+      all noise is on the output channel (see Bendat and Piersol chapter 6)
+    - fixed (and simplified) calculation of uncertainty
 - `DataCleaner` uses `TransferFunction`'s `corrector` property.
   
 ### MINOR

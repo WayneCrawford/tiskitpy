@@ -1,3 +1,5 @@
+.. _CleanRotator:
+
 CleanRotator class
 =======================
 

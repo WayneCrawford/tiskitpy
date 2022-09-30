@@ -1,3 +1,5 @@
+.. _TransferFunctions:
+
 TransferFunctions class
 =======================
 

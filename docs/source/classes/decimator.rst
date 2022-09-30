@@ -1,3 +1,5 @@
+.. _Decimator:
+
 Decimator class
 =======================
 

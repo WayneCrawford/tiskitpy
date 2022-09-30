@@ -303,7 +303,7 @@ class SpectralDensity:
             n_winds = len(sts)
             if n_winds < n_winds_orig:
                 rejected = n_winds_orig - n_winds
-                logging.info(f'"{z_threshold=}" rejected {rejected:d} of '
+                logging.info(f'{z_threshold=} rejected {rejected:d} of '
                              f'{n_winds_orig:d} windows '
                              f'({100.*rejected/n_winds_orig:.0f}%)')
 

@@ -77,30 +77,30 @@ class TransferFunctions(object):
             # response units are in_chan_units/out_chan_units
             # tf * response gives tf w.r.t. data counts
             self._ds = xr.Dataset(
-                data_vars=dict(
-                    value=(dims, np.zeros(shape, dtype="complex")),
-                    uncertainty=(dims, np.zeros(shape)),
-                    corr_mult=(dims, np.zeros(shape)),
-                    response=(dims, np.ones(shape, dtype="complex")),
-                ),
-                coords=dict(
-                    input=[in_chan],
-                    output=out_chans,
-                    in_units=("input", [in_units]),
-                    out_units=("output", out_units),
-                    noise_chan=("output", [noise_chan for x in out_chans]),
-                    f=f,
-                ),
+                data_vars={
+                    "value": (dims, np.zeros(shape, dtype="complex")),
+                    "uncert_mult": (dims, np.zeros(shape)),
+                    "corr_mult": (dims, np.zeros(shape)),
+                    "response": (dims, np.ones(shape, dtype="complex")),
+                },
+                coords= {
+                    "input": [in_chan],
+                    "output": out_chans,
+                    "in_units": ("input", [in_units]),
+                    "out_units": ("output", out_units),
+                    "noise_chan": ("output", [noise_chan for x in out_chans]),
+                    "f": f,
+                },
                 attrs=dict(n_winds=sdm.n_windows),
             )
             for out_chan in out_chans:
-                xf, xferr, corr_mult = self._calcxf(
+                xf, err_mult, corr_mult = self._calcxf(
                     sdm, in_chan, out_chan, noise_chan,
                     n_to_reject, min_freq, max_freq)
                 self._ds["value"].loc[dict(input=in_chan,
                                            output=out_chan)] = xf
-                self._ds["uncertainty"].loc[dict(input=in_chan,
-                                                 output=out_chan)] = xferr
+                self._ds["uncert_mult"].loc[dict(input=in_chan,
+                                                 output=out_chan)] = err_mult
                 self._ds["corr_mult"].loc[dict(input=in_chan,
                                                output=out_chan)] = corr_mult
                 self._ds["response"].loc[
@@ -237,19 +237,20 @@ class TransferFunctions(object):
         oc = self._match_out_chan(output_channel)
         return np.squeeze(self._ds["response"].sel(output=oc).values)
 
+    def uncert_mult(self, output_channel):
+        """Return transfer function uncertainty as a fraction of the transfer function"""
+        oc = self._match_out_chan(output_channel)
+        return np.squeeze(self._ds["uncert_mult"].sel(output=oc).values)
+
     def uncertainty(self, output_channel):
         """Return transfer function uncertainty for the given output channel"""
-        oc = self._match_out_chan(output_channel)
-        xferr = np.squeeze(
-            self._ds["uncertainty"].sel(output=oc).values
-        ) / np.squeeze(self._ds["response"].sel(output=oc).values)
-        return xferr
+        return self.frf(output_channel) * self.uncert_mult(output_channel)
 
     def uncertainty_wrt_counts(self, output_channel):
         """
         Return transfer function uncertainty with respect to counts
         """
-        return self.uncertainty(output_channel) * self.response(output_channel)
+        return self.frf_wrt_counts(output_channel) * self.uncert_mult(output_channel)
 
     @staticmethod
     def _check_chans(sdm, in_chan, out_chans):
@@ -317,7 +318,7 @@ class TransferFunctions(object):
         Returns:
             (tuple):
                 H (numpy.array): frequency response function
-                H_err (numpy.array): uncertainty
+                H_err_mult (numpy.array): uncertainty multiplier
                 corr_mult (numpy.array): value to multiply H by when correcting
                     spectra
         """
@@ -373,10 +374,8 @@ class TransferFunctions(object):
 
         # Calculate uncertainty
         # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
-        errbase = (np.sqrt((np.ones(coh.shape) - coh) / (2*self.n_windows))
-                   / np.sqrt(coh))
-        H_err = np.abs(H) * errbase
-        return H, H_err, corr_mult
+        H_err_mult = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
+        return H, H_err_mult, corr_mult
 
     def plot(self, errorbars=True, show=True):
         """
@@ -470,7 +469,7 @@ class TransferFunctions(object):
             return inp[ii:]
 
     def plot_one(self, in_chan, out_chan,
-                 fig=None, fig_grid=(1, 1), plot_spot=(0, 0), errorbars=False,
+                 fig=None, fig_grid=(1, 1), plot_spot=(0, 0), errorbars=True,
                  label=None, title=None, show_xlabel=True, show_ylabel=True):
         """
         Plot one transfer function
@@ -485,7 +484,7 @@ class TransferFunctions(object):
                 (rows, columns)
             plot_spot (tuple): put this plot at this (row, column) of
                 the figure grid
-            errorbars (bool): plot as error bars
+            errorbars (bool): plot as vertical error bars
             label (str): string to put in legend
             title (str): string to put in title
             show_xlabel (bool): put an xlabel on this subplot
@@ -509,9 +508,14 @@ class TransferFunctions(object):
             rowspan=2,
         )
         xf[xf == 0] = None
-        ax_a.loglog(f, np.abs(xf + xferr), color="blue", linewidth=0.5)
-        ax_a.loglog(f, np.abs(xf - xferr), color="blue", linewidth=0.5)
-        # ax_a.loglog(f, np.abs(xf), color="black", label=label)
+        if errorbars is True:
+            ax_a.errorbar(f, np.abs(xf), np.abs(xferr), fmt='none')
+            ax_a.set_xscale('log')
+            ax_a.set_yscale('log')
+        else:
+            ax_a.loglog(f, np.abs(xf + xferr), color="blue", linewidth=0.5)
+            ax_a.loglog(f, np.abs(xf - xferr), color="blue", linewidth=0.5)
+            ax_a.loglog(f, np.abs(xf), color="black", label=label)
         # ax_a.loglog(f, np.abs(xf), label=f"'{out_chan}' / '{in_chan}'")
         ax_a.set_xlim(f[1], f[-1])
         if title is not None:
