@@ -1,6 +1,6 @@
 .. _CleanRotator:
 
-CleanRotator class
+CleanRotator
 =======================
 
 Calculates the angle and azimuth to rotate the vertical channel to minimize

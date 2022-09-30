@@ -1,4 +1,4 @@
-DataCleaner class
+DataCleaner
 =======================
 
 Remove coherent noise seen on another channel

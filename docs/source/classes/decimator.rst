@@ -1,6 +1,6 @@
 .. _Decimator:
 
-Decimator class
+Decimator
 =======================
 
 Decimate data and put decimation information in instrument responses.

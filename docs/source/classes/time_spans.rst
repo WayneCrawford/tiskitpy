@@ -1,6 +1,6 @@
 .. _TimeSpans:
 
-TimeSpans class
+TimeSpans
 =======================
 
 A class to cut out "undesired" data.

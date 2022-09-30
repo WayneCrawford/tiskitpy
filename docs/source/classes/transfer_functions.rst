@@ -1,6 +1,6 @@
 .. _TransferFunctions:
 
-TransferFunctions class
+TransferFunctions
 =======================
 
 Calculate transfer functions (actually, frequency response functions, according

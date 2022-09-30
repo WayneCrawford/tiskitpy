@@ -1,6 +1,6 @@
 .. _SpectralDensity:
 
-SpectralDensity class
+SpectralDensity
 =======================
 
 Calculates auto- and cross-spectral densities for a data stream.
