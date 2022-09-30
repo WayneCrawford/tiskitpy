@@ -8,14 +8,14 @@ Routines for time series data processing, based on [BP2010]_
 Classes
 =========================
 
-:ref:`CleanRotator`: rotate data to minimize noise on vertical channel
-:ref:`DataCleaner`: Transfer_Function-based data cleaning
-:ref:`Decimator`: Decimate time series and update metadata with the decimator's
+::ref:`CleanRotator`: rotate data to minimize noise on vertical channel
+::ref:`DataCleaner`: Transfer_Function-based data cleaning
+::ref:`Decimator`: Decimate time series and update metadata with the decimator's
             response
-:ref:`PeriodicTransient`: calculate and remove periodic transient (VERY manual!)
-:ref:`SpectralDensity`: Calculate and manipulate spectral density functions.
-:ref:`TimeSpans`: Specify time spans to be removed, kept, zeroed, etc.
-:ref:`TransferFunctions`: Transfer functions for a given input channel.
+::ref:`PeriodicTransient`: calculate and remove periodic transient (VERY manual!)
+::ref:`SpectralDensity`: Calculate and manipulate spectral density functions.
+::ref:`TimeSpans`: Specify time spans to be removed, kept, zeroed, etc.
+::ref:`TransferFunctions`: Transfer functions for a given input channel.
                
 Functions
 =========================
