@@ -1,7 +1,12 @@
+.. _TechnicalDocumentation:
+
+=============================
 Technical Documentation
 =============================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
-   code/tiskit
+   code/tiskit.module
+   code/tiskit.autoclasses
+   code/tiskit.functions

@@ -30,7 +30,7 @@ Functions
 
 """
 from .clean_rotator import CleanRotator
-from .data_cleaner import DataCleaner
+from .data_cleaner import DataCleaner, DCTF, DCTFs, CleanerString
 from .decimate import Decimator
 from .rptransient import PeriodicTransient
 from .spectral_density import SpectralDensity, Peterson_noise_model

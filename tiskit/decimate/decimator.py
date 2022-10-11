@@ -44,12 +44,12 @@ class Decimator:
                         2 and 7, will be applied in order)
         verbose (bool): Be chatty
     """
-
     decimates: list
     verbose: bool = False
 
     @property
     def decimation_factor(self):
+        """Total decimation (product of `decimates`)"""
         return prod(self.decimates)
 
     def decimate(self, data):
@@ -168,7 +168,8 @@ class Decimator:
         """
         Return the channel band code based on an input band_code
 
-        :param in_band_code: input band code
+        :param in_band_code: input band code ('B' if cutoff > 10s,
+            'S' otherwise)
         :param sample_rate: input sample rate (sps)
         """
         if len(in_band_code) != 1:

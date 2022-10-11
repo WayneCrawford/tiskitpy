@@ -65,8 +65,8 @@ class TestMethods(unittest.TestCase):
             self.xf.__str__(),
             "TransferFunctions object:\n"
             "\tinput_channel='XX.STA.00.BX1'\n"
-            "\toutput_channels=['XX.STA.00.BX2', 'XX.STA.00.BX3']\n"
-            "\tnoise_channels=['output', 'output']\n"
+            "\toutput_channels=['XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
+            "\tnoise_channels=['output', 'output', 'output']\n"
             "\tn_windows=6",
         )
 
@@ -87,7 +87,7 @@ class TestMethods(unittest.TestCase):
         """Test input_channel and output_channel derived properties"""
         self.assertEqual(self.xf.input_channel, "XX.STA.00.BX1")
         self.assertEqual(
-            self.xf.output_channels, ["XX.STA.00.BX2", "XX.STA.00.BX3"]
+            self.xf.output_channels, ["XX.STA.00.BX2", "XX.STA.00.BX3", 'XX.STA.00.BDH']
         )
 
     def test_other_properties(self):
@@ -95,21 +95,21 @@ class TestMethods(unittest.TestCase):
         # window_type
         self.assertEqual(self.xf.input_units, "Counts")
         self.assertEqual(self.xf.n_windows, 6)
-        self.assertEqual(self.xf.noise_channels, ["output", "output"])
+        self.assertEqual(self.xf.noise_channels, ["output", "output", "output"])
         self.assertEqual(self.xf.noise_channel("XX.STA.00.BX2"), "output")
         # Not much of a test
         self.assertEqual(self.xf.output_units("XX.STA.00.BX2"), "Counts")
 
-    def test_values(self):
-        """Test values retrieval function and returned values"""
-        x = self.xf.values("XX.STA.00.BX2")
+    def test_frfs(self):
+        """Test frequency response function retrieval and returned values"""
+        x = self.xf.frf("XX.STA.00.BX2")
         # Verify that it returns a numpy array of the right size
         self.assertEqual(x.size, 8192)
         self.assertIsInstance(x, np.ndarray)
-        f, a_in = 13, 10  # Frequency, input channel amplitude
+        f, a_in = 13, .33*1  # Input channel (BX1) Frequency, amplitude
         ifreq = np.argmin(np.abs(self.xf.freqs - f))
         # output channel BX2
-        a_out, p_out = 2.0, 45  # output channelamplitude, phase
+        a_out, p_out = .33*.9, 0  # output channel (BX2) amplitude, phase
         pr = np.radians(p_out)
         self.assertAlmostEqual(
             x[ifreq],
@@ -117,8 +117,8 @@ class TestMethods(unittest.TestCase):
             delta=0.1,
         )
         # output channel BX3
-        x = self.xf.values("XX.STA.00.BX3")
-        a_out, p_out = 10.0, 0  # output channelamplitude, phase
+        x = self.xf.frf("XX.STA.00.BX3")
+        a_out, p_out = .33*1e-4, 0  # output channelamplitude, phase
         pr = np.radians(p_out)
         self.assertAlmostEqual(
             x[ifreq],
@@ -127,13 +127,13 @@ class TestMethods(unittest.TestCase):
         )
 
         # Verify that a bad channel name raises a ValueError
-        self.assertRaises(ValueError, self.xf.values, *["blah"])
+        self.assertRaises(ValueError, self.xf.frf, *["blah"])
         # Because there is no transfer function, values() and
         # values_wrt_counts() should be the same
         self.assertTrue(
             np.all(
-                self.xf.values("XX.STA.00.BX2")
-                == self.xf.values_wrt_counts("XX.STA.00.BX2")
+                self.xf.frf("XX.STA.00.BX2")
+                == self.xf.frf_wrt_counts("XX.STA.00.BX2")
             )
         )
 

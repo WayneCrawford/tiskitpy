@@ -1,16 +1,9 @@
 """
 Clean data using transfer functions between channels
 
-By default, calculates corrected spectra (intermediate and final) directly
-from the stream data, applying the transfer functions to each FFT.
 Test using spectra (ATACR-style) and time-series (TisKit style):  is there a
 difference?  If not, will be a lot faster to remove noise after calculating
 spectra!
-
-Note that the channel names are updated with each removal of correlated noise
-from another channel, by adding '-x', where 'x' is the shortest unique string
-taken from the input channel's name.  This complicates bookkeeping, but allows
-us to confirm that we are working on the properly prepared data
 """
 import fnmatch
 from copy import deepcopy
@@ -23,56 +16,74 @@ from matplotlib import pyplot as plt
 
 from ..transfer_functions import TransferFunctions
 from ..spectral_density import SpectralDensity
-from .dctfs import DCTF, DCTFs, remove_str, strip_remove_str
+from .dctfs import DCTF, DCTFs
+from .cleaner_string import CleanerString as CS
 
 
 class DataCleaner:
     """
-    Class for calculating and applying Transfer_Function-based data cleaning
+    Calculate and applying Transfer_Function-based data cleaner
 
     Works on raw data, without instrument corrections
+
+    By default, calculates corrected intermediate and final spectra directly
+    from the stream data, applying the transfer functions to each FFT.
+
+    Note:
+        Channel names are updated with each removal of noise correlated
+        with another channel, in the "location" slot of the seed_id
+        (NET.STA.LOC.CHAN) by adding '-x' to LOC, where 'x' is the shortest
+        unique string from the end of the input channel's name.  If the channel
+        name has no '.', one is added at the beginning to allow the cleaning
+        codes to be added before
+
+    Args:
+        stream (:class:`obspy.core.stream.Stream`): time series data used
+            to calculate cleaner
+        remove_list (list): list of channels to remove, in order.  Can use
+            "*" and "?" as wildcards
+        noise_channel (str): which channel the noise is on.  Choices are:
+            "input", "output", "equal", "unknown", "model"
+        n_to_reject (int): Number of neighboring frequencies for which
+            the coherence must be above the 95% signifcance level in order
+            to use for cleaning (0 means use all frequencies)
+        min_freq (float): Do not process frequencies below this value
+        max_freq (float): Do not process frequencies above this value
+        show_progress (bool): Show progress plots
+        fast_calc (bool): Calculate corrected spectra directly from
+            previous spectra (ATACR-style).
+        kwargs (:class:`SpectralDensity.from_stream()` properties):
+             window_s, windowtype, z_threshold, avoid_spans, ...
     """
 
     def __init__(self, stream, remove_list, noise_channel="output",
                  n_to_reject=3, min_freq=None, max_freq=None,
                  show_progress=False, fast_calc=False, **kwargs):
         """
-        Args:
-            stream (:class:`obspy.core.stream.Stream`): data to use
-                to calculate cleaning tfs
-            remove_list (list): list of channels to remove, in order.  Can use
-                "*" and "?" as wildcards
-            noise_channel (str): which channel the noise is on.  Choices are:
-                "input", "output", "equal", "unknown", "model"
-            n_to_reject (int): Number of neighboring frequencies for which
-                the coherence must be above the 95% signifcance level in order
-                to use for cleaning (0 means use all frequencies)
-            min_freq (float): Do not process frequencies below this value
-            max_freq (float): Do not process frequencies above this value
-            show_progress (bool): Show progress plots
-            fast_calc (bool): Calculate corrected spectra directly from
-                previous spectra (ATACR-style).
-            kwargs (:class:`SpectralDensity.from_stream()` properties):
-                 window_s, windowtype, z_threshold...
-
         Attributes:
             DCTFs (list of :class:`DCTF`): list of data cleaner transfer
                 functions
+            starttimes (list of :class:`obspy.UTCDateTime`): start times for
+                each spectra used
         """
         if not isinstance(stream, Stream):
             raise ValueError("stream is a {type(stream)}, not an obspy Stream")
-        stream=stream.copy()   # Do not change values in original stream
-        # Remove any response from stream 
+        stream = stream.copy()   # Do not change values in original stream
+        # Remove any response from stream
         for tr in stream:
-            tr.stats.response=None
+            tr.stats.response = None
         sdfs = [SpectralDensity.from_stream(stream, **kwargs)]
+        # Make sure we're using the same starttimes throughout the process
+        self.starttimes = sdfs[0].starttimes
         self.DCTFs = DCTFs()
         # Calculate removal transfer functions
-        out_chans = sdfs[0].channels
-        in_list = [_list_match_pattern(ic, out_chans) for ic in remove_list]
+        out_chans = sdfs[0].channel_names
+        # in_list = [_list_match_pattern(x, out_chans) for x in remove_list]
+        in_list = [sdfs[0].channel_name(x) for x in remove_list]
         remove_seq, remove_new = "", ""
         for in_chan in in_list:
-            ic = in_chan + remove_seq
+            # ic = in_chan + remove_seq
+            ic = CS.insert(remove_seq, in_chan)
             out_chans = [x for x in out_chans if not x == ic]
             tf = TransferFunctions(
                 sdfs[-1],
@@ -85,39 +96,37 @@ class DataCleaner:
                 show_progress=show_progress,
             )
             # Apply data cleaner and update channel names with removed channels
-            remove_new = remove_str(in_chan, remove_seq)
+            remove_new = CS.make(in_chan, remove_seq)
             remove_seq += remove_new
-            new_dctf = DCTF(ic, remove_seq, tf)
+            new_dctf = DCTF(remove_channel=ic, remove_sequence=remove_seq,
+                            tfs=tf)
             self.DCTFs.append(new_dctf)
             if fast_calc:
                 sdfs.append(
-                    self._removeTF_SDF(
-                        sdfs[-1], tf, show_progress, add_suffix=remove_new
-                    )
+                    self._removeDCTF_SDF(sdfs[-1], new_dctf, show_progress)
                 )
             else:
                 sdfs.append(SpectralDensity.from_stream(
                     stream, data_cleaner=self, **kwargs))
-            out_chans = [x + remove_new for x in out_chans]
+            out_chans = [CS.insert(remove_new, x) for x in out_chans]
+            # out_chans = [x + remove_new for x in out_chans]
         if show_progress:
-            print("Plotting sdfs after data cleaner applied")
+            logging.info("Plotting sdfs after data cleaner applied")
             self._plot_sdfs(sdfs)
 
     def __str__(self):
         s = "DataCleaner object:\n"
-        s += "        Input channel | output channels\n"
+        s += "   Input channel      | Output channels\n"
         s += "   ================== | ===============\n"
         for tf in self.DCTFs:
             s += "   {:18s} | {}\n".format(
                 tf.tfs.input_channel,
-                [
-                    strip_remove_str(x) + f"{tf.remove_sequence}"
-                    for x in tf.tfs.output_channels
-                ],
+                [CS.insert(tf.remove_sequence, CS.strip(x))
+                 for x in tf.tfs.output_channels]
             )
         return s
 
-    def clean_sdf(self, sdf, fast_calc=False):
+    def clean_sdf(self, sdf):
         """
         Correct spectral density functions
 
@@ -132,20 +141,20 @@ class DataCleaner:
         if not isinstance(sdf, SpectralDensity):
             raise TypeError('sdf is not a SpectralDensity object')
         for dctf in self.DCTFs:
-            sdf = self._removeTF_SDF(
-                sdf, dctf.tfs,
-                add_suffix=dctf.remove_sequence.rsplit("-", 1)[0])
+            sdf = self._removeDCTF_SDF(sdf, dctf)
         return sdf
 
     def clean_stream_to_sdf(self, stream, fast_calc=False, **kwargs):
         """
-        Calculate corrected spectral density functions
+        Calculate corrected spectral density functions from an input stream
 
+        Applys the DataCleaner values to each FFT
         Args:
             stream (:class:`obspy.core.stream.Stream`): data to apply to
             fast_calc (bool): Calculate corrected spectra directly from
                 previous spectra.
-            **kwargs (dict): keyword arguments for SpectralDensity.from_stream()
+            **kwargs (dict): keyword arguments for
+                SpectralDensity.from_stream()
         Return:
             sdf (:class:`.SpectralDensity`): corrected spectral density
                 functions
@@ -161,7 +170,7 @@ class DataCleaner:
                                               **kwargs)
         return sdf
 
-    def clean_stream(self, stream, in_time_domain=False, stuff_locations=True):
+    def clean_stream(self, stream, in_time_domain=False):
         """
         Calculate corrected data stream
 
@@ -169,8 +178,6 @@ class DataCleaner:
             stream (Stream): list of channels to remove, in order
             in_time_domain(bool): do work in time domain (default is freq
                 domain, time_domain is much slower)
-            stuff_locations (bool): stuff string representation of removal
-                sequence into location code
         Returns:
             stream (:class:`obspy.core.stream.Stream`): corrected data
 
@@ -187,31 +194,27 @@ class DataCleaner:
         remove_seqs = {k: "" for k in seed_ids}
 
         if in_time_domain is True:
-            logging.info("Correcting traces in the time domain")
+            logging.warning("Correcting traces in the time domain: VERY SLOW")
         else:
             logging.info("Correcting traces in the frequency domain")
 
         for dctf in self.DCTFs:
             tfs = dctf.tfs
             in_chan = tfs.input_channel
-            ic = strip_remove_str(in_chan)
             for out_chan in tfs.output_channels:
-                oc = strip_remove_str(out_chan)
-                in_trace = out_stream.select(id=ic)[0]
-                out_trace = out_stream.select(id=oc)[0]
+                in_trace = out_stream.select(id=in_chan)[0]
+                out_trace = out_stream.select(id=out_chan)[0]
                 out_stream.remove(out_trace)
                 out_trace = self._correct_trace(
                     in_trace,
                     out_trace,
                     tfs.freqs,
-                    tfs.values_wrt_counts(out_chan),
+                    tfs.corrector_wrt_counts(out_chan),
                     in_time_domain,
                 )
-                remove_seqs[out_chan] = dctf.remove_sequence
+                out_trace.id = CS.insert(dctf.remove_sequence,
+                                         CS.strip(out_trace.id))
                 out_stream += out_trace
-        if stuff_locations:
-            for tr in out_stream:
-                tr.stats.location += remove_seqs[tr.id]
         return out_stream
 
     def plot(self):
@@ -321,7 +324,7 @@ class DataCleaner:
                 + "start times ({}, {})".format(its.starttime, ots.starttime)
             )
 
-    def _removeTF_SDF(self, sdf, tf, show_progress=False, add_suffix=None):
+    def _removeDCTF_SDF(self, sdf, dctf, show_progress=False):
         """
         Directly clean a SpectralDensity object using transfer functions
 
@@ -334,14 +337,14 @@ class DataCleaner:
         Args:
             sdf (:class:`.SpectralDensity`): one-sided spectral density
                 functions
-            tf (:class:`.TransferFunctions`): Transfer Functions w.r.t. one
+            dctf (:class:`.DCTF`): Data Cleaner Transfer Functions w.r.t. one
                 input channel
             show_progress (bool): show progress plots for each step
-            add_suffix (str): suffix to add to channel names
 
         Returns:
             sdf (:class:`.SpectralDensity`): cleaned spectral density functions
         """
+        tf = dctf.tfs
         ic = tf.input_channel
         out_chans = tf.output_channels
 
@@ -349,25 +352,25 @@ class DataCleaner:
         in_auto = sdf.autospect(ic)
         for oc in out_chans:
             # tf_oc = tf.values_counts(oc)
-            tf_oc = tf.values(oc)
+            tf_oc = tf.corrector(oc)
             # out_auto = sdf.autospect(strip_remove_one(oc))
             # crossspect = sdf.crossspect(ic, strip_remove_one(oc))
             out_auto = sdf.autospect(oc)
             crossspect = sdf.crossspect(ic, oc)
             if show_progress:
-                self._plot_removeTF_SDF(
+                self._plot_removeDCTF_SDF(
                     tf, sdf, in_auto, out_auto, tf_oc, ic, oc
                 )
             # Bendat & Piersol 1986 eqs 6.35 and 6.41
             sdf.put_autospect(oc, out_auto - in_auto * np.abs(tf_oc) ** 2)
             # Bendat & Piersol eq6.36 with
             sdf.put_crossspect(ic, oc, crossspect - in_auto * tf_oc)
-            if add_suffix is not None:
-                sdf.replace_channel_name(oc, oc + add_suffix)
+            sdf.replace_channel_name(oc, CS.insert(dctf.remove_sequence,
+                                                   CS.strip(oc)))
         return sdf
 
     @staticmethod
-    def _plot_removeTF_SDF(tf, sdf, in_auto, out_auto, tf_oc, ic, oc):
+    def _plot_removeDCTF_SDF(tf, sdf, in_auto, out_auto, tf_oc, ic, oc):
         """Plot elements of transfer function removal using SDFs"""
         f = tf.freqs
         fig, ax = plt.subplots(1, 1)
@@ -403,16 +406,16 @@ class DataCleaner:
             ValueError("len(sdfs) isn't len(self.DCTFs)+1")
         remove_seqs = [""] + [t.remove_sequence for t in self.DCTFs]
         inputs = [""] + [t.remove_channel for t in self.DCTFs]
-        n_channels = len(sdfs[0].channels)
+        n_channels = len(sdfs[0].channel_names)
         rows = int(np.floor(np.sqrt(n_channels)))
         cols = int(np.ceil(n_channels / rows))
         fig, axs = plt.subplots(rows, cols)
         irow, icol = 0, 0
-        for chan in sdfs[0].channels:
+        for chan in sdfs[0].channel_names:
             ax = axs[irow, icol]
             # make one line for each input
-            inputs_base = [strip_remove_str(i) for i in inputs]
-            ch_base = strip_remove_str(chan)
+            inputs_base = [CS.strip(i) for i in inputs]
+            ch_base = CS.strip(chan)
             if chan in inputs_base:
                 i = inputs_base.index(chan)
                 for sdf, rs in zip(sdfs[:i], remove_seqs[:i]):
@@ -440,26 +443,26 @@ class DataCleaner:
         plt.show()
 
 
-def _list_match_pattern(pattern, chan_list):
-    """
-    Return list element matching pattern.  Pattern can include file wildcards
-
-    Returns error if there are no matches, or more than one match
-
-    Args:
-        pattern (str): pattern to match, can include "*" and "?" wildcards
-        chan_list (list of str): list of channels
-    """
-    selected = [x for x in chan_list if fnmatch.fnmatch(x, pattern)]
-    if len(selected) == 0:
-        raise ValueError(f'input pattern "{pattern}" not matched')
-    elif len(selected) > 1:
-        raise ValueError(
-            'more than one match for input pattern "{}": {}'.format(
-                pattern, selected
-            )
-        )
-    return selected[0]
+# def _list_match_pattern(pattern, chan_list):
+#     """
+#     Return list element matching pattern.  Pattern can include file wildcards
+# 
+#     Returns error if there are no matches, or more than one match
+# 
+#     Args:
+#         pattern (str): pattern to match, can include "*" and "?" wildcards
+#         chan_list (list of str): list of channels
+#     """
+#     selected = [x for x in chan_list if fnmatch.fnmatch(x, pattern)]
+#     if len(selected) == 0:
+#         raise ValueError(f'input pattern "{pattern}" not matched')
+#     elif len(selected) > 1:
+#         raise ValueError(
+#             'more than one match for input pattern "{}": {}'.format(
+#                 pattern, selected
+#             )
+#         )
+#     return selected[0]
 
 
 if __name__ == "__main__":

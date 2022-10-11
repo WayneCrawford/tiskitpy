@@ -5,11 +5,31 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from ..transfer_functions import TransferFunctions
+from .cleaner_string import CleanerString as CS
+
+
+@dataclass
+class DCTF:
+    """
+    Data Cleaner Transfer Function class
+
+    Organizes and names TransferFunctions for DataCleaner
+    
+    Attributes:
+        remove_channel: input channel name
+        remove_sequence: 
+    """
+
+    remove_channel: str
+    remove_sequence: str
+    tfs: TransferFunctions
 
 
 class DCTFs(UserList):
     """
     list of DCTFs
+
+    Most of the code involves channel renaming based on the removed channels
     """
 
     def ft_subtract_tfs(self, fts, evalresps=None):
@@ -40,23 +60,24 @@ class DCTFs(UserList):
                     ValueError(f"ft[{id_in=}] and ft[{id_out=}] "
                                "have different shapes "
                                f"({fts[id_in].shape} vs {fts[id_out].shape})")
-                new_id_out = (strip_remove_str(id_out)
-                                + dctf.remove_sequence)
+                new_id_out = CS.insert(dctf.remove_sequence, CS.strip(id_out))
+                # new_id_out = (CS.strip(id_out)
+                #               + dctf.remove_sequence)
                 # EQ 8, Crawford & Webb 2000
                 multiplier = np.ones(fts[id_in].shape)
                 if evalresps is not None:
-                    oid = strip_remove_str(id_out)
-                    iid = strip_remove_str(id_in)
+                    oid = CS.strip(id_out)
+                    iid = CS.strip(id_in)
                     if evalresps[iid] is not None:
                         if evalresps[oid] is not None:
                             multiplier = evalresps[iid] / evalresps[oid]
                 fts[new_id_out] = (fts[id_out] - fts[id_in]
-                                   * multiplier * tfs.values(id_out))
+                                   * multiplier * tfs.corrector(id_out))
         return fts
 
     def update_channel_names(self, channel_names):
         """
-        Change an array's channel names to final channel removal codes
+        Change an array's channel names to include final channel removal codes
 
         Args:
             channel_names (list): list of valid channel names.
@@ -148,93 +169,7 @@ class DCTFs(UserList):
             tfs = dctf.tfs
             # in_chan = tfs.input_channel
             for out_chan in tfs.output_channels:
-                orig_out = strip_remove_str(out_chan)
-                mapping[orig_out] = orig_out + dctf.remove_sequence
+                orig_out = CS.strip(out_chan)
+                # mapping[orig_out] = orig_out + dctf.remove_sequence
+                mapping[orig_out] = CS.insert(dctf.remove_sequence, orig_out)
         return mapping
-
-
-@dataclass
-class DCTF:
-    """
-    Data Cleaner Transfer Function class
-
-    Organizes and names TransferFunctions for DataCleaner
-    """
-
-    remove_channel: str
-    remove_sequence: str
-    tfs: TransferFunctions
-
-
-def strip_remove_str(in_str):
-    """
-    Strips transfer function removal string from a string
-
-    Just takes out everything after first '-'
-
-    Also handles lists of strings
-
-    Example:
-        >>> text = 'BHZ-1-2-H'
-        >>> strip_remove_str(text)
-        'BHZ'
-        >>> text = 'BHZ'
-        >>> strip_remove_str(text)
-        'BHZ'
-    """
-    if isinstance(in_str, list):
-        return [strip_remove_str(x) for x in in_str]
-    return in_str.split("-")[0]
-
-
-def strip_remove_one(in_str):
-    """
-    Strips last transfer function removal string from a string
-
-    Also handles lists of strings
-
-    Example:
-        >>> text = 'BHZ-1-2-H'
-        >>> strip_remove_one(text)
-        'BHZ-1-2'
-        >>> text = 'BHZ'
-        >>> strip_remove_one(text)
-        'BHZ'
-    """
-    if isinstance(in_str, list):
-        return [strip_remove_one(x) for x in in_str]
-    return in_str.rsplit("-", 1)[0]
-
-
-def remove_str(in_chan, prev_remove_seq=""):
-    """
-    Generate a string describing the TransferFunction removal chain
-
-    Args:
-        in_chan: name of channel to remove
-        prev_remove_seq (str): previous removal sequence string, used to
-            avoid repeating an already-given channel code
-    Returns:
-        remove_new (str): string to add to end of removal sequence
-
-    Example:
-        >>> remove_str('BHZ', '-X-Y')
-        '-Z'
-        >>> remove_str('BHX', '-X-Y')
-        '-HX'
-        >>> remove_str('X', '-X-Y')
-        Traceback (most recent call last):
-        ...
-        ValueError: new_name('X') already in prev_remove_seq('-X-Y')
-    """
-    prev_components = prev_remove_seq.split("-")
-    offset = 1
-    while (new_name := in_chan[-offset:]) in prev_components:
-        offset += 1
-        if offset > len(in_chan):
-            raise ValueError(
-                f"new_name('{new_name}') already in "
-                f"prev_remove_seq('{prev_remove_seq}')"
-            )
-    remove_elem = "-" + new_name
-    return remove_elem

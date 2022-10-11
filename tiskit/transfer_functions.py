@@ -16,36 +16,36 @@ np.seterr(all="ignore")
 class TransferFunctions(object):
     """
     Class of Transfer functions for a given input channel.
-    
+
     From Bendat & Piersol, chapter 6.  The frequency response function is
     the relation between coherent parts of the signal: if the measured
     input x(t) = u(t) + m(t) and the measured output y(t) = v(t) + n(t),
-    where u(t) and v(t) are coherent and m(t) and n(t) are not, then the 
+    where u(t) and v(t) are coherent and m(t) and n(t) are not, then the
     frequency response function H(f) is such that v(t) = H(f)*u(t).  As
     to spectra, G_vv(f) = abs(H(f))^2 * G_uu(f)
-    """
 
+    Args:
+        sdm (:class:`.SpectralDensity`): Spectral density matrix objet
+        in_chan (str): input channel.  Can use Unix wildcards (*, ?) but
+            will return error if more than one string matches
+        out_chans (list of str): output channels  (None => all but
+            in_chan))
+        noise_chan (str): 'input', 'output', 'equal', 'unknown'
+        n_to_reject (int): number of neighboring frequencies for which the
+            coherence must be above the 95% significance level in order
+            to calculate transfer function (other values are set to 0,
+            n_to_reject=0 means use all frequencies)
+        min_freq (float or None): Return zero for frequencies below
+            this value
+        max_freq (float or None): Return zero for frequencies above
+            this value
+        quiet (bool): don't warn if creating a test object
+        show_progress (bool): plot transfer functions and coherences
+    """
     def __init__(self, sdm, in_chan, out_chans=None, noise_chan="output",
                  n_to_reject=3, min_freq=None, max_freq=None,
                  quiet=False, show_progress=False):
         """
-        Args:
-            sdm (:class:`.SpectralDensity`): Spectral density matrix objet
-            in_chan (str): input channel.  Can use Unix wildcards (*, ?) but
-                will return error if more than one string matches
-            out_chans (list of str): output channels  (None => all but
-                in_chan))
-            noise_chan (str): 'input', 'output', 'equal', 'unknown'
-            n_to_reject (int): number of neighboring frequencies for which the
-                coherence must be above the 95% significance level in order
-                to calculate transfer function (other values are set to 0,
-                n_to_reject=0 means use all frequencies)
-            min_freq (float or None): Return zero for frequencies below
-                this value
-            max_freq (float or None): Return zero for frequencies above
-                this value
-            quiet (bool): don't warn if creating a test object
-            show_progress (bool): plot transfer functions and coherences
         Attributes:
             _ds (:class: XArray.dataset): container for transfer functions and
                 attributes
@@ -77,37 +77,32 @@ class TransferFunctions(object):
             # response units are in_chan_units/out_chan_units
             # tf * response gives tf w.r.t. data counts
             self._ds = xr.Dataset(
-                data_vars=dict(
-                    value=(dims, np.zeros(shape, dtype="complex")),
-                    uncertainty=(dims, np.zeros(shape)),
-                    response=(dims, np.ones(shape, dtype="complex")),
-                ),
-                coords=dict(
-                    input=[in_chan],
-                    output=out_chans,
-                    in_units=("input", [in_units]),
-                    out_units=("output", out_units),
-                    noise_chan=("output", [noise_chan for x in out_chans]),
-                    f=f,
-                ),
+                data_vars={
+                    "value": (dims, np.zeros(shape, dtype="complex")),
+                    "uncert_mult": (dims, np.zeros(shape)),
+                    "corr_mult": (dims, np.zeros(shape)),
+                    "response": (dims, np.ones(shape, dtype="complex")),
+                },
+                coords= {
+                    "input": [in_chan],
+                    "output": out_chans,
+                    "in_units": ("input", [in_units]),
+                    "out_units": ("output", out_units),
+                    "noise_chan": ("output", [noise_chan for x in out_chans]),
+                    "f": f,
+                },
                 attrs=dict(n_winds=sdm.n_windows),
             )
             for out_chan in out_chans:
-                xf, xferr = self._calcxf(
-                    sdm,
-                    in_chan,
-                    out_chan,
-                    noise_chan,
-                    n_to_reject,
-                    min_freq,
-                    max_freq,
-                )
-                self._ds["value"].loc[
-                    dict(input=in_chan, output=out_chan)
-                ] = xf
-                self._ds["uncertainty"].loc[
-                    dict(input=in_chan, output=out_chan)
-                ] = xferr
+                xf, err_mult, corr_mult = self._calcxf(
+                    sdm, in_chan, out_chan, noise_chan,
+                    n_to_reject, min_freq, max_freq)
+                self._ds["value"].loc[dict(input=in_chan,
+                                           output=out_chan)] = xf
+                self._ds["uncert_mult"].loc[dict(input=in_chan,
+                                                 output=out_chan)] = err_mult
+                self._ds["corr_mult"].loc[dict(input=in_chan,
+                                               output=out_chan)] = corr_mult
                 self._ds["response"].loc[
                     dict(input=in_chan, output=out_chan)
                 ] = sdm.channel_response(out_chan) / sdm.channel_response(
@@ -115,6 +110,13 @@ class TransferFunctions(object):
                 )
             if show_progress:
                 self._plot_progress(sdm)
+
+    def __repr__(self):
+        s = ("TransferFunctions(<SpectralDensity object>, "
+             f"'{self.input_channel}', "
+             f"{self.output_channels}, "
+             f"{self.noise_channels[0]})")
+        return s
 
     def __str__(self):
         s = "TransferFunctions object:\n"
@@ -173,9 +175,9 @@ class TransferFunctions(object):
         oc = self._match_out_chan(output_channel)
         return str(self._ds.sel(output=oc).coords["noise_chan"].values)
 
-    def values(self, output_channel, zero_as_none=False, wrt_counts=False):
+    def frf(self, output_channel, zero_as_none=False):
         """
-        Return transfer function for the given output channel
+        Return frequency response function for the given output channel
 
         Args:
             output_channel (str): output channel name
@@ -188,7 +190,32 @@ class TransferFunctions(object):
             xf[xf == 0] = None
         return xf
 
-    def values_wrt_counts(self, output_channel, zero_as_none=False):
+    def frf_wrt_counts(self, output_channel, zero_as_none=False):
+        """
+        Return frequency response function with respect to raw data counts
+
+        Args:
+            output_channel (str): output channel name
+            zero_as_none (bool): return non-calculated values as Nones instead
+                of zeros
+        """
+        oc = output_channel
+        return self.frf(oc, zero_as_none) * self.response(oc)
+
+    def corrector(self, output_channel, zero_as_none=False):
+        """
+        Return coherent channel correction factor for the given output channel
+
+        Args:
+            output_channel (str): output channel name
+            zero_as_none (bool): return non-calculated values as Nones instead
+                of zeros
+        """
+        oc = self._match_out_chan(output_channel)
+        corr_mult = np.squeeze(self._ds["corr_mult"].sel(output=oc).values)
+        return self.frf(output_channel, zero_as_none) * corr_mult
+
+    def corrector_wrt_counts(self, output_channel, zero_as_none=False):
         """
         Return transfer function with respect to raw data counts
 
@@ -197,7 +224,8 @@ class TransferFunctions(object):
             zero_as_none (bool): return non-calculated values as Nones instead
                 of zeros
         """
-        return self.values(output_channel) * self.response(output_channel)
+        oc = output_channel
+        return self.corrector(oc, zero_as_none) * self.response(oc)
 
     def response(self, output_channel, zero_as_none=False):
         """
@@ -209,19 +237,20 @@ class TransferFunctions(object):
         oc = self._match_out_chan(output_channel)
         return np.squeeze(self._ds["response"].sel(output=oc).values)
 
-    def uncert(self, output_channel):
-        """Return transfer function uncertainty for the given output channel"""
+    def uncert_mult(self, output_channel):
+        """Return transfer function uncertainty as a fraction of the transfer function"""
         oc = self._match_out_chan(output_channel)
-        xferr = np.squeeze(
-            self._ds["uncertainty"].sel(output=oc).values
-        ) / np.squeeze(self._ds["response"].sel(output=oc).values)
-        return xferr
+        return np.squeeze(self._ds["uncert_mult"].sel(output=oc).values)
 
-    def uncert_wrt_counts(self, output_channel):
+    def uncertainty(self, output_channel):
+        """Return transfer function uncertainty for the given output channel"""
+        return self.frf(output_channel) * self.uncert_mult(output_channel)
+
+    def uncertainty_wrt_counts(self, output_channel):
         """
         Return transfer function uncertainty with respect to counts
         """
-        return self.uncert(output_channel) * self.response(output_channel)
+        return self.frf_wrt_counts(output_channel) * self.uncert_mult(output_channel)
 
     @staticmethod
     def _check_chans(sdm, in_chan, out_chans):
@@ -231,9 +260,9 @@ class TransferFunctions(object):
         # Validate in_chan
         if not isinstance(in_chan, str):
             raise TypeError("Error: in_chan is not a str")
-        in_chans = fnmatch.filter(sdm.channels, in_chan)
+        in_chans = fnmatch.filter(sdm.channel_names, in_chan)
         if len(in_chans) == 0:
-            raise ValueError(f'No matches for "{in_chan}" in {sdm.channels}')
+            raise ValueError(f'No matches for "{in_chan}" in {sdm.channel_names}')
         elif len(in_chans) > 1:
             raise ValueError(
                 f'Multiple channel matches for "{in_chan}": {in_chans}'
@@ -243,7 +272,7 @@ class TransferFunctions(object):
         # Validate out_chan
         if out_chans is None:
             # Select all channels except in_chan
-            out_chans = [x for x in sdm.channels if not x == in_chan]
+            out_chans = [x for x in sdm.channel_names if not x == in_chan]
         if not isinstance(out_chans, list):
             raise TypeError("Error: out_chans is not a list")
         return in_chan, out_chans
@@ -284,7 +313,14 @@ class TransferFunctions(object):
                 many consecutive coherences are above the 95% significance
                 level (0 = use all)
             min_freq (float): set to zero for frequencies below this value
-            max_freq (float): set to zero for frequencies above this value 
+            max_freq (float): set to zero for frequencies above this value
+
+        Returns:
+            (tuple):
+                H (numpy.array): frequency response function
+                H_err_mult (numpy.array): uncertainty multiplier
+                corr_mult (numpy.array): value to multiply H by when correcting
+                    spectra
         """
         coh = spect_density.coherence(input, output)
         f = spect_density.freqs
@@ -316,7 +352,7 @@ class TransferFunctions(object):
             Gxy = spect_density.crossspect(input, output)
             if noise_chan == "output":
                 H = Gxy / Gxx  # BP86 eqn 6.37
-                corr_mult = np.ones(H.shape)
+                corr_mult = np.ones(H.shape)  # No change
             elif noise_chan == "equal":
                 # Derived from BP86 eqns 6.48, 6.49, 6.51 and 6.52
                 H = (Gxy / Gxx) / np.sqrt(coh)
@@ -325,7 +361,7 @@ class TransferFunctions(object):
             Gyy = spect_density.autospect(output)
             Gyx = spect_density.crossspect(output, input)
             H = Gyy / Gyx # BP86 eqn 6.42
-            corr_mult =  coh # derived from BP86 eqns 6.44 and 6.46
+            corr_mult = coh  # derived from BP86 eqns 6.44 and 6.46
         # elif noise_chan == "unknown":
         #     xf = H
         #     # VERY ad-hoc error guesstimate
@@ -335,23 +371,19 @@ class TransferFunctions(object):
         else:
             raise ValueError(f'unknown noise channel: "{noise_chan}"')
         H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
-        
+
         # Calculate uncertainty
         # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
-        errbase = (np.sqrt((np.ones(coh.shape) - coh) / (2*self.n_windows))
-                   / np.sqrt(coh))
-        # coh_mag_sq = abs(coh)*abs(coh)  # False! coherence already squared
-        # errbase = np.sqrt(
-        #     (np.ones(coh.shape) - coh_mag_sq)
-        #     / (2 * self.n_windows * coh_mag_sq)
-        # )
-        H_err = np.abs(H) * errbase
-        return H, H_err
+        H_err_mult = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
+        return H, H_err_mult, corr_mult
 
-    def plot(self, show=True):
+    def plot(self, errorbars=True, show=True):
         """
         Plot transfer functions
 
+        Args:
+            errorbars (bool): plot error bars
+            show (bool): show on the screen
         Returns:
             (numpy.ndarray): array of axis pairs (amplitude, phase)
         """
@@ -363,16 +395,11 @@ class TransferFunctions(object):
         fig, axs = plt.subplots(rows, cols, sharex=True)
         in_suffix = self._find_str_suffix(inp, outputs)
         for out_chan, j in zip(outputs, range(len(outputs))):
-            axa, axp = self.plot_one(
-                inp,
-                out_chan,
-                fig,
-                (rows, cols),
-                (0, j),
-                show_ylabel=j == 0,
-                title=f"{out_chan}/{in_suffix}",
-                show_xlabel=True,
-            )
+            axa, axp = self.plot_one(inp, out_chan, fig, (rows, cols),
+                                     (0, j), show_ylabel=j == 0,
+                                     errorbars=errorbars,
+                                     title=f"{out_chan}/{in_suffix}",
+                                     show_xlabel=True)
         ax_array[0, j] = (axa, axp)
         if show:
             plt.show()
@@ -441,18 +468,9 @@ class TransferFunctions(object):
                 ii_ind = ii
             return inp[ii:]
 
-    def plot_one(
-        self,
-        in_chan,
-        out_chan,
-        fig=None,
-        fig_grid=(1, 1),
-        plot_spot=(0, 0),
-        label=None,
-        title=None,
-        show_xlabel=True,
-        show_ylabel=True,
-    ):
+    def plot_one(self, in_chan, out_chan,
+                 fig=None, fig_grid=(1, 1), plot_spot=(0, 0), errorbars=True,
+                 label=None, title=None, show_xlabel=True, show_ylabel=True):
         """
         Plot one transfer function
 
@@ -463,9 +481,10 @@ class TransferFunctions(object):
                 None this method will plot on the current figure or create
                 a new figure.
             fig_grid (tuple): this plot sits in a grid of this many
-                              (rows, columns)
-            subplot_spot (tuple): put this plot at this (row,column) of
-                                  the figure grid
+                (rows, columns)
+            plot_spot (tuple): put this plot at this (row, column) of
+                the figure grid
+            errorbars (bool): plot as vertical error bars
             label (str): string to put in legend
             title (str): string to put in title
             show_xlabel (bool): put an xlabel on this subplot
@@ -476,8 +495,8 @@ class TransferFunctions(object):
                 transfer function amplitude plot
                 transfer function phase plot
         """
-        xf = self.values(out_chan).copy()
-        xferr = self.uncert(out_chan).copy()
+        xf = self.frf(out_chan).copy()
+        xferr = self.uncertainty(out_chan).copy()
         f = self.freqs
         if fig is None:
             fig = plt.gcf()
@@ -489,9 +508,14 @@ class TransferFunctions(object):
             rowspan=2,
         )
         xf[xf == 0] = None
-        ax_a.loglog(f, np.abs(xf + xferr), color="blue", linewidth=0.5)
-        ax_a.loglog(f, np.abs(xf - xferr), color="blue", linewidth=0.5)
-        ax_a.loglog(f, np.abs(xf), color="black", label=label)
+        if errorbars is True:
+            ax_a.errorbar(f, np.abs(xf), np.abs(xferr), fmt='none')
+            ax_a.set_xscale('log')
+            ax_a.set_yscale('log')
+        else:
+            ax_a.loglog(f, np.abs(xf + xferr), color="blue", linewidth=0.5)
+            ax_a.loglog(f, np.abs(xf - xferr), color="blue", linewidth=0.5)
+            ax_a.loglog(f, np.abs(xf), color="black", label=label)
         # ax_a.loglog(f, np.abs(xf), label=f"'{out_chan}' / '{in_chan}'")
         ax_a.set_xlim(f[1], f[-1])
         if title is not None:
@@ -519,51 +543,6 @@ class TransferFunctions(object):
         if show_xlabel:
             ax_p.set_xlabel("Frequency (Hz)")
         return ax_a, ax_p
-
-    def save(self, filename):
-        """
-        Method to save the object to file using `~Pickle`.
-
-        Args:
-            filename (str): File name
-
-        Examples
-        --------
-
-        Run demo through all methods
-
-        >>> from obstools.atacr import DayNoise, StaNoise, TFNoise
-        >>> daynoise = DayNoise('demo')
-        Uploading demo data - March 04, 2012, station 7D.M08A
-        >>> daynoise.QC_daily_spectra()
-        >>> daynoise.average_daily_spectra()
-        >>> tfnoise_day = TFNoise(daynoise)
-        >>> tfnoise_day.transfer_func()
-        >>> stanoise = StaNoise('demo')
-        Uploading demo data - March 01 to 04, 2012, station 7D.M08A
-        >>> stanoise.QC_sta_spectra()
-        >>> stanoise.average_sta_spectra()
-        >>> tfnoise_sta = TFNoise(stanoise)
-        >>> tfnoise_sta.transfer_func()
-
-        Save object
-
-        >>> tfnoise_day.save('tf_daynoise_demo.pkl')
-        >>> tfnoise_sta.save('tf_stanoise_demo.pkl')
-
-        Check that everything has been saved
-
-        >>> import glob
-        >>> glob.glob("./tf_daynoise_demo.pkl")
-        ['./tf_daynoise_demo.pkl']
-        >>> glob.glob("./tf_stanoise_demo.pkl")
-        ['./tf_stanoise_demo.pkl']
-
-        """
-        # Remove traces to save disk space
-        file = open(filename, "wb")
-        pickle.dump(self, file)
-        file.close()
 
     def _zero_bad(self, H, coh, n_to_reject, f, min_freq, max_freq):
         """

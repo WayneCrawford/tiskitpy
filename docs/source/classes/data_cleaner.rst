@@ -1,31 +1,33 @@
-DataCleaner class
+DataCleaner
 =======================
 
-Blah blah blah.
+Remove coherent noise seen on another channel
+
+Detailed information is in :ref:`tiskit.DataCleaner`
+
 The main methods are:
 
 Constructor
 ---------------------
 
-:`TransferFunction(...)`: blah
+:`DataCleaner(stream, remove_list,...)`: Calculate the DataCleaner object from
+    a data stram and a list of channels to remove
 
-Properties
+Methods
 ---------------------
 
+Cleaning
+^^^^^^^^^^^^
 
-Get Methods
----------------------
-
-
-Set Methods
----------------------
-
-You probably won't ever use these (should I put a `_` before?)
-
+:`clean_sdf(sdf)`: Clean an existing spectral density function (approximation).
+:`clean_stream(stream, ...)`: Clean a data stream
+:`clean_stream_to_sdf(stream, ...)`: Calculate SpectralDensity function directly
+    from the input stream
 
 Other
----------------------
+^^^^^^^^^^^^
 
+:`plot()`: plot the transfer functions in the DataCleaner
 
 Example
 ---------------------

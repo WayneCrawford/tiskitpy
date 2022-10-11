@@ -629,7 +629,7 @@ def _remove_noisy(inp, eq_spans, first_slice_starttime, period, plot=False):
         end="",
     )
     nRejected = 0
-    noise_start_times, noise_end_times = [], []
+    noise_spans = []
     for slice in slices:
         # print(f'{slice["var"]=}')
         if slice["var"] <= median + 3 * sigma:
@@ -637,10 +637,8 @@ def _remove_noisy(inp, eq_spans, first_slice_starttime, period, plot=False):
         else:
             nRejected += 1
             slice["muted"] = True
-            # n1 = slice['n1']
-            # n2 = slice['n2']
-            noise_start_times.append(slice["st"] + 10 / dt)
-            noise_end_times.append(slice["et"] - 10 / dt)
+            noise_spans.append([slice["st"] + 10 / dt,
+                                slice["et"] - 10 / dt])
             # eq_template.data[n1+10:n2-10] = 0
     if nRejected > 0:
         print("{:d} of {:d} rejected".format(nRejected, len(slices)))
@@ -650,7 +648,7 @@ def _remove_noisy(inp, eq_spans, first_slice_starttime, period, plot=False):
     if plot:
         stack = stack_data(inp.data[start_addr:], samp_per)
         _plot_remove_noisy(stack, slices, dt)
-    return TimeSpans(noise_start_times, noise_end_times)
+    return TimeSpans(noise_spans)
 
 
 def _plot_remove_noisy(stack, slices, dt):

@@ -1,4 +1,4 @@
-tiskit functions
+Functions
 ======================
 
 tiskit.fir2caus
