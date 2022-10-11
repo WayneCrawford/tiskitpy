@@ -166,6 +166,19 @@ class TestMethods(unittest.TestCase):
             interped.select(component='Z')[0].trim(st, et).data[0], 213.70,
             delta=0.01)
 
+    def test_from_eqs(self):
+        """Test `from_eqs()` method"""
+        eq_spans = TimeSpans.from_eqs(
+            UTCDateTime('2013-07-17T00:00'), UTCDateTime('2013-07-28T00:00'),
+            minmag=5.5, days_per_magnitude=1.5,
+            eq_file = str(self.test_path / 'test_cat.qml'))
+        self.assertEqual(eq_spans, TimeSpans(
+                [[UTCDateTime('2013-07-15T13:59:04.59'), UTCDateTime('2013-07-17T20:37:43.18')], 
+                 [UTCDateTime('2013-07-19T11:40:42.00'), UTCDateTime('2013-07-19T18:52:42.00')],
+                 [UTCDateTime('2013-07-20T19:17:10.14'), UTCDateTime('2013-07-23T11:49:42.50')],
+                 [UTCDateTime('2013-07-24T03:32:33.59'), UTCDateTime('2013-07-24T17:56:33.59')],
+                 [UTCDateTime('2013-07-26T07:07:15.63'), UTCDateTime('2013-07-28T02:20:59.99')]
+                ]))
 
 def suite():
     return unittest.makeSuite(TestMethods, 'test')

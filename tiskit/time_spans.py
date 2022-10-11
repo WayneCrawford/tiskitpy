@@ -52,6 +52,8 @@ class TimeSpans:
         else:
             raise ValueError('You must provide spans or start_times '
                                  'and end_times')
+        # print(f'{self._start_times=}')
+        # print(f'{self._end_times=}')
         self._organize()
 
     @property
@@ -70,16 +72,8 @@ class TimeSpans:
         return [[x, y] for x, y in zip(self._start_times, self._end_times)]
 
     @classmethod
-    def from_eqs(
-        cls,
-        starttime,
-        endtime,
-        minmag=5.85,
-        days_per_magnitude=1.5,
-        eq_file=None,
-        save_eq_file=True,
-        quiet=False,
-    ):
+    def from_eqs(cls, starttime, endtime, minmag=5.85, days_per_magnitude=1.5,
+                 eq_file=None, save_eq_file=True, quiet=False):
         """
         Generate timespans to avoid because of earthquakes
 
@@ -133,18 +127,14 @@ class TimeSpans:
         new_cat = Catalog(
             events=[x for x in cat if x.preferred_magnitude().mag >= minmag]
         )
-        start_times = [x.preferred_origin().time for x in new_cat]
-        end_times = [
-            x.preferred_origin().time
-            + _calc_eq_cut(x.preferred_magnitude().mag,
-                           minmag, days_per_magnitude)
-            for x in new_cat]
-        # spans = [[x.preferred_origin().time,
-        #           x.preferred_origin().time
-        #           + _calc_eq_cut(x.preferred_magnitude().mag,
-        #                          minmag, days_per_magnitude)]
-        #          for x in new_cat]
-        return cls(start_times=start_times, end_times=end_times)
+        spans = [[x.preferred_origin().time,
+                  x.preferred_origin().time
+                  + _calc_eq_cut(x.preferred_magnitude().mag,
+                                 minmag, days_per_magnitude)]
+                  for x in new_cat if _calc_eq_cut(x.preferred_magnitude().mag,
+                                                   minmag, days_per_magnitude)
+                                   > 0]
+        return cls(spans)
 
     # INFORMATION METHODS
     def __len__(self):
