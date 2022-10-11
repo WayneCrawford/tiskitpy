@@ -57,6 +57,7 @@ method call parameters.  Created a readthedocs page.
     - Added ``used()`, `unused()` methods and `window_seconds` property
     - `autospect()` and `.crossspect()` now accept wildcards in channel names
     - Added `channel_name()` method
+    - Added `**fig_kw` to `plot_*()` methods
 - `TimeSpans`:
     - Added `spans` property
     - Added `invert()` method

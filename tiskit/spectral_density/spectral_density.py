@@ -653,6 +653,7 @@ class SpectralDensity:
         show=True,
         outfile=None,
         title=None,
+        **fig_kw
     ):
         """
         Plot autospectra
@@ -665,6 +666,8 @@ class SpectralDensity:
             show (bool): show on desktop
             outfile (str): save figure to this filename
             title (str): custom plot title
+            **fig_kw (**dict): all additional keyword arguments (such as `figsize`
+                and `dpi`) are passed to the `pyplot.figure` call
         Returns:
             (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
@@ -674,7 +677,7 @@ class SpectralDensity:
         else:
             rows, cols = 1, 1
         ax_array = np.ndarray((rows, cols), dtype=tuple)
-        fig, axs = plt.subplots(rows, cols, sharex=True)
+        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
         if title is None:
             title = "Auto-spectra"
         fig.suptitle(title)
@@ -724,6 +727,7 @@ class SpectralDensity:
         show_coherence=False,
         outfile=None,
         plot_peterson=False,
+        **fig_kw
     ):
         """
         Plot cross (and auto) spectra
@@ -734,6 +738,8 @@ class SpectralDensity:
             plot_peterson(bool): plot Peterson Noise model if any channel has
                 units of (m/s^2)^2/Hz
             show_coherence (bool): show coherence as well
+            fig_kw (**dict): all additional keyword arguments (such as `figsize`
+                and `dpi`) are passed to the `pyplot.figure` call
         Returns:
             :class:`numpy.ndarray`: array of axis pairs (amplitude, phase)
         """
@@ -741,7 +747,7 @@ class SpectralDensity:
         n_subkeys = len(x)
         rows, cols = n_subkeys, n_subkeys
         ax_array = np.ndarray((rows, cols), dtype=tuple)
-        fig, axs = plt.subplots(rows, cols, sharex=True)
+        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
         fig.suptitle("Cross-spectra (dB ref UNITS/Hz)")
         for in_chan, i in zip(x, range(len(x))):
             for out_chan, j in zip(x, range(len(x))):
@@ -952,7 +958,8 @@ class SpectralDensity:
             return self._seedid_full
 
     def plot_coherences(self, x=None, y=None, overlay=False, show=True,
-                        outfile=None, labels="full", sort_by="full"):
+                        outfile=None, labels="full", sort_by="full",
+                        **fig_kw):
         """
         Plot coherences
 
@@ -966,6 +973,8 @@ class SpectralDensity:
                 'loc-chan')
             sort_by (str): how to sort x and y axes ('full', 'chan' or
                 'loc-chan')
+            fig_kw (**dict): all additional keyword arguments (such as `figsize`
+                and `dpi`) are passed to the `pyplot.figure` call
 
         Returns:
             (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
@@ -976,7 +985,7 @@ class SpectralDensity:
         if not overlay:
             rows, cols = len(x), len(y)
             ax_array = np.ndarray((rows, cols), dtype=tuple)
-            fig, axs = plt.subplots(rows, cols, sharex=True)
+            fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
             fig.suptitle("Coherences")
             strfun = self._seedid_strfun(labels)
             for in_chan, i in zip(x, range(len(x))):
@@ -998,7 +1007,7 @@ class SpectralDensity:
                     ax_array[i, j] = (axa, axp)
         else:
             ax_array = np.ndarray((1, 1), dtype=tuple)
-            fig, axs = plt.subplots(1, 1, sharex=True)
+            fig, axs = plt.subplots(1, 1, sharex=True, **fig_kw)
             fig.suptitle("Coherences")
             labels = []
             axa, axp = None, None
