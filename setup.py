@@ -8,7 +8,7 @@ with open("tiskit/version.py") as fp:
     exec(fp.read(),version)
 
 setuptools.setup(
-    name="tiskit",
+    name="tiskit-py",
     version=version['__version__'],
     author="Wayne Crawford",
     author_email="crawford@ipgp.fr",
