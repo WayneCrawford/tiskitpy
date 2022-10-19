@@ -19,6 +19,7 @@ class TimeSpans:
     Times are obspy UTCDateTimes
     
     You can initialize using:
+    
     - A list of (start_time, end_time) pairs (start_time and end_time can
       be any input to UTCDateTime, including UTCDateTime)
     - A list of UTCDateTime start_times and a list of UTCDateTime end_times
@@ -81,9 +82,9 @@ class TimeSpans:
         saving the information to a file that can be subsequently used
 
         Args:
-            starttime (UTCDateTime or str): earliest data that will be
+            starttime (:class:`UTCDateTime` or str): earliest data that will be
                 presented.  If a str, must by ISO8601 compatible
-            endtime (UTCDateTime or str): latest data that will be presented.
+            endtime (:class:`UTCDateTime` or str): latest data that will be presented.
                 If a str, must by ISO8601 compatible
             minmag (float): EQ Magnitude above which to cut out times
             days_per_magnitude (float): days to cut per magnitude above
@@ -91,7 +92,8 @@ class TimeSpans:
             eq_file (str): the eq filename (otherwise, generates it)
             save_eq_file (bool): save the catalog file for future use
         Returns:
-            eq_spans (~class `.TimeSpans`): time spans covering EQ signal
+            eq_spans (:class:`TimeSpans`): time spans covering EQ signal
+            eq_spans (TimeSpans_): time spans covering EQ signal
         """
         if isinstance(starttime, str):
             try:
