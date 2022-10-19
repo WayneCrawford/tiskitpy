@@ -92,7 +92,6 @@ class TimeSpans:
             eq_file (str): the eq filename (otherwise, generates it)
             save_eq_file (bool): save the catalog file for future use
         Returns:
-            eq_spans (:class:`TimeSpans`): time spans covering EQ signal
             eq_spans (TimeSpans_): time spans covering EQ signal
         """
         if isinstance(starttime, str):
@@ -303,7 +302,7 @@ class TimeSpans:
         Appends TimeSpan object to self
 
         Args:
-            new_time_spans (~class `TimeSpans`): time spans to append
+            new_time_spans (:class:`TimeSpans`): time spans to append
         """
         new_time_spans._validate()
         self._validate()
