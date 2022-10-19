@@ -41,6 +41,7 @@ CleanRotator example code
     sd_compare.plot(overlay=True)
 
 ::
+
     2 Trace(s) in Stream:
     XS.S11D..LHZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
     XS.S11D..LXZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
