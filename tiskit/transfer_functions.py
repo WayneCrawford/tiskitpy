@@ -508,10 +508,12 @@ class TransferFunctions(object):
             rowspan=2,
         )
         xf[xf == 0] = None
+        xferr[xf == 0] = None
         if errorbars is True:
             ax_a.errorbar(f, np.abs(xf), np.abs(xferr), fmt='none')
+            if np.any(xf is not None):
+                ax_a.set_yscale('log')
             ax_a.set_xscale('log')
-            ax_a.set_yscale('log')
         else:
             ax_a.loglog(f, np.abs(xf + xferr), color="blue", linewidth=0.5)
             ax_a.loglog(f, np.abs(xf - xferr), color="blue", linewidth=0.5)
