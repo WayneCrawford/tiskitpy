@@ -1,10 +1,9 @@
 
 =============================
-Classes Overview
+Example codes
 =============================
 
-The :ref:`TechnicalDocumentation` contains detailed class constructor, method
-and property descriptions
+All of these codes and data can be found in the directory `tiskit/_examples/codes`
 
 .. toctree::
    :maxdepth: 1

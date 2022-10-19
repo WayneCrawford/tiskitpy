@@ -14,7 +14,7 @@ TiSKit documentation
   
   intro
   classes
-  example
+  examples
   code
 
 Indices and tables
