@@ -8,14 +8,13 @@ CleanRotator example code
     inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')
     cr = CleanRotator(stream)
 
-```
+::
     Optimization terminated successfully.
              Current function value: 510824.252893
              Iterations: 97
              Function evaluations: 185
     INFO:root:    variance reduced from 2.07e+06 to 5.11e+05 (75.4% lower)
     INFO:root:Best angle, azimuth is (-0.09, 32.28)
-```
 
 .. code-block:: python
 
@@ -41,11 +40,10 @@ CleanRotator example code
     sd_compare = SpectralDensity.from_stream(z_compare, inv=inv)
     sd_compare.plot(overlay=True)
 
-```
+::
     2 Trace(s) in Stream:
     XS.S11D..LHZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
     XS.S11D..LXZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
-```
 
 .. code-block:: python
 

@@ -36,7 +36,7 @@ SpectralDensity example code
 .. image:: images/1_SpectralDensity_plot_overlay.png
    :width: 564
    
-  .. code-block:: python
+.. code-block:: python
 
     sd.plot_coherences()
 
