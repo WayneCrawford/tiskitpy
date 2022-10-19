@@ -13,6 +13,7 @@ TiSKit documentation
   :glob:
   
   intro
+  install
   classes
   examples
   code
