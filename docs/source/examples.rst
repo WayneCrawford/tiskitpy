@@ -3,7 +3,8 @@
 Example codes
 =============================
 
-All of these codes and data can be found in the directory `tiskit/_examples/codes`
+All of these codes and data can be found in the directory
+``tiskit/_examples/codes``
 
 .. toctree::
    :maxdepth: 1
@@ -11,7 +12,7 @@ All of these codes and data can be found in the directory `tiskit/_examples/code
    examples/spectral_density
    examples/decimator
    examples/data_cleaner
-   examples/clean_rotator
    examples/transfer_functions
+   examples/clean_rotator
    examples/time_spans
    examples/combined
