@@ -1,5 +1,5 @@
 ==============================
-SpectralDensity example code
+Decimator example code
 ==============================
 
 This example uses data and inventory from a FDSN data server

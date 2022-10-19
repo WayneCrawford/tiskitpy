@@ -1,5 +1,5 @@
 ==============================
-SpectralDensity example code
+DataCleaner example code
 ==============================
 
 .. code-block:: python

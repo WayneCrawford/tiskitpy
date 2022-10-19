@@ -4,6 +4,7 @@ from obspy.core import UTCDateTime
 from tiskit import Decimator
 
 # Read data and inventory from IRIS server (takes a while)client_address = 'IRIS'
+client_address = 'IRIS'
 net = 'Z5'
 sta = 'BB650'  # Trillium T240. 100 sps
 loc = '*'
