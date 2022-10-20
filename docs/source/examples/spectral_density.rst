@@ -1,3 +1,5 @@
+.. _tiskit.SpectralDensity_example:
+
 ==============================
 SpectralDensity example code
 ==============================

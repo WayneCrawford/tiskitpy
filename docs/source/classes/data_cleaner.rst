@@ -32,9 +32,5 @@ Other
 Example
 ---------------------
 
-.. code-block:: python
 
-  from obspy.core.stream import read
-  from obspy.core.inventory import read_inventory
-  from tiskit import DataCleaner
-  
+see :ref:`tiskit.DataCleaner_example`

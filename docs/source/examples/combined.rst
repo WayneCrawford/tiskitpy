@@ -1,3 +1,5 @@
+.. _tiskit.combined_example:
+
 ==============================
 Combining classes
 ==============================

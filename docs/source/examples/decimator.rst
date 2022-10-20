@@ -1,3 +1,5 @@
+.. _tiskit.Decimator_example:
+
 ==============================
 Decimator example code
 ==============================

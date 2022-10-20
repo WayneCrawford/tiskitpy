@@ -1,3 +1,5 @@
+.. _tiskit.DataCleaner_example:
+
 ==============================
 DataCleaner example code
 ==============================

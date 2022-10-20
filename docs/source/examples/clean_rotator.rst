@@ -1,3 +1,5 @@
+.. _tiskit.CleanRotator_example:
+
 ==============================
 CleanRotator example code
 ==============================

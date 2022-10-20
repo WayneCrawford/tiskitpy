@@ -1,5 +1,7 @@
+.. _tiskit.TransferFunctions_example:
+
 ==============================
-TransferFunction example code
+TransferFunctions example code
 ==============================
 
 .. code-block:: python

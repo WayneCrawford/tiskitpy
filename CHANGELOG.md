@@ -65,3 +65,6 @@ method call parameters.  Created a readthedocs page.
 - Updated documentation
 - `DataCleaner`:
     - Created `CleanerString` class to help with channel names
+
+## 0.3.1
+    Fix `TransferFunction` errorbar plotting bug

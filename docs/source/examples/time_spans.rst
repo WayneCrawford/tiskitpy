@@ -1,3 +1,5 @@
+.. _tiskit.TimeSpans_example:
+
 ==============================
 TimeSpans example code
 ==============================
