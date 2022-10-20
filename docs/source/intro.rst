@@ -14,7 +14,7 @@ Classes
             response
 :PeriodicTransient: Calculate and remove periodic transient (VERY manual!)
 :SpectralDensity: Calculate and manipulate spectral density functions.
-:TimeSpan`: Specify time spans to be removed, kept, zeroed, etc.
+:TimeSpan: Specify time spans to be removed, kept, zeroed, etc.
 :TransferFunctions: Transfer functions for a given input channel.
                
 Functions

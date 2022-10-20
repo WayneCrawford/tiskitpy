@@ -37,7 +37,7 @@ This example uses data and inventory from a FDSN data server
     inv_decim = decim.update_inventory(inv, stream)
     print(inv)
 
-.. code-block::
+.. code-block:: none
 
     Inventory created at 2022-10-19T20:40:32.956900Z
         Created by: IRIS WEB SERVICE: fdsnws-station | version: 1.1.52
@@ -56,7 +56,7 @@ This example uses data and inventory from a FDSN data server
 
     print(inv_decim)
 
-.. code-block::
+.. code-block:: none
 
     Inventory created at 2022-10-19T20:40:32.956900Z
         Created by: IRIS WEB SERVICE: fdsnws-station | version: 1.1.52
@@ -77,7 +77,7 @@ This example uses data and inventory from a FDSN data server
     compare_z = stream.select(channel='*Z') + stream_decim.select(channel='*Z')
     print(compare_z)
 
-.. code-block::
+.. code-block:: none
 
     2 Trace(s) in Stream:
     Z5.BB650..HHZ | 2014-01-01T00:52:00.002634Z - 2014-01-01T00:54:59.992634Z | 100.0 Hz, 18000 samples

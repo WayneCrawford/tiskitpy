@@ -16,7 +16,7 @@ TransferFunctions example code
     xfs = TransferFunctions(sd, '*H')
     print(xfs)
 
-.. code-block::
+.. code-block:: none
 
     TransferFunctions object:
         input_channel='XS.S11D..LDH'

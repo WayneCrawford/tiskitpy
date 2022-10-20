@@ -15,7 +15,7 @@ SpectralDensity example code
     sd = SpectralDensity.from_stream(stream, inv=inv)
     print(sd)
 
-.. code-block::
+.. code-block:: none
 
   SpectralDensity object:
 	  channel_names=['XS.S11D..LDH', 'XS.S11D..LH1', 'XS.S11D..LH2', 'XS.S11D..LHZ']

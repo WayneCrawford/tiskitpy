@@ -17,7 +17,7 @@ DataCleaner example code
     z_compare = stream.select(channel='*Z') + stream_cleaned.select(channel='*Z')
     print(z_compare)
 
-.. code-block::
+.. code-block:: none
 
     2 Trace(s) in Stream:
     XS.S11D..LHZ       | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples

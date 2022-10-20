@@ -42,7 +42,7 @@ CleanRotator example code
     sd_compare = SpectralDensity.from_stream(z_compare, inv=inv)
     sd_compare.plot(overlay=True)
 
-::
+.. code-block:: none
 
     2 Trace(s) in Stream:
     XS.S11D..LHZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
