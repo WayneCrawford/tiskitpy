@@ -33,15 +33,6 @@ CleanRotator example code
     z_compare = stream.select(channel='*Z') + stream_rotated.select(channel='*Z')
     print(z_compare)
 
-.. code-block:: python
-
-    z_compare.plot()
-
-.. code-block:: python
-
-    sd_compare = SpectralDensity.from_stream(z_compare, inv=inv)
-    sd_compare.plot(overlay=True)
-
 .. code-block:: none
 
     2 Trace(s) in Stream:
