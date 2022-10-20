@@ -10,7 +10,8 @@ CleanRotator example code
     inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')
     cr = CleanRotator(stream)
 
-::
+.. code-block:: none
+
     Optimization terminated successfully.
              Current function value: 510824.252893
              Iterations: 97
