@@ -2,7 +2,7 @@
 TiSKit
 *******************************
 
-Routines for time series data processing, based on [BP2010]_
+Time series data processing, based on [BP2010]_
 
 
 Classes
