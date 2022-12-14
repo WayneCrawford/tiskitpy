@@ -2,7 +2,7 @@
 TiSKit
 *******************************
 
-Routines for time series data processing, based on [BP2010]_
+Time series data processing, based on [BP2010]_
 
 
 Classes
@@ -14,7 +14,7 @@ Classes
             response
 :PeriodicTransient: Calculate and remove periodic transient (VERY manual!)
 :SpectralDensity: Calculate and manipulate spectral density functions.
-:TimeSpan`: Specify time spans to be removed, kept, zeroed, etc.
+:TimeSpan: Specify time spans to be removed, kept, zeroed, etc.
 :TransferFunctions: Transfer functions for a given input channel.
                
 Functions

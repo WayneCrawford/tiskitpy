@@ -36,9 +36,5 @@ Methods
 Example
 ---------------------
 
-.. code-block:: python
 
-  from obspy.core.stream import read
-  from obspy.core.inventory import read_inventory
-  from tiskit import Decimator
-  
+see :ref:`tiskit.Decimator_example`

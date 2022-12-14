@@ -6,6 +6,9 @@ CleanRotator
 Calculates the angle and azimuth to rotate the vertical channel to minimize
 noise [#f1]_.
 
+**BUG: The code only rotates about two axes, so it is not appropriate for
+rotating the horizontal axes, which could lose their orientation**
+
 Detailed information is in :ref:`tiskit.CleanRotator`
 
 The main methods are:
@@ -32,12 +35,5 @@ Methods
 Example
 ---------------------
 
-.. code-block:: python
 
-  from obspy.core.stream import read
-  from obspy.core.inventory import read_inventory
-  from tiskit import CleanRotator
-
-.. [#f1]  This only rotates
-about 2 axes, so rotation of X and Y may lose their initial orientation (*need
-to change to 3-value rotation that preserves X and Y azimuths*)]
+see :ref:`tiskit.CleanRotator_example`

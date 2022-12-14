@@ -73,14 +73,4 @@ You probably won't ever use these (should I put a `_` before?)
 Example
 ---------------------
 
-.. code-block:: python
-
-  from obspy.core.stream import read
-  from obspy.core.inventory import read_inventory
-  from tiskit import SpectralDensity
-  
-  stream = read('mydata.mseed', 'MSEED')
-  inv = read_inventory('myinv', 'STATIONXML')
-  sd = SpectralDensity.from_stream(stream, inv=inv)
-  sd.plot()
-  print(sd)
+see :ref:`tiskit.SpectralDensity_example`

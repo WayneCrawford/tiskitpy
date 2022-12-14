@@ -57,9 +57,5 @@ Other
 Example
 ---------------------
 
-.. code-block:: python
 
-  from obspy.core.stream import read
-  from obspy.core.inventory import read_inventory
-  from tiskit import TransferFunction
-  
+see :ref:`tiskit.TransferFunctions_example`

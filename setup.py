@@ -8,13 +8,13 @@ with open("tiskit/version.py") as fp:
     exec(fp.read(),version)
 
 setuptools.setup(
-    name="tiskit",
+    name="tiskit-py",
     version=version['__version__'],
     author="Wayne Crawford",
     author_email="crawford@ipgp.fr",
     description="TIme Series  toolKIT",
     long_description=long_description,
-    long_description_content_type="text/x-rst; charset=UTF-8",
+    long_description_content_type="text/markdown; charset=UTF-8",
     url="https://github.com/WayneCrawford/tiskit",
     packages=setuptools.find_packages(),
     include_package_data=True,

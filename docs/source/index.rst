@@ -13,8 +13,9 @@ TiSKit documentation
   :glob:
   
   intro
+  install
   classes
-  example
+  examples
   code
 
 Indices and tables
