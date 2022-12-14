@@ -1,2 +1,3 @@
 # graft lcheapo/_examples
 # include ToDo.rst
+recursive-include tiskit/decimate *
