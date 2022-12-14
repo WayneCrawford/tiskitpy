@@ -94,11 +94,14 @@ class TestMethods(unittest.TestCase):
     def test_decimate_data(self):
         """Run decimation on data with a big earthquake"""
         st = stream_read(str(self.test_path / 'XS.S10D.20161212T2053.mseed'))
-        # st.plot()
         decim = Decimator([5])
         st2 = decim.decimate(st)
-        # st2.plot()
         self.assertTrue(len(st[0].data == 5 * len(st2[0].data)))
+
+        # Test dtype handling
+        self.assertEqual(st2[0].data.dtype, st[0].data.dtype )
+        st3 = decim.decimate(st, keep_dtype=False)
+        self.assertNotEqual(st3[0].data.dtype, st[0].data.dtype )
 
     def test_decimate_impulse(self):
         """Run decimation on data with a single impulse"""
