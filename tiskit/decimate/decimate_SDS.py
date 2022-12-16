@@ -36,17 +36,16 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
     logging.info('output sampling rate will be {:g} sps, band code will be {}'
                  .format(output_sample_rate, out_band_code))
     if in_band_code == out_band_code:
-        raise ValueError('identical input & output band codes: {in_band_code}')
+        raise ValueError(f'identical input & output band codes: {in_band_code}')
 
     for year_dir in [x for x in SDS_root.iterdir() if x.is_dir()]:
-        logging.info('Working on year {str(year_dir.name)}')
+        logging.info(f'Working on year {str(year_dir.name)}')
         for net_dir in [x for x in year_dir.iterdir() if x.is_dir()]:
-            logging.info('\tWorking on net {str(net_dir.name)}')
+            logging.info(f'\tWorking on net {str(net_dir.name)}')
             for sta_dir in [x for x in net_dir.iterdir() if x.is_dir()]:
-                logging.info('\t\tWorking on station {str(sta_dir.name)}')
+                logging.info(f'\t\tWorking on station {str(sta_dir.name)}')
                 for cha_dir in [x for x in sta_dir.iterdir() if x.is_dir()]:
-                    logging.info('\t\t\tWorking on channel {}'
-                                 .format(str(sta_dir.name)))
+                    logging.info(f'\t\t\tWorking on channel {str(cha_dir.name)}')
                     cha_name = cha_dir.name
                     if not cha_name[0] == in_band_code:
                         continue
@@ -54,8 +53,8 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
                     out_cha_dir.mkdir()
                     logging.info('\t\t\t\tCreating output channel dir "{}"'
                                  .format(out_cha_dir.name))
-                    files = cha_dir.glob(f'*.{cha_name}.*')
-                    logging.info('\t\t\t\t{len(files):d} files to process')
+                    files = list(cha_dir.glob(f'*.{cha_name}.*'))
+                    logging.info(f'\t\t\t\t{len(files):d} files to process')
                     for f in files:
                         stream = read(str(f), 'MSEED')
                         if stream[0].stats.npts % decimator.decimation_factor == 0:
@@ -66,7 +65,7 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
                         if stream[0].stats.sampling_rate != input_sample_rate:
                             logging.warning(
                                 f"{str(f)} first block's sampling rate != "
-                                "{input_sample_rate}, skipping...")
+                                f"{input_sample_rate}, skipping...")
                         net, sta, loc, ich, typ, yr, dy = str(f.name).split('.')
                         d_stream = decimator.decimate(stream)
                         och = out_band_code + ich[1:]

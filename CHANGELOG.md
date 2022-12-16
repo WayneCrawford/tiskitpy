@@ -70,3 +70,6 @@ method call parameters.  Created a readthedocs page.
     Fix `TransferFunction` errorbar plotting bug
 ## 0.3.2
     Change `MANIFEST.in` to recursively include subfiles/directories of decimate/
+## 0.3.3
+    Decimator.decimate() now returns same data.dtype by default
+    

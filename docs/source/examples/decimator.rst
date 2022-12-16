@@ -4,6 +4,8 @@
 Decimator example code
 ==============================
 
+Decimating data and updating the metadata
+
 This example uses data and inventory from a FDSN data server
 
 .. code-block:: python
