@@ -39,13 +39,13 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
         raise ValueError(f'identical input & output band codes: {in_band_code}')
 
     for year_dir in [x for x in SDS_root.iterdir() if x.is_dir()]:
-        logging.info(f'Working on year {str(year_dir.name)}')
+        logging.info(f' year={str(year_dir.name)}')
         for net_dir in [x for x in year_dir.iterdir() if x.is_dir()]:
-            logging.info(f'\tWorking on net {str(net_dir.name)}')
+            logging.info(f'\tnet={str(net_dir.name)}')
             for sta_dir in [x for x in net_dir.iterdir() if x.is_dir()]:
-                logging.info(f'\t\tWorking on station {str(sta_dir.name)}')
+                logging.info(f'\t\tstation={str(sta_dir.name)}')
                 for cha_dir in [x for x in sta_dir.iterdir() if x.is_dir()]:
-                    logging.info(f'\t\t\tWorking on channel {str(cha_dir.name)}')
+                    logging.info(f'\t\t\tchannel={str(cha_dir.name)}')
                     cha_name = cha_dir.name
                     if not cha_name[0] == in_band_code:
                         continue

@@ -52,17 +52,20 @@ class Decimator:
         """Total decimation (product of `decimates`)"""
         return prod(self.decimates)
 
-    def decimate(self, data):
+    def decimate(self, data, keep_dtype=True):
         """
         Apply decimator to data
 
         Args:
             data (:class:`obspy.Stream` or :class:`obspy.Trace`): waveform data
+            keep_dformat (bool): force output data format to be the same as
+                the input data_format
         """
+        self.keep_dtype = keep_dtype
         if isinstance(data, Stream):
             return self._run_stream(data)
         if isinstance(data, Trace):
-            return self._run_stream(Stream([data]))[0]
+            return self._run_trace(data)
         else:
             raise TypeError("data is not a Stream or Trace")
 
@@ -372,7 +375,7 @@ class Decimator:
 
     def _run_stream(self, stream):
         """
-        Return decimated obspy stream
+        Decimate obspy Stream
         """
         if not isinstance(stream, Stream):
             raise ValueError("input stream is not an obspy Stream!")
@@ -389,10 +392,11 @@ class Decimator:
 
     def _run_trace(self, trace):
         """
-        Decimate obspy trace
+        Decimate obspy Trace
         """
         if not isinstance(trace, Trace):
             raise ValueError("input trace is not an obspy Trace!")
+        dtype = trace.data.dtype
         tr = trace.copy()
         sr = tr.stats.sampling_rate
         if self.verbose:
@@ -404,6 +408,8 @@ class Decimator:
             fir_filter = FIRFilter.from_SAC(d)
             tr.data = fir_filter.convolve(tr.data)
             tr.decimate(d, no_filter=True)
+        if self.keep_dtype is True and not tr.data.dtype == dtype:
+            tr.data = tr.data.astype(dtype)
         tr.stats.channel, tr.stats.location = self._get_chan_loc(
             tr.stats.channel,
             tr.stats.location,

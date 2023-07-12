@@ -124,6 +124,7 @@ class TestMethods(unittest.TestCase):
         for decim in range(2, 8):
             ff = FIRFilter.from_SAC(decim, normalize=False)
             fname = f'decim{decim}.pickle'
+            # The following is to save a file to put in self.test_path
             with open(fname, 'wb') as f:
                 pickle.dump(ff, f)
             with open(str(self.test_path / fname), 'rb') as f:
