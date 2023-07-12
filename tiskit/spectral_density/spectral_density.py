@@ -388,6 +388,8 @@ class SpectralDensity:
         Returns:
             (:class:`numpy.ndarray`): cross-spectral density function
         """
+        if in_channel == out_channel:
+            return self.autospect(in_channel)
         ichn = self.channel_name(in_channel, "in_channel")
         ochn = self.channel_name(out_channel, "out_channel")
         return (self._ds["spectra"].sel(input=ichn,

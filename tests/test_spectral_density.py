@@ -84,12 +84,12 @@ class TestMethods(unittest.TestCase):
         self.assertAlmostEqual(np.degrees(np.angle(x[ifreq])), sineparm.phase,
                                places=2)
         # Verify that crossspect for same channel is same as autospect
-        self.assertTrue(
-            np.all(
-                self.sd.crossspect("XX.STA.00.BX1", "XX.STA.00.BX1")
-                == self.sd.autospect("XX.STA.00.BX1")
-            )
-        )
+        chan = "XX.STA.00.BX1"
+        print(f"{self.sd.crossspect(chan, chan)=}")
+        print(f"{self.sd.autospect(chan)=}")
+        print(self.sd.crossspect(chan, chan) == self.sd.autospect(chan))
+        self.assertTrue(np.all(self.sd.crossspect(chan, chan)
+                        == self.sd.autospect(chan)))
 
     def test_channel_name(self):
         """Test channel_name() function"""

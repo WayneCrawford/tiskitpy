@@ -15,4 +15,5 @@ All of these codes and data can be found in the directory
    examples/transfer_functions
    examples/clean_rotator
    examples/time_spans
+   examples/decimate_SDS
    examples/combined

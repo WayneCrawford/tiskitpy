@@ -12,7 +12,7 @@ setuptools.setup(
     version=version['__version__'],
     author="Wayne Crawford",
     author_email="crawford@ipgp.fr",
-    description="TIme Series  toolKIT",
+    description="TIme Series toolKIT",
     long_description=long_description,
     long_description_content_type="text/markdown; charset=UTF-8",
     url="https://github.com/WayneCrawford/tiskit",

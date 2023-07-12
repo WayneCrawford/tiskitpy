@@ -1,6 +1,7 @@
 # Copyright 2021 Wayne Crawford
 import pickle
 import fnmatch  # Allows Unix filename pattern matching
+import copy
 
 import numpy as np
 import xarray as xr
@@ -125,6 +126,12 @@ class TransferFunctions(object):
         s += f"\tnoise_channels={self.noise_channels}\n"
         s += f"\tn_windows={self.n_windows}"
         return s
+    
+    def copy(self):
+        return copy.copy(self)
+
+    def deepcopy(self):
+        return copy.deepcopy(self)
 
     @property
     def freqs(self):
@@ -237,6 +244,24 @@ class TransferFunctions(object):
         oc = self._match_out_chan(output_channel)
         return np.squeeze(self._ds["response"].sel(output=oc).values)
 
+    def to_norm_compliance(self, water_depth):
+        """
+        Change tfs from m/s^2 / Pa to 1 / Pa by multiplying by k / omega^2
+        """
+        if not self.input_units.upper() == 'PA':
+            raise ValueError(f'{self.input_units=}, not "PA"')
+        om = np.pi * self.freqs
+        k = _gravd(om, water_depth)
+        tf_multiplier = k / (om**2)
+        for oc in self.output_channels:
+            if not self.output_units(oc).upper() == 'M/S^2':
+                raise ValueError('{self.output_units(oc)=}, not "M/2^2"')
+            # 'value' is in physical units, have to change response so that
+            # value w.r.t. counts remains constant
+            self._ds["value"].loc[dict(output=oc)] = self.frf(oc) * tf_multiplier
+            self._ds["response"].loc[dict(output=oc)] = self.response(oc) / tf_multiplier
+            self._ds.coords["out_units"].loc[dict(output=oc)] = '1'
+
     def uncert_mult(self, output_channel):
         """Return transfer function uncertainty as a fraction of the transfer function"""
         oc = self._match_out_chan(output_channel)
@@ -275,6 +300,9 @@ class TransferFunctions(object):
             out_chans = [x for x in sdm.channel_names if not x == in_chan]
         if not isinstance(out_chans, list):
             raise TypeError("Error: out_chans is not a list")
+        else:
+            out_chans = [fnmatch.filter(sdm.channel_names, oc)[0]
+                         for oc in out_chans]
         return in_chan, out_chans
 
     def _match_out_chan(self, value):
@@ -377,13 +405,14 @@ class TransferFunctions(object):
         H_err_mult = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
         return H, H_err_mult, corr_mult
 
-    def plot(self, errorbars=True, show=True):
+    def plot(self, errorbars=True, show=True, outfile=None):
         """
         Plot transfer functions
 
         Args:
             errorbars (bool): plot error bars
             show (bool): show on the screen
+            outfile (str): save figure to this filename
         Returns:
             (numpy.ndarray): array of axis pairs (amplitude, phase)
         """
@@ -401,6 +430,8 @@ class TransferFunctions(object):
                                      title=f"{out_chan}/{in_suffix}",
                                      show_xlabel=True)
         ax_array[0, j] = (axa, axp)
+        if outfile:
+            plt.savefig(outfile)
         if show:
             plt.show()
         return ax_array
@@ -595,3 +626,62 @@ class TransferFunctions(object):
                     )
             H[~goods] = 0
         return H
+
+
+def _gravd(W, h):
+    """
+    Linear ocean surface gravity wave dispersion
+
+    Args:
+        W (:class:`numpy.ndarray`): angular frequencies (rad/s)
+        h (float): water depth (m)
+
+    Returns:
+        K (:class:`numpy.ndarray`): wavenumbers (rad/m)
+    """
+    # W must be array
+    if not isinstance(W, np.ndarray):
+        W = np.array([W])
+    G = 9.79329
+    N = len(W)
+    W2 = W*W
+    kDEEP = W2/G
+    kSHAL = W/(np.sqrt(G*h))
+    erDEEP = np.ones(np.shape(W)) - G*kDEEP*_dtanh(kDEEP*h)/W2
+    one = np.ones(np.shape(W))
+    d = np.copy(one)
+    done = np.zeros(np.shape(W))
+    nd = np.where(done == 0)
+
+    k1 = np.copy(kDEEP)
+    k2 = np.copy(kSHAL)
+    e1 = np.copy(erDEEP)
+    ktemp = np.copy(done)
+    e2 = np.copy(done)
+
+    while True:
+        e2[nd] = one[nd] - G*k2[nd] * _dtanh(k2[nd]*h)/W2[nd]
+        d = e2*e2
+        done = d < 1e-20
+        if done.all():
+            K = k2
+            break
+        nd = np.where(done == 0)
+        ktemp[nd] = k1[nd]-e1[nd]*(k2[nd]-k1[nd])/(e2[nd]-e1[nd])
+        k1[nd] = k2[nd]
+        k2[nd] = ktemp[nd]
+        e1[nd] = e2[nd]
+    return K
+
+def _dtanh(x):
+    """
+    Stable hyperbolic tangent
+
+    Args:
+        x (:class:`numpy.ndarray`)
+    """
+    a = np.exp(x*(x <= 50))
+    one = np.ones(np.shape(x))
+
+    y = (abs(x) > 50) * (abs(x)/x) + (abs(x) <= 50)*((a-one/a) / (a+one/a))
+    return y
