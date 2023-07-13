@@ -664,7 +664,7 @@ class SpectralDensity:
             x (list of str): limit to the listed channels
             overlay (bool): put all spect on one axis
             plot_peterson(bool): plot Peterson Noise model if any channel has
-                units of (m/s^2)^2/Hz
+                units of :math:`(m/s^2)^2/Hz`
             show (bool): show on desktop
             outfile (str): save figure to this filename
             title (str): custom plot title
@@ -738,7 +738,7 @@ class SpectralDensity:
             x (list of str): limit to the listed channels
             show (bool): show on desktop
             plot_peterson(bool): plot Peterson Noise model if any channel has
-                units of (m/s^2)^2/Hz
+                units of :math:`(m/s^2)^2/Hz`
             show_coherence (bool): show coherence as well
             fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
@@ -827,7 +827,7 @@ class SpectralDensity:
             show_coherence (bool): draw coherence on the same plot
             show_phase (bool): show phase as well as amplitude
             plot_peterson(bool): plot Peterson Noise model if channel has
-                units of (m/s^2)^2/Hz
+                units of :math:`(m/s^2)^2/Hz`
             outfile (str): save figure to this filename
 
         Returns:

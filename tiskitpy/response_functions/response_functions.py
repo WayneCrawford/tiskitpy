@@ -20,10 +20,12 @@ class ResponseFunctions(object):
 
     From Bendat & Piersol, chapter 6.  The frequency response function is
     the relation between coherent parts of the signal: if the measured
-    input x(t) = u(t) + m(t) and the measured output y(t) = v(t) + n(t),
-    where u(t) and v(t) are coherent and m(t) and n(t) are not, then the
-    frequency response function H(f) is such that v(t) = H(f)*u(t).  As
-    to spectra, G_vv(f) = abs(H(f))^2 * G_uu(f)
+    input :math:`x(t) = u(t) + m(t)` and the measured output
+    :math:`y(t) = v(t) + n(t)`, where :math:`u(t)` and :math:`v(t)` are
+    coherent and :math:`m(t)` and :math:`n(t)` are not, then the
+    frequency response function :math:`H(f)` is such that
+    :math:`v(t) = H(f)*u(t)`.
+    As to spectra, :math:`G_vv(f) = abs(H(f))^2 * G_uu(f)`
 
     Args:
         sdm (:class:`.SpectralDensity`): Spectral density matrix objet

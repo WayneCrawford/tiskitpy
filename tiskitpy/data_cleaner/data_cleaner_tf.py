@@ -150,12 +150,12 @@ class DataCleaner:
         Calculate corrected spectral density functions from an input stream
 
         Applys the DataCleaner values to each FFT
+
         Args:
             stream (:class:`obspy.core.stream.Stream`): data to apply to
             fast_calc (bool): Calculate corrected spectra directly from
                 previous spectra.
-            kwargs (dict): keyword arguments for
-                SpectralDensity.from_stream()
+            kwargs (dict): keyword arguments for `SpectralDensity.from_stream()`
         Return:
             sdf (:class:`.SpectralDensity`): corrected spectral density
                 functions
