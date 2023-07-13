@@ -1,5 +1,5 @@
 *******************************
-TiSKit
+TiSKitPy
 *******************************
 
 Time series data processing, based on [BP2010]_
@@ -30,7 +30,7 @@ Functions
 Command-line programs
 =========================
 
-:tiskit_decimate_SDS: Decimate data in a SeisComp Data Structure database.
+:tiskitpy_decimate_SDS: Decimate data in a SeisComp Data Structure database.
     Inserts the data into the same database and creates a new StationXML file
     (based on an existing StationXML file for the original database)
 
