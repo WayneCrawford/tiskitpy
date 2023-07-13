@@ -15,7 +15,7 @@ setuptools.setup(
     description="TIme Series toolKIT",
     long_description=long_description,
     long_description_content_type="text/markdown; charset=UTF-8",
-    url="https://github.com/WayneCrawford/tiskit",
+    url="https://github.com/WayneCrawford/tiskitpy",
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=['obspy>=1.3.0','PyYAML', 'numpy', 'scipy', 'matplotlib',
