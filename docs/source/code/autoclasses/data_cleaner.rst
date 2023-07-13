@@ -1,6 +1,6 @@
-.. _tiskit.DataCleaner:
+.. _tiskitpy.DataCleaner:
 
-tiskit.DataCleaner
+tiskitpy.DataCleaner
 -----------------------------
 
-.. autoclass:: tiskit.DataCleaner
+.. autoclass:: tiskitpy.DataCleaner

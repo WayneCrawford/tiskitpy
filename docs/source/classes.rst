@@ -15,5 +15,3 @@ and property descriptions
    classes/clean_rotator
    classes/response_functions
    classes/time_spans
-   classes/fir_corr
-   classes/rptransient

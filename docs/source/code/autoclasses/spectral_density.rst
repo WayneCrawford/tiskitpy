@@ -1,6 +1,6 @@
-.. _tiskit.SpectralDensity:
+.. _tiskitpy.SpectralDensity:
 
-tiskit.SpectralDensity
+tiskitpy.SpectralDensity
 -----------------------------
 
-.. autoclass:: tiskit.SpectralDensity
+.. autoclass:: tiskitpy.SpectralDensity

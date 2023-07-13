@@ -4,7 +4,7 @@ CleanRotator
 =======================
 
 Calculates the angle and azimuth to rotate the vertical channel to minimize
-noise [#f1]_.
+noise.
 
 **BUG: The code only rotates about two axes, so it is not appropriate for
 rotating the horizontal axes, which could lose their orientation**

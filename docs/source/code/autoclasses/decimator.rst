@@ -1,6 +1,6 @@
-.. _tiskit.Decimator:
+.. _tiskitpy.Decimator:
 
-tiskit.Decimator
+tiskitpy.Decimator
 -----------------------------
 
-.. autoclass:: tiskit.Decimator
+.. autoclass:: tiskitpy.Decimator

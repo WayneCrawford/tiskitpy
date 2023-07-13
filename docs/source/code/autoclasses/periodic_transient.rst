@@ -1,4 +1,4 @@
-tiskit.PeriodicTransient
+tiskitpy.PeriodicTransient
 -----------------------------
 
-.. autoclass:: tiskit.PeriodicTransient
+.. autoclass:: tiskitpy.PeriodicTransient

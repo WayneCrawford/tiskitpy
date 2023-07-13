@@ -1,6 +1,6 @@
-.. _tiskit.TimeSpans:
+.. _tiskitpy.TimeSpans:
 
-tiskit.TimeSpans
+tiskitpy.TimeSpans
 -----------------------------
 
-.. autoclass:: tiskit.TimeSpans
+.. autoclass:: tiskitpy.TimeSpans

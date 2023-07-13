@@ -51,6 +51,8 @@ Get
 Other
 ^^^^^^^^^^^^^^^^^^^^^
 
+:`to_norm_compliance(water_depth)`: convert m/s^2 / Pa transfer functions to
+    normalized compliance
 :`plot`: plot the frequency response functions
 :`plot_one(in_chan, out_chan, ...)`: plot one frequency response function
 

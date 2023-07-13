@@ -1,6 +1,6 @@
-.. _tiskit.TransferFunctions:
+.. _tiskitpy.TransferFunctions:
 
-tiskit.TransferFunctions
+tiskitpy.TransferFunctions
 -----------------------------
 
-.. autoclass:: tiskit.TransferFunctions
+.. autoclass:: tiskitpy.TransferFunctions

@@ -1,6 +1,6 @@
-.. _tiskit.CleanRotator:
+.. _tiskitpy.CleanRotator:
 
-tiskit.CleanRotator
+tiskitpy.CleanRotator
 -----------------------------
 
-.. autoclass:: tiskit.CleanRotator
+.. autoclass:: tiskitpy.CleanRotator
