@@ -458,8 +458,8 @@ class TimeSpans:
         Make a stream or trace plot with highlighted time spans
 
         Args:
-            stream (:class:`obspy.core.trace.Stream` or
-                :class:`obspy.core.trace.Trace`): obspy stream/trace to plot
+            stream (:class:`obspy.core.trace.Stream` or :class:`obspy.core.trace.Trace`):
+                obspy stream/trace to plot
             color (str): highlight color
             alpha (float): highlight transparency alpha (1=opaque, 0 =
                 invisible)
