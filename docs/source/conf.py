@@ -19,12 +19,12 @@ sys.path.insert(0, pathlib.Path(__file__).resolve().parents[1].as_posix())
 
 # -- Project information -----------------------------------------------------
 
-project = 'tiskit'
+project = 'tiskitpy'
 copyright = '2022, IPGP'
 author = 'Wayne Crawford' 
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '0.4'
 
 
 # -- General configuration ---------------------------------------------------
