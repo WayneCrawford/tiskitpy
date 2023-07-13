@@ -27,7 +27,7 @@ class ResponseFunctions(object):
 
     Args:
         sdm (:class:`.SpectralDensity`): Spectral density matrix objet
-        in_chan (str): input channel.  Can use Unix wildcards (*, ?) but
+        in_chan (str): input channel.  Can use Unix wildcards ('*', '?') but
             will return error if more than one string matches
         out_chans (list of str): output channels  (None => all but
             in_chan))

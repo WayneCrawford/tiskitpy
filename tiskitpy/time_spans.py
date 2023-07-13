@@ -92,7 +92,7 @@ class TimeSpans:
             eq_file (str): the eq filename (otherwise, generates it)
             save_eq_file (bool): save the catalog file for future use
         Returns:
-            eq_spans (TimeSpans_): time spans covering EQ signal
+            eq_spans (:class:`TimeSpans`): time spans covering EQ signal
         """
         if isinstance(starttime, str):
             try:
@@ -464,7 +464,7 @@ class TimeSpans:
             alpha (float): highlight transparency alpha (1=opaque, 0 =
                 invisible)
             title (str): figure title
-            **kwargs (**dict): arguments to stream/trace plot program
+            kwargs (dict): arguments to stream/trace plot program
         Returns:
             (tuple):
                 fig (matplotlib Figure):

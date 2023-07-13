@@ -668,7 +668,7 @@ class SpectralDensity:
             show (bool): show on desktop
             outfile (str): save figure to this filename
             title (str): custom plot title
-            **fig_kw (**dict): all additional keyword arguments (such as `figsize`
+            fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
             (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
@@ -740,7 +740,7 @@ class SpectralDensity:
             plot_peterson(bool): plot Peterson Noise model if any channel has
                 units of (m/s^2)^2/Hz
             show_coherence (bool): show coherence as well
-            fig_kw (**dict): all additional keyword arguments (such as `figsize`
+            fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
             :class:`numpy.ndarray`: array of axis pairs (amplitude, phase)
@@ -975,7 +975,7 @@ class SpectralDensity:
                 'loc-chan')
             sort_by (str): how to sort x and y axes ('full', 'chan' or
                 'loc-chan')
-            fig_kw (**dict): all additional keyword arguments (such as `figsize`
+            fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
 
         Returns:
@@ -1078,7 +1078,7 @@ class SpectralDensity:
             ax_p (Axis): use this existing axis for the phase plot
             title (str): title to put on this subplot
             show_phase (bool): show phase as well as amplitude
-            kwargs (**dict): values to pass on to plotting routines
+            kwargs (dict): values to pass on to plotting routines
 
         Returns:
             (tuple): tuple containing:

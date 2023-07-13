@@ -5,6 +5,7 @@ Test using spectra (ATACR-style) and time-series (TisKit style):  is there a
 difference?  If not, will be a lot faster to remove noise after calculating
 spectra!
 """
+
 import fnmatch
 from copy import deepcopy
 import logging
@@ -153,7 +154,7 @@ class DataCleaner:
             stream (:class:`obspy.core.stream.Stream`): data to apply to
             fast_calc (bool): Calculate corrected spectra directly from
                 previous spectra.
-            **kwargs (dict): keyword arguments for
+            kwargs (dict): keyword arguments for
                 SpectralDensity.from_stream()
         Return:
             sdf (:class:`.SpectralDensity`): corrected spectral density
