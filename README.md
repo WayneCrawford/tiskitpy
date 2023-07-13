@@ -33,12 +33,6 @@ classes, but should work for non-seismology datasets as well
 - `PetersonNoiseModel`: return the Peterson High and Low Noise Models
 
 
-## `seismo_tools` submodule: seismology-specific functions
-
-- `plot_response`: plot instrument response (command line?)
-- `plot_sensitivity`: plot instrument sensitivity (command line?)
-
-
 ## Installation
 
 First, install `obspy` using the instructions on their webpage.
