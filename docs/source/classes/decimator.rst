@@ -5,7 +5,7 @@ Decimator
 
 Decimate data and put decimation information in instrument responses.
 
-Detailed information is in :ref:`tiskit.Decimator`
+Detailed information is in :ref:`tiskitpy.Decimator`
 
 The main methods are:
 
@@ -37,4 +37,4 @@ Example
 ---------------------
 
 
-see :ref:`tiskit.Decimator_example`
+see :ref:`tiskitpy.Decimator_example`

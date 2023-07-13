@@ -6,7 +6,7 @@ SpectralDensity
 Calculates auto- and cross-spectral densities for a data stream.
 Also outputs coherences as well.  Plots any of the above.   
 
-Detailed information is in :ref:`tiskit.SpectralDensity`
+Detailed information is in :ref:`tiskitpy.SpectralDensity`
 
 The main methods are:
 
@@ -73,4 +73,4 @@ You probably won't ever use these (should I put a `_` before?)
 Example
 ---------------------
 
-see :ref:`tiskit.SpectralDensity_example`
+see :ref:`tiskitpy.SpectralDensity_example`

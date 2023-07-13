@@ -1,4 +1,4 @@
-.. _tiskit.DataCleaner_example:
+.. _tiskitpy.DataCleaner_example:
 
 ==============================
 DataCleaner example code
@@ -8,7 +8,7 @@ DataCleaner example code
 
     from obspy.core.stream import read
     from obspy.core.inventory import read_inventory
-    from tiskit import DataCleaner, SpectralDensity
+    from tiskitpy import DataCleaner, SpectralDensity
 
     stream = read('data/XS.S11D.LH.2016.12.11.mseed', 'MSEED')
     inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')

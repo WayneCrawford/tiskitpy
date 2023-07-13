@@ -1,4 +1,4 @@
-.. _tiskit.Decimator_example:
+.. _tiskitpy.Decimator_example:
 
 ==============================
 Decimator example code
@@ -13,7 +13,7 @@ This example uses data and inventory from a FDSN data server
     from obspy.clients.fdsn import Client
     from obspy.core import UTCDateTime
 
-    from tiskit import Decimator
+    from tiskitpy import Decimator
 
     # Read data and inventory from IRIS server (takes a while)
     client_address = 'IRIS'

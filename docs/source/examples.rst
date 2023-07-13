@@ -4,7 +4,7 @@ Example codes
 =============================
 
 All of these codes and data can be found in the directory
-``tiskit/_examples/codes``
+``tiskitpy/_examples/codes``
 
 .. toctree::
    :maxdepth: 1

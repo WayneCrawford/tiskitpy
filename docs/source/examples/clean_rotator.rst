@@ -1,10 +1,12 @@
-.. _tiskit.CleanRotator_example:
+.. _tiskitpy.CleanRotator_example:
 
 ==============================
 CleanRotator example code
 ==============================
 
 .. code-block:: python
+
+    from tiskitpy import CleanRotator
 
     stream = read('data/XS.S11D.LH.2016.12.11.mseed', 'MSEED')
     inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')

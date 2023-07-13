@@ -3,7 +3,7 @@ DataCleaner
 
 Remove coherent noise seen on another channel
 
-Detailed information is in :ref:`tiskit.DataCleaner`
+Detailed information is in :ref:`tiskitpy.DataCleaner`
 
 The main methods are:
 
@@ -33,4 +33,4 @@ Example
 ---------------------
 
 
-see :ref:`tiskit.DataCleaner_example`
+see :ref:`tiskitpy.DataCleaner_example`

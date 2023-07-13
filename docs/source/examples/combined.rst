@@ -1,4 +1,4 @@
-.. _tiskit.combined_example:
+.. _tiskitpy.combined_example:
 
 ==============================
 Combining classes
@@ -13,7 +13,7 @@ Combining classes
     from obspy.core.inventory import read_inventory
     from matplotlib import pyplot as plt
 
-    from tiskit import CleanRotator, SpectralDensity, DataCleaner
+    from tiskitpy import CleanRotator, SpectralDensity, DataCleaner
 
     stream = read('data/XS.S11D.LH.2016.12.11.mseed', 'MSEED')
     inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')

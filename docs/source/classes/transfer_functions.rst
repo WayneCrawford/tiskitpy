@@ -1,12 +1,12 @@
-.. _TransferFunctions:
+.. _ResponseFunctions:
 
-TransferFunctions
+ResponseFunctions
 =======================
 
-Calculate transfer functions (actually, frequency response functions, according
-to [BP2010]_) for a given input channel and a range of output channels.
+Calculate frequency response functions for a given input channel and
+a range of output channels.
 
-Detailed information is in :ref:`tiskit.TransferFunctions`
+Detailed information is in :ref:`tiskitpy.ResponseFunctions`
 
 The main methods are:
 
@@ -18,10 +18,10 @@ Constructor
 Properties
 ---------------------
 
-:`freqs`: Transfer function frequencies
+:`freqs`: Frequency response function frequencies
 :`n_windows`: Number of time series data windows used
-:`input_channel`: Transfer function input channel
-:`input_units`: Transfer function input channel units
+:`input_channel`: Frequency response function input channel
+:`input_units`: Frequency response function input channel units
 :`output_channels`: List of the output channels
 :`noise_channels`: Noise channels for each xf
 
@@ -42,7 +42,7 @@ Get
 :`noise_channel(output_channel)`: Return the channel ("input", "output" or "equal")
     assumed to have incoherent noise
 :`output_units(output_channel)`: output channel units
-:`instrument_response(output_channel)`: transfer function's instrument respose 
+:`instrument_response(output_channel)`: frequency response function's instrument respose 
     (output_channel_instrument_response / input_channel_instrument_response)
 :`uncertainty(output_channel)`: uncertainty of the given `value` s
 :`uncertainty_wrt_counts(output_channel)`: uncertainty with respect
@@ -51,11 +51,11 @@ Get
 Other
 ^^^^^^^^^^^^^^^^^^^^^
 
-:`plot`: plot the transfer functions
-:`plot_one(in_chan, out_chan, ...)`: plot one transfer function
+:`plot`: plot the frequency response functions
+:`plot_one(in_chan, out_chan, ...)`: plot one frequency response function
 
 Example
 ---------------------
 
 
-see :ref:`tiskit.TransferFunctions_example`
+see :ref:`tiskitpy.ResponseFunctions_example`

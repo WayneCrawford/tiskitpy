@@ -5,7 +5,7 @@ TimeSpans
 
 A class to cut out "undesired" data.
 
-Detailed information is in :ref:`tiskit.TimeSpans`
+Detailed information is in :ref:`tiskitpy.TimeSpans`
 
 The main methods are:
 
@@ -51,4 +51,4 @@ Example
 ----------------------
 
 
-see :ref:`tiskit.TimeSpans_example`
+see :ref:`tiskitpy.TimeSpans_example`

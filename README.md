@@ -6,7 +6,7 @@ Uses the obspy seismological Trace, Stream (data) and Inventory (metadata)
 classes, but should work for non-seismology datasets as well
 
 
-[Documentation](https://tiskit.readthedocs.io/en/latest/index.html)
+[Documentation](https://tiskitpy.readthedocs.io/en/latest/index.html)
 
 
 ## Classes
@@ -50,8 +50,4 @@ You can also install in editable mode (for developers), with:
 
 ### Using `pip`
 
-Type `pip install tiskit-py`
-
-Note that I had to call this module `tiskit-py` on PyPI, rather than `tiskit`,
-so you may have to change the `import` calls in your code from `import tiskit`
-to `import tiskit-py as tiskit`
+Type `pip install tiskitpy`

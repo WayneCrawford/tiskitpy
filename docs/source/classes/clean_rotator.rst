@@ -9,7 +9,7 @@ noise [#f1]_.
 **BUG: The code only rotates about two axes, so it is not appropriate for
 rotating the horizontal axes, which could lose their orientation**
 
-Detailed information is in :ref:`tiskit.CleanRotator`
+Detailed information is in :ref:`tiskitpy.CleanRotator`
 
 The main methods are:
 
@@ -36,4 +36,4 @@ Example
 ---------------------
 
 
-see :ref:`tiskit.CleanRotator_example`
+see :ref:`tiskitpy.CleanRotator_example`

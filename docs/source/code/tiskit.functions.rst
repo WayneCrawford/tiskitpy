@@ -1,17 +1,17 @@
 Functions
 ======================
 
-tiskit.fir2caus
+tiskitpy.fir2caus
 -----------------------------
 
-.. autofunction:: tiskit.fir2caus
+.. autofunction:: tiskitpy.fir2caus
 
-tiskit.read_MSEED
+tiskitpy.read_MSEED
 -----------------------------
 
-.. autofunction:: tiskit.read_MSEED
+.. autofunction:: tiskitpy.read_MSEED
 
-tiskit.Peterson_noise_model
+tiskitpy.Peterson_noise_model
 -----------------------------
 
-.. autofunction:: tiskit.Peterson_noise_model
+.. autofunction:: tiskitpy.Peterson_noise_model

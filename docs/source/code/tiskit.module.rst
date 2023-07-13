@@ -1,4 +1,4 @@
 Module
 ======================
 
-.. automodule:: tiskit
+.. automodule:: tiskitpy
