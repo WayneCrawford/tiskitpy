@@ -1,4 +1,4 @@
-# TiSKit
+# TiSKitPy
 
 Routines for time series data processing
 
@@ -17,7 +17,7 @@ classes, but should work for non-seismology datasets as well
   response
 - `SpectralDensity`: Calculate and manipulate spectral density functions.
 - `TimeSpans`: Specify time spans to be removed, kept, zeroed, etc.
-- `TransferFunctions`: Transfer functions for a given input channel.
+- `ResponseFunctions`: Frequency response functions for a given input channel.
             
                
 ## Functions

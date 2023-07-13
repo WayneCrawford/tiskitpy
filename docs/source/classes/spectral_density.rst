@@ -43,7 +43,7 @@ Get Methods
     between the given channels
 :`channel_name(channel_name)`: get the specified channel name, expanding
     wildcards and verifying that the result is unique
-:`channel_response(channel)`: the channel's instrument response
+:`channel_instrument_response(channel)`: the channel's instrument response
 :`channel_units(channel)`: the channel's input (physical) units
 :`units(in_channel, out_channel)`: get the units of the corresponding
     cross- or auto-spectra
@@ -67,7 +67,7 @@ You probably won't ever use these (should I put a `_` before?)
 
 :`put_crossspect(in_channel, out_channel, spect)`: put a cross-spectral density in the given slot
 :`put_autospect(channel, spect)`: same as `put_crossspect(channel, channel, spect)`
-:`put_channel_response(channel, response)`: put a channel response in the given slot
+:`put_channel_instrument_response(channel, response)`: put a channel response in the given slot
 :`replace_channel_name(channel, replacement)`: change a channel name
 
 Example

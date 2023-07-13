@@ -76,3 +76,15 @@ method call parameters.  Created a readthedocs page.
     - Added 'outfile' to TransferFunction.plot()
     - Added TransferFunction.put_response()
     
+## 0.4
+
+- Renamed TransferFunction to ResponseFunction, changed internal and method
+  names to correspond:
+
+    - .response -> instrument_response
+    - .frf -> .value
+    - .frf_wrt_counts -> .value_wrt_counts
+    - SpectralDensity.channel_response -> SpectralDensity.channel_instrument_response
+    - SpectralDensity.put_channel_response -> SpectralDensity.put_channel_instrument_response
+    - SpectralDensity.__init__(response=) -> SpectralDensity.__init__(instrument_response)
+- Renamed internally tiskit -> tiskitpy 

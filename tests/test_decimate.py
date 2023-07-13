@@ -18,7 +18,8 @@ from obspy.core.stream import read as stream_read
 from matplotlib import pyplot as plt
 import numpy as np
 
-from tiskit.decimate import FIRFilter, Decimator
+from tiskitpy import Decimator
+from tiskitpy.decimate import FIRFilter
 
 
 class TestMethods(unittest.TestCase):

@@ -9,7 +9,7 @@ import unittest
 
 from obspy.core.stream import read
 
-from tiskit import CleanerString as CS
+from tiskitpy import CleanerString as CS
 
 
 class TestMethods(unittest.TestCase):

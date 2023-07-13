@@ -11,7 +11,7 @@ from obspy.core import Stream, Trace
 
 # sys.path.append("..")
 
-from tiskit.utils.seis_rotate import SeisRotate as SR
+from tiskitpy.utils.seis_rotate import SeisRotate as SR
 
 
 class TestMethods(unittest.TestCase):

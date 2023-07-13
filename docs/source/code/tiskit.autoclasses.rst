@@ -12,4 +12,4 @@ Class DocStrings
    autoclasses/periodic_transient
    autoclasses/spectral_density
    autoclasses/time_spans
-   autoclasses/transfer_functions
+   autoclasses/response_functions

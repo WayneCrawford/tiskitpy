@@ -13,7 +13,7 @@ The main methods are:
 Constructor
 ---------------------
 
-:`TransferFunction(SpectralDensity, in_chan, ...)`: 
+:`ResponseFunction(SpectralDensity, in_chan, ...)`: 
 
 Properties
 ---------------------
@@ -36,14 +36,14 @@ Get
     to the given channel
 :`corrector_wrt_counts(output_channel)`: as above, but with respect to raw
     data counts
-:`frf (output_channel)`: frequency response function
-:`frf_wrt_counts(output_channel)`: frequency response function with respect
+:`value (output_channel)`: frequency response function
+:`value_wrt_counts(output_channel)`: frequency response function with respect
     to raw data counts
 :`noise_channel(output_channel)`: Return the channel ("input", "output" or "equal")
     assumed to have incoherent noise
 :`output_units(output_channel)`: output channel units
-:`response(output_channel)`: transfer function's instrument respose 
-    (output_channel_response / input_channel_response)
+:`instrument_response(output_channel)`: transfer function's instrument respose 
+    (output_channel_instrument_response / input_channel_instrument_response)
 :`uncertainty(output_channel)`: uncertainty of the given `value` s
 :`uncertainty_wrt_counts(output_channel)`: uncertainty with respect
     to raw data counts

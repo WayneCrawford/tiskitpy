@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
-from tiskit import SpectralDensity, TimeSpans
+from tiskitpy import SpectralDensity, TimeSpans
 from make_test_stream import make_test_stream
 
 

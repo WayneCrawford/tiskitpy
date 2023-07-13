@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
     
 version={}
-with open("tiskit/version.py") as fp:
+with open("tiskitpy/version.py") as fp:
     exec(fp.read(),version)
 
 setuptools.setup(
-    name="tiskit-py",
+    name="tiskitpy",
     version=version['__version__'],
     author="Wayne Crawford",
     author_email="crawford@ipgp.fr",
@@ -22,7 +22,7 @@ setuptools.setup(
                       'xarray'],
     entry_points={
          'console_scripts': [
-            'tiskit_decimate_SDS=tiskit.decimate.decimate_SDS:main'
+            'tiskitpy_decimate_SDS=tiskitpy.decimate.decimate_SDS:main'
          ]
     },
     python_requires='>=3.8',
