@@ -166,6 +166,62 @@ class CleanSequence:
             raise TypeError('tr_st is neither a Trace nor a Stream')
                              
     @staticmethod
+    def stream_plot(inp, **kwargs):
+        """
+        Plot an obspy stream with clean_sequence tags
+        
+        Uses Stream.plot() after putting clean_sequence information into
+        the seed_id location code
+        
+        Args:
+            inp (:class:`obspy.core.Stream): stream to plot
+            
+        Other Parameters:
+            **kwargs: Keyword arguments for Stream.plot()
+        """
+        if isinstance(inp, Stream):
+            stream = CleanSequence.seedid_tag(inp)
+            stream.plot(**kwargs)
+        else:
+            raise TypeError('inp is not a Stream')
+                             
+    @staticmethod
+    def stream_print(inp, **kwargs):
+        """
+        Print an obspy stream with clean_sequence tags
+        
+        Uses print(inp) after putting clean_sequence information into
+        the seed_id location code
+        
+        Args:
+            inp (:class:`obspy.core.Stream): stream to print
+            
+        Other Parameters:
+            **kwargs: Keyword arguments for print()
+        """
+        print(CleanSequence.stream_str(inp), **kwargs)
+                             
+    @staticmethod
+    def stream_str(inp, **kwargs):
+        """
+        Return string for an obspy stream with clean_sequence tags
+        
+        Uses Stream.__str__() after putting clean_sequence information into
+        the seed_id location code
+        
+        Args:
+            inp (:class:`obspy.core.Stream): stream
+            
+        Other Parameters:
+            **kwargs: Keyword arguments for Stream.__str__()
+        """
+        if isinstance(inp, Stream):
+            stream = CleanSequence.seedid_tag(inp)
+            return stream.__str__(**kwargs)
+        else:
+            raise TypeError('inp is not a Stream')
+                             
+    @staticmethod
     def _id_list_str(id_list, out_format='minimal'):
         """
         Return the cleaner string for a list of seed_ids

@@ -35,9 +35,8 @@ DataCleaner example code
 
 .. code-block:: python
 
-    # Construct and plot a stream with original and cleaned Z channels
+    # Construct a stream with original and cleaned Z channels
     z_compare = stream.select(channel='*Z') + stream_cleaned.select(channel='*Z')
-    z_compare.plot(outfile='3_DataCleaner_timeseries.png')
     print(z_compare)
 
 .. code-block:: none
@@ -48,9 +47,18 @@ DataCleaner example code
 
 .. code-block:: python
 
-    # Tag trace seed_ids with cleaning information so that it shows up in obspy plots
-    z_compare_tagged = CS.seedid_tag(z_compare)
-    print(z_compare_tagged)
+    # If you plot the stream "normally", can not see which is which
+    z_compare.plot()
+
+.. image:: images/3_DataCleaner_tagged_timeseries.png
+   :width: 564
+
+.. code-block:: python
+
+    # The CleanSequence stream_plot() and stream_print() methods add clean sequence
+    # info to the seed_id before running the corresponding Stream functions
+    CleanSequence.stream_print(z_compare)
+    CleanSequence.stream_plot(z_compare)
 
 .. code-block:: none
 
@@ -58,20 +66,19 @@ DataCleaner example code
     XS.S11D..LHZ       | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
     XS.S11D.-1-2-H.LHZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
 
-.. code-block:: python
-
-    z_compare_tagged.plot()
-
-.. image:: images/3_DataCleaner_tagged_timeseries.png
+.. image:: images/3_DataCleaner_tagged_timeseries_csplot.png
    :width: 564
-   
 
 .. code-block:: python
 
     # compare spectral densities
-    # No need to tag seed_ids, tiskitpy plot() methods do it automatically
+    # (tiskitpy plot() automatically include CleanSequence information)
     sd_compare = SpectralDensity.from_stream(z_compare, inv=inv)
-    sd_compare.plot(overlay=True, outfile='3_DataCleaner_sd_overlay.png')
+    sd_compare.plot(overlay=True)
+
+.. code-block:: none
+
+    [INFO] z_threshold=3, rejected 5% of windows (4/84)
 
 .. image:: images/3_DataCleaner_sd_overlay.png
    :width: 564
