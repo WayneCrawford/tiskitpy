@@ -4,8 +4,6 @@
 DataCleaner example code
 ==============================
 
-from ``tiskitpy/_examples/3_DataCleaner.py``
-
 .. code-block:: python
 
     from obspy.core.stream import read
@@ -21,10 +19,10 @@ from ``tiskitpy/_examples/3_DataCleaner.py``
 
 .. code-block:: none
 
-    [INFO] z_threshold=3 rejected 3 of 84 windows (4%)
-    [INFO] z_threshold=3 rejected 3 of 84 windows (4%)
-    [INFO] z_threshold=3 rejected 3 of 84 windows (4%)
-    [INFO] z_threshold=3 rejected 3 of 84 windows (4%)
+    [INFO] z_threshold=3, rejected 4% of windows (3/84)
+    [INFO] z_threshold=3, rejected 4% of windows (3/84)
+    [INFO] z_threshold=3, rejected 4% of windows (3/84)
+    [INFO] z_threshold=3, rejected 4% of windows (3/84)
 
 .. code-block:: python
 

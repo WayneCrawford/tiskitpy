@@ -4,8 +4,6 @@
 SpectralDensity example code
 ==============================
 
-from ``tiskitpy/_examples/1_SpectralDensity.py``
-
 .. code-block:: python
 
     from obspy.core.stream import read
@@ -39,50 +37,42 @@ from ``tiskitpy/_examples/1_SpectralDensity.py``
 .. code-block:: python
 
     # plot results
-    base = "1_SpectralDensity"
-    sd.plot(outfile=f'{base}_plot.png')
+    sd.plot()
 
 .. image:: images/1_SpectralDensity_plot.png
    :width: 564
    
 .. code-block:: python
 
-    sd.plot(overlay=True, outfile=f'{base}_plot_overlay.png')
+    sd.plot(overlay=True)
 
 .. image:: images/1_SpectralDensity_plot_overlay.png
    :width: 564
    
 .. code-block:: python
 
-    sd.plot_coherences()
-
-.. image:: images/1_SpectralDensity_coher.png
-   :width: 564
-   
-.. code-block:: python
-
-    sd.plot_coherences(display="full", outfile=f'{base}_coher_full.png')
+    sd.plot_coherences(display="full")
 
 .. image:: images/1_SpectralDensity_coher_full.png
    :width: 564
    
 .. code-block:: python
 
-    sd.plot_coherences(display="overlay", outfile=f'{base}_coher_overlay.png')
+    sd.plot_coherences(display="overlay")
 
 .. image:: images/1_SpectralDensity_coher_overlay.png
    :width: 564
 
 .. code-block:: python
 
-    sd.plot_coherences(display="sparse", outfile=f'{base}_coher_sparse.png')
+    sd.plot_coherences(display="sparse")
 
 .. image:: images/1_SpectralDensity_coher_sparse.png
    :width: 564
 
 .. code-block:: python
 
-    sd.plot_coherences(display="minimal", outfile=f'{base}_coher_minimal.png')
+    sd.plot_coherences(display="minimal")
 
 .. image:: images/1_SpectralDensity_coher_minimal.png
    :width: 564

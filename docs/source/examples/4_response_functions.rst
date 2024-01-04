@@ -4,8 +4,6 @@
 ResponseFunctions example code
 ==============================
 
-from ``tiskitpy/_examples/4_ResponseFunctions.py``
-
 .. code-block:: python
 
     from obspy.core.stream import read
