@@ -1,6 +1,6 @@
 # File: docs/requirements.txt
 
-sphinx==4.2.0
-tiskitpy==0.4.post1
-# sphinx_rtd_theme==0.5.1
+sphinx>=6.0
+tiskitpy==0.4.1
+sphinx_rtd_theme>=2.0
 # readthedocs-sphinx-search==0.1.0rc3

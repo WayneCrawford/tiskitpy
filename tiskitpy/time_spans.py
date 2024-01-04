@@ -1,7 +1,6 @@
 #!env python3
 """Class of time spans to remove, keep, zero, etc. in Trace or Stream data"""
 from pathlib import Path
-import logging
 
 from obspy.clients.fdsn import Client
 from obspy.core.event import Catalog, read_events
@@ -11,6 +10,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.dates import date2num
 
+from .logger import init_logger
+
+logger = init_logger()
 
 class TimeSpans:
     """
@@ -20,10 +22,11 @@ class TimeSpans:
     
     You can initialize using:
     
-    - A list of (start_time, end_time) pairs (start_time and end_time can
-      be any input to UTCDateTime, including UTCDateTime)
-    - A list of UTCDateTime start_times and a list of UTCDateTime end_times
-      (the lists must be the same length), or
+        A list of (start_time, end_time) pairs (start_time and end_time can
+        be any input to UTCDateTime, including UTCDateTime)
+    - or -
+        A list of UTCDateTime start_times and a list of UTCDateTime end_times
+        (the lists must be the same length)
     """
     def __init__(self, spans: list=None, start_times: list=None, end_times: list=None):
         if spans is not None:
@@ -121,7 +124,7 @@ class TimeSpans:
             )
             if not quiet:
                 print("Done", flush=True)
-                logging.info(f'writing catalog to "{eq_file}"')
+                logger.info(f'writing catalog to "{eq_file}"')
             if save_eq_file:
                 cat.write(eq_file, format="quakeml")
 
@@ -284,9 +287,9 @@ class TimeSpans:
         new_spans = [x for x in self.spans if x[1] > ts_starttime and x[0] < ts_endtime]
         if len(new_spans) == 0:
             if ts_starttime > self.end_times[-1]:
-                logging.info(f'{ts_starttime=} after end of TimeSpans')
+                logger.info(f'{ts_starttime=} after end of TimeSpans')
             elif ts_endtime < self.start_times[0]:
-                logging.info(f'{ts_endtime=} before start of TimeSpans')
+                logger.info(f'{ts_endtime=} before start of TimeSpans')
             return TimeSpans([[ts_starttime, ts_endtime]])
         if ts_starttime < new_spans[0][0]:
             new_spans = [[ts_starttime, ts_starttime]] + new_spans

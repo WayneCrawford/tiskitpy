@@ -21,7 +21,6 @@ from inspect import getfile, currentframe
 from pathlib import Path
 import warnings
 import fnmatch
-import logging
 
 from numpy import prod
 from obspy.core.stream import Stream, Trace
@@ -30,6 +29,9 @@ from obspy.core.inventory import (FIRResponseStage,
                                   CoefficientsTypeResponseStage)
 
 from .fir_filter import FIRFilter
+from ..logger import init_logger
+
+logger = init_logger()
 
 
 @dataclass
@@ -245,18 +247,16 @@ class Decimator:
             normalize_firs (bool): normalizes any FIR channel that isn't
                 already
         """
-        if quiet is not True:
-            print("channel modified from {} ({} sps)".format(
-                  ".".join([net, sta, cha.location_code, cha.code]),
-                  cha.sample_rate), end=" ")
+        logger.info("channel modified from {} ({} sps)".format(
+              ".".join([net, sta, cha.location_code, cha.code]),
+              cha.sample_rate))
         input_sample_rate = cha.sample_rate
         self._add_instrument_response(cha, input_sample_rate)
         self._change_chan_loc(cha, input_sample_rate)
         cha.sample_rate /= self.decimation_factor
-        if quiet is not True:
-            print("to {} ({:g} sps)".format(
-                  ".".join([net, sta, cha.location_code, cha.code]),
-                  cha.sample_rate))
+        logger.info("to {} ({:g} sps)".format(
+                    ".".join([net, sta, cha.location_code, cha.code]),
+                    cha.sample_rate))
 
     @staticmethod
     def _normalize_firs(cha):
@@ -281,7 +281,7 @@ class Decimator:
                         f"Unknown FIR coefficient symmetry: {stg.symmetry}"
                     )
                 if abs(coeff_sum - 1) > 0.01:
-                    logging.info(f"DECIMATOR: Sum of FIR coeffs = "
+                    logger.info(f"DECIMATOR: Sum of FIR coeffs = "
                                  f"{coeff_sum}, normalizing")
                     stg.coefficients = [x / coeff_sum
                                         for x in stg.coefficients]
@@ -294,7 +294,7 @@ class Decimator:
                     coeff_sum = sum(stg.numerator) / sum(stg.denominator)
                 # descriptor = "Coeff numerator"
                 if abs(coeff_sum - 1) > 0.01:
-                    logging.info(
+                    logger.info(
                         f"DECIMATOR: sum(numerator coeffs)/sum(denom coeffs)"
                         f" = {coeff_sum}, normalizing")
                     stg.numerator = [x / coeff_sum for x in stg.numerator]
@@ -384,9 +384,8 @@ class Decimator:
         for tr in st.traces:
             newtr.append(self._run_trace(tr))
         st.traces = newtr
-        if self.verbose:
-            print("New data has {} samples".format([tr.data.size
-                                                    for tr in st]))
+        logger.info("New data has {} samples".format([tr.data.size
+                                                for tr in st]))
         st.verify()
         return st
 
@@ -399,10 +398,9 @@ class Decimator:
         dtype = trace.data.dtype
         tr = trace.copy()
         sr = tr.stats.sampling_rate
-        if self.verbose:
-            print("Decimating data from {:g} to {:g} Hz ({:d}x)... "
-                  .format(sr, sr / self.decimation_factor,
-                          self.decimation_factor))
+        logger.info("Decimating data from {:g} to {:g} Hz ({:d}x)... "
+                    .format(sr, sr / self.decimation_factor,
+                            self.decimation_factor))
         tic = time.time()
         for d in self.decimates:
             fir_filter = FIRFilter.from_SAC(d)
@@ -414,8 +412,7 @@ class Decimator:
             tr.stats.channel,
             tr.stats.location,
             tr.stats.sampling_rate * self.decimation_factor)
-        if self.verbose:
-            print("Took {:.1f} seconds".format(time.time() - tic))
+        logger.info("Took {:.1f} seconds".format(time.time() - tic))
         return tr
 
     def _read_FIR_SAC(decimation):

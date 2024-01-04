@@ -4,15 +4,15 @@ Clean tilt noise from OBS vertical channel using non-deforming rotation
 
 Is there any reason why rotate_clean isn't just rotate_calc + rotate_apply?
 """
-import logging
-
 import numpy as np
 from obspy.core.stream import Stream
 from obspy import UTCDateTime
 
 from .time_spans import TimeSpans
-from .utils import SeisRotate
+from .utils import SeisRotate, CleanSequence as CS
+from .logger import init_logger
 
+logger = init_logger()
 
 class CleanRotator:
     """
@@ -59,7 +59,7 @@ class CleanRotator:
             verbose=verbose, ignore_spans=ignore_spans, uselogvar=uselogvar
         )
         if verbose:
-            logging.info(f"Best angle, azimuth is ({ang:.2f}, {azi:.2f})")
+            logger.info(f"    Best angle= azimuth is ({ang:.2f}, {azi:.2f})")
         self.angle = ang
         self.azimuth = azi
         if plot:
@@ -129,6 +129,7 @@ class CleanRotator:
         seis_stream, other_stream = SeisRotate.separate_streams(stream)
         srData = SeisRotate(stream)
         srData.zrotate(self.angle, self.azimuth, horiz_too)
+        srData.Z = CS.tag(srData.Z, "ROT")
         if other_stream is None:
             return srData.stream()
         else:

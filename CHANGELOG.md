@@ -87,4 +87,10 @@ method call parameters.  Created a readthedocs page.
     - SpectralDensity.channel_response -> SpectralDensity.channel_instrument_response
     - SpectralDensity.put_channel_response -> SpectralDensity.put_channel_instrument_response
     - SpectralDensity.__init__(response=) -> SpectralDensity.__init__(instrument_response)
-- Renamed internally tiskit -> tiskitpy 
+- Internally renamed `tiskit` to `tiskitpy` 
+
+
+## 0.4.1
+    Rewrote tracking of cleaning steps, a lot of internal work, including
+    new classes, but should be invisible when using the command-line codes
+    and mostly invisible when using the API.

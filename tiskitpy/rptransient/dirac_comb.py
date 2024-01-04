@@ -6,20 +6,17 @@ Versions:
 import math as M
 import time
 
-# import obspy.core
 from obspy.core import Trace
 import numpy as np
-
-# import scipy as sp
 import matplotlib.pyplot as plt
 from scipy.signal import convolve
-
-# from scipy.signal import correlate, deconvolve
 from scipy.fftpack import ifft
 
 from .utils import stack_data
 from ..time_spans import TimeSpans
+from ..logger import init_logger
 
+logger = init_logger()
 DEBUG = False
 
 

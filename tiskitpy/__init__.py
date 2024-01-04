@@ -26,7 +26,8 @@ Functions
 
 """
 from .clean_rotator import CleanRotator
-from .data_cleaner import DataCleaner, DCRF, DCRFs, CleanerString
+from .logger import init_logger
+from .data_cleaner import DataCleaner, RFList
 from .decimate import Decimator
 from .rptransient import PeriodicTransient
 from .spectral_density import SpectralDensity, Peterson_noise_model
@@ -34,7 +35,5 @@ from .time_spans import TimeSpans
 from .response_functions import ResponseFunctions
 from .read_mseed import read_MSEED
 from .fir_corr import fir2caus
-# from .seismo_tools import plot_response, plot_sensitivity
-## `seismo_tools` submodule: seismology-specific functions
-# - plot_response`: plot instrument response (command line?)
-# - plot_sensitivity: plot instrument sensitivity (command line?)
+from .utils import CleanSequence
+# from .utils import remove_cleaner_string, CleanerString, CleanSequence

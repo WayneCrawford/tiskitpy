@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 from scipy.signal import convolve, freqz, lfilter
 from obspy.core.inventory.response import FIRResponseStage
 
+from ..logger import init_logger
+
+logger = init_logger()
+
 
 @dataclass
 class FIRFilter:

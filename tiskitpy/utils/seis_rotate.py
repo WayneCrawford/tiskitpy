@@ -6,14 +6,16 @@ Is there any reason why rotate_clean isn't just rotate_calc + rotate_apply?
 """
 import math as M
 from copy import deepcopy
-import logging
 
 import numpy as np
 import scipy as sp
-
 import matplotlib.pyplot as plt
 from obspy.signal.rotate import rotate2zne
 from obspy.core.stream import Stream  # , Trace
+
+from ..logger import init_logger
+
+logger = init_logger()
 
 
 class SeisRotate:
@@ -174,7 +176,7 @@ class SeisRotate:
         Arguments:
             verbose (bool): display extra information?
         """
-        logging.debug("Estimating preliminary angle based on signal ratios")
+        logger.debug("Estimating preliminary angle based on signal ratios")
         ZoverN = np.divide(self.Z.data, self.N.data)
         ZoverE = np.divide(self.Z.data, self.E.data)
         # Throw out not-a-numbers
@@ -187,24 +189,24 @@ class SeisRotate:
         ZEratio = np.median(ZoverE)
         plt.plot(ZoverN, "x")
 
-        logging.debug(f"    {ZNratio=}, {ZEratio=}")
+        logger.debug(f"    {ZNratio=}, {ZEratio=}")
 
         ZNangle = (180 / M.pi) * M.asin(ZNratio)
         ZEangle = (180 / M.pi) * M.asin(ZEratio)
         azimuth = (180 / M.pi) * M.atan(ZNratio / ZEratio)
         azimuth = 90 - (180 / M.pi) * M.atan2(ZNratio, ZEratio)
-        logging.debug(f"    ZNangle={ZNangle:<10g}, ZEangle={ZEangle:<10g}")
+        logger.debug(f"    ZNangle={ZNangle:<10g}, ZEangle={ZEangle:<10g}")
         # The angle from vertical below is just a guess, should developed
         # mathematically (or at least derived empirically from the searched
         # results)
         angle = M.sqrt(ZNangle**2 + ZEangle**2)
-        logging.debug("    estAngle= {angle:<10g}, estAzim = {azimuth:<10g}")
+        logger.debug("    estAngle= {angle:<10g}, estAzim = {azimuth:<10g}")
 
         # Sanity check: do the dip equations from zrotate()
         # return ZN & ZE angles??
         dip_N = angle * M.cos(np.deg2rad(azimuth))
         dip_E = angle * M.sin(np.deg2rad(azimuth))
-        logging.info(f"{dip_N=}, {dip_E=}")
+        logger.info(f"{dip_N=}, {dip_E=}")
 
         return angle, azimuth
 
@@ -224,35 +226,38 @@ class SeisRotate:
 
         Searches for minimum Z energy as function of angle
         """
-        logging.debug("Calculating best angle based on variance minimization")
+        logger.debug("Calculating best angle based on variance minimization")
         start_var = self._rotZ_variance([startAngle, startAzimuth])
-        logging.debug(f"Starting variance = {start_var}")
+        logger.debug(f"Starting variance = {start_var}")
 
         xopt, fopt, iter, funcalls, warnflag, allvecs = sp.optimize.fmin(
             func=self._rotZ_variance,
             x0=[startAngle, startAzimuth],
-            disp=verbose,
+            disp=False,
             full_output=True,
             retall=True,
         )
         bestAngles = xopt
 
-        logging.debug(f"{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}")
-        logging.debug("    best Angle,Azimuth = {:.2f},{:.2f}".format(
-                      bestAngles[0], bestAngles[1]))
+        if verbose is True:
+            logger.info(f"{fopt=}, {iter=}, {funcalls=}")
+            logger.debug(f"{xopt=}, {warnflag=}")
+        else:
+            logger.debug(f"{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}")
+        
         if self.uselogvar is False:
-            logging.info(
+            logger.info(
                 "    variance reduced from "
                 "{:.2e} to {:.2e} ({:.1f}% lower)".format(
                     start_var, fopt,
                     100 * (1 - fopt / start_var)))
         else:
-            logging.info(" log variance reduced from "
+            logger.info("    log variance reduced from "
                   "{:.1f} to {:.1f} ({:.1f}% lower)".format(
                       start_var, fopt,
                       100 * (1 - 10 ** (fopt - start_var))))
         if warnflag:
-            logging.info(f"{allvecs=}")
+            logger.info(f"{allvecs=}")
 
         return (bestAngles[0], bestAngles[1])
 

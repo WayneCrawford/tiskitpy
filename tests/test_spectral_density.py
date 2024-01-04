@@ -78,16 +78,12 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(x.size, 8192)
         self.assertIsInstance(x, np.ndarray)
         # Verify that the phase of the cross-spect equals 45°
-        # (self.chan_amp_phases['BX2'][0].phase)
         sineparm = self.sineparms["XX.STA.00.BX2"][0]
         ifreq = np.argmin(np.abs(self.sd.freqs - sineparm.frequency))
         self.assertAlmostEqual(np.degrees(np.angle(x[ifreq])), sineparm.phase,
                                places=2)
         # Verify that crossspect for same channel is same as autospect
         chan = "XX.STA.00.BX1"
-        print(f"{self.sd.crossspect(chan, chan)=}")
-        print(f"{self.sd.autospect(chan)=}")
-        print(self.sd.crossspect(chan, chan) == self.sd.autospect(chan))
         self.assertTrue(np.all(self.sd.crossspect(chan, chan)
                         == self.sd.autospect(chan)))
 

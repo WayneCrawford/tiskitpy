@@ -64,10 +64,10 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(
             self.xf.__str__(),
             "ResponseFunctions object:\n"
-            "\tinput_channel='XX.STA.00.BX1'\n"
-            "\toutput_channels=['XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
-            "\tnoise_channels=['output', 'output', 'output']\n"
-            "\tn_windows=6",
+            "  input_channel='XX.STA.00.BX1'\n"
+            "  output_channels=['XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
+            "  noise_channels=['output', 'output', 'output']\n"
+            "  n_windows=6",
         )
 
     def test_freqs(self):

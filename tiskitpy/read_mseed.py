@@ -5,6 +5,9 @@ import glob
 import io
 import os.path
 
+from tiskitpy.logger import init_logger
+
+logger = init_logger()
 
 def read_MSEED(filenames, starttime, endtime, verbose=False):
     """
