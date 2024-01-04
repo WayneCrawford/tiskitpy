@@ -14,7 +14,7 @@ TimeSpans example code
     inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')
     Z = stream.select(channel='*Z')
     ts = TimeSpans([['2016-12-11T16:50', '2016-12-11T17:10']])
-    ts.plot(Z, outfile='6_TimeSpans_tsplot.png')
+    ts.plot(Z)
 
 .. image:: images/6_TimeSpans_tsplot.png
    :width: 564
@@ -23,7 +23,7 @@ TimeSpans example code
 
     Zs = Z.copy()
     Zs += ts.zero(Z)
-    Zs.plot(outfile='6_TimeSpans_zeroed.png')
+    Zs.plot()
 
 .. image:: images/6_TimeSpans_zeroed.png
    :width: 564
@@ -35,14 +35,14 @@ TimeSpans example code
     kwargs={'inv': inv, 'z_threshold': 1000}
     sd =   SpectralDensity.from_stream(Z, **kwargs)
     sd_z = SpectralDensity.from_stream(Z, avoid_spans=ts, **kwargs)
-    sd.plot(outfile='6_TimeSpans_spect.png')
+    sd.plot()
 
 .. image:: images/6_TimeSpans_spect.png
    :width: 564
 
 .. code-block:: python
 
-    sd_z.plot(outfile='6_TimeSpans_spect_zeroed.png')
+    sd_z.plot()
 
 .. image:: images/6_TimeSpans_spect_zeroed.png
    :width: 564

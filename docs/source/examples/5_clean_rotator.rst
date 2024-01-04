@@ -22,11 +22,10 @@ CleanRotator example code
 
 .. code-block:: python
 
-stream_rotated = cr.apply(stream)
-    
-z_compare = stream.select(channel='*Z') + stream_rotated.select(channel='*Z')
-z_compare.plot(outfile='5_CleanRotator_z_compare.png')
-print(z_compare)
+    stream_rotated = cr.apply(stream)
+    z_compare = stream.select(channel='*Z') + stream_rotated.select(channel='*Z')
+    z_compare.plot(outfile='5_CleanRotator_z_compare.png')
+    print(z_compare)
 
 .. code-block:: none
 
@@ -36,7 +35,7 @@ print(z_compare)
 
 .. code-block:: python
 
-z_compare.plot(outfile='5_CleanRotator_z_compare.png')
+    z_compare.plot(outfile='5_CleanRotator_z_compare.png')
 
 .. image:: images/5_CleanRotator_z_compare.png
    :width: 564
