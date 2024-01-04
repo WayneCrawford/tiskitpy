@@ -14,7 +14,7 @@ DataCleaner example code
     stream = read('data/XS.S11D.LH.2016.12.11.mseed', 'MSEED')
     inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')
 
-    # Calculate and apply Datacleaner from/to stream, subtracting *1, then *2, then *H
+    # Calculate a Datacleaner that will subtract `*1`, then `*2`, then `*H`
     dc = DataCleaner(stream, ['*1','*2','*H'])
 
 .. code-block:: none
@@ -26,8 +26,9 @@ DataCleaner example code
 
 .. code-block:: python
 
+    # Clean the data, then construct a stream with original and cleaned channels
     stream_cleaned = dc.clean_stream(stream)
-
+    z_compare = stream.select(channel='*Z') + stream_cleaned.select(channel='*Z')
 
 .. code-block:: none
 
@@ -35,20 +36,15 @@ DataCleaner example code
 
 .. code-block:: python
 
-    # Construct a stream with original and cleaned Z channels
-    z_compare = stream.select(channel='*Z') + stream_cleaned.select(channel='*Z')
+    # If you print and plot the stream "normally", can not see which is which
     print(z_compare)
+    z_compare.plot()
 
 .. code-block:: none
 
     2 Trace(s) in Stream:
     XS.S11D..LHZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
     XS.S11D..LHZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
-
-.. code-block:: python
-
-    # If you plot the stream "normally", can not see which is which
-    z_compare.plot()
 
 .. image:: images/3_DataCleaner_tagged_timeseries.png
    :width: 564
