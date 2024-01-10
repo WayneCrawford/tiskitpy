@@ -1,9 +1,6 @@
 *******************************
-TiSKitPy
+Functional overview
 *******************************
-
-Time series data processing, based on [BP2010]_
-
 
 Classes
 =========================
@@ -16,6 +13,8 @@ Classes
 :SpectralDensity: Calculate and manipulate spectral density functions.
 :TimeSpan: Specify time spans to be removed, kept, zeroed, etc.
 :ResponseFunctions: Frequency response functions for a given input channel.
+:CleanedStream: obspy `Stream` subclass that includes cleaned_sequence information
+    in the `print()` and `plot()` methods and adds a `tag()` method
                
 Functions
 =========================
@@ -37,6 +36,3 @@ Command-line programs
 *I had to remove `SpectralDensity.from_ATACR()` (never tested
 anyway) because readthedocs had a problem importing the `obstools` package
 using `pip`*
-
-.. [BP2010] Bendat J. S. and A. G. Piersol (1986), Random Data:
-    Analysis and Measurement Procedures, 566 pp.

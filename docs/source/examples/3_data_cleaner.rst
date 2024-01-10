@@ -51,10 +51,10 @@ DataCleaner example code
 
 .. code-block:: python
 
-    # The CleanSequence stream_plot() and stream_print() methods add clean sequence
-    # info to the seed_id before running the corresponding Stream functions
-    CleanSequence.stream_print(z_compare)
-    CleanSequence.stream_plot(z_compare)
+    # If you convert the Stream to its CleanedStream subclass, all works automatically
+    z_compare = CleanedStream(z_compare)
+    print(z_compare)
+    z_compare.plot(outfile='3_DataCleaner_tagged_timeseries_cleanedstream.png')
 
 .. code-block:: none
 
@@ -62,7 +62,7 @@ DataCleaner example code
     XS.S11D..LHZ       | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
     XS.S11D.-1-2-H.LHZ | 2016-12-10T23:59:59.992583Z - 2016-12-11T23:59:59.992583Z | 1.0 Hz, 86401 samples
 
-.. image:: images/3_DataCleaner_tagged_timeseries_csplot.png
+.. image:: images/3_DataCleaner_tagged_timeseries_cleanedstream.png
    :width: 564
 
 .. code-block:: python

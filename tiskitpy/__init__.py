@@ -26,6 +26,7 @@ Functions
 
 """
 from .clean_rotator import CleanRotator
+from .cleaned_stream import CleanedStream
 from .logger import init_logger
 from .data_cleaner import DataCleaner, RFList
 from .decimate import Decimator

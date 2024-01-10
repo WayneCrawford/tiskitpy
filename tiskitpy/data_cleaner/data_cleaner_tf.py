@@ -70,16 +70,16 @@ class DataCleaner:
         self.starttimes = sdfs[0].starttimes
         self.RFList = RFList()
         # Calculate removal frequency response functions
-        out_chans = sdfs[0].channel_names
-        # in_list = [_list_match_pattern(x, out_chans) for x in remove_list]
-        in_list = [sdfs[0].channel_name(x) for x in remove_list]
+        out_ids = sdfs[0].ids
+        # in_list = [_list_match_pattern(x, out_ids) for x in remove_list]
+        in_list = [sdfs[0].channel_id(x) for x in remove_list]
         clean_sequence = []
-        for in_chan in in_list:
-            out_chans = [x for x in out_chans if not x == in_chan]
+        for in_id in in_list:
+            out_ids = [x for x in out_ids if not x == in_id]
             rf = ResponseFunctions(
                 sdfs[-1],
-                in_chan,
-                out_chans,
+                in_id,
+                out_ids,
                 noise_channel,
                 n_to_reject,
                 min_freq,
@@ -87,15 +87,15 @@ class DataCleaner:
                 show_progress=show_progress,
             )
             # Apply data cleaner and update channel names with removed channels
-            clean_sequence.append(in_chan)
+            clean_sequence.append(in_id)
             self.RFList.append(deepcopy(rf))
             if fast_calc:
                 sdfs.append(self._removeRF_SDF(sdfs[-1], rf, show_progress))
             else:
                 sdfs.append(SpectralDensity.from_stream(
                     stream, data_cleaner=self, **kwargs))
-            # out_chans = [CS.insert(remove_new, x) for x in out_chans]
-            # out_chans = [x + remove_new for x in out_chans]
+            # out_ids = [CS.insert(remove_new, x) for x in out_ids]
+            # out_ids = [x + remove_new for x in out_ids]
         if show_progress:
             logger.info("Plotting sdfs after data cleaner applied")
             self._plot_sdfs(sdfs)
@@ -169,6 +169,7 @@ class DataCleaner:
             stream = stream.split().merge(fill_value='interpolate')
         out_stream = stream.copy()
         seed_ids = [tr.id for tr in out_stream]
+        print(f'{seed_ids=}')
         clean_seqs = {k: "" for k in seed_ids}
 
         if in_time_domain is True:
@@ -177,9 +178,13 @@ class DataCleaner:
             logger.info("Correcting traces in the frequency domain")
 
         for rfs in self.RFList:
-            in_chan = rfs.input_channel
-            for out_chan in rfs.output_channels:
-                in_trace = out_stream.select(id=in_chan)[0]
+            in_id = rfs.input_channel_id
+            print(f'{in_id=}')
+            for out_chan in rfs.output_channel_ids:
+                in_trace = out_stream.select(id=in_id)[0]
+                print(stream)
+                print(f'{type(stream)=}')
+                print(f'{out_chan=}')
                 out_trace = out_stream.select(id=out_chan)[0]
                 out_stream.remove(out_trace)
                 out_trace = self._correct_trace(
@@ -320,12 +325,12 @@ class DataCleaner:
         Returns:
             sdf (:class:`.SpectralDensity`): cleaned spectral density functions
         """
-        ic = rf.input_channel
-        out_chans = rf.output_channels
+        ic = rf.input_channel_id
+        out_ids = rf.output_channel_ids
 
         sdf = deepcopy(sdf)  # Avoids overwriting input object
         in_auto = sdf.autospect(ic)
-        for oc in out_chans:
+        for oc in out_ids:
             # rf_oc = rf.values_counts(oc)
             rf_oc = rf.corrector(oc)
             # out_auto = sdf.autospect(strip_remove_one(oc))
@@ -381,24 +386,21 @@ class DataCleaner:
             ValueError("len(sdfs) isn't len(self.RFList)+1")
         # clean_seqs = [""] + [t.clean_sequence for t in self.RFList]
         inputs = [""] + [t.rfs.input_channel for t in self.RFList]
-        n_channels = len(sdfs[0].channel_names)
+        n_channels = len(sdfs[0].ids)
         rows = int(np.floor(np.sqrt(n_channels)))
         cols = int(np.ceil(n_channels / rows))
         fig, axs = plt.subplots(rows, cols)
         irow, icol = 0, 0
-        for chan in sdfs[0].channel_names:
+        for chan_id in sdfs[0].ids:
             ax = axs[irow, icol]
-            # make one line for each input
-            # inputs_base = [CS.strip(i) for i in inputs]
-            # ch_base = CS.strip(chan)
             plot_sdfs = sdfs
-            if chan in inputs:
-                plot_sdfs = sdfs[:inputs.index(chan)]
+            if id in inputs:
+                plot_sdfs = sdfs[:inputs.index(chan_id)]
             for sdf in plot_sdfs:
                 ax.loglog(sdf.freqs,
-                          np.abs(sdf.autospect(chan)),
+                          np.abs(sdf.autospect(chan_id)),
                           alpha=0.75,
-                          label=chan + sdf.cleaners(chan))
+                          label=chan_id + sdf.cleaners(chan_id))
             if irow == rows - 1:
                 ax.set_xlabel("Frequency (Hz)")
             ax.legend()

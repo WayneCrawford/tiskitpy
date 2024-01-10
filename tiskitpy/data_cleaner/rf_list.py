@@ -36,11 +36,11 @@ class RFList(UserList):
         """
         clean_sequence_dict = {}
         for rfs in self:
-            id_in = rfs.input_channel
+            id_in = rfs.input_channel_id
             if not rfs.freqs.shape == fts[id_in].shape:
                 ValueError("frequency response function and ft have different shapes "
                            f"({rfs.freqs.shape} vs {fts[id_in].shape})")
-            for id_out in rfs.output_channels:
+            for id_out in rfs.output_channel_ids:
                 # Verify that the fourier transforms have the same shape
                 if not fts[id_out].shape == fts[id_in].shape:
                     ValueError(f"ft[{id_in=}] and ft[{id_out=}] "
@@ -67,8 +67,8 @@ class RFList(UserList):
         s += "   ==== | ================== | ========================================\n"
         for rfs, i in zip(self, range(len(self))):
             s += " {:>6d} | {:18s} | {}\n".format(
-                i+1, rfs.input_channel,
-                "['" +"', '".join(rfs.output_channels) + "']")
+                i+1, rfs.input_channel_id,
+                "['" +"', '".join(rfs.output_channel_ids) + "']")
         return s
 
     def plot(self, outfile=None, title=None):
@@ -100,13 +100,13 @@ class RFList(UserList):
                 col += 1
             row += 1
             col = 0
-        seed_idl = self[0].rfs.input_channel.split(".")
+        seed_idl = self[0].rfs.input_channel_id.split(".")
         if title is not None:
             fig.suptitle(title)
         elif len(seed_idl) > 1:
             title = ".".join(seed_idl[:2])
         else:
-            title = self[0].rfs.input_channel
+            title = self[0].rfs.input_channel_id
         fig.suptitle(f"{title} DataCleaner Frequency Response Functions")
         if outfile:
             fig.savefig(outfile)

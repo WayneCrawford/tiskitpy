@@ -39,7 +39,7 @@ class TestMethods(unittest.TestCase):
         rot_stream = rotator.apply(stream)
         rotZ = rot_stream.select(channel='*Z')[0]
         self.assertEqual(rotZ.get_id(), 'XS.S10D..LHZ')
-        self.assertEqual(CS.seedid_tag(rotZ).get_id(), 'XS.S10D.-T.LHZ')
+        self.assertEqual(CS.seedid_tag(rotZ).get_id(), 'XS.S10D.-ROT.LHZ')
         self.assertEqual(CS.seedid_tag(rotZ, 'min_code').get_id(), 'XS.S10D.-ROT.LHZ')
 
 

@@ -1,6 +1,6 @@
 from obspy.core.stream import read
 from obspy.core.inventory import read_inventory
-from tiskitpy import DataCleaner, SpectralDensity, CleanSequence
+from tiskitpy import DataCleaner, SpectralDensity, CleanedStream
 
 # Read data and inventory
 stream = read('data/XS.S11D.LH.2016.12.11.mseed', 'MSEED')
@@ -20,10 +20,11 @@ print('='*80)
 print(z_compare)
 z_compare.plot(outfile='3_DataCleaner_tagged_timeseries.png')
 
-# The CleanSequence stream_plot() and stream_print() methods wrap the
-# Stream functions after adding clean sequence info to the seed_id
-CleanSequence.stream_print(z_compare)
-CleanSequence.stream_plot(z_compare, outfile='3_DataCleaner_tagged_timeseries_csplot.png')
+# If you convert the Stream to its CleanedStream subclass, all works automatically
+z_compare = CleanedStream(z_compare)
+print('='*80)
+print(z_compare)
+z_compare.plot(outfile='3_DataCleaner_tagged_timeseries_cleanedstream.png')
 
 # compare spectral densities
 # (tiskitpy plot() automatically include CleanSequence information)

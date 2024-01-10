@@ -54,11 +54,11 @@ class TestMethods(unittest.TestCase):
     def test_clean_sdf(self):
         """Test clean_sdf function"""
         sdf = SpectralDensity.from_stream(self.stream, window_s=self.window_s)
-        ch_names = ['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']
+        ch_ids = ['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']
         
         # Test dc1 (one channel removed)
         cleaned = self.dc1.clean_sdf(sdf)
-        self.assertEqual(cleaned.channel_names, ch_names)
+        self.assertEqual(cleaned.ids, ch_ids)
         for chan, cleaned_chans in {
             'XX.STA.00.BX1': None,
             'XX.STA.00.BX2': ['XX.STA.00.BX1'],
@@ -68,7 +68,7 @@ class TestMethods(unittest.TestCase):
         
         # Test dc1 (two channels removed)
         cleaned = self.dc12.clean_sdf(sdf)
-        self.assertEqual(cleaned.channel_names, ch_names)
+        self.assertEqual(cleaned.ids, ch_ids)
         for chan, cleaned_chans in {
             'XX.STA.00.BX1': None,
             'XX.STA.00.BX2': ['XX.STA.00.BX1'],
@@ -115,7 +115,7 @@ class TestMethods(unittest.TestCase):
                 # cleaned.plot(end_time=cleaned[0].stats.starttime + 10)
                 sdf_cleaned = SpectralDensity.from_stream(
                     self.stream, data_cleaner=cleaner, window_s=self.window_s)
-                self.assertEqual(sdf_cleaned.channel_names, list(relations.keys()))
+                self.assertEqual(sdf_cleaned.ids, list(relations.keys()))
                 for chan, clean_seq in relations.items():
                     self.assertEqual(sdf_cleaned.clean_sequence(chan),
                                      clean_seq)

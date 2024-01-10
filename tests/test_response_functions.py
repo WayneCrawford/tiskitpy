@@ -64,8 +64,8 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(
             self.xf.__str__(),
             "ResponseFunctions object:\n"
-            "  input_channel='XX.STA.00.BX1'\n"
-            "  output_channels=['XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
+            "  input_channel_id='XX.STA.00.BX1'\n"
+            "  output_channel_ids=['XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
             "  noise_channels=['output', 'output', 'output']\n"
             "  n_windows=6",
         )
@@ -85,9 +85,9 @@ class TestMethods(unittest.TestCase):
 
     def test_channels(self):
         """Test input_channel and output_channel derived properties"""
-        self.assertEqual(self.xf.input_channel, "XX.STA.00.BX1")
+        self.assertEqual(self.xf.input_channel_id, "XX.STA.00.BX1")
         self.assertEqual(
-            self.xf.output_channels, ["XX.STA.00.BX2", "XX.STA.00.BX3", 'XX.STA.00.BDH']
+            self.xf.output_channel_ids, ["XX.STA.00.BX2", "XX.STA.00.BX3", 'XX.STA.00.BDH']
         )
 
     def test_other_properties(self):

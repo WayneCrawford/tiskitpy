@@ -22,17 +22,15 @@ class CleanSequence:
     seed id using the  `seedid_tag()` and `seedid_untag()` methods
     """
     @staticmethod
-    def tag(inp, clean_chan_id, cleaned_ids=None, verbose=False):
+    def tag(inp, clean_code, cleaned_ids=None, verbose=False):
         """
         Tag Trace stats with a cleaned channel ids
 
         Args:
             inp (:class:`obspy.core.Trace`, :class:`obspy.core.Stream`, a list,
                 or None): the object to tag
-            clean_chan_id (str or list of str): the channel code or id of the
-                cleaned channel.
-                If it does not contain three dots (seed_id),
-                dots will be added to the start.
+            clean_code (str or list of str): transformation code ('ROT', ...)
+                or the seed_id of the cleaned channel
                 If a list, each str in the list will be appended
             cleaned_ids (list): a list of which Stream ids to apply to (can use
                 wildcards). If None, applies to all of the Stream traces
@@ -44,30 +42,32 @@ class CleanSequence:
             TypeError if inp is not a Trace, Stream, list or NoneType
         """
         if inp is None:
-            return CleanSequence.tag([], clean_chan_id)
+            return CleanSequence.tag([], clean_code)
         if isinstance(inp, (Trace, list)):
             outp = inp.copy()
             if cleaned_ids is not None:
                 raise ValueError('cleaned_ids is not None')
-            if isinstance(clean_chan_id, list):
-                for x in clean_chan_id:
+            if isinstance(clean_code, list):
+                for x in clean_code:
                     outp = CleanSequence.tag(outp, x)
                 return outp
             else:
-                clean_chan_id = _to_seed_id(clean_chan_id, verbose)
+                if not _is_seed_id(clean_code) and not _is_trans_code(clean_code):
+                    raise ValueError('"{clean_code=}" is neither a seed_id nor a transformation code')
+                # clean_code = _to_seed_id(clean_code, verbose)
                 if isinstance(inp, Trace):
                     if not 'clean_sequence' in outp.stats:
-                        outp.stats['clean_sequence'] = [clean_chan_id]
+                        outp.stats['clean_sequence'] = [clean_code]
                     else:
-                        outp.stats['clean_sequence'].append(clean_chan_id)
+                        outp.stats['clean_sequence'].append(clean_code)
                 else:
-                    outp.append(clean_chan_id)
+                    outp.append(clean_code)
         elif isinstance(inp, Stream):
             outp = inp.copy()
             cleaned_ids = _expand_cleaned_ids(cleaned_ids, inp)
             for tr in outp:
                 if tr.get_id() in cleaned_ids:
-                    new_tr = CleanSequence.tag(tr, clean_chan_id)
+                    new_tr = CleanSequence.tag(tr, clean_code)
                     outp.remove(tr)
                     outp.append(new_tr)
         elif isinstance(inp, list):
@@ -76,7 +76,7 @@ class CleanSequence:
                 raise ValueError('cleaned_ids is not None')
             for tr in outp:
                 if tr.get_id() in cleaned_ids:
-                    new_tr = CleanSequence.tag(tr, clean_chan_id)
+                    new_tr = CleanSequence.tag(tr, clean_code)
                     outp.remove(tr)
                     outp.append(new_tr)
         else:
@@ -224,12 +224,16 @@ class CleanSequence:
     @staticmethod
     def _id_list_str(id_list, out_format='minimal'):
         """
-        Return the cleaner string for a list of seed_ids
+        Return the cleaner string for a list of seed_ids and or transformation codes
 
+        seed_ids must have three '.'s, transformation codes must have none
+        neither can have '-'s or '_'s
+        
         Args:
-            id_list (list): list of channels cleaned (each is a seed_id)
+            id_list (list): list of cleaning steps (seed_id or transformation code)
             out_format (str): how to format the output:
-                'minimal': return the shortest string possible
+                'minimal': return the shortest string possible (transformation
+                    codes are kept in full)
                 'min_code': use the shortest string containing full codes
                 'min_level': use the shortest string containing all different levels
                 'full': return the full seedid string for each cleaned channel
@@ -263,25 +267,26 @@ class CleanSequence:
         for x in id_list:
             if not isinstance(x, str):
                 raise TypeError('id_list element is not a str')
-            if not len(x.split('.')) == 4:
-                raise ValueError(f'"seed_id" {x} does not have three "."s')
+            if not ((len(x.split('.')) == 4) or ('.' not in x)):
+                raise ValueError(f'"{x}" is neither a seed_id nor a transformation code')
         
         if out_format == 'full':    # Use full seed ids
             return '-' + '-'.join([DOT_REPLACE_CHAR.join(x.split('.')) for x in id_list])
         else:
             # Create shortened str describing each sequence element
-            strs = [None for x in id_list]
-            unique_strs = [False for x in id_list]
+            strs = [x if _is_trans_code(x) else None for x in id_list]
+            unique_strs = [_is_trans_code(x) for x in id_list]
+            fake_id_list = [x if _is_seed_id(x) else '...' for x in id_list]
             for i in range(3, -1, -1): # from channel to net, if needed
                 strs, unique_strs = CleanSequence._prepend_unique_str(
-                    [x.split('.')[i] for x in id_list],
+                    [x.split('.')[i] for x in fake_id_list],
                     strs,
                     unique_strs,
                     out_format)
                 if all(unique_strs):
                     return '-' + '-'.join(strs)
             raise ValueError(f'Could not create unique strs from {id_list=}')           
-                             
+                    
     @staticmethod
     def _prepend_unique_str(codes, prevs, prev_uniques, out_format='minimal'):
         """
@@ -388,3 +393,15 @@ def _expand_cleaned_ids(cleaned_ids, in_stream):
         return [tr.get_id() for tr in in_stream]
     return [get_full_id('*' + x, in_stream) for x in cleaned_ids]
 
+
+def _is_seed_id(x):
+    if not len(x.split('.')) == 4:
+        return False
+    if ('-' in x) or ('_' in x):
+        return False
+    return True
+
+def _is_trans_code(x):
+    if ('.' in x) or ('-' in x) or ('_' in x) or (len(x) > 5):
+        return False
+    return True

@@ -9,10 +9,12 @@ from obspy.core.stream import Stream
 from obspy import UTCDateTime
 
 from .time_spans import TimeSpans
+from .cleaned_stream import CleanedStream
 from .utils import SeisRotate, CleanSequence as CS
 from .logger import init_logger
 
 logger = init_logger()
+TRANS_CODE = 'ROT'
 
 class CleanRotator:
     """
@@ -129,11 +131,11 @@ class CleanRotator:
         seis_stream, other_stream = SeisRotate.separate_streams(stream)
         srData = SeisRotate(stream)
         srData.zrotate(self.angle, self.azimuth, horiz_too)
-        srData.Z = CS.tag(srData.Z, "ROT")
+        srData.Z = CS.tag(srData.Z, TRANS_CODE)
         if other_stream is None:
-            return srData.stream()
+            return CleanedStream(srData.stream())
         else:
-            return srData.stream() + other_stream
+            return CleanedStream(srData.stream() + other_stream)
 
     def tfs(self):
         """

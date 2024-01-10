@@ -43,24 +43,24 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(
             f'{rf_list[0].__str__()}',
             'ResponseFunctions object:\n'
-            "  input_channel='A.BDH'\n"
-            "  output_channels=['A.BH1', 'A.BH2', 'A.BHZ']\n"
+            "  input_channel_id='A.BDH'\n"
+            "  output_channel_ids=['A.BH1', 'A.BH2', 'A.BHZ']\n"
             "  noise_channels=['output', 'output', 'output']\n"
             "  n_windows=0"
         )
         self.assertEqual(
             f'{rf_list[1].__str__()}',
             'ResponseFunctions object:\n'
-            "  input_channel='A.BH1'\n"
-            "  output_channels=['A.BH2', 'A.BHZ']\n"
+            "  input_channel_id='A.BH1'\n"
+            "  output_channel_ids=['A.BH2', 'A.BHZ']\n"
             "  noise_channels=['output', 'output']\n"
             "  n_windows=0"
         )
         self.assertEqual(
             f'{rf_list[2].__str__()}',
             'ResponseFunctions object:\n'
-            "  input_channel='A.BH2'\n"
-            "  output_channels=['A.BHZ']\n"
+            "  input_channel_id='A.BH2'\n"
+            "  output_channel_ids=['A.BHZ']\n"
             "  noise_channels=['output']\n"
             "  n_windows=0"
         )
