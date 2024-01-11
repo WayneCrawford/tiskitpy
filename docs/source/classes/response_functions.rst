@@ -39,7 +39,10 @@ Get
 - ``noise_channel(output_channel)``: Return the channel ("input", "output" or "equal") assumed to have incoherent noise
 - ``output_units(output_channel)``: output channel units
 - ``instrument_response(output_channel)``: frequency response function's instrument respose 
+  (output_channel_instrument_response / input_channel_instrument_response)
+- ``instrument_response(output_channel)``: frequency response function's instrument respose 
     (output_channel_instrument_response / input_channel_instrument_response)
+- ``instrument_response(output_channel)``: frequency response function's instrument respose  (output_channel_instrument_response / input_channel_instrument_response)
 - ``uncertainty(output_channel)``: uncertainty of the given `value` s
 - ``uncertainty_wrt_counts(output_channel)``: uncertainty with respect
     to raw data counts
