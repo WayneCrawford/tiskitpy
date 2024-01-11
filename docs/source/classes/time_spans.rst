@@ -14,9 +14,7 @@ Constructor
 
 :``TimeSpans(spans)``: create a TimeSpans object using the
     provided lists of [start_time, end_time]s.
-:``TimeSpans.from_eqs(start_time, end_time, ...)``: create a TimeSpans
-    object from an earthquake catalog.  If the catalog is not provided, will
-    download from USGS.
+:``TimeSpans.from_eqs(start_time, end_time, ...)``: create a TimeSpans object from an earthquake catalog.  If the catalog is not provided, will download from USGS.
 
 Properties
 ----------------------
@@ -33,8 +31,7 @@ Modify a Trace or Stream
 
 :``cutout(Stream or Trace)``: cuts out data from the Stream or Trace (using
     ``obspy`` ``.cutout()`` method
-:``interp(Stream or Trace)``: linearly interpolate values within the time spans
-    from their value at the span start to their value at the span end
+:``interp(Stream or Trace)``: linearly interpolate values within the time spans from their value at the span start to their value at the span end
 :``zero(Stream or Trace)``: set values within the time spans to zero
 
 Other
