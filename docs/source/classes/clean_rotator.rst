@@ -17,7 +17,7 @@ Constructor
 ---------------------
 
 - ``CleanRotator(stream,...)``: Calculate the CleanRotator object from
-    a data stream
+  a data stream
 
 Properties
 ---------------------
@@ -30,9 +30,9 @@ Methods
 
 - ``apply(stream, horiz_too=False)``: apply the rotation to the given stream
 - ``tfs()``: return the transfer functions equivalent to the rotation. *NOT
-    FULLY TESTED/VALIDATED*
+  FULLY TESTED/VALIDATED*
 
 Example
 ---------------------
 
-see :ref:`tiskitpy.CleanRotator_example`
+:ref:`tiskitpy.CleanRotator_example`

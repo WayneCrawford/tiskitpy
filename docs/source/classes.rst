@@ -12,3 +12,4 @@ Classes
    classes/clean_rotator
    classes/response_functions
    classes/time_spans
+   classes/cleaned_stream

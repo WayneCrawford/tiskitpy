@@ -37,7 +37,6 @@ New
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - ``tag()``: tags the stream with the given seed_id or transformation code
-- ``
 
 Example
 ---------------------
