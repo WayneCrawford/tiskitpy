@@ -13,3 +13,4 @@ Class DocStrings
    autoclasses/spectral_density
    autoclasses/time_spans
    autoclasses/response_functions
+   autoclasses/cleaned_stream

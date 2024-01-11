@@ -27,6 +27,8 @@ Different classes store their clean_sequence lists in different places:
 - ``SpectralDensity``: in ``self._clean_sequences``
 - ``ReponseFunctions``: in ``self.input_clean_sequence``
 
+.. _tiskitpy_id:
+
 ``seed_id`` and ``tiskitpy_id``
 ====================================================
 
