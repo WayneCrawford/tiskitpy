@@ -15,6 +15,7 @@ from matplotlib import pyplot as plt
 from ..response_functions import ResponseFunctions
 from ..spectral_density import SpectralDensity
 from .rf_list import RFList
+from ..cleaned_stream import CleanedStream
 from ..utils import CleanSequence as CS
 from tiskitpy.logger import init_logger
 
@@ -30,32 +31,32 @@ class DataCleaner:
     By default, calculates corrected intermediate and final spectra directly
     from the stream data, applying the frequency response functions to each FFT.
 
-    Args:
-        stream (:class:`obspy.core.stream.Stream`): time series data used
-            to calculate cleaner
-        remove_list (list): list of channels to remove, in order.  Can use
-            "*" and "?" as wildcards
-        noise_channel (str): which channel the noise is on.  Choices are:
-            "input", "output", "equal", "unknown", "model"
-        n_to_reject (int): Number of neighboring frequencies for which
-            the coherence must be above the 95% signifcance level in order
-            to use for cleaning (0 means use all frequencies)
-        min_freq (float): Do not process frequencies below this value
-        max_freq (float): Do not process frequencies above this value
-        show_progress (bool): Show progress plots
-        fast_calc (bool): Calculate corrected spectra directly from
-            previous spectra (ATACR-style).
-        kwargs (:class:`SpectralDensity.from_stream()` properties):
-             window_s, windowtype, z_threshold, avoid_spans, ...
     """
 
     def __init__(self, stream, remove_list, noise_channel="output",
                  n_to_reject=3, min_freq=None, max_freq=None,
                  show_progress=False, fast_calc=False, **kwargs):
         """
+        Args:
+            stream (:class:`obspy.core.stream.Stream`): time series data used
+                to calculate cleaner
+            remove_list (list): list of channels to remove, in order.  Can use
+                "*" and "?" as wildcards
+            noise_channel (str): which channel the noise is on.  Choices are:
+                "input", "output", "equal", "unknown", "model"
+            n_to_reject (int): Number of neighboring frequencies for which
+                the coherence must be above the 95% signifcance level in order
+                to use for cleaning (0 means use all frequencies)
+            min_freq (float): Do not process frequencies below this value
+            max_freq (float): Do not process frequencies above this value
+            show_progress (bool): Show progress plots
+            fast_calc (bool): Calculate corrected spectra directly from
+                previous spectra (ATACR-style).
+            kwargs (:class:`SpectralDensity.from_stream()` properties):
+                 window_s, windowtype, z_threshold, avoid_spans, ...
         Attributes:
-            RFList (list of :class:`ResponseFunctions`): list of data cleaner frequency response
-                functions
+            RFList (list of :class:`ResponseFunctions`): list of data cleaner
+                frequency response functions
             starttimes (list of :class:`obspy.UTCDateTime`): start times for
                 each spectra used
         """
@@ -71,11 +72,13 @@ class DataCleaner:
         self.RFList = RFList()
         # Calculate removal frequency response functions
         out_ids = sdfs[0].ids
-        # in_list = [_list_match_pattern(x, out_ids) for x in remove_list]
-        in_list = [sdfs[0].channel_id(x) for x in remove_list]
         clean_sequence = []
-        for in_id in in_list:
+        # in_ids = [sdfs[0].channel_id(x) for x in remove_list]
+        # for in_id in in_ids:
+        for remove_id in remove_list:
+            in_id = sdfs[-1].channel_id(remove_id)
             out_ids = [x for x in out_ids if not x == in_id]
+            # out_ids = [x for x in sdfs[-1].ids if not x == in_id]
             rf = ResponseFunctions(
                 sdfs[-1],
                 in_id,
@@ -90,12 +93,11 @@ class DataCleaner:
             clean_sequence.append(in_id)
             self.RFList.append(deepcopy(rf))
             if fast_calc:
-                sdfs.append(self._removeRF_SDF(sdfs[-1], rf, show_progress))
+                new_sdf = self._removeRF_SDF(sdfs[-1], rf, show_progress)
             else:
-                sdfs.append(SpectralDensity.from_stream(
-                    stream, data_cleaner=self, **kwargs))
-            # out_ids = [CS.insert(remove_new, x) for x in out_ids]
-            # out_ids = [x + remove_new for x in out_ids]
+                new_sdf = SpectralDensity.from_stream(
+                    stream, data_cleaner=self, **kwargs)
+            sdfs.append(new_sdf)
         if show_progress:
             logger.info("Plotting sdfs after data cleaner applied")
             self._plot_sdfs(sdfs)
@@ -167,10 +169,8 @@ class DataCleaner:
         if np.any([np.ma.count_masked(tr.data) for tr in stream]):
             logger.warning('Unmasking masked data (usually a gap or overlap)')
             stream = stream.split().merge(fill_value='interpolate')
-        out_stream = stream.copy()
-        seed_ids = [tr.id for tr in out_stream]
-        print(f'{seed_ids=}')
-        clean_seqs = {k: "" for k in seed_ids}
+
+        out_stream = CleanedStream(stream)
 
         if in_time_domain is True:
             logger.warning("Correcting traces in the time domain: VERY SLOW")
@@ -178,22 +178,23 @@ class DataCleaner:
             logger.info("Correcting traces in the frequency domain")
 
         for rfs in self.RFList:
+            print(rfs)
             in_id = rfs.input_channel_id
-            print(f'{in_id=}')
-            for out_chan in rfs.output_channel_ids:
+            for out_id in rfs.output_channel_ids:
+                print(f'{in_id=}, {out_id=}, {type(out_stream)=}')
+                print('out_stream =')
+                print(out_stream)
                 in_trace = out_stream.select(id=in_id)[0]
-                print(stream)
-                print(f'{type(stream)=}')
-                print(f'{out_chan=}')
-                out_trace = out_stream.select(id=out_chan)[0]
+                out_trace = out_stream.select(id=out_id)[0]
                 out_stream.remove(out_trace)
                 out_trace = self._correct_trace(
                     in_trace,
                     out_trace,
                     rfs.freqs,
-                    rfs.corrector_wrt_counts(out_chan),
+                    rfs.corrector_wrt_counts(out_id),
                     in_time_domain,
                 )
+                print('out_trace=' + out_trace.__str__())
                 out_trace = CS.tag(out_trace, in_trace.id)
                 out_stream += out_trace
         return out_stream
@@ -384,7 +385,6 @@ class DataCleaner:
         """
         if len(sdfs) == len(self.RFList) + 1:
             ValueError("len(sdfs) isn't len(self.RFList)+1")
-        # clean_seqs = [""] + [t.clean_sequence for t in self.RFList]
         inputs = [""] + [t.rfs.input_channel for t in self.RFList]
         n_channels = len(sdfs[0].ids)
         rows = int(np.floor(np.sqrt(n_channels)))

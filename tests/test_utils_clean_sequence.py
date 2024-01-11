@@ -29,7 +29,7 @@ class TestMethods(unittest.TestCase):
         """
         Test the private function behind _prepend_unique_str()
         """
-        self.assertEqual(CS._min_codes(['BDH', 'BH1', 'BH2']),
+        self.assertEqual(CS._min_codes(['...BDH', '...BH1', '...BH2']),
                          ['H', '1', '2'])
         self.assertEqual(CS._min_codes(['BDH', 'BH1', 'BDH']),
                          ['H', '1', 'H'])
@@ -40,7 +40,7 @@ class TestMethods(unittest.TestCase):
 
     def test_prepend_unique_str(self):
         """
-        Test the private function behind _id_list_str()
+        Test the private function behind _clean_sequence_str()
         """
         self.assertEqual(CS._prepend_unique_str(['BDH', 'BH1', 'BH2'],
                                                 [None, None, None],
@@ -69,60 +69,60 @@ class TestMethods(unittest.TestCase):
                                                 'min_code'),
                          (['01_H', '1', '00_H'], [True, True, True]))
 
-    def test_id_list_str(self):
+    def test_clean_sequence_str(self):
         """
         Test the private function that creates a cleaner string
         """
-        self.assertEqual(CS._id_list_str(['NN.SSS.LL.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.LL.BDH',
                                           'NN.SSS.LL.BH1',
                                           'NN.SSS.LL.BH2']),
                          '-H-1-2')
-        self.assertEqual(CS._id_list_str(['NN.SSS.LL.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.LL.BDH',
                                           'NN.SSS.LL.BH1',
                                           'NN.SSS.LL.BH2',
                                           'ROT']),
                          '-H-1-2-ROT')
-        self.assertEqual(CS._id_list_str(['NN.SSS.LL.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.LL.BDH',
                                           'NN.SSS.LL.BH1',
                                           'NN.SSS.LL.BH2'],
                                           'min_code'),
                          '-BDH-BH1-BH2')
-        self.assertEqual(CS._id_list_str(['NN.SSS.LL.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.LL.BDH',
                                           'NN.SSS.LL.BH1',
                                           'NN.SSS.LL.BH2',
                                           'ROT'],
                                           'min_code'),
                          '-BDH-BH1-BH2-ROT')
-        self.assertEqual(CS._id_list_str(['NN.SSS.LL.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.LL.BDH',
                                           'NN.SSS.LL.BH1',
                                           'NN.SSS.LL.BH2'],
                                           'full'),
                          '-NN_SSS_LL_BDH-NN_SSS_LL_BH1-NN_SSS_LL_BH2')
-        self.assertEqual(CS._id_list_str(['ROT',
+        self.assertEqual(CS._clean_sequence_str(['ROT',
                                           'NN.SSS.LL.BDH',
                                           'NN.SSS.LL.BH1',
                                           'NN.SSS.LL.BH2'],
                                           'full'),
                          '-ROT-NN_SSS_LL_BDH-NN_SSS_LL_BH1-NN_SSS_LL_BH2')
         # More complicated cases (same channel code, different locations)
-        self.assertEqual(CS._id_list_str(['NN.SSS.L1.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.L1.BDH',
                                           'NN.SSS.L1.BH1',
                                           'NN.SSS.L2.BDH',
                                           'NN.SSS.L1.BH2']),
                          '-1_H-1-2_H-2')
-        self.assertEqual(CS._id_list_str(['ROT',
+        self.assertEqual(CS._clean_sequence_str(['ROT',
                                           'NN.SSS.L1.BDH',
                                           'NN.SSS.L1.BH1',
                                           'NN.SSS.L2.BDH',
                                           'NN.SSS.L1.BH2']),
                          '-ROT-1_H-1-2_H-2')
-        self.assertEqual(CS._id_list_str(['NN.SSS.L1.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.L1.BDH',
                                           'NN.SSS.L1.BH1',
                                           'NN.SSS.L2.BDH',
                                           'NN.SSS.L1.BH2'],
                                           'min_code'),
                          '-L1_BDH-BH1-L2_BDH-BH2')
-        self.assertEqual(CS._id_list_str(['NN.SSS.L1.BDH',
+        self.assertEqual(CS._clean_sequence_str(['NN.SSS.L1.BDH',
                                           'NN.SSS.L1.BH1',
                                           'NN.SSS.L2.BDH',
                                           'NN.SSS.L1.BH2'],
@@ -130,10 +130,44 @@ class TestMethods(unittest.TestCase):
                          '-L1_BDH-L1_BH1-L2_BDH-L1_BH2')
         # Same channel removed twice raises ValueError
         with self.assertRaises(ValueError):
-            CS._id_list_str(['NN.SSS.LL.BDH',
+            CS._clean_sequence_str(['NN.SSS.LL.BDH',
                              'NN.SSS.LL.BH1',
                              'NN.SSS.LL.BDH',
                              'NN.SSS.LL.BH2'])
+
+    def test_tiskitpy_id(self):
+        """
+        Test creation of a tiskitpy_id
+        """
+        self.assertEqual(CS.tiskitpy_id('XX.STA.00.BHZ',
+                                        ['NN.SSS.LL.BDH', 'NN.SSS.LL.BH1',
+                                         'NN.SSS.LL.BH2']),
+                         'XX.STA.00-H-1-2.BHZ')
+        self.assertEqual(CS.tiskitpy_id('XX.STA.00.BHZ',
+                                        ['NN.SSS.LL.BDH', 'NN.SSS.LL.BH1',
+                                         'NN.SSS.LL.BH2', 'ROT']),
+                         'XX.STA.00-H-1-2-ROT.BHZ')
+
+    def test_seed_id(self):
+        """
+        Test creation of a seed_id from a tiskitpy_id
+        """
+        self.assertEqual(CS.seed_id('XX.STA.00-H-1-2.BHZ'),
+                         'XX.STA.00.BHZ')
+        self.assertEqual(CS.seed_id('XX.STA.00-H-1-2-ROT.BHZ'),
+                         'XX.STA.00.BHZ')
+
+    def test_complete_seed_id(self):
+        """
+        Test creation of a seed_id from an incomplete channel id
+        """
+        self.assertEqual(CS.complete_seed_id('BHZ'), '...BHZ')
+        self.assertEqual(CS.complete_seed_id('NN.SSS.LL.BDH'), 'NN.SSS.LL.BDH')
+        self.assertEqual(CS.complete_seed_id('SSS.LL.BDH'), '.SSS.LL.BDH')
+        with self.assertRaises(ValueError):
+            CS.complete_seed_id('QQ.NN.SSS.LL.BDH')
+        with self.assertRaises(ValueError):
+            CS.complete_seed_id('-BDH')
 
     def test_tag(self):
         cleaned_trace = CS.tag(self.trace, '...BDH')

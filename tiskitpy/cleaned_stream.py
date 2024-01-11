@@ -27,3 +27,16 @@ class CleanedStream(Stream):
         Haven't figured out how to do it in place
         '"""
         return CleanSequence.tag(self, the_tag, **kwargs)
+
+    def select(self, **kwargs):
+        """
+        Adds selection by tiskitpy_id
+        """
+        out_stream =  super().select(**kwargs)
+        if len(out_stream) == 0:
+            logger.info(f"Stream.select(**{kwargs}) returned no traces, seedid_tag() and retry...")
+            tagged = Stream(CleanSequence.seedid_tag(self))
+            print(tagged)
+            out_stream =  tagged.select(**kwargs)
+            out_stream = CleanSequence.seedid_untag(out_stream)
+        return out_stream

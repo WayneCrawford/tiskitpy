@@ -2,7 +2,7 @@
 <q:quakeml xmlns="http://quakeml.org/xmlns/bed/1.2" xmlns:anss="http://anss.org/xmlns/event/0.1" xmlns:catalog="http://anss.org/xmlns/catalog/0.1" xmlns:q="http://quakeml.org/xmlns/quakeml/1.2">
   <eventParameters publicID="quakeml:earthquake.usgs.gov/fdsnws/event/1/query?starttime=2016-12-06T06%3A35%3A59.992583&amp;endtime=2016-12-11T23%3A59%3A59.992583&amp;minmagnitude=5.85&amp;orderby=time-asc">
     <creationInfo>
-      <creationTime>2024-01-08T21:37:27.000000Z</creationTime>
+      <creationTime>2024-01-10T14:48:08.000000Z</creationTime>
     </creationInfo>
     <event publicID="quakeml:earthquake.usgs.gov/fdsnws/event/1/query?eventid=us10007ggp&amp;format=quakeml" catalog:datasource="us" catalog:eventsource="us" catalog:eventid="10007ggp">
       <preferredOriginID>quakeml:earthquake.usgs.gov/product/origin/us10007ggp/us/1488524765040/product.xml</preferredOriginID>

@@ -1,12 +1,11 @@
 .. _TechnicalDocumentation:
 
 =============================
-Technical Documentation
+Helper classes and functions
 =============================
 
 .. toctree::
    :maxdepth: 2
 
-   code/tiskitpy.module
-   code/tiskitpy.autoclasses
-   code/tiskitpy.functions
+   helpers/classes
+   helpers/functions

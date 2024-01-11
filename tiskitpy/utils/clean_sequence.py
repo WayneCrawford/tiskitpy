@@ -24,7 +24,7 @@ class CleanSequence:
     @staticmethod
     def tag(inp, clean_code, cleaned_ids=None, verbose=False):
         """
-        Tag Trace stats with a cleaned channel ids
+        Tag Trace stats with a clean_code
 
         Args:
             inp (:class:`obspy.core.Trace`, :class:`obspy.core.Stream`, a list,
@@ -54,7 +54,6 @@ class CleanSequence:
             else:
                 if not _is_seed_id(clean_code) and not _is_trans_code(clean_code):
                     raise ValueError('"{clean_code=}" is neither a seed_id nor a transformation code')
-                # clean_code = _to_seed_id(clean_code, verbose)
                 if isinstance(inp, Trace):
                     if not 'clean_sequence' in outp.stats:
                         outp.stats['clean_sequence'] = [clean_code]
@@ -161,70 +160,123 @@ class CleanSequence:
         elif isinstance(inp, Trace):
             if not 'clean_sequence' in inp.stats:
                 return ''
-            return CleanSequence._id_list_str(inp.stats.clean_sequence, out_format)
+            return CleanSequence._clean_sequence_str(inp.stats.clean_sequence, out_format)
         else:
             raise TypeError('tr_st is neither a Trace nor a Stream')
                              
     @staticmethod
-    def stream_plot(inp, **kwargs):
+    def tiskitpy_id(seed_id, clean_sequence):
         """
-        Plot an obspy stream with clean_sequence tags
-        
-        Uses Stream.plot() after putting clean_sequence information into
-        the seed_id location code
+        Returns a tiskitpy_id, based on a seed_id and a clean_sequence list
         
         Args:
-            inp (:class:`obspy.core.Stream): stream to plot
-            
-        Other Parameters:
-            **kwargs: Keyword arguments for Stream.plot()
+            seed_id (str): a valid seed_id (has three '.'s)
+            clean_sequence (list of str): ordered list of cleaning steps:
+                either seed_ids or transformation codes
+        Returns:
+            (str): the tiskitpy_id
         """
-        if isinstance(inp, Stream):
-            stream = CleanSequence.seedid_tag(inp)
-            stream.plot(**kwargs)
+        if not _is_seed_id(seed_id):
+            raise ValueError(f'{seed_id=} is not a valid seed_id')
+        components = seed_id.split('.')
+        components[2] += CleanSequence._clean_sequence_str(clean_sequence)
+        return '.'.join(components)
+                             
+    @staticmethod
+    def seed_id(tiskitpy_id):
+        """
+        Converts a tiskitpy_id to its base seed_id
+        
+        Args:
+            tiskitpy_id (str): tiskitpy_id
+        Returns:
+            (str): the seed_id
+        """
+        if not _is_tiskitpy_id(tiskitpy_id):
+            raise ValueError(f'{tiskitpy_id=} is not a valid tiskitpy_id')
+        components = tiskitpy_id.split('.')
+        components[2] = components[2].split('-')[0]
+        return '.'.join(components)
+                             
+    def complete_seed_id(chan_id, verbose=False):
+        """
+        Change string to a seed_id
+    
+        Checks if there are 3 dots.  If not, adds "missing" dots to beginning
+        """
+        num_dots = chan_id.count('.')
+        if num_dots == 3:
+            new_seed_id = chan_id
+        elif num_dots > 3:
+            raise ValueError(f'More than 3 dots in input "{chan_id=}"')
         else:
-            raise TypeError('inp is not a Stream')
+            new_seed_id = (3-num_dots)*'.' + chan_id
+            logger.info(f'Added {3 - num_dots} dots to start of seed_code: '
+                        f'"{chan_id}"->"{new_seed_id}"')
+        if not _is_seed_id(new_seed_id):
+            raise ValueError('Created {new_seed_id=} is invalid')
+        return new_seed_id
+
+#     @staticmethod
+#     def stream_plot(inp, **kwargs):
+#         """
+#         Plot an obspy stream with clean_sequence tags
+#         
+#         Uses Stream.plot() after putting clean_sequence information into
+#         the seed_id location code
+#         
+#         Args:
+#             inp (:class:`obspy.core.Stream): stream to plot
+#             
+#         Other Parameters:
+#             **kwargs: Keyword arguments for Stream.plot()
+#         """
+#         if isinstance(inp, Stream):
+#             stream = CleanSequence.seedid_tag(inp)
+#             stream.plot(**kwargs)
+#         else:
+#             raise TypeError('inp is not a Stream')
+#
+#     @staticmethod
+#     def stream_print(inp, **kwargs):
+#         """
+#         Print an obspy stream with clean_sequence tags
+#         
+#         Uses print(inp) after putting clean_sequence information into
+#         the seed_id location code
+#         
+#         Args:
+#             inp (:class:`obspy.core.Stream): stream to print
+#             
+#         Other Parameters:
+#             **kwargs: Keyword arguments for print()
+#         """
+#         print(CleanSequence.stream_str(inp), **kwargs)
+#                              
+#     @staticmethod
+#     def stream_str(inp, **kwargs):
+#         """
+#         Return string for an obspy stream with clean_sequence tags
+#         
+#         Uses Stream.__str__() after putting clean_sequence information into
+#         the seed_id location code
+#         
+#         Args:
+#             inp (:class:`obspy.core.Stream): stream
+#             
+#         Other Parameters:
+#             **kwargs: Keyword arguments for Stream.__str__()
+#         """
+#         if isinstance(inp, Stream):
+#             stream = CleanSequence.seedid_tag(inp)
+#             return stream.__str__(**kwargs)
+#         else:
+#             raise TypeError('inp is not a Stream')
                              
     @staticmethod
-    def stream_print(inp, **kwargs):
+    def _clean_sequence_str(id_list, out_format='minimal'):
         """
-        Print an obspy stream with clean_sequence tags
-        
-        Uses print(inp) after putting clean_sequence information into
-        the seed_id location code
-        
-        Args:
-            inp (:class:`obspy.core.Stream): stream to print
-            
-        Other Parameters:
-            **kwargs: Keyword arguments for print()
-        """
-        print(CleanSequence.stream_str(inp), **kwargs)
-                             
-    @staticmethod
-    def stream_str(inp, **kwargs):
-        """
-        Return string for an obspy stream with clean_sequence tags
-        
-        Uses Stream.__str__() after putting clean_sequence information into
-        the seed_id location code
-        
-        Args:
-            inp (:class:`obspy.core.Stream): stream
-            
-        Other Parameters:
-            **kwargs: Keyword arguments for Stream.__str__()
-        """
-        if isinstance(inp, Stream):
-            stream = CleanSequence.seedid_tag(inp)
-            return stream.__str__(**kwargs)
-        else:
-            raise TypeError('inp is not a Stream')
-                             
-    @staticmethod
-    def _id_list_str(id_list, out_format='minimal'):
-        """
-        Return the cleaner string for a list of seed_ids and or transformation codes
+        Return a string representing a clean_sequence list
 
         seed_ids must have three '.'s, transformation codes must have none
         neither can have '-'s or '_'s
@@ -239,23 +291,23 @@ class CleanSequence:
                 'full': return the full seedid string for each cleaned channel
 
         Examples:
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BDH'])
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BDH'])
             '-Z-1-H'
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BDH'], out_format='min_code')
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BDH'], out_format='min_code')
             '-BHZ-BH1-BDH'
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BDH'], out_format='full')
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BDH'], out_format='full')
             '-NN_SSS_LL_BHZ-NN_SSS_LL_BH1-NN_SSS_LL_BDH'
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'OO.TTT.MM.BH1', 'PP.UUU.NN.BDH'])
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'OO.TTT.MM.BH1', 'PP.UUU.NN.BDH'])
             '-Z-1-H'
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BLZ'])
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BLZ'])
             '-HZ-1-LZ'
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BHZ'])
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.LL.BHZ'])
             ValueError: Could not create unique strs from id_list=['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.SSS.L2.BHZ']
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.AAA.LL.BHZ'])
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.AAA.LL.BHZ'])
             '-S_L_Z-1-A_L_Z'
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.AAA.LL.BHZ'], out_format='min_code')
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.AAA.LL.BHZ'], out_format='min_code')
             '-SSS_LL_BHZ-BH1-AAA_LL_BHZ'
-            >>> CleanSequence._id_list_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.AAA.LL.BHZ'], out_format='min_level')
+            >>> CleanSequence._clean_sequence_str(['NN.SSS.LL.BHZ', 'NN.SSS.LL.BH1', 'NN.AAA.LL.BHZ'], out_format='min_level')
             '-SSS_LL_BHZ-SSS_LL_BH1-AAA_LL_BHZ'
         """
         # Error checking
@@ -368,23 +420,6 @@ class CleanSequence:
                     break
             min_codes.append(code[-offset:])
         return min_codes
-
-def _to_seed_id(chan_id, verbose=False):
-    """
-    Change string to a seed_id
-    
-    Just checks if there are 3 dots.  If not, adds "missing" dots to beginning
-    """
-    num_dots = chan_id.count('.')
-    if num_dots == 3:
-        return chan_id
-    elif num_dots > 3:
-        raise ValueError(f'More than 3 dots in input seed_id "{chan_id}"')
-    new_chan_id = (3-num_dots)*'.' + chan_id
-    if verbose:
-        print('Added {} dots to start of seed_code: "{}"->"{}"'
-            .format(3 - num_dots, chan_id, new_chan_id))
-    return new_chan_id
     
 
 def _expand_cleaned_ids(cleaned_ids, in_stream):
@@ -394,10 +429,13 @@ def _expand_cleaned_ids(cleaned_ids, in_stream):
     return [get_full_id('*' + x, in_stream) for x in cleaned_ids]
 
 
-def _is_seed_id(x):
-    if not len(x.split('.')) == 4:
+def _is_tiskitpy_id(x):
+    if (not len(x.split('.')) == 4) or  ('_' in x):
         return False
-    if ('-' in x) or ('_' in x):
+    return True
+
+def _is_seed_id(x):
+    if (not len(x.split('.')) == 4) or ('-' in x) or ('_' in x):
         return False
     return True
 

@@ -88,12 +88,11 @@ class CleanRotator:
     def _make_eq_spans(self, remove_eq, stats, verbose, save_eq_file):
         if isinstance(remove_eq, str):
             return TimeSpans.from_eqs(
-                stats.starttime, stats.endtime, quiet=not verbose,
+                stats.starttime, stats.endtime,
                 eq_file=remove_eq, save_eq_file=save_eq_file)
         elif remove_eq is True:
             return TimeSpans.from_eqs(
-                stats.starttime, stats.endtime, quiet=not verbose,
-                save_eq_file=save_eq_file)
+                stats.starttime, stats.endtime, save_eq_file=save_eq_file)
         return None
 
     def _plot_filtered_stream(self, stream, filt_band):

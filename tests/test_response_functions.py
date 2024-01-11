@@ -20,44 +20,9 @@ class TestMethods(unittest.TestCase):
     """
 
     def setUp(self):
-        # self.path = (Path(inspect.getfile(inspect.currentframe()))
-        #              .resolve().parent)
-        # self.test_path = self.path / "data" / "transfer_functions"
         self.stream, self.sineparms = make_test_stream()
         sd = SpectralDensity.from_stream(self.stream, window_s=100.0)
         self.xf = ResponseFunctions(sd, "XX.STA.00.BX1")
-
-    def make_stream(
-        self,
-        freqs,
-        chan_amp_phases,
-        net="XX",
-        sta="STA",
-        data_len=1000.0,
-        sampling_rate=100,
-        loc="00",
-        starttime=UTCDateTime(2020, 1, 1),
-    ):
-        stream = Stream()
-        header = dict(
-            sampling_rate=sampling_rate,
-            network=net,
-            station=sta,
-            location=loc,
-            starttime=starttime,
-        )
-        for chan in chan_amp_phases.keys():
-            header["channel"] = chan
-            amps = chan_amp_phases[chan][0]
-            phases = chan_amp_phases[chan][1]
-            t = np.arange(0, data_len, 1.0 / sampling_rate)
-            data = amps[0] * np.sin(
-                t * 2 * np.pi * freqs[0] + np.radians(phases[0])
-            )
-            for f, a, p in zip(freqs[1:], amps[1:], phases[1:]):
-                data += a * np.sin(t * 2 * np.pi * f + np.radians(p))
-            stream += Trace(data, header)
-        return stream
 
     def test_str(self):
         """Test __str__ function"""
@@ -70,35 +35,27 @@ class TestMethods(unittest.TestCase):
             "  n_windows=6",
         )
 
-    def test_freqs(self):
-        """Test freqs derived property"""
-        stop = self.stream[0].stats.sampling_rate / 2
-        num = len(self.xf.freqs)
-        self.assertTrue(
-            np.all(self.xf.freqs == np.arange(1, num + 1) * stop / num)
-        )
-
-    def test_coh_signif(self):
-        """Test coherence significance levels"""
-        self.assertAlmostEqual(self.xf.coh_signif(), 0.88113, places=4)
-        self.assertAlmostEqual(self.xf.coh_signif(0.5), 0.541196, places=4)
-
-    def test_channels(self):
-        """Test input_channel and output_channel derived properties"""
+    def test_properties(self):
+        """Test derived properties"""
         self.assertEqual(self.xf.input_channel_id, "XX.STA.00.BX1")
-        self.assertEqual(
-            self.xf.output_channel_ids, ["XX.STA.00.BX2", "XX.STA.00.BX3", 'XX.STA.00.BDH']
-        )
-
-    def test_other_properties(self):
-        """Test other properties"""
-        # window_type
+        self.assertEqual(self.xf.output_channel_ids,
+                         ["XX.STA.00.BX2", "XX.STA.00.BX3", 'XX.STA.00.BDH'])
+        self.assertIsNone(self.xf.input_clean_sequence)
         self.assertEqual(self.xf.input_units, "Counts")
         self.assertEqual(self.xf.n_windows, 6)
         self.assertEqual(self.xf.noise_channels, ["output", "output", "output"])
         self.assertEqual(self.xf.noise_channel("XX.STA.00.BX2"), "output")
         # Not much of a test
         self.assertEqual(self.xf.output_units("XX.STA.00.BX2"), "Counts")
+        stop = self.stream[0].stats.sampling_rate / 2
+        num = len(self.xf.freqs)
+        self.assertTrue(
+            np.all(self.xf.freqs == np.arange(1, num + 1) * stop / num)
+        )
+    def test_coh_signif(self):
+        """Test coherence significance levels"""
+        self.assertAlmostEqual(self.xf.coh_signif(), 0.88113, places=4)
+        self.assertAlmostEqual(self.xf.coh_signif(0.5), 0.541196, places=4)
 
     def test_values(self):
         """Test frequency response function retrieval and returned values"""

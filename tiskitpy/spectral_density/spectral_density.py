@@ -1,5 +1,9 @@
 """
-Spectral Density Functions
+Spectral Density Class
+
+*The ``from_ATACR()`` method is disabled because readthedocs had
+a problem importing the `obstools` package using `pip`.  (the method was never
+validated anyway)*
 """
 import xarray as xr
 import numpy as np
@@ -310,16 +314,18 @@ class SpectralDensity:
             if resp is not None:
                 tr.stats.response = resp
 
+        n_winds = len(sts)
         # Remove outliers
         if starttimes is None and z_threshold is not None:
             n_winds_orig = len(sts)
             ft, sts = cls._remove_outliers(ft, sts, z_threshold)
-            n_winds = len(sts)
-            if n_winds < n_winds_orig:
-                rejected = n_winds_orig - n_winds
+            n_winds_new = len(sts)
+            if not n_winds_new == n_winds:
+                rejected = n_winds - n_winds_new
                 logger.info(f'{z_threshold=}, rejected '
-                            f'{100.*rejected/n_winds_orig:.0f}% '
-                            f'of windows ({rejected:d}/{n_winds_orig:d})')
+                            f'{100.*rejected/n_winds:.0f}% '
+                            f'of windows ({rejected:d}/{n_winds:d})')
+                n_winds = n_winds_new
 
         # Clean data
         clean_sequence_dict = {}
@@ -1085,8 +1091,8 @@ class SpectralDensity:
         Plot coherences
 
         Args:
-            x (list of str): limit to the listed input channels
-            y (list of str): limit to the listed output channels
+            x (list of str or None): limit to the listed input channels
+            y (list of str or None): limit to the listed output channels
             display (str): how to arrange plots:
                 - "full": a row for every channel, a column for every channel,
                   every cell filled
@@ -1139,18 +1145,27 @@ class SpectralDensity:
                     ax_array[i, j] = (axa, axp)
         if display == 'sparse':
             rows, cols = len(x), len(y)
+            reduce_display = False
+            if x[0] == y[0]:
+                reduce_display = True   # Can get rid of one row and column
+                rows -= 1
+                cols -= 1
             ax_array = np.ndarray((rows, cols), dtype=tuple)
             fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
             fig.suptitle("Coherences")
             strfun = self._seedid_strfun(labels)
-            pairs = []
-            for in_chan, i in zip(x, range(rows)):
+            plotted = []
+            for in_chan, i in zip(x, range(len(x))):
                 new_row = True
-                for out_chan, j in zip(y, range(cols)):
-                    if in_chan == out_chan or (out_chan, in_chan) in pairs:
-                        axs[i, j].axis('off')
+                for out_chan, jbase in zip(y, range(len(y))):
+                    j = jbase
+                    if reduce_display==True:
+                        j -= 1
+                    if in_chan == out_chan or (out_chan, in_chan) in plotted:
+                        if i < rows and j >= 0:
+                            axs[i, j].axis('off')
                         continue
-                    pairs.append((in_chan, out_chan))
+                    plotted.append((in_chan, out_chan))
                     in_chan_label = strfun(in_chan)
                     out_chan_label = strfun(out_chan)
                     title = out_chan_label if i == 0 else None

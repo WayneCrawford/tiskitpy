@@ -57,8 +57,6 @@ class RFList(UserList):
                     clean_sequence_dict[id_out] = [id_in]
                 else:
                     clean_sequence_dict[id_out].append(id_in)
-                # print(f'clean_sequence_dict[{id_out}]={clean_sequence_dict[id_out]}')
-        # print(f'{clean_sequence_dict=}')
         return fts, clean_sequence_dict
 
     def __str__(self):

@@ -57,8 +57,6 @@ class TimeSpans:
         else:
             raise ValueError('You must provide spans or start_times '
                                  'and end_times')
-        # print(f'{self._start_times=}')
-        # print(f'{self._end_times=}')
         self._organize()
 
     @property
@@ -78,7 +76,7 @@ class TimeSpans:
 
     @classmethod
     def from_eqs(cls, starttime, endtime, minmag=5.85, days_per_magnitude=1.5,
-                 eq_file=None, save_eq_file=True, quiet=False):
+                 eq_file=None, save_eq_file=True):
         """
         Generate timespans to avoid because of earthquakes
 
@@ -113,9 +111,7 @@ class TimeSpans:
         if Path(eq_file).is_file():
             cat = read_events(eq_file, format="quakeml")
         else:
-            if not quiet:
-                print("Reading EQs from USGS online catalog...",
-                      end="", flush=True)
+            logger.info("Reading EQs from USGS online catalog...")
             cat = Client("USGS").get_events(
                 starttime=starttime
                 - _calc_eq_cut(9, minmag, days_per_magnitude),
@@ -123,9 +119,8 @@ class TimeSpans:
                 minmagnitude=minmag,
                 orderby="time-asc",
             )
-            if not quiet:
-                print("Done", flush=True)
-                logger.info(f'writing catalog to "{eq_file}"')
+            logger.info("Done")
+            logger.info(f'writing catalog to "{eq_file}"')
             if save_eq_file:
                 cat.write(eq_file, format="quakeml")
 

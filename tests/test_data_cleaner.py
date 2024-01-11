@@ -48,32 +48,36 @@ class TestMethods(unittest.TestCase):
             "   Step | Channel to remove  | Channels to remove from\n"
             "   ==== | ================== | ========================================\n"
             "      1 | XX.STA.00.BX1      | ['XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
-            "      2 | XX.STA.00.BX2      | ['XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
+            "      2 | XX.STA.00-1.BX2    | ['XX.STA.00-1.BX3', 'XX.STA.00-1.BDH']\n"
         )
 
     def test_clean_sdf(self):
         """Test clean_sdf function"""
         sdf = SpectralDensity.from_stream(self.stream, window_s=self.window_s)
-        ch_ids = ['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']
+        seed_ids = ['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']
+        ch_ids = ['XX.STA.00.BX1', 'XX.STA.00-1.BX2', 'XX.STA.00-1.BX3', 'XX.STA.00-1.BDH']
         
         # Test dc1 (one channel removed)
         cleaned = self.dc1.clean_sdf(sdf)
         self.assertEqual(cleaned.ids, ch_ids)
-        for chan, cleaned_chans in {
+        self.assertEqual(cleaned.seed_ids, seed_ids)
+        for ch_id, cleaned_ids in {
             'XX.STA.00.BX1': None,
-            'XX.STA.00.BX2': ['XX.STA.00.BX1'],
-            'XX.STA.00.BX3': ['XX.STA.00.BX1'],
-            'XX.STA.00.BDH': ['XX.STA.00.BX1']}.items():
+            'XX.STA.00-1.BX2': ['XX.STA.00.BX1'],
+            'XX.STA.00-1.BX3': ['XX.STA.00.BX1'],
+            'XX.STA.00-1.BDH': ['XX.STA.00.BX1']}.items():
             self.assertEqual(cleaned.clean_sequence(chan), cleaned_chans)
         
         # Test dc1 (two channels removed)
+        ch_ids = ['XX.STA.00.BX1', 'XX.STA.00-1.BX2', 'XX.STA.00-1-2.BX3', 'XX.STA.00-1-2.BDH']
         cleaned = self.dc12.clean_sdf(sdf)
         self.assertEqual(cleaned.ids, ch_ids)
-        for chan, cleaned_chans in {
+        self.assertEqual(cleaned.seed_ids, seed_ids)
+        for ch_id, cleaned_ids in {
             'XX.STA.00.BX1': None,
-            'XX.STA.00.BX2': ['XX.STA.00.BX1'],
-            'XX.STA.00.BX3': ['XX.STA.00.BX1','XX.STA.00.BX2'],
-            'XX.STA.00.BDH': ['XX.STA.00.BX1','XX.STA.00.BX2']}.items():
+            'XX.STA.00-1.BX2': ['XX.STA.00.BX1'],
+            'XX.STA.00-1-2.BX3': ['XX.STA.00.BX1','XX.STA.00-1.BX2'],
+            'XX.STA.00-1-2.BDH': ['XX.STA.00.BX1','XX.STA.00-1.BX2']}.items():
             self.assertEqual(cleaned.clean_sequence(chan), cleaned_chans)
 
     def test_clean_stream_to_sdf(self):
