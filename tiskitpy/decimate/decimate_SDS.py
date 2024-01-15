@@ -8,7 +8,7 @@ from pathlib import Path
 from obspy.core.stream import read
 from obspy.core.inventory import read_inventory
 
-from tiskit import Decimator
+from .decimator import Decimator
 from ..logger import init_logger
 
 logger = init_logger()
@@ -111,7 +111,7 @@ def main():
                         help="Process only channels having this sample rate")
     parser.add_argument("decim_factor", type=int, nargs="+",
                         choices=[2,3,4,5,6,7],
-                        help="Sequence of decimation factors to use)")
+                        help="Sequence of decimation factors to use")
     parser.add_argument("--of", dest="output_file", default=None,
                         help="Output StationXML filename "
                              "(default = infile.replace('.xml', '_decim.xml')")
