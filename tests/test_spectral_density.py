@@ -50,6 +50,8 @@ class TestMethods(unittest.TestCase):
                                        "XX.STA.00.BX3",  "XX.STA.00.BDH"])
         self.assertEqual(self.sd_tagged.ids, ["XX.STA.00.BX1", "XX.STA.00.BX2",
                                               "XX.STA.00-ROT.BX3",  "XX.STA.00.BDH"])
+        self.assertEqual(self.sd_tagged.seed_ids, ["XX.STA.00.BX1", "XX.STA.00.BX2",
+                                                   "XX.STA.00.BX3",  "XX.STA.00.BDH"])
         self.assertEqual(self.sd_tagged.seed_id("XX.STA.00-ROT.BX3"),  "XX.STA.00.BX3")
         self.assertEqual(self.sd_tagged.seed_id("XX.STA.00.BX2"),  "XX.STA.00.BX2")
 

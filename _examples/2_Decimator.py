@@ -29,12 +29,19 @@ print('='*80)
 decim = Decimator([5, 5, 4])
 stream_decim = decim.decimate(stream)
 print('='*80)
+
+# Update the inventory to include the decimated channels
 inv_decim = decim.update_inventory(inv, stream)
 print('='*80)
+
+# Inventory now has 4 more channels (LDH, LHZ, LH1 and LH2)
 print(inv_decim)
 print('='*80)
 
+# Combine the original and decimated Z channels into one stream
 compare_z = stream.select(channel='*Z') + stream_decim.select(channel='*Z')
 print(compare_z)
 print('='*80)
+
+# Plot the original and decimated Z channels
 compare_z.plot(show=True, outfile='2_Decimator_time_series.png')

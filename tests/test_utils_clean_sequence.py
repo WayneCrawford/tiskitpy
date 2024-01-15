@@ -73,6 +73,7 @@ class TestMethods(unittest.TestCase):
         """
         Test the private function that creates a cleaner string
         """
+        self.assertEqual(CS._clean_sequence_str([]), '')
         self.assertEqual(CS._clean_sequence_str(['NN.SSS.LL.BDH',
                                           'NN.SSS.LL.BH1',
                                           'NN.SSS.LL.BH2']),
@@ -134,6 +135,9 @@ class TestMethods(unittest.TestCase):
                              'NN.SSS.LL.BH1',
                              'NN.SSS.LL.BDH',
                              'NN.SSS.LL.BH2'])
+        # This previously gave '-1-'
+        self.assertEqual(CS._clean_sequence_str(['XX.STA.00.BX1', 'XX.STA.00-1.BX2']),
+                         '-1-2')
 
     def test_tiskitpy_id(self):
         """
@@ -147,6 +151,13 @@ class TestMethods(unittest.TestCase):
                                         ['NN.SSS.LL.BDH', 'NN.SSS.LL.BH1',
                                          'NN.SSS.LL.BH2', 'ROT']),
                          'XX.STA.00-H-1-2-ROT.BHZ')
+        self.assertEqual(CS.tiskitpy_id('XX.STA.00.BDH',
+                                        ['XX.STA.00.BX1', 'XX.STA.00-1.BX2']),
+                         'XX.STA.00-1-2.BDH')
+        # If first argument is not a seed_id, should convert to one and warn
+        self.assertEqual(CS.tiskitpy_id('XX.STA.00-1-2.BDH',
+                                        ['XX.STA.00.BX1', 'XX.STA.00-1.BX2']),
+                         'XX.STA.00-1-2.BDH')
 
     def test_seed_id(self):
         """

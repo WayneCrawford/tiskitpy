@@ -36,7 +36,7 @@ DataCleaner example code
 
 .. code-block:: python
 
-    # If you print and plot the stream "normally", can not see which is which
+    # If you print and plot the stream "normally", they have the same channel names
     print(z_compare)
     z_compare.plot()
 
@@ -51,7 +51,7 @@ DataCleaner example code
 
 .. code-block:: python
 
-    # If you convert the Stream to its CleanedStream subclass, all works automatically
+    # If you convert the Stream to its CleanedStream subclass, the tiskit_py ids are printed and plotted
     z_compare = CleanedStream(z_compare)
     print(z_compare)
     z_compare.plot(outfile='3_DataCleaner_tagged_timeseries_cleanedstream.png')

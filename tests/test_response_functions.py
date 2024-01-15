@@ -40,7 +40,7 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(self.xf.input_channel_id, "XX.STA.00.BX1")
         self.assertEqual(self.xf.output_channel_ids,
                          ["XX.STA.00.BX2", "XX.STA.00.BX3", 'XX.STA.00.BDH'])
-        self.assertIsNone(self.xf.input_clean_sequence)
+        self.assertEqual(self.xf.input_clean_sequence, [])
         self.assertEqual(self.xf.input_units, "Counts")
         self.assertEqual(self.xf.n_windows, 6)
         self.assertEqual(self.xf.noise_channels, ["output", "output", "output"])

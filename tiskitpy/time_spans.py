@@ -10,10 +10,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.dates import date2num
 
+from .utils import CleanSequence
+from .cleaned_stream import CleanedStream
 from .logger import init_logger
 
 logger = init_logger()
-ZERO_TAG = '000'
+ZERO_TAG = 'ZEROS'
 
 class TimeSpans:
     """
@@ -336,38 +338,6 @@ class TimeSpans:
         self._start_times = start_times
         self._end_times = end_times
 
-#     # METHODS OPERATING ON OUTSIDE OBJECTS
-#     def zero(self, inp, plot=False):
-#         """
-#         Zero out data in the time spans
-# 
-#         Arguments:
-#             inp (Trace or Stream): seismological data
-#             plot: plot traces with spans cut out
-# 
-#         Returns:
-#             trace with spans set to zero
-#         """
-#         if isinstance(inp, Trace):
-#             stream = Stream([inp])
-#         elif isinstance(inp, Stream):
-#             stream = inp.copy()
-#         else:
-#             raise (ValueError, "inp is not an obspy Trace or Stream")
-#         for tr in stream:
-#             tr.stats.channel = "XX" + tr.stats.channel[2]
-# 
-#             for st, et in zip(self.start_times, self.end_times):
-#                 start_addr, end_addr = self._get_addrs(st, et, tr.stats)
-#                 if start_addr is None:
-#                     continue
-#                 tr.data[start_addr: end_addr + 1] = 0.0
-#         if plot:
-#             (stream + inp).plot(color="blue", equal_scale=False)
-#         if isinstance(inp, Trace):
-#             return stream[0]
-#         return stream
-
     # METHODS OPERATING ON OUTSIDE OBJECTS
     def zero(self, inp, plot=False):
         """
@@ -386,16 +356,18 @@ class TimeSpans:
                 start_addr, end_addr = self._get_addrs(st, et, tr.stats)
                 if start_addr is not None:
                     tr.data[start_addr: end_addr + 1] = 0.0
-                    tr.stats.channel = "XX" + tr.stats.channel[2]  # Mark channel code
+                    tr = CleanSequence.tag(tr, ZERO_TAG)
+                    # tr.stats.channel = "XX" + tr.stats.channel[2]  # Mark channel code
             if plot:
                 Stream([trace,inp]).plot(color="blue", equal_scale=False)
             return tr
         elif isinstance(inp, Stream):
-            stream = inp.copy() # Do not destroy original
+            stream = CleanedStream(inp)
             for tr in stream:
                 new_tr = self.zero(tr)
                 stream.remove(tr)
                 stream.append(new_tr)
+            # stream = stream.tag(ZERO_TAG)
             if plot:
                 (stream + inp).plot(color="blue", equal_scale=False)
             return stream

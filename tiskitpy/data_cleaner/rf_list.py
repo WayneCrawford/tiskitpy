@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from ..response_functions import ResponseFunctions
-# from ..utils import CleanSequence as CS
+from ..utils import CleanSequence as CS
 from ..logger import init_logger
 
 logger = init_logger()
@@ -34,29 +34,43 @@ class RFList(UserList):
                 fts (dict): corrected Fourier transforms for each channel.
                 clean_sequence_dict (dict of list): clean_sequence list for each channel
         """
+        # Each iteration of subtract_rf will change the tiskitpy_ids. 
+        # This is reflected in the different ResponseFunctions but not in
+        # output_channel_id, which gives the response channel to apply to,
+        # not the result.
         clean_sequence_dict = {}
+        start_ids = self[0].output_channel_ids  # clean sequence dict is w.r.t. start_ids
         for rfs in self:
             id_in = rfs.input_channel_id
+            if not id_in in fts:
+                id_in = _match_fts_ids(id_in, fts)
             if not rfs.freqs.shape == fts[id_in].shape:
                 ValueError("frequency response function and ft have different shapes "
                            f"({rfs.freqs.shape} vs {fts[id_in].shape})")
             for id_out in rfs.output_channel_ids:
+                fts_id_out = id_out
+                if not fts_id_out in fts:
+                    fts_id_out = _match_fts_ids(id_out, fts)
                 # Verify that the fourier transforms have the same shape
-                if not fts[id_out].shape == fts[id_in].shape:
-                    ValueError(f"ft[{id_in=}] and ft[{id_out=}] "
+                if not fts[fts_id_out].shape == fts[id_in].shape:
+                    ValueError(f"ft[{id_in=}] and ft[{fts_id_out=}] "
                                "have different shapes ({} vs {})".response(
-                               fts[id_in].shape, fts[id_out].shape))
+                               fts[id_in].shape, fts[fts_id_out].shape))
                 # Clean coherent noise (EQ 8, Crawford & Webb 2000)
                 multiplier = np.ones(fts[id_in].shape)
                 if evalresps is not None:
-                    if evalresps[id_in] is not None and evalresps[id_out] is not None:
-                            multiplier = evalresps[id_in] / evalresps[id_out]
-                fts[id_out] -= fts[id_in] * multiplier * rfs.corrector(id_out)
+                    if evalresps[id_in] is not None and evalresps[fts_id_out] is not None:
+                            multiplier = evalresps[id_in] / evalresps[fts_id_out]
+                fts[fts_id_out] -= fts[id_in] * multiplier * rfs.corrector(id_out)
                 # Add input channel to clean_sequence for output channel
-                if id_out not in clean_sequence_dict:
-                    clean_sequence_dict[id_out] = [id_in]
+                if id_out in start_ids:
+                    cs_id_out = id_out
                 else:
-                    clean_sequence_dict[id_out].append(id_in)
+                    cs_id_out = _match_ids(id_out, start_ids)
+                if cs_id_out not in clean_sequence_dict:
+                    clean_sequence_dict[cs_id_out] = [id_in]
+                else:
+                    clean_sequence_dict[cs_id_out].append(id_in)
         return fts, clean_sequence_dict
 
     def __str__(self):
@@ -110,3 +124,16 @@ class RFList(UserList):
             fig.savefig(outfile)
         else:
             plt.show()
+
+def _match_ids(test_id, id_list):
+    """Return an id whos seed_id matches a seed_id in id_list"""
+    seed_id_dict = {CS.seed_id(k): k for k in id_list}
+    return seed_id_dict.get(CS.seed_id(test_id), None)
+
+
+def _match_fts_ids(test_id, fts_dict):
+    """Return an id whos seed_id matches a seed_id in fts_dict.keys()"""
+    matched_id = _match_ids(test_id, list(fts_dict.keys()))
+    if matched_id is None:
+        raise ValueError(f"{test_id=} not in fts dict keys {list(fts.keys())=} and doesn't match a seed_id either")
+    return matched_id

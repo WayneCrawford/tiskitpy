@@ -44,6 +44,7 @@ SpectralDensity example code
    
 .. code-block:: python
 
+    # plot results, overlaid
     sd.plot(overlay=True)
 
 .. image:: images/1_SpectralDensity_plot_overlay.png
@@ -51,6 +52,7 @@ SpectralDensity example code
    
 .. code-block:: python
 
+    # plot coherences
     sd.plot_coherences(display="full")
 
 .. image:: images/1_SpectralDensity_coher_full.png
@@ -58,6 +60,7 @@ SpectralDensity example code
    
 .. code-block:: python
 
+    # plot coherences, overlaid
     sd.plot_coherences(display="overlay")
 
 .. image:: images/1_SpectralDensity_coher_overlay.png
@@ -65,6 +68,7 @@ SpectralDensity example code
 
 .. code-block:: python
 
+    # plot coherences, sparse
     sd.plot_coherences(display="sparse")
 
 .. image:: images/1_SpectralDensity_coher_sparse.png
@@ -72,6 +76,7 @@ SpectralDensity example code
 
 .. code-block:: python
 
+    # plot coherences, minimal space
     sd.plot_coherences(display="minimal")
 
 .. image:: images/1_SpectralDensity_coher_minimal.png

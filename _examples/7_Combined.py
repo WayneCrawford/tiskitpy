@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 
 from tiskitpy import CleanRotator, SpectralDensity, DataCleaner
 
+# Read data and metadata, and calculate a SpectralDensity
 stream = read('data/XS.S11D.LH.2016.12.11.mseed', 'MSEED')
 inv = read_inventory('data/XS.S11_decimated.station.xml', 'STATIONXML')
 sd_orig = SpectralDensity.from_stream(stream, inv=inv)
@@ -23,8 +24,6 @@ dc_rot = DataCleaner(rot_stream, ['*1', '*2', '*H'])
 # Clean the stream, then calculate the spectral density
 stream_dc = dc.clean_stream(stream)
 rot_stream_dc = dc_rot.clean_stream(rot_stream)
-# For now, must remove '-ROT' from location code
-rot_stream_dc = CleanSequence.remove_from_loc(rot_stream_dc)
 sd_dc = SpectralDensity.from_stream(stream_dc, inv=inv)
 sd_rot_dc = SpectralDensity.from_stream(rot_stream_dc, inv=inv)
 
@@ -36,9 +35,10 @@ fig, ax = plt.subplots()
 for sd, label in zip(
         (sd_orig, sd_rot, sd_dc, sd_rot_dc, sd_rot_sddc),
         ('original', 'rotated', 'cleaned', 'rot + clean', 'rot+clean(sd)')):
-    # print(sd.channel_names)
-    z_id = fnmatch.filter(sd.channel_names, '*.LHZ*')[0]
+    z_id = fnmatch.filter(sd.ids, '*.LHZ*')[0]
     ax.semilogx(sd.freqs, 10*np.log10(sd.autospect(z_id)), label=label)
+ax.set_xlabel('Frequency (Hz)')
+ax.set_ylabel('PSD (dB ref 1 (m/s^2)^2/Hz)')
 ax.legend()
 plt.show()
-plot.outfile(f'7_Combined.png')
+plt.savefig('7_Combined.png')

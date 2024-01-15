@@ -15,12 +15,13 @@ print('='*80)
 stream_cleaned = dc.clean_stream(stream)
 z_compare = stream.select(channel='*Z') + stream_cleaned.select(channel='*Z')
 
-# If you print and plot the stream "normally", can not see which is which
+# If you print and plot the stream "normally", both channels have the same name
 print('='*80)
 print(z_compare)
 z_compare.plot(outfile='3_DataCleaner_tagged_timeseries.png')
 
-# If you convert the Stream to its CleanedStream subclass, all works automatically
+# If you convert the Stream to its CleanedStream subclass, the tiskit_py ids
+# are printed and plotted
 z_compare = CleanedStream(z_compare)
 print('='*80)
 print(z_compare)

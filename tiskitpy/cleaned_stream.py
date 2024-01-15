@@ -34,9 +34,9 @@ class CleanedStream(Stream):
         """
         out_stream =  super().select(**kwargs)
         if len(out_stream) == 0:
-            logger.info(f"Stream.select(**{kwargs}) returned no traces, seedid_tag() and retry...")
+            logger.debug(f'Stream.select(**{kwargs}) returned no traces, '
+                        f'tag with tiskitpy_ids and retry...')
             tagged = Stream(CleanSequence.seedid_tag(self))
-            print(tagged)
             out_stream =  tagged.select(**kwargs)
             out_stream = CleanSequence.seedid_untag(out_stream)
         return out_stream

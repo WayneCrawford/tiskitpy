@@ -35,7 +35,7 @@ class SpectralDensity:
 
     No public attributes, access data through provided methods
     """
-    def __init__(self, freqs, ids, seed_ids, chan_units, n_windows,
+    def __init__(self, freqs, seed_ids, chan_units, n_windows,
                  window_type, window_s, chan_clean_sequences=None,
                  ts_starttime=None, ts_endtime=None, starttimes=None,
                  data=None, instrument_responses=None):
@@ -45,15 +45,13 @@ class SpectralDensity:
             :meth:`SpectralDensity.from_stream()`
         Args:
             freqs (np.ndarray): frequencies
-            ids (list of str): unique ids for each channel
             seed_ids (list of str): seed_ids for each channel
             chan_units (list of str): channel physical units (e.g m/s^2, Pa)
             n_windows (int): of windows used to calculate spectra
             window_type (str): type of window used
             window_s (float): length of data windows in seconds
             chan_clean_sequences (list of list of str): clean_sequences
-                applied to each channel.  These aren't currently used: the
-                clean_sequence must be 'baked in' to the location code
+                applied to each channel.
             ts_starttime (:class:`obspy.core.UTCDateTime`): start of time
                 series used for this object
             ts_endtime (:class:`obspy.core.UTCDateTime`): end of time series
@@ -75,9 +73,14 @@ class SpectralDensity:
             data = np.zeros((n_ch, n_ch, n_f), dtype="complex")
         if instrument_responses is None:
             instrument_responses = np.ones((n_ch, n_f), dtype="complex")
-        _validate_dimensions(freqs, ids, seed_ids, chan_units, starttimes,
+        assert isinstance(chan_clean_sequences, list)
+        for x in chan_clean_sequences:
+            assert isinstance(x, list)
+            for y in x:
+                assert isinstance(y, str)
+        _validate_dimensions(freqs, seed_ids, chan_units, starttimes,
                              chan_clean_sequences, data, instrument_responses)
-
+        ids = [CS.tiskitpy_id(s,cs) for (s, cs) in zip(seed_ids, chan_clean_sequences)]
         self._ds = xr.Dataset(
             data_vars={
                 "spectra": (("input", "output", "f"), data),
@@ -103,7 +106,6 @@ class SpectralDensity:
                 "description": "One-sided spectral density functions",
             },
         )
-        # Datasets can't handle arbitrary-length tuples
         self._clean_sequences = {k: v for k, v in zip(ids,
                                                       chan_clean_sequences)}
 
@@ -139,6 +141,14 @@ class SpectralDensity:
     @property
     def seed_ids(self):
         return list(self._ds.coords["seed_ids"].values)
+
+    @property
+    def clean_sequences(self):
+        """
+        Returns:
+            (list of list):
+        """
+        return [self._clean_sequences[key] for key in self.ids]
 
     @property
     def freqs(self):
@@ -294,6 +304,7 @@ class SpectralDensity:
         ft, evalresps, units = {}, {}, []
         tagged_stream = CS.seedid_tag(stream)
         ids = [tr.id for tr in tagged_stream]
+        clean_seq_dict = {tr.id: tr.stats.get('clean_sequence',[]) for tr in tagged_stream}
         seed_ids = [tr.id for tr in stream]
         if not len(ids) == len(set(ids)):
             raise ValueError("stream has duplicate IDs")
@@ -328,34 +339,33 @@ class SpectralDensity:
                 n_winds = n_winds_new
 
         # Clean data
-        clean_sequence_dict = {}
+        new_clean_seq_dict = {}
         if data_cleaner is not None:  # clean data using correlated noise
-            rf_list = data_cleaner.RFList
-            # old_ids = ids
-            ft, clean_sequence_dict = rf_list.ft_subtract_rfs(ft, evalresps)
+            rf_list = data_cleaner.RFList  # the ids here are beyond those in ft
+            ft, new_clean_seq_dict = rf_list.ft_subtract_rfs(ft, evalresps)
+            clean_seq_dict = {k: clean_seq_dict.get(k,[]) + new_clean_seq_dict.get(k,[]) for k in ids}
 
-        # Create clean_sequence information (NOT USED)
-        clean_seqs = [clean_sequence_dict.get(x, None) for x in ids]
-
+        clean_seq_list = [clean_seq_dict.get(x, []) for x in ids]
         # Create object
         obj = cls(f,
-                  ids,
                   seed_ids,
                   units,
                   n_winds,
                   windowtype,
                   ws,
-                  clean_seqs,
+                  clean_seq_list,
                   ts_starttime=min([x.stats.starttime for x in stream]),
                   ts_endtime=max([x.stats.endtime for x in stream]),
                   starttimes=sts)
         # Fill object with Cross-Spectral Density Functions
         for inp in ids:
+            in_id = CS.tiskitpy_id(CS.seed_id(inp), clean_seq_dict.get(inp,[]))
             if evalresps[inp] is not None:
-                obj.put_channel_instrument_response(inp, evalresps[inp])
+                obj.put_channel_instrument_response(in_id, evalresps[inp])
             for outp in ids:
+                out_id = CS.tiskitpy_id(CS.seed_id(outp), clean_seq_dict.get(outp,[]))
                 # (p 547, Bendat and Piersol, 2010)
-                obj.put_crossspect(inp, outp, 2 * multfac * np.mean(
+                obj.put_crossspect(in_id, out_id, 2 * multfac * np.mean(
                     np.conj(ft[inp])*ft[outp], axis=0))
         return obj
 
@@ -485,6 +495,7 @@ class SpectralDensity:
         ids[ids.index(channel)] = replacement
         self._ds["input"] = ids
         self._ds["output"] = ids
+        self._clean_sequences[replacement] = self._clean_sequences.pop(channel)
 
     def put_crossspect(self, in_id, out_id, cross_spect):
         """
@@ -1173,7 +1184,8 @@ class SpectralDensity:
                         in_chan, out_chan,
                         fig, (rows, cols), (i, j),
                         show_ylabel=new_row,
-                        show_xlabel=i == rows - 1,
+                        # show_xlabel=i == rows - 1,
+                        show_xlabel=i == j,
                         ylabel=in_chan_label,
                         title=title,
                     )
@@ -1522,32 +1534,26 @@ class SpectralDensity:
         return offsets
 
 
-def _validate_dimensions(freqs, ids, seed_ids, chan_units, starttimes,
+def _validate_dimensions(freqs, seed_ids, chan_units, starttimes,
                          chans_cleaned, data, instrument_responses):
     """Validate dimensions of __init__() variables"""
-    n_f, n_ch = len(freqs), len(ids)
+    n_f, n_ch = len(freqs), len(seed_ids)
     assert freqs.size == (n_f)  # Make sure it's one dimensional
     assert freqs.dtype == "float"
-    assert len(seed_ids) == n_ch
     assert len(chan_units) == n_ch
     assert len(chans_cleaned) == n_ch
     for x in chan_units:
         assert isinstance(x, str)
-    for x in ids:
-        assert isinstance(x, str)
     for x in seed_ids:
         assert isinstance(x, str)
     for x in chans_cleaned:
-        if x is not None:
-            if not isinstance(x, list):
-                raise TypeError(f'chans_cleaned element is a {type(x)}, '
-                                'not a list')
-            if not len(x) > 0:
-                raise TypeError(f'chans_cleaned element is len {len(x)}')
-            for y in x:
-                if not isinstance(y, str):
-                    raise TypeError('chans_cleaned subelement is a '
-                                    f'{type(y)}, not a str')
+        if not isinstance(x, list):
+            raise TypeError(f'chans_cleaned element is a {type(x)}, '
+                            'not a list')
+        for y in x:
+            if not isinstance(y, str):
+                raise TypeError('chans_cleaned subelement is a '
+                                f'{type(y)}, not a str')
     if starttimes is not None:
         for x in starttimes:
             assert isinstance(x, UTCDateTime)

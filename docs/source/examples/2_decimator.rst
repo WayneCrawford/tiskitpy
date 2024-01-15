@@ -79,6 +79,7 @@ This example uses data and inventory from a FDSN data server
     
 .. code-block:: python
 
+    # Update the inventory to include the decimated channels
     inv_decim = decim.update_inventory(inv, stream)
 
 .. code-block:: none
@@ -98,6 +99,7 @@ This example uses data and inventory from a FDSN data server
     
 .. code-block:: python
 
+    # Inventory now has 4 more channels (LDH, LHZ, LH1 and LH2)
     print(inv_decim)
 
 .. code-block:: none
@@ -118,6 +120,7 @@ This example uses data and inventory from a FDSN data server
 
 .. code-block:: python
 
+    # Combine the original and decimated Z channels into one stream
     compare_z = stream.select(channel='*Z') + stream_decim.select(channel='*Z')
     print(compare_z)
 
@@ -129,6 +132,7 @@ This example uses data and inventory from a FDSN data server
 
 .. code-block:: python
 
+    # Plot the original and decimated Z channels
     compare_z.plot()
 
 .. image:: images/2_Decimator_time_series.png

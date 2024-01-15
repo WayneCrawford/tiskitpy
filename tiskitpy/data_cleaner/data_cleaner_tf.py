@@ -71,26 +71,30 @@ class DataCleaner:
         self.starttimes = sdfs[0].starttimes
         self.RFList = RFList()
         # Calculate removal frequency response functions
-        out_ids = sdfs[0].ids
+        # out_chan_ids = sdfs[0].ids
         clean_sequence = []
         # in_ids = [sdfs[0].channel_id(x) for x in remove_list]
         # for in_id in in_ids:
-        for remove_id in remove_list:
-            in_id = sdfs[-1].channel_id(remove_id)
-            out_ids = [x for x in out_ids if not x == in_id]
-            # out_ids = [x for x in sdfs[-1].ids if not x == in_id]
+        removed_codes=[]
+        for remove_code in remove_list:
+            in_chan_id = sdfs[-1].channel_id(remove_code)
+            removed_ids = [sdfs[-1].channel_id(x) for x in removed_codes]
+            out_chan_ids = [CS.tiskitpy_id(x, y)
+                       for x, y in zip(sdfs[-1].seed_ids, sdfs[-1].clean_sequences)
+                       if not x == CS.seed_id(in_chan_id) and not x in [CS.seed_id(y) for y in removed_ids]]
             rf = ResponseFunctions(
                 sdfs[-1],
-                in_id,
-                out_ids,
+                in_chan_id,
+                out_chan_ids,
                 noise_channel,
                 n_to_reject,
                 min_freq,
                 max_freq,
                 show_progress=show_progress,
             )
+            removed_codes.append(remove_code)
             # Apply data cleaner and update channel names with removed channels
-            clean_sequence.append(in_id)
+            clean_sequence.append(in_chan_id)
             self.RFList.append(deepcopy(rf))
             if fast_calc:
                 new_sdf = self._removeRF_SDF(sdfs[-1], rf, show_progress)
@@ -178,12 +182,8 @@ class DataCleaner:
             logger.info("Correcting traces in the frequency domain")
 
         for rfs in self.RFList:
-            print(rfs)
             in_id = rfs.input_channel_id
             for out_id in rfs.output_channel_ids:
-                print(f'{in_id=}, {out_id=}, {type(out_stream)=}')
-                print('out_stream =')
-                print(out_stream)
                 in_trace = out_stream.select(id=in_id)[0]
                 out_trace = out_stream.select(id=out_id)[0]
                 out_stream.remove(out_trace)
@@ -194,7 +194,6 @@ class DataCleaner:
                     rfs.corrector_wrt_counts(out_id),
                     in_time_domain,
                 )
-                print('out_trace=' + out_trace.__str__())
                 out_trace = CS.tag(out_trace, in_trace.id)
                 out_stream += out_trace
         return out_stream
@@ -332,10 +331,7 @@ class DataCleaner:
         sdf = deepcopy(sdf)  # Avoids overwriting input object
         in_auto = sdf.autospect(ic)
         for oc in out_ids:
-            # rf_oc = rf.values_counts(oc)
             rf_oc = rf.corrector(oc)
-            # out_auto = sdf.autospect(strip_remove_one(oc))
-            # crossspect = sdf.crossspect(ic, strip_remove_one(oc))
             out_auto = sdf.autospect(oc)
             crossspect = sdf.crossspect(ic, oc)
             if show_progress:
@@ -346,8 +342,12 @@ class DataCleaner:
             sdf.put_autospect(oc, out_auto - in_auto * np.abs(rf_oc) ** 2)
             # Bendat & Piersol eq6.36 with
             sdf.put_crossspect(ic, oc, crossspect - in_auto * rf_oc)
-            # Could the above be replaced by:
-            sdf.put_clean_sequence(oc, CS.tag(sdf.clean_sequence(oc), ic))
+            # Add to clean_sequence:
+            # sdf.put_clean_sequence(oc, CS.tag(sdf.clean_sequence(oc), ic))
+            new_clean_sequence = sdf.clean_sequence(oc) + [ic]
+            sdf.put_clean_sequence(oc, new_clean_sequence)
+            sdf.replace_channel_id(oc, CS.tiskitpy_id(CS.seed_id(oc),
+                                                      new_clean_sequence))
         return sdf
 
     @staticmethod

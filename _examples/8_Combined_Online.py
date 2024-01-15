@@ -8,7 +8,7 @@ from obspy.core.stream import read
 from obspy.core.inventory import read_inventory
 from matplotlib import pyplot as plt
 
-from tiskit import Decimator, CleanRotator, SpectralDensity, DataCleaner
+from tiskitpy import Decimator, CleanRotator, SpectralDensity, DataCleaner
 
 client_address = 'IRIS'
 net = 'Z5'
@@ -18,10 +18,10 @@ cha = 'HH*,HDH'
 starttime = UTCDateTime('2014-01-01T') 
 endtime = UTCDateTime('2014-01-02T')
 
-# READ WAVEFORM DATA
-fname=f'data/{net}.{sta}.{starttime.strftime("%Y%m%d")}'
+# READ WAVEFORM DATA ONLINE
+fname=f'{net}.{sta}.{starttime.strftime("%Y%m%d")}'
 client = Client(client_address)
-if Path(fname).is_file(): 
+if Path(fname).is_file():   # IF YOU'VE ALREADY DOWNLOADED, DON'T DOWNLOAD AGAIN
     print(f'reading data from file "{fname}"')
     stream = read(fname, "MSEED")
 else:
@@ -32,9 +32,9 @@ else:
     Path(fname).parent.mkdir(exist_ok=True)
     stream.write(fname, "MSEED")  # COMMENT OUT ONCE YOU'VE READ FROM FDSN!!!!!
 
-# READ INVENTORY (INSTRUMENT RESPONSE, etc)
-fname=f'data/{net}.{sta}.{starttime.strftime("%Y%m%d")}.station.xml'    
-if Path(fname).is_file(): 
+# READ INVENTORY ONLINE
+fname=f'{net}.{sta}.{starttime.strftime("%Y%m%d")}.station.xml'    
+if Path(fname).is_file():  # IF YOU'VE ALREADY DOWNLOADED, DON'T DOWNLOAD AGAIN
     print(f'reading inventory from file "{fname}"')
     inv = read_inventory(fname, "STATIONXML")
 else:
@@ -43,8 +43,9 @@ else:
                           network=net, station=sta, channel='*', location='*',
                           level='response')
     Path(fname).parent.mkdir(exist_ok=True)
-    inv.write(fname, "STATIONXML")  # COMMENT OUT ONCE YOU'VE READ FROM FDSN!!!!!
+    inv.write(fname, "STATIONXML")
 
+print('1' * 80)
 # DECIMATE DATA DOWN TO 1 Hz
 decim = Decimator([5, 5, 4])
 stream_decim = decim.decimate(stream)
@@ -70,10 +71,11 @@ fig, ax = plt.subplots()
 for sd, label in zip((sd_orig, sd_rot, sd_rot_dc, sd_rot_sddc),
                       ('original', 'rotated', 'rot + clean', 'rot+clean(sd)')
                     ):
-    print(sd.channels)
-    z_id = fnmatch.filter(sd.channels, '*.LHZ*')[0]
+    z_id = fnmatch.filter(sd.ids, '*.LHZ*')[0]
     ax.semilogx(sd.freqs, 10*np.log10(sd.autospect(z_id)), label=label)
+ax.set_title(f'{net=}, {sta=}')
+ax.set_xlabel('Frequency (Hz)')
+ax.set_ylabel('PSD (dB ref 1 (m/s^2)^2/Hz)')
 ax.legend()
 plt.show()
-print(stream)
-stream.plot()
+plt.savefig('8_Combined_Online.png')

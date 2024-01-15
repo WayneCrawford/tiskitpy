@@ -177,7 +177,11 @@ class CleanSequence:
             (str): the tiskitpy_id
         """
         if not _is_seed_id(seed_id):
-            raise ValueError(f'{seed_id=} is not a valid seed_id')
+            try:
+                seed_id = CleanSequence.seed_id(seed_id)
+                logger.warning(f'{seed_id=} was not a valid seed_id, reduced to seed_id equivalent')
+            except Exception:
+                raise ValueError(f'{seed_id=} is neither a valid seed_id nor a valid tiskitpy_id')
         components = seed_id.split('.')
         components[2] += CleanSequence._clean_sequence_str(clean_sequence)
         return '.'.join(components)
@@ -217,62 +221,6 @@ class CleanSequence:
             raise ValueError('Created {new_seed_id=} is invalid')
         return new_seed_id
 
-#     @staticmethod
-#     def stream_plot(inp, **kwargs):
-#         """
-#         Plot an obspy stream with clean_sequence tags
-#         
-#         Uses Stream.plot() after putting clean_sequence information into
-#         the seed_id location code
-#         
-#         Args:
-#             inp (:class:`obspy.core.Stream): stream to plot
-#             
-#         Other Parameters:
-#             **kwargs: Keyword arguments for Stream.plot()
-#         """
-#         if isinstance(inp, Stream):
-#             stream = CleanSequence.seedid_tag(inp)
-#             stream.plot(**kwargs)
-#         else:
-#             raise TypeError('inp is not a Stream')
-#
-#     @staticmethod
-#     def stream_print(inp, **kwargs):
-#         """
-#         Print an obspy stream with clean_sequence tags
-#         
-#         Uses print(inp) after putting clean_sequence information into
-#         the seed_id location code
-#         
-#         Args:
-#             inp (:class:`obspy.core.Stream): stream to print
-#             
-#         Other Parameters:
-#             **kwargs: Keyword arguments for print()
-#         """
-#         print(CleanSequence.stream_str(inp), **kwargs)
-#                              
-#     @staticmethod
-#     def stream_str(inp, **kwargs):
-#         """
-#         Return string for an obspy stream with clean_sequence tags
-#         
-#         Uses Stream.__str__() after putting clean_sequence information into
-#         the seed_id location code
-#         
-#         Args:
-#             inp (:class:`obspy.core.Stream): stream
-#             
-#         Other Parameters:
-#             **kwargs: Keyword arguments for Stream.__str__()
-#         """
-#         if isinstance(inp, Stream):
-#             stream = CleanSequence.seedid_tag(inp)
-#             return stream.__str__(**kwargs)
-#         else:
-#             raise TypeError('inp is not a Stream')
-                             
     @staticmethod
     def _clean_sequence_str(id_list, out_format='minimal'):
         """
@@ -315,7 +263,9 @@ class CleanSequence:
         if not out_format in valid_out_formats:
             raise ValueError(f'{out_format=} not in {valid_out_formats}')
         if not isinstance(id_list, list):
-            raise TypeError('id_list is not a list')
+            raise TypeError(f'id_list is type {type(id_list)}, not a list')
+        if len(id_list) == 0:
+            return ''
         for x in id_list:
             if not isinstance(x, str):
                 raise TypeError('id_list element is not a str')
@@ -328,7 +278,7 @@ class CleanSequence:
             # Create shortened str describing each sequence element
             strs = [x if _is_trans_code(x) else None for x in id_list]
             unique_strs = [_is_trans_code(x) for x in id_list]
-            fake_id_list = [x if _is_seed_id(x) else '...' for x in id_list]
+            fake_id_list = [x if _is_tiskitpy_id(x) else '...' for x in id_list]
             for i in range(3, -1, -1): # from channel to net, if needed
                 strs, unique_strs = CleanSequence._prepend_unique_str(
                     [x.split('.')[i] for x in fake_id_list],
