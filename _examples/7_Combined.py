@@ -40,5 +40,5 @@ for sd, label in zip(
 ax.set_xlabel('Frequency (Hz)')
 ax.set_ylabel('PSD (dB ref 1 (m/s^2)^2/Hz)')
 ax.legend()
-plt.show()
 plt.savefig('7_Combined.png')
+plt.show()
