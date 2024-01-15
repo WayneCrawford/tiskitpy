@@ -16,7 +16,9 @@ import numpy as np
 
 from .dirac_comb import comb_calc, comb_remove
 from .utils import stack_data, input_float, input_float_tuple
+from ..logger import init_logger
 
+logger = init_logger()
 def_mag_limit = 5.85
 def_days_per_magnitude = 1.5
 

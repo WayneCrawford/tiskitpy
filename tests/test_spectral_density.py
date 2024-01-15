@@ -26,23 +26,34 @@ class TestMethods(unittest.TestCase):
         self.test_path = self.path / "data" / "spectral_density"
         self.stream, self.sineparms = make_test_stream()
         self.sd = SpectralDensity.from_stream(self.stream, window_s=100.0)
+        stream2 = self.stream.copy()
+        trace = stream2.select(channel='*3')[0]
+        trace.stats['clean_sequence'] = ['ROT']
+        self.sd_tagged = SpectralDensity.from_stream(stream2, window_s=100.)
+        
 
     def test_str(self):
         """Test __str__ function"""
         self.assertEqual(
             self.sd.__str__(),
             "SpectralDensity object:\n"
-            "\tchannel_names=['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
+            "\tids=['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']\n"
             "\tchannel_units=['Counts', 'Counts', 'Counts', 'Counts']\n"
             "\t8192 frequencies, from 0.0061 to 50Hz\n"
             "\tn_windows=6\n"
             "\twindow_type=prol1pi",
         )
 
-    def test_channel_names(self):
-        """Test channel names derived property"""
-        self.assertEqual(self.sd.channel_names, ["XX.STA.00.BX1", "XX.STA.00.BX2",
-                                            "XX.STA.00.BX3",  "XX.STA.00.BDH"])
+    def test_ids(self):
+        """Test derived property "ids" """
+        self.assertEqual(self.sd.ids, ["XX.STA.00.BX1", "XX.STA.00.BX2",
+                                       "XX.STA.00.BX3",  "XX.STA.00.BDH"])
+        self.assertEqual(self.sd_tagged.ids, ["XX.STA.00.BX1", "XX.STA.00.BX2",
+                                              "XX.STA.00-ROT.BX3",  "XX.STA.00.BDH"])
+        self.assertEqual(self.sd_tagged.seed_ids, ["XX.STA.00.BX1", "XX.STA.00.BX2",
+                                                   "XX.STA.00.BX3",  "XX.STA.00.BDH"])
+        self.assertEqual(self.sd_tagged.seed_id("XX.STA.00-ROT.BX3"),  "XX.STA.00.BX3")
+        self.assertEqual(self.sd_tagged.seed_id("XX.STA.00.BX2"),  "XX.STA.00.BX2")
 
     def test_freqs(self):
         """Test freqs derived property"""
@@ -78,40 +89,36 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(x.size, 8192)
         self.assertIsInstance(x, np.ndarray)
         # Verify that the phase of the cross-spect equals 45°
-        # (self.chan_amp_phases['BX2'][0].phase)
         sineparm = self.sineparms["XX.STA.00.BX2"][0]
         ifreq = np.argmin(np.abs(self.sd.freqs - sineparm.frequency))
         self.assertAlmostEqual(np.degrees(np.angle(x[ifreq])), sineparm.phase,
                                places=2)
         # Verify that crossspect for same channel is same as autospect
         chan = "XX.STA.00.BX1"
-        print(f"{self.sd.crossspect(chan, chan)=}")
-        print(f"{self.sd.autospect(chan)=}")
-        print(self.sd.crossspect(chan, chan) == self.sd.autospect(chan))
         self.assertTrue(np.all(self.sd.crossspect(chan, chan)
                         == self.sd.autospect(chan)))
 
-    def test_channel_name(self):
-        """Test channel_name() function"""
-        # Verify that a bad channel name raises a ValueError
+    def test_channel_id(self):
+        """Test channel_id() function"""
+        # Verify that a bad channel id raises a ValueError
         with self.assertRaises(ValueError):
-            self.sd.channel_name("blah")
+            self.sd.channel_id("blah")
         # Verify that a bad channel type raises a TypeError
         with self.assertRaises(TypeError):
-            self.sd.channel_name(2)
+            self.sd.channel_id(2)
         # Verify that a good channel name returns nothing
-        self.assertEqual(self.sd.channel_name("XX.STA.00.BX1"), "XX.STA.00.BX1")
-        self.assertEqual(self.sd.channel_name("*BX1"), "XX.STA.00.BX1")
+        self.assertEqual(self.sd.channel_id("XX.STA.00.BX1"), "XX.STA.00.BX1")
+        self.assertEqual(self.sd.channel_id("*BX1"), "XX.STA.00.BX1")
         # Verify that multiple fitting channel name raises a ValueError
         with self.assertRaises(ValueError):
-            self.sd.channel_name("*.BX*")
+            self.sd.channel_id("*.BX*")
 
-    def test_replace_channel_name(self):
-        """Test replace_channel_name function"""
+    def test_replace_channel_id(self):
+        """Test replace_channel_id() method"""
         x = copy.deepcopy(self.sd)
-        x.replace_channel_name("XX.STA.00.BX1", "toto")
-        self.assertEqual(x.channel_names, ["toto", "XX.STA.00.BX2",
-                                      "XX.STA.00.BX3", 'XX.STA.00.BDH'])
+        x.replace_channel_id("XX.STA.00.BX1", "toto")
+        self.assertEqual(x.ids, ["toto", "XX.STA.00.BX2",
+                                 "XX.STA.00.BX3", 'XX.STA.00.BDH'])
         self.assertTrue(
             np.all(x.autospect("toto") == self.sd.autospect("XX.STA.00.BX1"))
         )

@@ -1,5 +1,4 @@
 # Copyright 2021 Wayne Crawford
-import pickle
 import fnmatch  # Allows Unix filename pattern matching
 import copy
 
@@ -9,9 +8,11 @@ from matplotlib import pyplot as plt
 
 from ..spectral_density.utils import coherence_significance_level
 from ..spectral_density import SpectralDensity
+from ..utils import match_one_str
+from tiskitpy.logger import init_logger
 
+logger = init_logger()
 np.seterr(all="ignore")
-# np.set_printoptions(threshold=sys.maxsize)
 
 
 class ResponseFunctions(object):
@@ -26,18 +27,21 @@ class ResponseFunctions(object):
     frequency response function :math:`H(f)` is such that
     :math:`v(t) = H(f)*u(t)`.
     As to spectra, :math:`G_vv(f) = abs(H(f))^2 * G_uu(f)`
+    
+    The input and output channel_ids should be tikitpy_ids (seed_codes +
+    cleaned_sequence info)
 
     Args:
-        sdm (:class:`.SpectralDensity`): Spectral density matrix objet
-        in_chan (str): input channel.  Can use Unix wildcards ('*', '?') but
+        sdf (:class:`.SpectralDensity`): Spectral density functions objet
+        in_id (str): input channel id.  Can use Unix wildcards ('*', '?') but
             will return error if more than one string matches
-        out_chans (list of str): output channels  (None => all but
-            in_chan))
+        out_ids (list of str): output channel ids  (None => all but
+            in_id)
         noise_chan (str): 'input', 'output', 'equal', 'unknown'
         n_to_reject (int): number of neighboring frequencies for which the
             coherence must be above the 95% significance level in order
-            to calculate frequency response function (other values are set to 0,
-            n_to_reject=0 means use all frequencies)
+            to calculate frequency response function (other values are set to
+            0, n_to_reject=0 means use all frequencies)
         min_freq (float or None): Return zero for frequencies below
             this value
         max_freq (float or None): Return zero for frequencies above
@@ -45,7 +49,7 @@ class ResponseFunctions(object):
         quiet (bool): don't warn if creating a test object
         show_progress (bool): plot response functions and coherences
     """
-    def __init__(self, sdm, in_chan, out_chans=None, noise_chan="output",
+    def __init__(self, sdf, in_id, out_ids=None, noise_chan="output",
                  n_to_reject=3, min_freq=None, max_freq=None,
                  quiet=False, show_progress=False):
         """
@@ -53,29 +57,40 @@ class ResponseFunctions(object):
             _ds (:class: XArray.dataset): container for response functions and
                 attributes
         """
-        if sdm is None:
-            if not quiet:
-                print("Creating test ResponseFunction object (no data)")
-            if out_chans is None:
-                raise ValueError("cannot have empty out_chans for test object")
+        if sdf is None:
+            logger.info("Creating test ResponseFunction object (no data)")
+            if out_ids is None:
+                raise ValueError("cannot have empty out_ids for test object")
             f = np.array([1])
             dims = ("input", "output", "f")
-            shape = (1, len(out_chans), len(f))
+            shape = (1, len(out_ids), len(f))
             self._ds = xr.Dataset(
-                data_vars=dict(value=(dims, np.zeros(shape, dtype="complex"))),
-                coords=dict(input=[in_chan], output=out_chans, f=f),
+                data_vars={
+                    "value": (dims, np.zeros(shape, dtype="complex"))
+                },
+                coords={
+                    "input": [in_id],
+                    "output": out_ids,
+                    "noise_chan": ("output", [noise_chan for x in out_ids]),
+                    "f": f
+                },
+                attrs={
+                    "n_winds": 0,
+                    "input_clean_sequence": []
+                },
             )
 
         else:
-            if not isinstance(sdm, SpectralDensity):
-                raise TypeError("sdm is not a SpectralDensity object")
-            in_chan, out_chans = self._check_chans(sdm, in_chan, out_chans)
-            in_units = sdm.channel_units(in_chan)
-            out_units = [sdm.channel_units(x) for x in out_chans]
-            f = sdm.freqs
+            if not isinstance(sdf, SpectralDensity):
+                raise TypeError("sdf is not a SpectralDensity object")
+            in_id, out_ids = self._expand_ids(sdf, in_id, out_ids)
+            in_units = sdf.channel_units(in_id)
+            clean_sequence = sdf.clean_sequence(in_id)
+            out_units = [sdf.channel_units(x) for x in out_ids]
+            f = sdf.freqs
             # Set properties
             dims = ("input", "output", "f")
-            shape = (1, len(out_chans), len(f))
+            shape = (1, len(out_ids), len(f))
             # rf units are out_chan_units/in_chan_units
             # instrument_response units are in_chan_units/out_chan_units
             # rf * instrument_response gives rf w.r.t. data counts
@@ -84,51 +99,52 @@ class ResponseFunctions(object):
                     "value": (dims, np.zeros(shape, dtype="complex")),
                     "uncert_mult": (dims, np.zeros(shape)),
                     "corr_mult": (dims, np.zeros(shape)),
-                    "instrument_response": (dims, np.ones(shape, dtype="complex")),
+                    "instrument_response": (dims, np.ones(shape, dtype="complex"))
                 },
-                coords= {
-                    "input": [in_chan],
-                    "output": out_chans,
+                coords={
+                    "input": [in_id],
+                    "output": out_ids,
+                    "f": f,
                     "in_units": ("input", [in_units]),
                     "out_units": ("output", out_units),
-                    "noise_chan": ("output", [noise_chan for x in out_chans]),
-                    "f": f,
+                    "noise_chan": ("output", [noise_chan for x in out_ids]),
                 },
-                attrs=dict(n_winds=sdm.n_windows),
+                attrs={
+                    "n_winds": sdf.n_windows,
+                    "input_clean_sequence": clean_sequence
+                }
             )
-            for out_chan in out_chans:
+            for out_id in out_ids:
                 rf, err_mult, corr_mult = self._calcrf(
-                    sdm, in_chan, out_chan, noise_chan,
+                    sdf, in_id, out_id, noise_chan,
                     n_to_reject, min_freq, max_freq)
-                self._ds["value"].loc[dict(input=in_chan,
-                                           output=out_chan)] = rf
-                self._ds["uncert_mult"].loc[dict(input=in_chan,
-                                                 output=out_chan)] = err_mult
-                self._ds["corr_mult"].loc[dict(input=in_chan,
-                                               output=out_chan)] = corr_mult
+                self._ds["value"].loc[dict(input=in_id,
+                                           output=out_id)] = rf
+                self._ds["uncert_mult"].loc[dict(input=in_id,
+                                                 output=out_id)] = err_mult
+                self._ds["corr_mult"].loc[dict(input=in_id,
+                                               output=out_id)] = corr_mult
                 self._ds["instrument_response"].loc[
-                    dict(input=in_chan, output=out_chan)
-                ] = sdm.channel_instrument_response(out_chan) / sdm.channel_instrument_response(
-                    in_chan
-                )
+                    dict(input=in_id, output=out_id)
+                ] = (sdf.channel_instrument_response(out_id)
+                     / sdf.channel_instrument_response(in_id))
             if show_progress:
-                self._plot_progress(sdm)
+                self._plot_progress(sdf)
 
     def __repr__(self):
         s = (f"{self.__class__.__name__}(<SpectralDensity object>, "
-             f"'{self.input_channel}', "
-             f"{self.output_channels}, "
-             f"{self.noise_channels[0]})")
+             f"'{self.input_channel_id}', {self.output_channel_ids}, "
+             f"{self.noise_channels})")
         return s
 
     def __str__(self):
         s = f"{self.__class__.__name__} object:\n"
-        s += f"\tinput_channel='{self.input_channel}'\n"
-        s += f"\toutput_channels={self.output_channels}\n"
-        s += f"\tnoise_channels={self.noise_channels}\n"
-        s += f"\tn_windows={self.n_windows}"
+        s += f"  input_channel_id='{self.input_channel_id}'\n"
+        s += f"  output_channel_ids={self.output_channel_ids}\n"
+        s += f"  noise_channels={self.noise_channels}\n"
+        s += f"  n_windows={self.n_windows}"
         return s
-    
+
     def copy(self):
         return copy.copy(self)
 
@@ -141,13 +157,16 @@ class ResponseFunctions(object):
         return self._ds.coords["f"].values
 
     @property
-    def input_channel(self):
-        """Frequency response function input channel"""
+    def input_channel_id(self):
         return str(self._ds.coords["input"].values[0])
 
     @property
-    def output_channels(self):
-        """Frequency response function output channels"""
+    def input_clean_sequence(self):
+        """"""
+        return self._ds.attrs["input_clean_sequence"]
+
+    @property
+    def output_channel_ids(self):
         return list(self._ds.coords["output"].values)
 
     @property
@@ -174,77 +193,82 @@ class ResponseFunctions(object):
         """
         return coherence_significance_level(self.n_windows, prob)
 
-    def output_units(self, output_channel):
+    def output_units(self, output_channel_id):
         """Frequency response function output channel units"""
-        oc = self._match_out_chan(output_channel)
+        oc = self._match_out_id(output_channel_id)
         return str(self._ds.sel(output=oc).coords["out_units"].values)
 
-    def noise_channel(self, output_channel):
+    def noise_channel(self, output_channel_id):
         """Frequency response function noise channel string"""
-        oc = self._match_out_chan(output_channel)
+        oc = self._match_out_id(output_channel_id)
         return str(self._ds.sel(output=oc).coords["noise_chan"].values)
 
-    def value(self, output_channel, zero_as_none=False):
+    def value(self, output_channel_id, zero_as_none=False):
         """
         Return frequency response function for the given output channel
 
         Args:
-            output_channel (str): output channel name
+            output_channel_id (str): output channel id
             zero_as_none (bool): return non-calculated values as Nones instead
                 of zeros
         """
-        oc = self._match_out_chan(output_channel)
+        oc = self._match_out_id(output_channel_id)
         rf = np.squeeze(self._ds["value"].sel(output=oc).values)
         if zero_as_none:
             rf[rf == 0] = None
         return rf
 
-    def value_wrt_counts(self, output_channel, zero_as_none=False):
+    def value_wrt_counts(self, output_channel_id, zero_as_none=False):
         """
         Return frequency response function with respect to raw data counts
 
         Args:
-            output_channel (str): output channel name
+            output_channel_id (str): output channel name
             zero_as_none (bool): return non-calculated values as Nones instead
                 of zeros
         """
-        oc = output_channel
+        oc = output_channel_id
         return self.value(oc, zero_as_none) * self.instrument_response(oc)
 
-    def corrector(self, output_channel, zero_as_none=False):
+    def corrector(self, output_channel_id, zero_as_none=False):
         """
         Return coherent channel correction factor for the given output channel
 
         Args:
-            output_channel (str): output channel name
+            output_channel_id (str): output channel id
             zero_as_none (bool): return non-calculated values as Nones instead
                 of zeros
         """
-        oc = self._match_out_chan(output_channel)
+        oc = self._match_out_id(output_channel_id)
         corr_mult = np.squeeze(self._ds["corr_mult"].sel(output=oc).values)
-        return self.value(output_channel, zero_as_none) * corr_mult
+        return self.value(output_channel_id, zero_as_none) * corr_mult
 
-    def corrector_wrt_counts(self, output_channel, zero_as_none=False):
+    def corrector_wrt_counts(self, output_channel_id, zero_as_none=False):
         """
         Return frequency response function with respect to raw data counts
 
         Args:
-            output_channel (str): output channel name
+            output_channel_id (str): output channel id
             zero_as_none (bool): return non-calculated values as Nones instead
                 of zeros
         """
-        oc = output_channel
+        oc = output_channel_id
         return self.corrector(oc, zero_as_none) * self.instrument_response(oc)
 
-    def instrument_response(self, output_channel, zero_as_none=False):
+    def instrument_response(self, output_channel_id, zero_as_none=False):
         """
-        Return rf instrument response (output_channel_instrument_response/input_channel_instrument_response)
+        Return (output_channel_instr_response/input_channel_instr_response)
 
-        Divide count-based response function by this to get unit-based 
-        Multiply unit-based response function by this to get count-based 
+        Divide count-based response function by this to get unit-based
+        Multiply unit-based response function by this to get count-based
+
+        Args:
+            output_channel_id (str): output channel id
+            zero_as_none (bool): NOT USED!
         """
-        oc = self._match_out_chan(output_channel)
-        return np.squeeze(self._ds["instrument_response"].sel(output=oc).values)
+        oc = self._match_out_id(output_channel_id)
+        ir = self._ds["instrument_response"].sel(output=oc).values
+        return np.squeeze(ir)
 
     def to_norm_compliance(self, water_depth):
         """
@@ -255,89 +279,95 @@ class ResponseFunctions(object):
         om = np.pi * self.freqs
         k = _gravd(om, water_depth)
         rf_multiplier = k / (om**2)
-        for oc in self.output_channels:
+        for oc in self.output_channel_ids:
             if not self.output_units(oc).upper() == 'M/S^2':
                 raise ValueError('{self.output_units(oc)=}, not "M/2^2"')
-            # 'value' is in physical units, have to change instrument_response so that
-            # value w.r.t. counts remains constant
+            # 'value' is in physical units, have to change instrument_response
+            # so that value w.r.t. counts remains constant
             self._ds["value"].loc[dict(output=oc)] = self.value(oc) * rf_multiplier
-            self._ds["instrument_response"].loc[dict(output=oc)] = self.instrument_response(oc) / rf_multiplier
+            self._ds["instrument_response"].loc[dict(output=oc)] = (
+                self.instrument_response(oc) / rf_multiplier)
             self._ds.coords["out_units"].loc[dict(output=oc)] = '1'
 
-    def uncert_mult(self, output_channel):
-        """Return uncertainty as a fraction of the frequency response function"""
-        oc = self._match_out_chan(output_channel)
+    def uncert_mult(self, output_channel_id):
+        """
+        Return uncertainty as a fraction of the frequency response function
+
+        Args:
+            output_channel (str): channel to return uncertainty for
+        """
+        oc = self._match_out_id(output_channel_id)
         return np.squeeze(self._ds["uncert_mult"].sel(output=oc).values)
 
-    def uncertainty(self, output_channel):
-        """Return frequency response function uncertainty for the given output channel"""
-        return self.value(output_channel) * self.uncert_mult(output_channel)
+    def uncertainty(self, out_id):
+        """
+        Return frequency response function uncertainty
 
-    def uncertainty_wrt_counts(self, output_channel):
+        Args:
+            out_id (str): channel to return uncertainty for
+        """
+        return self.value(out_id) * self.uncert_mult(out_id)
+
+    def uncertainty_wrt_counts(self, out_id):
         """
         Return frequency response function uncertainty with respect to counts
         """
-        return self.value_wrt_counts(output_channel) * self.uncert_mult(output_channel)
+        return self.value_wrt_counts(out_id) * self.uncert_mult(out_id)
 
     @staticmethod
-    def _check_chans(sdm, in_chan, out_chans):
+    def _expand_ids(sdf, in_id, out_ids):
         """
-        Verify that in_chan and out_chan are in the SpectralDensity object
-        """
-        # Validate in_chan
-        if not isinstance(in_chan, str):
-            raise TypeError("Error: in_chan is not a str")
-        in_chans = fnmatch.filter(sdm.channel_names, in_chan)
-        if len(in_chans) == 0:
-            raise ValueError(f'No matches for "{in_chan}" in {sdm.channel_names}')
-        elif len(in_chans) > 1:
-            raise ValueError(
-                f'Multiple channel matches for "{in_chan}": {in_chans}'
-            )
-        in_chan = in_chans[0]
+        Wildcard expansion
 
-        # Validate out_chan
-        if out_chans is None:
-            # Select all channels except in_chan
-            out_chans = [x for x in sdm.channel_names if not x == in_chan]
-        if not isinstance(out_chans, list):
-            raise TypeError("Error: out_chans is not a list")
+        Return in_id and out_ids expanded to match input and output
+        channel name in the SpectralDensity object
+
+        Also returns all output channels if out_ids is None
+        """
+        # Validate in_id
+        verified_in_id = match_one_str(in_id, sdf.ids, "in_id", "sdf.ids")
+
+        # Validate out_ids
+        if out_ids is None:
+            # Select all channels except in_id
+            verified_out_ids = [x for x in sdf.ids if not x == in_id]
         else:
-            out_chans = [fnmatch.filter(sdm.channel_names, oc)[0]
-                         for oc in out_chans]
-        return in_chan, out_chans
+            if not isinstance(out_ids, list):
+                raise TypeError("Error: out_ids is not a list")
+            verified_out_ids = []
+            for out_id in out_ids:
+                voc = match_one_str(out_id, sdf.ids, "out_id", "sdf.ids")
+                verified_out_ids.append(voc)
 
-    def _match_out_chan(self, value):
+        return verified_in_id, verified_out_ids
+
+    def _match_out_id(self, value):
         """
-        Returns output_channel matching string (may have *,? wildcards)
+        Returns output channel id matching string (may have *,? wildcards)
 
         Error if there is not exactly one match
         """
-        # Validate in_chan
+        # Validate in_id
         if not isinstance(value, str):
             raise TypeError("Error: value is not a str")
-        out_chans = fnmatch.filter(self.output_channels, value)
-        if len(out_chans) == 0:
-            raise ValueError(f'No output channel matches "{value}"')
-        elif len(out_chans) > 1:
-            raise ValueError('Multiple output channels match "{}": {}'
-                             .format(value, out_chans))
-        return out_chans[0]
+        out_id = match_one_str(value, self.output_channel_ids,
+                                 "value", "self.output_channel_ids")
+        return out_id
 
     def _calcrf(self, spect_density, input, output, noise_chan="output",
                 n_to_reject=1, min_freq=None, max_freq=None):
         """
         Calculate frequency response function between two channels
-        
+
         Returns 0 for values where coherence is beneath signif level
-        
+
         Uses equations from Bendat&Piersol, 1986 (BP86)
 
         Args:
             spect_density(:class: ~SpectralDensity): cross-spectral density
                 matrix
-            input (str): input channel name
-            output (str): output channel name
+            input (str): input channel id
+            output (str): output channel id
             noise_channel (str): which channel has the noise
             n_to_reject (int): only use values for which more than this
                 many consecutive coherences are above the 95% significance
@@ -354,27 +384,7 @@ class ResponseFunctions(object):
         """
         coh = spect_density.coherence(input, output)
         f = spect_density.freqs
-        # H = Gxy / Gxx  # B&P Equation 6.69
-        # H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
-        # if noise_chan == "output":
-        #     rf = H * coh
-        #     rferr = np.abs(rf) * errbase
-        # elif noise_chan == "input":
-        #     rf = H / coh
-        #     rferr = np.abs(rf) * errbase
-        # elif noise_chan == "equal":
-        #     rf = H
-        #     rferr = np.abs(rf) * errbase
-        # elif noise_chan == "unknown":
-        #     rf = H
-        #     # VERY ad-hoc error guesstimate
-        #     maxerr = np.abs(coh ** (-1)) + errbase
-        #     minerr = np.abs(coh) - errbase
-        #     rferr = np.abs(rf * (maxerr - minerr) / 2)
-        # else:
-        #     raise ValueError(f'unknown noise channel: "{noise_chan}"')
-        # return rf, rferr
-        
+
         # Calculate Frequency Response Function
         if noise_chan == "output" or noise_chan == "equal":
             Gxx = spect_density.autospect(input)
@@ -389,7 +399,7 @@ class ResponseFunctions(object):
         elif noise_chan == "input":
             Gyy = spect_density.autospect(output)
             Gyx = spect_density.crossspect(output, input)
-            H = Gyy / Gyx # BP86 eqn 6.42
+            H = Gyy / Gyx    # BP86 eqn 6.42
             corr_mult = coh  # derived from BP86 eqns 6.44 and 6.46
         # elif noise_chan == "unknown":
         #     rf = H
@@ -417,18 +427,18 @@ class ResponseFunctions(object):
         Returns:
             (numpy.ndarray): array of axis pairs (amplitude, phase)
         """
-        inp = self.input_channel
-        outputs = self.output_channels
+        inp = self.input_channel_id
+        outputs = self.output_channel_ids
         rows = 1
         cols = len(outputs)
         ax_array = np.ndarray((rows, cols), dtype=tuple)
         fig, axs = plt.subplots(rows, cols, sharex=True)
         in_suffix = self._find_str_suffix(inp, outputs)
-        for out_chan, j in zip(outputs, range(len(outputs))):
-            axa, axp = self.plot_one(inp, out_chan, fig, (rows, cols),
+        for out_id, j in zip(outputs, range(len(outputs))):
+            axa, axp = self.plot_one(inp, out_id, fig, (rows, cols),
                                      (0, j), show_ylabel=j == 0,
                                      errorbars=errorbars,
-                                     title=f"{out_chan}/{in_suffix}",
+                                     title=f"{out_id}/{in_suffix}",
                                      show_xlabel=True)
         ax_array[0, j] = (axa, axp)
         if outfile:
@@ -448,27 +458,27 @@ class ResponseFunctions(object):
         Returns:
             (numpy.ndarray): array of axis pairs (amplitude, phase)
         """
-        inp = self.input_channel
-        outputs = self.output_channels
+        inp = self.input_channel_id
+        outputs = self.output_channel_ids
         shape = (2, len(outputs))
         ax_array = np.ndarray(shape, dtype=tuple)
         fig, axs = plt.subplots(shape[0], shape[1], sharex=True)
         in_suffix = self._find_str_suffix(inp, outputs)
-        for out_chan, j in zip(outputs, range(len(outputs))):
+        for out_id, j in zip(outputs, range(len(outputs))):
             axa, axp = self.plot_one(
                 inp,
-                out_chan,
+                out_id,
                 fig,
                 shape,
                 (0, j),
                 show_ylabel=j == 0,
                 show_xlabel=True,
-                title=f"{out_chan}/{in_suffix}",
+                title=f"{out_id}/{in_suffix}",
             )
             ax_array[0, j] = (axa, axp)
             axa, axp = spect_dens.plot_one_coherence(
                 inp,
-                out_chan,
+                out_id,
                 fig,
                 shape,
                 (1, j),
@@ -500,15 +510,15 @@ class ResponseFunctions(object):
                 ii_ind = ii
             return inp[ii:]
 
-    def plot_one(self, in_chan, out_chan,
+    def plot_one(self, in_id, out_id,
                  fig=None, fig_grid=(1, 1), plot_spot=(0, 0), errorbars=True,
                  label=None, title=None, show_xlabel=True, show_ylabel=True):
         """
         Plot one frequency response function
 
         Args:
-            in_chan (str): input channel
-            out_chan (str): output channel
+            in_id (str): input channel id
+            out_id (str): output channel id
             fig (:class: ~matplotlib.figure.Figure): figure to plot on, if
                 None this method will plot on the current figure or create
                 a new figure.
@@ -527,13 +537,13 @@ class ResponseFunctions(object):
                 frequency response function amplitude plot
                 frequency response function phase plot
         """
-        rf = self.value(out_chan).copy()
-        rferr = self.uncertainty(out_chan).copy()
+        rf = self.value(out_id).copy()
+        rferr = self.uncertainty(out_id).copy()
         f = self.freqs
         if fig is None:
             fig = plt.gcf()
         # Plot amplitude
-        if self.input_units.upper() == 'PA' and self.output_units(out_chan) == '1':
+        if self.input_units.upper() == 'PA' and self.output_units(out_id) == '1':
             fig.suptitle("Compliance")
         else:
             fig.suptitle("Frequency Response Functions")
@@ -542,10 +552,11 @@ class ResponseFunctions(object):
             (3 * plot_spot[0] + 0, plot_spot[1] + 0),
             rowspan=2,
         )
-        rf[rf == 0] = None
-        rferr[rf == 0] = None
+        rf[rf == 0] = np.nan
+        rferr[rferr == 0] = np.nan
         if errorbars is True:
-            ax_a.errorbar(f, np.abs(rf), np.abs(rferr), fmt='none')
+            ax_a.errorbar(f, np.abs(rf), np.abs(rferr), fmt='b_', ecolor='k',
+                          markersize=3)
             if np.any(rf is not None):
                 ax_a.set_yscale('log')
             ax_a.set_xscale('log')
@@ -553,24 +564,36 @@ class ResponseFunctions(object):
             ax_a.loglog(f, np.abs(rf + rferr), color="blue", linewidth=0.5)
             ax_a.loglog(f, np.abs(rf - rferr), color="blue", linewidth=0.5)
             ax_a.loglog(f, np.abs(rf), color="black", label=label)
-        # ax_a.loglog(f, np.abs(rf), label=f"'{out_chan}' / '{in_chan}'")
         ax_a.set_xlim(f[1], f[-1])
         if title is not None:
-            ax_a.set_title(title)
+            ax_a.set_title(title, fontsize='medium')
         if label is not None:
             ax_a.legend()
 
         if show_ylabel:
             ax_a.set_ylabel("FRF")
-        ax_a.set_xticklabels([])
+        # Below doesn't work for removing x tick labels
+        # xt = ax_a.get_xticks()  # Needed to "set" xticks before removing label
+        # ax_a.set_xticks(xt)
+        # ax_a.set_xticklabels([])
+        
         # Plot phase
         ax_p = plt.subplot2grid(
             (3 * fig_grid[0], 1 * fig_grid[1]),
             (3 * plot_spot[0] + 2, plot_spot[1] + 0),
             sharex=ax_a,
         )
-        ax_p.semilogx(f, np.degrees(np.angle(rf)))
-        ax_p.set_ylim(-180, 180)
+        phases = np.angle(rf, deg=True)
+        phase_lim = 220
+        igood = np.invert(np.isnan(phases))
+        wrap_phases = phases.copy()
+        wrap_phases[igood] = np.unwrap(phases[igood], period=360)
+        if (np.all(wrap_phases[igood] > -phase_lim)
+            and np.all(wrap_phases[igood] < phase_lim)):
+            ax_p.semilogx(f, wrap_phases)
+        else:
+            ax_p.semilogx(f, phases)
+        ax_p.set_ylim(-phase_lim, phase_lim)
         ax_p.set_xlim(f[1], f[-1])
         ax_p.set_yticks((-180, 0, 180))
         if show_ylabel:
@@ -647,7 +670,7 @@ def _gravd(W, h):
     if not isinstance(W, np.ndarray):
         W = np.array([W])
     G = 9.79329
-    N = len(W)
+    # N = len(W)
     W2 = W*W
     kDEEP = W2/G
     kSHAL = W/(np.sqrt(G*h))
@@ -676,6 +699,7 @@ def _gravd(W, h):
         k2[nd] = ktemp[nd]
         e1[nd] = e2[nd]
     return K
+
 
 def _dtanh(x):
     """

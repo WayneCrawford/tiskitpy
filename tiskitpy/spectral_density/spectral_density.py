@@ -1,9 +1,10 @@
 """
-Spectral Density Functions
-"""
-import logging
-import fnmatch
+Spectral Density Class
 
+*The ``from_ATACR()`` method is disabled because readthedocs had
+a problem importing the `obstools` package using `pip`.  (the method was never
+validated anyway)*
+"""
 import xarray as xr
 import numpy as np
 from matplotlib import pyplot as plt
@@ -16,32 +17,41 @@ from scipy import signal, stats
 
 from .Peterson_noise_model import Peterson_noise_model
 from ..time_spans import TimeSpans
+from ..logger import init_logger
+from ..cleaned_stream import CleanedStream
+from ..utils import match_one_str, CleanSequence as CS
 
+logger = init_logger()
 np.seterr(all="ignore")
-
-logging.basicConfig(level=logging.INFO)
 
 
 class SpectralDensity:
     """
     Class for spectral density functions.
 
-    The standard constructor is rarely used, generate objects using
-    `SpectralDensity.from_stream()`
+    Warning:
+        The standard constructor is rarely used, generate objects using
+        :meth:`SpectralDensity.from_stream()`
 
     No public attributes, access data through provided methods
     """
-    def __init__(self, chan_names, freqs, chan_units, n_windows, window_type,
-                 window_s, ts_starttime=None, ts_endtime=None, starttimes=None,
+    def __init__(self, freqs, seed_ids, chan_units, n_windows,
+                 window_type, window_s, chan_clean_sequences=None,
+                 ts_starttime=None, ts_endtime=None, starttimes=None,
                  data=None, instrument_responses=None):
         """
+        Warning:
+            This constructor is rarely used, use instead
+            :meth:`SpectralDensity.from_stream()`
         Args:
-            chan_names (list of str): channel names
             freqs (np.ndarray): frequencies
+            seed_ids (list of str): seed_ids for each channel
             chan_units (list of str): channel physical units (e.g m/s^2, Pa)
             n_windows (int): of windows used to calculate spectra
             window_type (str): type of window used
             window_s (float): length of data windows in seconds
+            chan_clean_sequences (list of list of str): clean_sequences
+                applied to each channel.
             ts_starttime (:class:`obspy.core.UTCDateTime`): start of time
                 series used for this object
             ts_endtime (:class:`obspy.core.UTCDateTime`): end of time series
@@ -49,48 +59,40 @@ class SpectralDensity:
             starttimes (list of UTCDateTime): starttime for each window
             data (:class:`np.ndarray`):
                 one-sided spectral density functions.
-                shape = (len(chan_names), len(chan_names), len(freqs)
+                shape = (len(ids), len(ids), len(freqs)
                 units = chan_units(i)*chan_units(j)/Hz
+                The diagonal is used for "autospectra", the others for
+                coherency and frequency response functions
             instrument_responses (:class:`np.ndarray`):
                 instrument response for each channel.
                 shape=(n_spects,n_freqs)
                 units=(counts/chan_units)
         """
-        # Validate Dimensions
-        n_ch = len(chan_names)
-        n_f = len(freqs)
-        shape = (n_ch, n_ch, n_f)
-        dims = ("input", "output", "f")
-        instrument_responses_shape = (n_ch, n_f)
-        instrument_responses_dims = ("input", "f")
-        assert freqs.size == (n_f)  # Make sure it's one dimensional
-        assert len(chan_units) == n_ch
-        if starttimes is not None:
-            for x in starttimes:
-                assert isinstance(x, UTCDateTime)
-        if data is not None:
-            assert data.size() == shape
-            assert data.dtype == "complex"
-        else:
-            data = np.zeros(shape, dtype="complex")
-        if instrument_responses is not None:
-            assert instrument_responses.shape == instrument_responses_shape
-            assert instrument_responses.dtype == "complex"
-        else:
+        n_f, n_ch = len(freqs), len(seed_ids)
+        if data is None:
+            data = np.zeros((n_ch, n_ch, n_f), dtype="complex")
+        if instrument_responses is None:
             instrument_responses = np.ones((n_ch, n_f), dtype="complex")
-
+        assert isinstance(chan_clean_sequences, list)
+        for x in chan_clean_sequences:
+            assert isinstance(x, list)
+            for y in x:
+                assert isinstance(y, str)
+        _validate_dimensions(freqs, seed_ids, chan_units, starttimes,
+                             chan_clean_sequences, data, instrument_responses)
+        ids = [CS.tiskitpy_id(s,cs) for (s, cs) in zip(seed_ids, chan_clean_sequences)]
         self._ds = xr.Dataset(
             data_vars={
-                "spectra": (dims, np.zeros(shape, dtype="complex")),
-                "instrument_response": (instrument_responses_dims, instrument_responses),
+                "spectra": (("input", "output", "f"), data),
+                "instrument_response": (("input", "f"), instrument_responses)
             },
-            # dims=dims,
             coords={
-                "input": chan_names,
-                "output": chan_names,
+                "input": ids,
+                "output": ids,
                 "f": freqs,
                 "in_units": ("input", chan_units),
                 "out_units": ("output", chan_units),
+                "seed_ids": ("input", seed_ids)
             },
             attrs={
                 "n_windows": n_windows,
@@ -104,12 +106,14 @@ class SpectralDensity:
                 "description": "One-sided spectral density functions",
             },
         )
+        self._clean_sequences = {k: v for k, v in zip(ids,
+                                                      chan_clean_sequences)}
 
     def __str__(self):
         s = "SpectralDensity object:\n"
-        s += f"\tchannel_names={self.channel_names}\n"
+        s += f"\tids={self.ids}\n"
         s += "\tchannel_units={}\n".format([self.channel_units(ch)
-                                            for ch in self.channel_names])
+                                            for ch in self.ids])
         f = self.freqs
         s += f"\t{len(f)} frequencies, from {f[0]:.3g} to {f[-1]:.3g}Hz\n"
         s += f"\tn_windows={self.n_windows}\n"
@@ -120,9 +124,11 @@ class SpectralDensity:
         return self._ds == other._ds
 
     @property
-    def channel_names(self):
+    def ids(self):
         """
-        Channel names
+        Channel ids
+
+        ** Previously called _channel_names **
 
         Returns:
             (list of str):
@@ -131,6 +137,18 @@ class SpectralDensity:
             self._ds.coords["output"].values
         )
         return list(self._ds.coords["input"].values)
+
+    @property
+    def seed_ids(self):
+        return list(self._ds.coords["seed_ids"].values)
+
+    @property
+    def clean_sequences(self):
+        """
+        Returns:
+            (list of list):
+        """
+        return [self._clean_sequences[key] for key in self.ids]
 
     @property
     def freqs(self):
@@ -180,10 +198,8 @@ class SpectralDensity:
         Returns:
             (:class:`obspy.TimeSpans`):
         """
-        spans = [[x, x + self.window_seconds] for x in self.starttimes]
-
         return TimeSpans([[x, x + self.window_seconds]
-                           for x in self.starttimes])
+                          for x in self.starttimes])
 
     @property
     def unused_times(self):
@@ -197,12 +213,12 @@ class SpectralDensity:
             ts_start = self._ds.ts_starttime
         else:
             ts_start = self.starttimes[0]
-            logging.info('no starttime information, using first used window')
+            logger.info('no starttime information, using first used window')
         if self._ds.ts_endtime is not None:
             ts_end = self._ds.ts_endtime
         else:
             ts_start = self.starttimes[-1] + self.window_seconds
-            logging.info('no endtime information, using end of last used window')
+            logger.info('no endtime information, using end of last window')
 
         return self.used_times.invert(ts_start, ts_end)
 
@@ -244,23 +260,27 @@ class SpectralDensity:
                 time spans.  Incompatible with `starttimes` and "time_spans"
             subtract_rf_suffix (str): suffix to add to channel names if rf
                 is subtracted
-            z_threshold (float or None): reject windows with z-score greater than this
-                value.  None: no rejection
+            z_threshold (float or None): reject windows with z-score greater
+                than this value.  None: no rejection
         """
         if not isinstance(stream, Stream):
             raise ValueError(f"stream is a {type(stream)}, not obspy Stream")
+        stream = stream.copy()  # avoid modifying original stream
+
+        if time_spans is not None:
+            stream = CleanedStream(stream).tag('SPANS')
         if avoid_spans is not None:
             if time_spans is not None:
                 raise RuntimeError("Provided both time_spans and avoid_spans")
+            stream = CleanedStream(stream).tag('AVOID')
             time_spans = avoid_spans.invert(stream[0].stats.starttime,
-            stream[0].stats.endtime)
+                                            stream[0].stats.endtime)
         if starttimes is not None and time_spans is not None:
             if avoid_spans is not None:
                 raise RuntimeError("Provided both starttimes and avoid_spans")
             else:
                 raise RuntimeError("Provided both starttimes and time_spans")
 
-        stream = stream.copy()  # avoid modifying original stream
         stream = _align_traces(stream)
 
         # Select windows
@@ -271,22 +291,30 @@ class SpectralDensity:
                 .format(window_s, stream[0].stats.npts/sr))
         ws = int(_npow2(window_s * sr))
         if (ws > stream[0].stats.npts):
-            logging.warning(f'window pts > data pts ({ws:d} > '
-                            f'{stream[0].stats.npts:d} pts), reducing ...')
+            logger.warning(f'window pts > data pts ({ws:d} > '
+                           f'{stream[0].stats.npts:d} pts), reducing ...')
             while ws > stream[0].stats.npts:
                 ws /= 2
             ws = int(ws)
-            logging.warning(f'New window size={ws:d} pts')
+            logger.warning(f'New window size={ws:d} pts')
         multfac = 2 / (ws * sr)  # Bendata&Piersol 1986 eqs 11.100 & 11.102
         # window_starts = WindowSelect(stream, ws, windowtype)
 
         # Calculate FFTs
         ft, evalresps, units = {}, {}, []
-        ids = [tr.id for tr in stream]
+        tagged_stream = CS.seedid_tag(stream)
+        ids = [tr.id for tr in tagged_stream]
+        clean_seq_dict = {tr.id: tr.stats.get('clean_sequence',[]) for tr in tagged_stream}
+        seed_ids = [tr.id for tr in stream]
         if not len(ids) == len(set(ids)):
             raise ValueError("stream has duplicate IDs")
         for id in ids:  # Calculate Fourier transforms
-            tr = stream.select(id=id)[0]
+            tr_st = tagged_stream.select(id=id)
+            if len(tr_st) == 0:
+                raise ValueError(f'{id=} not found in tagged stream = {tagged_stream.__str__()}')
+            elif not len(tr_st) == 1:
+                raise ValueError(f'{len(tr_st)} {id=}s found in tagged stream = {tagged_stream.__str__()}')
+            tr = tr_st[0]
             ft[id], f, sts = SpectralDensity._windowed_rfft(
                 tr, ws, ws, windowtype, starttimes, time_spans)
             # Transform fft to physical units
@@ -296,35 +324,48 @@ class SpectralDensity:
             evalresps[id] = evalresp
             if resp is not None:
                 tr.stats.response = resp
-        # Remove outliers if starttimes not forced and z_threshold specified
+
+        n_winds = len(sts)
+        # Remove outliers
         if starttimes is None and z_threshold is not None:
             n_winds_orig = len(sts)
             ft, sts = cls._remove_outliers(ft, sts, z_threshold)
-            n_winds = len(sts)
-            if n_winds < n_winds_orig:
-                rejected = n_winds_orig - n_winds
-                logging.info(f'{z_threshold=} rejected {rejected:d} of '
-                             f'{n_winds_orig:d} windows '
-                             f'({100.*rejected/n_winds_orig:.0f}%)')
+            n_winds_new = len(sts)
+            if not n_winds_new == n_winds:
+                rejected = n_winds - n_winds_new
+                logger.info(f'{z_threshold=}, rejected '
+                            f'{100.*rejected/n_winds:.0f}% '
+                            f'of windows ({rejected:d}/{n_winds:d})')
+                n_winds = n_winds_new
 
+        # Clean data
+        new_clean_seq_dict = {}
         if data_cleaner is not None:  # clean data using correlated noise
-            dcrfs = data_cleaner.DCRFs
-            old_ids = ids
-            ft = dcrfs.ft_subtract_rfs(ft, evalresps)
-            ids = dcrfs.update_channel_names(old_ids)
-            evalresps = dcrfs.update_channel_keys(evalresps)
-        # Create DataArray
-        obj = cls(ids, f, units, n_winds, windowtype, ws,
+            rf_list = data_cleaner.RFList  # the ids here are beyond those in ft
+            ft, new_clean_seq_dict = rf_list.ft_subtract_rfs(ft, evalresps)
+            clean_seq_dict = {k: clean_seq_dict.get(k,[]) + new_clean_seq_dict.get(k,[]) for k in ids}
+
+        clean_seq_list = [clean_seq_dict.get(x, []) for x in ids]
+        # Create object
+        obj = cls(f,
+                  seed_ids,
+                  units,
+                  n_winds,
+                  windowtype,
+                  ws,
+                  clean_seq_list,
                   ts_starttime=min([x.stats.starttime for x in stream]),
                   ts_endtime=max([x.stats.endtime for x in stream]),
                   starttimes=sts)
-        # Fill DataArray with Cross-Spectral Density Functions
+        # Fill object with Cross-Spectral Density Functions
         for inp in ids:
+            in_id = CS.tiskitpy_id(CS.seed_id(inp), clean_seq_dict.get(inp,[]))
             if evalresps[inp] is not None:
-                obj.put_channel_instrument_response(inp, evalresps[inp])
+                obj.put_channel_instrument_response(in_id, evalresps[inp])
             for outp in ids:
+                out_id = CS.tiskitpy_id(CS.seed_id(outp), clean_seq_dict.get(outp,[]))
                 # (p 547, Bendat and Piersol, 2010)
-                obj.put_crossspect(inp, outp, 2 * multfac * np.mean(
+                obj.put_crossspect(in_id, out_id, 2 * multfac * np.mean(
                     np.conj(ft[inp])*ft[outp], axis=0))
         return obj
 
@@ -354,8 +395,8 @@ class SpectralDensity:
             z_scores = np.max(np.abs(z_scores), axis=0)
             n_reject = np.count_nonzero(np.abs(z_scores) > z_threshold)
             if n_reject > 0:
-                logging.debug('{:d} of {:d} had z_score > {:g}: rejected'
-                              .format(n_reject, len(z_scores), z_threshold))
+                logger.debug('{:d} of {:d} had z_score > {:g}: rejected'
+                             .format(n_reject, len(z_scores), z_threshold))
                 keepers = z_scores <= z_threshold
                 sts = [x for x, keep in zip(sts, keepers.tolist())
                        if keep is True]
@@ -370,60 +411,57 @@ class SpectralDensity:
         Get auto-spectral_density function for the channel
 
         Args:
-            channel (str): channel name
+            channel (str): channel id
         Returns:
             (:class:`numpy.ndarray`): auto-spectral density function
         """
-        ch_name = self.channel_name(channel, "in_channel")
-        return np.abs(self._ds["spectra"].sel(input=ch_name,
-                                              output=ch_name).values.flatten())
+        ch_id = self.channel_id(channel, "in_id")
+        return np.abs(self._ds["spectra"].sel(input=ch_id,
+                                              output=ch_id).values.flatten())
 
-    def crossspect(self, in_channel, out_channel):
+    def crossspect(self, in_id, out_id):
         """
         Get cross-spectral density function for the channels
 
         Args:
-            in_channel (str): input channel name
-            out_channel (str): output channel name
+            in_id (str): input channel id
+            out_id (str): output channel id
         Returns:
             (:class:`numpy.ndarray`): cross-spectral density function
         """
-        if in_channel == out_channel:
-            return self.autospect(in_channel)
-        ichn = self.channel_name(in_channel, "in_channel")
-        ochn = self.channel_name(out_channel, "out_channel")
+        if in_id == out_id:
+            return self.autospect(in_id)
+        ichn = self.channel_id(in_id, "in_id")
+        ochn = self.channel_id(out_id, "out_id")
         return (self._ds["spectra"].sel(input=ichn,
                                         output=ochn).values.flatten())
 
-    def channel_name(self, channel, ch_identifier='chname'):
+    def channel_id(self, test_id, ch_identifier='id'):
         """
-        Return channel name, verifying that it exists and is unique
+        Return channel id, verifying that it exists and is unique
 
         Can expand wildcards, if they match only one channel
-        
+
         Args:
-            channel (str): channel name to search for
+            test_id (str): channel id to search for
             ch_identifier (str): description of the kind of channel (input,
                 output...), useful for error messages
         """
-        if not isinstance(channel, str):
-            raise TypeError(f"{ch_identifier} is a {type(channel)}, not a str")
-        names = fnmatch.filter(self.channel_names, channel)
-        if len(names) == 0:
-            raise ValueError(f'{ch_identifier} "{channel}" not in '
-                             f'{self.channel_names=}')
-        elif len(names) > 1:
-            raise ValueError(f'{ch_identifier} "{channel}" matches more than '
-                             f'one {self.channel_names=}')
-        else:
-            return names[0]
+        if not isinstance(test_id, str):
+            raise TypeError(f"{ch_identifier} is a {type(test_id)}, not a str")
+        name = match_one_str(test_id, self.ids,
+                             "test_id", "self.ids")
+        return name
+
+    def seed_id(self, id):
+        return self._ds["seed_ids"].sel(input=id)
 
     def put_autospect(self, channel, auto_spect):
         """
         Equivalent to put_cross_spect(channel, channel, auto_spect)
 
         Args:
-            channel (str): auto-spectra channel
+            channel (str): auto-spectra channel id
             auto_spect (:class:`numpy.ndarray`): the auto-spectral density
         """
         if not auto_spect.shape == self.freqs.shape:
@@ -437,47 +475,48 @@ class SpectralDensity:
             except Exception:
                 raise ValueError(
                     'auto_spect could not be converted to dtype=complex')
-        if channel not in self.channel_names:
+        if channel not in self.ids:
             raise ValueError(
-                'channel "{}" is not in channel_names {}'.format(
-                    channel, self.channel_names
+                'channel "{}" is not in ids {}'.format(
+                    channel, self.ids
                 )
             )
         self._ds["spectra"].loc[
             dict(input=channel, output=channel)
         ] = auto_spect
 
-    def replace_channel_name(self, channel, replacement):
+    def replace_channel_id(self, channel, replacement):
         """
         Args:
-            channel (str): original channel name
-            replacement (str): replacement channel name
+            channel (str): original channel id
+            replacement (str): replacement channel id
         """
-        channel_names = self.channel_names
-        channel_names[channel_names.index(channel)] = replacement
-        self._ds["input"] = channel_names
-        self._ds["output"] = channel_names
+        ids = self.ids
+        ids[ids.index(channel)] = replacement
+        self._ds["input"] = ids
+        self._ds["output"] = ids
+        self._clean_sequences[replacement] = self._clean_sequences.pop(channel)
 
-    def put_crossspect(self, in_channel, out_channel, cross_spect):
+    def put_crossspect(self, in_id, out_id, cross_spect):
         """
         Put data into one of the cross-spectra.  Also puts the complex
         conjugate in the symmetric index
 
         Args:
-            in_channel (str): cross-spectra input channel
-            out_channel (str): cross-spectra output channel
+            in_id (str): cross-spectra input channel
+            out_id (str): cross-spectra output channel
             cross_spect (:class:`numpy.ndarray`): a cross-spectral density
         """
         assert cross_spect.shape == self.freqs.shape
         assert cross_spect.dtype == "complex"
-        assert in_channel in self.channel_names
-        assert out_channel in self.channel_names
+        assert in_id in self.ids
+        assert out_id in self.ids
         self._ds["spectra"].loc[
-            dict(input=in_channel, output=out_channel)
+            dict(input=in_id, output=out_id)
         ] = cross_spect
-        if not in_channel == out_channel:
+        if not in_id == out_id:
             self._ds["spectra"].loc[
-                dict(input=out_channel, output=in_channel)
+                dict(input=out_id, output=in_id)
             ] = np.conj(cross_spect)
 
     def channel_instrument_response(self, channel):
@@ -495,43 +534,77 @@ class SpectralDensity:
         """
         Put a channel's instrument response into the object
 
-        Verifies that the instrument_response has the same shape as the object's
-        `frequency` property and that it is of type=`complex`
+        Verifies that the instrument_response has the same shape as the
+        object's `frequency` property and that it is of type=`complex`
 
         Args:
             channel (str): the channel name
-            instrument_response (:class:`numpy.ndarray`): the instrument response
+            instrument_response (:class:`numpy.ndarray`): the instrument
+                response
         """
         assert instrument_response.shape == self.freqs.shape
         assert instrument_response.dtype == "complex"
-        assert channel in self.channel_names
+        assert channel in self.ids
         self._ds["instrument_response"].loc[dict(input=channel)] = instrument_response
 
     def channel_units(self, channel):
         """
         Get channel's input (physical) units
-        
+
         Args:
             channel (str): the channel name
         Returns:
             (str): Channel's input units
         """
+        if channel not in self._ds["spectra"].coords["input"]:
+            raise ValueError("channel {} not found in spectra.input {}"
+                             .format(
+                                channel,
+                                self._ds["spectra"].coords["input"].values))
         return str(
             self._ds["spectra"].sel(input=channel).coords["in_units"].values
         )
 
-    def units(self, in_channel, out_channel):
+    def clean_sequence(self, channel):
+        """
+        Clean sequence applied to this channel
+
+        Args:
+            channel (str): a channel name
+        Returns:
+            (list): List of cleaners applied, in order
+        """
+        if channel not in self._clean_sequences.keys():
+            raise ValueError("channel {} not found in clean_sequence keys {}"
+                             .format(channel, self._clean_sequences.keys()))
+        return self._clean_sequences[channel]
+
+    def put_clean_sequence(self, channel, clean_sequence):
+        """
+        Put a channel's clean_sequence into the object
+
+        Args:
+            channel (str): the channel name
+            clean_sequence (list of str): clean channels/methods, in order
+        """
+        if channel in self._clean_sequences:
+            self._clean_sequences[channel] = clean_sequence
+        else:
+            logger.warning('tried to put a clean_sequence in non-existent '
+                           f'channel "{channel}"')
+
+    def units(self, in_id, out_id):
         """
         The units of the given cross-  or auto-spectra
 
         Args:
-            in_channel (str): input channel
-            out_channel (str): output channel
+            in_id (str): input channel
+            out_id (str): output channel
         Returns:
             (str): the units
         """
-        in_units = self.channel_units(in_channel)
-        out_units = self.channel_units(out_channel)
+        in_units = self.channel_units(in_id)
+        out_units = self.channel_units(out_id)
         if in_units == out_units:
             return f"({in_units})^2/Hz"
         return f"({in_units})*({out_units})/Hz"
@@ -621,12 +694,14 @@ class SpectralDensity:
         use the cross-spectral density function.
         From Bendat & Piersol (1986), Appendix B, gamma_xy^2 (f)
         """
-        in_chan = self.channel_name(in_chan, 'in_chan')
-        out_chan = self.channel_name(out_chan, 'out_chan')
+        in_chan = self.channel_id(in_chan, 'in_id')
+        out_chan = self.channel_id(out_chan, 'out_id')
         if in_chan not in self._ds.input:
-            raise ValueError(f'{in_chan=} not in spectral density matrix {self._ds.input}')
+            raise ValueError('in_chan={} not in spectral density matrix {}'
+                             .format(in_chan, self._ds.input))
         if out_chan not in self._ds.output:
-            raise ValueError(f'{out_chan=} not in spectral density matrix {self._ds.output}')
+            raise ValueError('out_chan={} not in spectral density matrix {}'
+                             .format(out_chan, self._ds.output))
         coherence = (np.abs(self.crossspect(in_chan, out_chan))**2
                      / (self.autospect(in_chan) * self.autospect(out_chan)))
         return np.abs(coherence)  # shouldn't be necessary
@@ -642,6 +717,67 @@ class SpectralDensity:
             (float):
         """
         return coherence_significance_level(self.n_windows, prob)
+
+    @staticmethod
+    def plots(sds,
+              x=None,
+              overlay=True,
+              plot_peterson=True,
+              show=True,
+              outfile=None,
+              title=None,
+              **fig_kw):
+        """
+        Plot overlaid autospectra of multiple SpectralDensity objects
+
+        Args:
+            sds (list): SpectralDensity functions to plot
+        Other Properties:
+            **kwargs: any arguments used in plot_autospectra, except
+                overlay (always true)
+        """
+        # Validate inputs
+        if overlay is not True:
+            logger.warning('You requested overlay=False, ignored!')
+        if not isinstance(sds, list):
+            raise ValueError('sds is not a list')
+        for sd in sds:
+            if not isinstance(sd, SpectralDensity):
+                raise ValueError('sds element is not a SpectralDensity object')
+
+        rows, cols = 1, 1
+        ax_array = np.ndarray((rows, cols), dtype=tuple)
+        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        if title is None:
+            title = "Auto-spectra, multiple SpectralDensities"
+        fig.suptitle(title)
+        axa, axp = None, None
+        first_time = True
+        for sd in sds:
+            new_x = sd._get_validate_ids(x)
+            for key, i in zip(new_x, range(len(new_x))):
+                axa, axp = sd.plot_one_spectra(
+                    key,
+                    key,
+                    fig,
+                    (1, 1),
+                    (0, 0),
+                    show_ylabel=first_time,
+                    show_xlabel=first_time,
+                    ax_a=axa,
+                    ax_p=axp,
+                    show_phase=False,
+                    plot_peterson=plot_peterson,
+                    annotate=False
+                )
+                first_time = False
+        ax_array[0, 0] = (axa, axp)
+        plt.legend(fontsize='small')
+        if outfile:
+            plt.savefig(outfile)
+        if show:
+            plt.show()
+        return ax_array
 
     def plot(self, **kwargs):
         """Shortcut for `plot_autospectra()`"""
@@ -673,7 +809,7 @@ class SpectralDensity:
         Returns:
             (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
-        x = self._get_validate_channel_names(x)
+        x = self._get_validate_ids(x)
         if not overlay:
             rows, cols = _squarish_grid(len(x))
         else:
@@ -714,8 +850,10 @@ class SpectralDensity:
                     ax_p=axp,
                     show_phase=False,
                     plot_peterson=plot_peterson,
+                    annotate=False
                 )
             ax_array[0, 0] = (axa, axp)
+            plt.legend(fontsize='small')
         if outfile:
             plt.savefig(outfile)
         if show:
@@ -745,7 +883,7 @@ class SpectralDensity:
         Returns:
             :class:`numpy.ndarray`: array of axis pairs (amplitude, phase)
         """
-        x = self._get_validate_channel_names(x)
+        x = self._get_validate_ids(x)
         n_subkeys = len(x)
         rows, cols = n_subkeys, n_subkeys
         ax_array = np.ndarray((rows, cols), dtype=tuple)
@@ -802,6 +940,7 @@ class SpectralDensity:
         show_phase=True,
         plot_peterson=True,
         outfile=None,
+        annotate=True
     ):
         """
         Plot one spectral density
@@ -835,9 +974,6 @@ class SpectralDensity:
                 - :class:`matplotlib.axes.axis`: amplitude plot axis
                 - :class:`matplotlib.axes.axis`: phase plot axis
         """
-        # da = self._ds["spectra"].sel(input=key, output=subkey)
-        # in_units = da.coords['in_units'].values
-        # out_units = da.coords['out_units'].values
         psd = self.crossspect(key, subkey)
         in_units = self.channel_units(key)
         out_units = self.channel_units(subkey)
@@ -895,11 +1031,11 @@ class SpectralDensity:
             ax_a.semilogx(f, lownoise, "k--")
             ax_a.semilogx(f, highnoise, "k--")
 
-        if label is not None:
-            legend_1 = ax_a.legend()
-            if show_coherence:
-                legend_1.remove()
-                ax2.add_artist(legend_1)
+        if label is not None and annotate is True:
+            ax_a.annotate(label, (0.5, 0.98),  xycoords="axes fraction",
+                          ha='center', va='top', fontsize='small',
+                          bbox=dict(boxstyle='square', fc='w', ec='k',
+                                    alpha=0.5))
         if show_ylabel:
             if ylabel is None:
                 ylabel = "dB ref UNITS/Hz"
@@ -959,16 +1095,23 @@ class SpectralDensity:
         else:
             return self._seedid_full
 
-    def plot_coherences(self, x=None, y=None, overlay=False, show=True,
+    def plot_coherences(self, x=None, y=None, display='full', show=True,
                         outfile=None, labels="full", sort_by="full",
-                        **fig_kw):
+                        overlay=False, **fig_kw):
         """
         Plot coherences
 
         Args:
-            x (list of str): limit to the listed input channels
-            y (list of str): limit to the listed output channels
-            overlay (bool): put all coherences on one plot
+            x (list of str or None): limit to the listed input channels
+            y (list of str or None): limit to the listed output channels
+            display (str): how to arrange plots:
+                - "full": a row for every channel, a column for every channel,
+                  every cell filled
+                - "sparse": Only plot the upper diagonal
+                - "minimal": Plot upper diagonal elements in the least
+                  number of cells possible
+                - "overlay": One plot with all upper diagonal elemetns overlain
+            overlay (bool): [GRANDFATHERED]: same as display="overlay"
             show (bool): show on desktop
             outfile (str): save to the named file
             labels (str): labels to put on x and y axes ('full', 'chan' or
@@ -981,33 +1124,122 @@ class SpectralDensity:
         Returns:
             (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
         """
+        if display not in ('full', 'sparse', 'minimal', 'overlay'):
+            raise ValueError(f'Unknown display value: "{display}"')
         strfun = self._seedid_strfun(sort_by)
-        x = sorted(self._get_validate_channel_names(x), key=strfun)
-        y = sorted(self._get_validate_channel_names(y), key=strfun)
-        if not overlay:
+        x = sorted(self._get_validate_ids(x), key=strfun)
+        y = sorted(self._get_validate_ids(y), key=strfun)
+        if overlay is True:
+            logger.warning('parameter `overlay` is grandfathered, '
+                           'use display="overlay"')
+            if display == 'full':
+                display = 'overlay'
+        if display == 'full':
             rows, cols = len(x), len(y)
             ax_array = np.ndarray((rows, cols), dtype=tuple)
             fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
             fig.suptitle("Coherences")
             strfun = self._seedid_strfun(labels)
-            for in_chan, i in zip(x, range(len(x))):
-                for out_chan, j in zip(y, range(len(y))):
+            for in_chan, i in zip(x, range(rows)):
+                for out_chan, j in zip(y, range(cols)):
                     in_chan_label = strfun(in_chan)
                     out_chan_label = strfun(out_chan)
                     title = out_chan_label if i == 0 else None
                     axa, axp = self.plot_one_coherence(
-                        in_chan,
-                        out_chan,
-                        fig,
-                        (rows, cols),
-                        (i, j),
+                        in_chan, out_chan,
+                        fig, (rows, cols), (i, j),
                         show_ylabel=j == 0,
                         show_xlabel=i == rows - 1,
                         ylabel=in_chan_label,
                         title=title,
                     )
                     ax_array[i, j] = (axa, axp)
-        else:
+        if display == 'sparse':
+            rows, cols = len(x), len(y)
+            reduce_display = False
+            if x[0] == y[0]:
+                reduce_display = True   # Can get rid of one row and column
+                rows -= 1
+                cols -= 1
+            ax_array = np.ndarray((rows, cols), dtype=tuple)
+            fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+            fig.suptitle("Coherences")
+            strfun = self._seedid_strfun(labels)
+            plotted = []
+            for in_chan, i in zip(x, range(len(x))):
+                new_row = True
+                for out_chan, jbase in zip(y, range(len(y))):
+                    j = jbase
+                    if reduce_display==True:
+                        j -= 1
+                    if in_chan == out_chan or (out_chan, in_chan) in plotted:
+                        if i < rows and j >= 0:
+                            axs[i, j].axis('off')
+                        continue
+                    plotted.append((in_chan, out_chan))
+                    in_chan_label = strfun(in_chan)
+                    out_chan_label = strfun(out_chan)
+                    title = out_chan_label if i == 0 else None
+                    axa, axp = self.plot_one_coherence(
+                        in_chan, out_chan,
+                        fig, (rows, cols), (i, j),
+                        show_ylabel=new_row,
+                        # show_xlabel=i == rows - 1,
+                        show_xlabel=i == j,
+                        ylabel=in_chan_label,
+                        title=title,
+                    )
+                    new_row = False
+                    ax_array[i, j] = (axa, axp)
+        if display == 'minimal':
+            combis = []
+            for i in x:
+                for o in y:
+                    if i == o or (o, i) in combis:
+                        continue
+                    combis.append((i, o))
+            rows = int(np.sqrt(len(combis)))
+            if rows == 0:
+                rows = 1
+            cols = int(np.ceil(len(combis)/rows))
+            ax_array = np.ndarray((rows, cols), dtype=tuple)
+            fig, axs = plt.subplots(rows, cols, sharex=True, sharey=True,
+                                    **fig_kw)
+            fig.suptitle("Coherencies")
+            strfun = self._seedid_strfun(labels)
+            i, j = 0, 0
+            for combi in combis:
+                in_chan = combi[0]
+                out_chan = combi[1]
+                in_chan_label = strfun(in_chan)
+                out_chan_label = strfun(out_chan)
+                title = out_chan_label if i == 0 else None
+                # Get unique part of in_chan_label
+                for ctr in range(len(in_chan_label)):
+                    if ctr > len(out_chan_label):
+                        raise ValueError("strings match all of out_chan_label")
+                    if in_chan_label[ctr] == out_chan_label[ctr]:
+                        continue
+                    in_chan_sublabel = in_chan_label[ctr:]
+                axa, axp = self.plot_one_coherence(
+                    in_chan, out_chan,
+                    fig, (rows, cols), (i, j),
+                    show_ylabel=j == 0,
+                    show_xlabel=i == rows - 1,
+                    ylabel='Coherence',
+                    title=None
+                )
+                label = f'{out_chan_label}/{in_chan_sublabel}'
+                axa.annotate(label, (0.5, 0.98),  xycoords="axes fraction",
+                             ha='center', va='top', fontsize='small',
+                             bbox=dict(boxstyle='square', fc='w', ec='k',
+                                       alpha=0.5))
+                ax_array[i, j] = (axa, axp)
+                j += 1
+                if j >= cols:
+                    j = 0
+                    i += 1
+        elif display == 'overlay':
             ax_array = np.ndarray((1, 1), dtype=tuple)
             fig, axs = plt.subplots(1, 1, sharex=True, **fig_kw)
             fig.suptitle("Coherences")
@@ -1021,11 +1253,8 @@ class SpectralDensity:
                         break
                     label = f"{in_chan}-{out_chan}"
                     axa, axp = self.plot_one_coherence(
-                        in_chan,
-                        out_chan,
-                        fig,
-                        (1, 1),
-                        (0, 0),
+                        in_chan, out_chan,
+                        fig, (1, 1), (0, 0),
                         ylabel="Coherence",
                         label=label,
                         ax_a=axa,
@@ -1085,19 +1314,20 @@ class SpectralDensity:
                 - (:class:`matplotlib.axes.axis`): amplitude plot axis
                 - (:class:`matplotlib.axes.axis`): phase plot axis
         """
-        in_chan = self.channel_name(in_chan,'in_chan')
-        out_chan = self.channel_name(out_chan, 'out_chan')
+        in_chan = self.channel_id(in_chan, 'in_id')
+        out_chan = self.channel_id(out_chan, 'out_id')
         ds = self._ds["spectra"].sel(input=in_chan, output=out_chan)
         f = self._ds.coords["f"].values
         if fig is None:
             fig = plt.gcf()
+        plot_shape = (3*fig_grid[0], fig_grid[1])
         # Plot amplitude
         if ax_a is None:
             if show_phase:
                 ax_a = plt.subplot2grid(
-                    (3 * fig_grid[0], 1 * fig_grid[1]),
-                    (3 * plot_spot[0] + 0, plot_spot[1] + 0),
-                    rowspan=2,
+                    plot_shape,
+                    (3 * plot_spot[0], plot_spot[1]),
+                    rowspan=2
                 )
             else:
                 ax_a = plt.subplot2grid(
@@ -1117,21 +1347,17 @@ class SpectralDensity:
         # ax_a.set_yticklabels([])
         # Plot amplitude
         if label is not None:
-            ax_a.legend()
-        if show_ylabel:
-            if ylabel is None:
-                ylabel = "Coherence"
-            ax_a.set_ylabel(ylabel)
+            ax_a.legend(fontsize='small')
+        if not show_ylabel:
+            ax_a.set_yticklabels([])
         if title:
-            ax_a.set_title(title)
+            ax_a.set_title(title, fontsize='small')
 
         # Plot phase
         if show_phase:
             if ax_p is None:
-                ax_p = plt.subplot2grid(
-                    (3 * fig_grid[0], 1 * fig_grid[1]),
-                    (3 * plot_spot[0] + 2, plot_spot[1] + 0),
-                )
+                ax_p = plt.subplot2grid(plot_shape,
+                                        (3 * plot_spot[0] + 2, plot_spot[1]))
             ax_p.semilogx(f, np.angle(ds, deg=True), **kwargs)
             ax_p.set_ylim(-180, 180)
             ax_p.set_xlim(f[1], f[-1])
@@ -1141,69 +1367,45 @@ class SpectralDensity:
                 pass
             else:
                 ax_p.set_yticklabels([])
+            ax_a.set_xticklabels([])
             bottom_axis = ax_p
         else:
             ax_p = None
             bottom_axis = ax_a
+
         if show_xlabel:
             bottom_axis.set_xlabel("Frequency (Hz)")
         else:
             bottom_axis.set_xticklabels([])
+
+        # Put ylabel across amplitude and phase plots
+        if show_ylabel:
+            rows, cols = fig_grid
+            row, col = plot_spot
+            fig.add_subplot(rows, cols, row * cols + col + 1, frameon=False)
+            if ylabel is None:
+                ylabel = "Coherence"
+            plt.tick_params(labelcolor='none', which='both', top=False,
+                            bottom=False, left=False, right=False)
+            plt.ylabel(ylabel, fontsize='small')
+
         return ax_a, ax_p
 
-    def _get_validate_channel_names(self, x):
+    def _get_validate_ids(self, x):
         """
-        If x is None, return list of all channel names
-        If x is a list, validate all of the names
-        """
-        if x is None:
-            return list(self._ds.coords["input"].values)
-        for key in x:
-            if key not in list(self._ds.coords["input"].values):
-                ValueError('key "{key}" not in channel list')
-        return x
-
-    @staticmethod
-    def _remove_subtracted_loc(id):
-        """
-        Remove loc code characters including and after first "-"
-
-        Allows the use of "-?" in the loc code to specify removed coherent
-        noise
+        If x is None, return list of all channel ids
+        If x is a list, validate each id
 
         Args:
-            id (str): seed ID code
-
-        Example:
-            >>> SD._remove_subtracted_loc('hello')
-            'hello'
-            >>> SD._remove_subtracted_loc('NN.SSSS.LL.CCC')
-            'NN.SSSS.LL.CCC'
-            >>> SD._remove_subtracted_loc('NN.SSSS.-LL.CCC')
-            'NN.SSSS..CCC'
-            >>> SD._remove_subtracted_loc('NN.SSSS.L-LL.CCC')
-            'NN.SSSS.L.CCC'
+            x (list or None): channel ids to validate
         """
-        comps = id.split(".")
-        if not len(comps) == 4:
-            return id
-        if "-" not in comps[2]:
-            return id
-        comps[2] = comps[2].partition("-")[0]
-        return ".".join(comps)
-
-    @staticmethod
-    def _remove_subtracted_chan(id):
-        """
-        Remove chan code characters including and after first "-"
-        """
-        comps = id.split(".")
-        if not len(comps) == 4:
-            return id
-        if "-" not in comps[3]:
-            return id
-        comps[3] = comps[3].partition("-")[0]
-        return ".".join(comps)
+        if x is None:
+            x = list(self._ds.coords["input"].values)
+        else:
+            for key in x:
+                if key not in list(self._ds.coords["input"].values):
+                    ValueError('key "{key}" not in id list')
+        return x
 
     @staticmethod
     def _windowed_rfft(trace, ws, ss=None, win_taper="hanning",
@@ -1232,7 +1434,7 @@ class SpectralDensity:
         """
         # Extract data windows
         a, starttimes = SpectralDensity._make_windows(trace, ws, ss, win_taper,
-                                           starttimes, time_spans)
+                                                      starttimes, time_spans)
         sr = trace.stats.sampling_rate
         # Fourier transform
         n2 = _npow2(ws)
@@ -1271,8 +1473,9 @@ class SpectralDensity:
             for s, e in zip(time_spans.start_times, time_spans.end_times):
                 spanoffsets = SpectralDensity._sliding_window(int((e-s)*sr),
                                                               ws, ss)
-                reloffsets = [int(x + (s-st)*sr) for x in spanoffsets]
-                offsets.extend([x for x in reloffsets if x >= 0 and x+ws<=npts])
+                reloffs = [int(x + (s-st)*sr) for x in spanoffsets]
+                offsets.extend([x for x in reloffs
+                                if x >= 0 and x + ws <= npts])
         else:
             offsets = SpectralDensity._sliding_window(trace.stats.npts, ws, ss)
 
@@ -1286,8 +1489,8 @@ class SpectralDensity:
         else:
             raise ValueError(f'Unknown taper type "{win_taper}"')
 
-        if len(offsets)==0:
-            logging.warning('No offsets returned')
+        if len(offsets) == 0:
+            logger.warning('No offsets returned')
             return None, None
         # Make tapered windows
         a = np.ndarray((len(offsets), ws), dtype=trace.data.dtype)
@@ -1330,6 +1533,36 @@ class SpectralDensity:
             offsets.append(i*ss)
         return offsets
 
+
+def _validate_dimensions(freqs, seed_ids, chan_units, starttimes,
+                         chans_cleaned, data, instrument_responses):
+    """Validate dimensions of __init__() variables"""
+    n_f, n_ch = len(freqs), len(seed_ids)
+    assert freqs.size == (n_f)  # Make sure it's one dimensional
+    assert freqs.dtype == "float"
+    assert len(chan_units) == n_ch
+    assert len(chans_cleaned) == n_ch
+    for x in chan_units:
+        assert isinstance(x, str)
+    for x in seed_ids:
+        assert isinstance(x, str)
+    for x in chans_cleaned:
+        if not isinstance(x, list):
+            raise TypeError(f'chans_cleaned element is a {type(x)}, '
+                            'not a list')
+        for y in x:
+            if not isinstance(y, str):
+                raise TypeError('chans_cleaned subelement is a '
+                                f'{type(y)}, not a str')
+    if starttimes is not None:
+        for x in starttimes:
+            assert isinstance(x, UTCDateTime)
+    assert data.shape == (n_ch, n_ch, n_f)
+    assert data.dtype == "complex"
+    assert instrument_responses.shape == (n_ch, n_f)
+    assert instrument_responses.dtype == "complex"
+
+
 def _align_traces(stream):
     """Trim stream so that all traces are aligned and same length"""
     # Determine last starttime and first endtime, and verify that
@@ -1351,17 +1584,17 @@ def _align_traces(stream):
 
     # Make sure that the array is not masked
     if np.any([np.ma.count_masked(x.data) for x in stream]):
-        logging.warning('Unmasking masked data (usually a gap or overlap)')
+        logger.warning('Unmasking masked data (usually a gap or overlap)')
         stream = stream.split().merge(fill_value='interpolate')
 
     if last_start >= first_end:
         raise ValueError("There are non-overlapping traces")
     if last_start - first_start > 1 / sampling_rate:
-        logging.debug(f"Cutting up to {last_start-first_start} seconds "
-                      "from trace starts")
+        logger.debug("Cutting up to {} seconds from trace starts"
+                     .format(last_start-first_start))
     if last_end - first_end > 1 / sampling_rate:
-        logging.debug(f"Cutting up to {last_end-first_end} seconds "
-                      "from trace ends")
+        logger.debug("Cutting up to {} seconds from trace ends"
+                     .format(last_end-first_end))
     stream.trim(last_start, first_end)
     min_len = min([tr.stats.npts for tr in stream])
     max_len = max([tr.stats.npts for tr in stream])
@@ -1409,9 +1642,9 @@ def _subtract_rfs(fts, subtract_rfs):
         fts (dict): dictionary containing Fourier transforms for each channel.
             Each Fourier transform is N*ws, where ws is the window size and N
             is the mumber of windows
-        subtract_rfs (list of DCRF): frequency response functions to
-            subtract from channels as ffts are calculated (NOT SURE IF
-            THIS IS MORE USEFUL THAN SUBTRACTING FROM THE FINAL
+        subtract_rfs (list of :class:`.ResponseFunctions``): frequency response
+            functions to subtract from channels as ffts are calculated
+            (NOT SURE IF THIS IS MORE USEFUL THAN SUBTRACTING FROM THE FINAL
             SPECTRALDENSITY (LIKE ATACR), BUT NEED TO TEST)
     Returns:
         fts (dict): dictionary containg corrected Fourier transforms for each
@@ -1422,8 +1655,8 @@ def _subtract_rfs(fts, subtract_rfs):
         in_chan = rfs.input_channel
         fts_ic = in_chan.split("-")[0]  # take off any '-*' tail
         if not rfs.freqs.shape == fts[fts_ic].shape:
-            ValueError("frequency response function and ft have different shapes "
-                       f"({rfs.freqs.shape} vs {fts[fts_ic].shape})")
+            ValueError("frequency response function and ft have different "
+                       f"shapes ({rfs.freqs.shape} vs {fts[fts_ic].shape})")
         for out_chan in rfs.output_channels:
             fts_oc = out_chan.split("-")[0]
             fts[fts_oc] -= fts[fts_ic] * rfs.corrector(out_chan)
@@ -1452,11 +1685,11 @@ def _correct_instrument_response(ft, f, id, stats, inv=None):
             resp = inv.get_response(id, stats.starttime)
         except Exception:
             # remove subtraction codes from location code
-            new_id = SpectralDensity._remove_subtracted_loc(id)
+            new_id = _remove_subtracted_loc(id)
             try:
                 resp = inv.get_response(new_id, stats.starttime)
             except Exception:
-                new_id = SpectralDensity._remove_subtracted_chan(id)
+                new_id = _remove_subtracted_chan(id)
                 try:
                     resp = inv.get_response(new_id, stats.starttime)
                 except Exception:
@@ -1472,6 +1705,48 @@ def _correct_instrument_response(ft, f, id, stats, inv=None):
             units = "m/s^2"
         ft /= evalresp
     return ft, resp, evalresp, units
+
+
+def _remove_subtracted_loc(id):
+    """
+    Remove loc code characters including and after first "-"
+
+    Allows the use of "-?" in the loc code to specify removed coherent
+    noise
+
+    Args:
+        id (str): seed ID code
+
+    Example:
+        >>> SD._remove_subtracted_loc('hello')
+        'hello'
+        >>> SD._remove_subtracted_loc('NN.SSSS.LL.CCC')
+        'NN.SSSS.LL.CCC'
+        >>> SD._remove_subtracted_loc('NN.SSSS.-LL.CCC')
+        'NN.SSSS..CCC'
+        >>> SD._remove_subtracted_loc('NN.SSSS.L-LL.CCC')
+        'NN.SSSS.L.CCC'
+    """
+    comps = id.split(".")
+    if not len(comps) == 4:
+        return id
+    if "-" not in comps[2]:
+        return id
+    comps[2] = comps[2].partition("-")[0]
+    return ".".join(comps)
+
+
+def _remove_subtracted_chan(id):
+    """
+    Remove chan code characters including and after first "-"
+    """
+    comps = id.split(".")
+    if not len(comps) == 4:
+        return id
+    if "-" not in comps[3]:
+        return id
+    comps[3] = comps[3].partition("-")[0]
+    return ".".join(comps)
 
 
 if __name__ == "__main__":

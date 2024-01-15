@@ -6,6 +6,11 @@ import sys
 
 import numpy as np
 
+from ..logger import init_logger
+
+logger = init_logger()
+
+
 #        Period    Level       Slope
 LPAB = [[0.10,    -162.36,     5.64],
         [0.17,    -166.7,      0.00],

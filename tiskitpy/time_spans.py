@@ -1,7 +1,6 @@
 #!env python3
 """Class of time spans to remove, keep, zero, etc. in Trace or Stream data"""
 from pathlib import Path
-import logging
 
 from obspy.clients.fdsn import Client
 from obspy.core.event import Catalog, read_events
@@ -11,6 +10,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.dates import date2num
 
+from .utils import CleanSequence
+from .cleaned_stream import CleanedStream
+from .logger import init_logger
+
+logger = init_logger()
+ZERO_TAG = 'ZEROS'
 
 class TimeSpans:
     """
@@ -20,10 +25,11 @@ class TimeSpans:
     
     You can initialize using:
     
-    - A list of (start_time, end_time) pairs (start_time and end_time can
-      be any input to UTCDateTime, including UTCDateTime)
-    - A list of UTCDateTime start_times and a list of UTCDateTime end_times
-      (the lists must be the same length), or
+        A list of (start_time, end_time) pairs (start_time and end_time can
+        be any input to UTCDateTime, including UTCDateTime)
+    - or -
+        A list of UTCDateTime start_times and a list of UTCDateTime end_times
+        (the lists must be the same length)
     """
     def __init__(self, spans: list=None, start_times: list=None, end_times: list=None):
         if spans is not None:
@@ -53,8 +59,6 @@ class TimeSpans:
         else:
             raise ValueError('You must provide spans or start_times '
                                  'and end_times')
-        # print(f'{self._start_times=}')
-        # print(f'{self._end_times=}')
         self._organize()
 
     @property
@@ -74,7 +78,7 @@ class TimeSpans:
 
     @classmethod
     def from_eqs(cls, starttime, endtime, minmag=5.85, days_per_magnitude=1.5,
-                 eq_file=None, save_eq_file=True, quiet=False):
+                 eq_file=None, save_eq_file=True):
         """
         Generate timespans to avoid because of earthquakes
 
@@ -109,9 +113,7 @@ class TimeSpans:
         if Path(eq_file).is_file():
             cat = read_events(eq_file, format="quakeml")
         else:
-            if not quiet:
-                print("Reading EQs from USGS online catalog...",
-                      end="", flush=True)
+            logger.info("Reading EQs from USGS online catalog...")
             cat = Client("USGS").get_events(
                 starttime=starttime
                 - _calc_eq_cut(9, minmag, days_per_magnitude),
@@ -119,9 +121,8 @@ class TimeSpans:
                 minmagnitude=minmag,
                 orderby="time-asc",
             )
-            if not quiet:
-                print("Done", flush=True)
-                logging.info(f'writing catalog to "{eq_file}"')
+            logger.info("Done")
+            logger.info(f'writing catalog to "{eq_file}"')
             if save_eq_file:
                 cat.write(eq_file, format="quakeml")
 
@@ -284,9 +285,9 @@ class TimeSpans:
         new_spans = [x for x in self.spans if x[1] > ts_starttime and x[0] < ts_endtime]
         if len(new_spans) == 0:
             if ts_starttime > self.end_times[-1]:
-                logging.info(f'{ts_starttime=} after end of TimeSpans')
+                logger.info(f'{ts_starttime=} after end of TimeSpans')
             elif ts_endtime < self.start_times[0]:
-                logging.info(f'{ts_endtime=} before start of TimeSpans')
+                logger.info(f'{ts_endtime=} before start of TimeSpans')
             return TimeSpans([[ts_starttime, ts_endtime]])
         if ts_starttime < new_spans[0][0]:
             new_spans = [[ts_starttime, ts_starttime]] + new_spans
@@ -347,27 +348,31 @@ class TimeSpans:
             plot: plot traces with spans cut out
 
         Returns:
-            trace with spans set to zero
+            Trace or Stream with spans set to zero
         """
         if isinstance(inp, Trace):
-            stream = Stream([inp])
-        elif isinstance(inp, Stream):
-            stream = inp.copy()
-        else:
-            raise (ValueError, "inp is not an obspy Trace or Stream")
-        for tr in stream:
-            tr.stats.channel = "XX" + tr.stats.channel[2]
-
+            tr = inp.copy()  # Do not destroy original
             for st, et in zip(self.start_times, self.end_times):
                 start_addr, end_addr = self._get_addrs(st, et, tr.stats)
-                if start_addr is None:
-                    continue
-                tr.data[start_addr: end_addr + 1] = 0.0
-        if plot:
-            (stream + inp).plot(color="blue", equal_scale=False)
-        if isinstance(inp, Trace):
-            return stream[0]
-        return stream
+                if start_addr is not None:
+                    tr.data[start_addr: end_addr + 1] = 0.0
+                    tr = CleanSequence.tag(tr, ZERO_TAG)
+                    # tr.stats.channel = "XX" + tr.stats.channel[2]  # Mark channel code
+            if plot:
+                Stream([trace,inp]).plot(color="blue", equal_scale=False)
+            return tr
+        elif isinstance(inp, Stream):
+            stream = CleanedStream(inp)
+            for tr in stream:
+                new_tr = self.zero(tr)
+                stream.remove(tr)
+                stream.append(new_tr)
+            # stream = stream.tag(ZERO_TAG)
+            if plot:
+                (stream + inp).plot(color="blue", equal_scale=False)
+            return stream
+        else:
+            raise (ValueError, "inp is not an obspy Trace or Stream")
 
     def has_zeros(self, starttime, endtime):
         """

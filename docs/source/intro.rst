@@ -1,42 +1,24 @@
-*******************************
-TiSKitPy
-*******************************
 
-Time series data processing, based on [BP2010]_
+=============================
+tiskitpy
+=============================
 
+TIme Series data processing toolKIT, for cleaning data series and calculating
+the coherencies and frequence response functions between them.
+Most of the algorithms are based on `BP2010`_.
 
-Classes
-=========================
+Classes, functions and command_line programs are listed in the
+:ref:`Module overview`
 
-:CleanRotator: Rotate data to minimize noise on vertical channel
-:DataCleaner: Transfer_Function-based data cleaning
-:Decimator: Decimate time series and update metadata with the decimator's
-            response
-:PeriodicTransient: Calculate and remove periodic transient (VERY manual!)
-:SpectralDensity: Calculate and manipulate spectral density functions.
-:TimeSpan: Specify time spans to be removed, kept, zeroed, etc.
-:ResponseFunctions: Frequency response functions for a given input channel.
-               
-Functions
-=========================
+The cleaning algorithms can create multiple instances of the 'same' data stream.
+In order to keep track of these instances, tiskitpy stores clean_sequence
+information, as described in :ref:`clean_sequences`
 
-:fir2caus: Transform zero-phase data to minimum phase (only works for
-           LCHEAPO loggers, need to update to calculate/work for any
-           zero-phase filter)
-:read_MSEED: Read MSEED data, even if the file is too big (> 2 GB)
-             for obspy's read() function
-:Peterson_noise_model: Return the Peterson High and Low Noise Models
+.. toctree::
+   :maxdepth: 1
 
-Command-line programs
-=========================
-
-:tiskitpy_decimate_SDS: Decimate data in a SeisComp Data Structure database.
-    Inserts the data into the same database and creates a new StationXML file
-    (based on an existing StationXML file for the original database)
-
-*I had to remove `SpectralDensity.from_ATACR()` (never tested
-anyway) because readthedocs had a problem importing the `obstools` package
-using `pip`*
+   intro/module_overview
+   intro/clean_sequences
 
 .. [BP2010] Bendat J. S. and A. G. Piersol (1986), Random Data:
     Analysis and Measurement Procedures, 566 pp.

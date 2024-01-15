@@ -4,6 +4,10 @@ Functions to calculate spectra, coherences and transfer functions
 from obspy.signal.invsim import cosine_taper
 import numpy as np
 
+from ..logger import init_logger
+
+logger = init_logger()
+
 # Set variables
 # spect_library = 'scipy'  # 'mlab' or 'scipy': mlab gives weird coherences!
 

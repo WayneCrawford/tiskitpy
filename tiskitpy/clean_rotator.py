@@ -4,15 +4,17 @@ Clean tilt noise from OBS vertical channel using non-deforming rotation
 
 Is there any reason why rotate_clean isn't just rotate_calc + rotate_apply?
 """
-import logging
-
 import numpy as np
 from obspy.core.stream import Stream
 from obspy import UTCDateTime
 
 from .time_spans import TimeSpans
-from .utils import SeisRotate
+from .cleaned_stream import CleanedStream
+from .utils import SeisRotate, CleanSequence as CS
+from .logger import init_logger
 
+logger = init_logger()
+TRANS_CODE = 'ROT'
 
 class CleanRotator:
     """
@@ -59,7 +61,7 @@ class CleanRotator:
             verbose=verbose, ignore_spans=ignore_spans, uselogvar=uselogvar
         )
         if verbose:
-            logging.info(f"Best angle, azimuth is ({ang:.2f}, {azi:.2f})")
+            logger.info(f"    Best angle= azimuth is ({ang:.2f}, {azi:.2f})")
         self.angle = ang
         self.azimuth = azi
         if plot:
@@ -86,12 +88,11 @@ class CleanRotator:
     def _make_eq_spans(self, remove_eq, stats, verbose, save_eq_file):
         if isinstance(remove_eq, str):
             return TimeSpans.from_eqs(
-                stats.starttime, stats.endtime, quiet=not verbose,
+                stats.starttime, stats.endtime,
                 eq_file=remove_eq, save_eq_file=save_eq_file)
         elif remove_eq is True:
             return TimeSpans.from_eqs(
-                stats.starttime, stats.endtime, quiet=not verbose,
-                save_eq_file=save_eq_file)
+                stats.starttime, stats.endtime, save_eq_file=save_eq_file)
         return None
 
     def _plot_filtered_stream(self, stream, filt_band):
@@ -129,10 +130,11 @@ class CleanRotator:
         seis_stream, other_stream = SeisRotate.separate_streams(stream)
         srData = SeisRotate(stream)
         srData.zrotate(self.angle, self.azimuth, horiz_too)
+        srData.Z = CS.tag(srData.Z, TRANS_CODE)
         if other_stream is None:
-            return srData.stream()
+            return CleanedStream(srData.stream())
         else:
-            return srData.stream() + other_stream
+            return CleanedStream(srData.stream() + other_stream)
 
     def tfs(self):
         """

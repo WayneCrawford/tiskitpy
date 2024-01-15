@@ -5,7 +5,9 @@
 # import obspy
 from .periodic_transient import PeriodicTransient
 from .utils import prep_filter as prep_filt
+from ..logger import init_logger
 
+logger = init_logger()
 def_mag_limit = 5.85
 def_days_per_magnitude = 1.5
 

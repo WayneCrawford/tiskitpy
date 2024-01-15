@@ -4,11 +4,14 @@ Plot instrument response
 """
 import sys
 import argparse
-import logging
 
 from obspy import read_inventory  # , UTCDateTime
 import numpy as np
 import matplotlib.pyplot as plt
+
+from ..logger import init_logger
+
+logger = init_logger()
 
 
 def _get_arguments():
@@ -71,13 +74,13 @@ def main():
             network=net, station=sta, location=loc, channel=arguments.component
         )[0][0][0]
     except Exception:
-        logging.error(f"{SEED_id} not found in {arguments.sta_file}")
+        logger.error(f"{SEED_id} not found in {arguments.sta_file}")
     SEED_id = f"{net}.{sta}.{loc}.{channel.code}"
     if not arguments.min_freq:
-        logging.info("Calculating minimum frequency from lowest frequency pole:")
+        logger.info("Calculating minimum frequency from lowest frequency pole:")
         paz = channel.response.get_paz()
         min_pole = np.min(np.abs(paz.poles)) / (2 * np.pi)
-        logging.info(f"    LF pole found at {min_pole:.2g} Hz ({1/min_pole:.2g} s)")
+        logger.info(f"    LF pole found at {min_pole:.2g} Hz ({1/min_pole:.2g} s)")
         arguments.min_freq = (min_pole) / 10
 
     outf_base = f"{SEED_id}"

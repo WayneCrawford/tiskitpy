@@ -33,10 +33,6 @@ class SineParms:
         """
         return self.amplitude * np.sin(2*np.pi*self.frequency*t + np.radians(self.phase))
 
-# default_sineparms = {
-#     "BX1": [SineParms(13., 10., 0), SineParms(10., 0., 0.), SineParms(42., 0., 0.)],
-#     "BX2": [SineParms(13., 2., 45.), SineParms(10., 1., 90.), SineParms(42., 3., 135.)],
-#     "BX3": [SineParms(13., 10., 0), SineParms(10., 10., 0), SineParms(42., 10., 0)]}
 sineparms = {
     "tilt": [SineParms(13., .33, 0), SineParms(10., .33, 0.), SineParms(42., .33, 0.)],
     "compliance": [SineParms(7, .33, 45.), SineParms(23, .33, 90.), SineParms(31, .34, 135.)],

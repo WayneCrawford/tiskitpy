@@ -3,9 +3,13 @@ Utilities used for transient detection/removal
 """
 import sys
 import math as M
-import logging
 
 import numpy as np
+
+from ..logger import init_logger
+
+logger = init_logger()
+
 
 
 def stack_data(data, slice_len):
@@ -61,7 +65,7 @@ def input_float(text, default):
     try:
         _ = float(default)
     except Exception:
-        logging.critical('The default value is not numeric!')
+        logger.critical('The default value is not numeric!')
         sys.exit(2)
     while True:
         inp = input(f'{text}  (RETURN uses current value) [{default:g}]: ')

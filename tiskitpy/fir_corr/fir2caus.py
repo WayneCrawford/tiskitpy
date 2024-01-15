@@ -13,9 +13,12 @@ Author: Wayne Crawford
 
 import numpy as np
 import json as json
-# import obspy.core as oc
 import scipy.signal as sig
-# import matplotlib.pyplot as plt
+
+from ..logger import init_logger
+
+logger = init_logger()
+
 
 
 def fir2caus(stream, firCorrFileName, FIRdecim):

@@ -1,4 +1,0 @@
-Module
-======================
-
-.. automodule:: tiskitpy

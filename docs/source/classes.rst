@@ -1,10 +1,7 @@
 
 =============================
-Classes Overview
+Classes
 =============================
-
-The :ref:`TechnicalDocumentation` contains detailed class constructor, method
-and property descriptions
 
 .. toctree::
    :maxdepth: 1
@@ -15,3 +12,4 @@ and property descriptions
    classes/clean_rotator
    classes/response_functions
    classes/time_spans
+   classes/cleaned_stream

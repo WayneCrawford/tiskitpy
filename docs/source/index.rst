@@ -16,7 +16,7 @@ TiSKitPy documentation
   install
   classes
   examples
-  code
+  programmers
 
 Indices and tables
 ==================
