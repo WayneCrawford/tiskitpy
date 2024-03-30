@@ -113,18 +113,24 @@ class TimeSpans:
         if Path(eq_file).is_file():
             cat = read_events(eq_file, format="quakeml")
         else:
-            logger.info("Reading EQs from USGS online catalog...")
-            cat = Client("USGS").get_events(
-                starttime=starttime
-                - _calc_eq_cut(9, minmag, days_per_magnitude),
-                endtime=endtime,
-                minmagnitude=minmag,
-                orderby="time-asc",
-            )
-            logger.info("Done")
-            logger.info(f'writing catalog to "{eq_file}"')
-            if save_eq_file:
-                cat.write(eq_file, format="quakeml")
+            logger.info(f"Didn't find local EQ file '{eq_file}', reading from USGS online catalog...")
+            try:
+                cat = Client("USGS").get_events(
+                    starttime=starttime
+                    - _calc_eq_cut(9, minmag, days_per_magnitude),
+                    endtime=endtime,
+                    minmagnitude=minmag,
+                    orderby="time-asc",
+                )
+                logger.info("Done")
+                logger.info(f'writing catalog to "{eq_file}"')
+                if save_eq_file:
+                    cat.write(eq_file, format="quakeml")
+            except Exception as e:  # except FDSNNoServiceException as e:
+                logger.warning(e)
+                logger.warning('!!!Continuing without removing EQs!!!')
+                return cls([])
+            
 
         new_cat = Catalog(
             events=[x for x in cat if x.preferred_magnitude().mag >= minmag]

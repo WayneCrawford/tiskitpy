@@ -41,6 +41,8 @@ class CleanRotator:
     Attributes:
         angle (float): angle by which Z (or Z-X-Y) was rotated
         azimuth (float): azimuth by which Z (or Z-X-Y) was rotated
+        variance_reduction (float): amount by which variance was reduced during
+            calculation (0 to 1)
     """
 
     def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,
@@ -48,7 +50,6 @@ class CleanRotator:
                  filt_band=(0.001, 0.01), save_eq_file=True):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
-
         """
         ignore_spans = self._make_eq_spans(
             remove_eq, stream[0].stats, verbose, save_eq_file
@@ -57,20 +58,20 @@ class CleanRotator:
             ignore_spans += avoid_spans
         filtstream = self._filtstream(stream, filt_band)
         srData = SeisRotate(filtstream)
-        (ang, azi) = srData.calc_zrotate_opt(
-            verbose=verbose, ignore_spans=ignore_spans, uselogvar=uselogvar
+        (ang, azi, var_red) = srData.calc_zrotate_opt(
+            ignore_spans=ignore_spans, uselogvar=uselogvar
         )
-        if verbose:
-            logger.info(f"    Best angle= azimuth is ({ang:.2f}, {azi:.2f})")
         self.angle = ang
         self.azimuth = azi
+        self.variance_reduction = var_red
+        if verbose:
+            logger.info(self.__str__())
         if plot:
             self._plot_filtered_stream(stream, filt_band)
 
     def __str__(self):
-        return "CleanRotator: angle, azimuth = {:.2f}, {:.1f} degrees".format(
-            self.angle, self.azimuth
-        )
+        return "CleanRotator: angle, azimuth, var_red = {:5.2f}, {:6.1f}, {:3.2f}".format(
+            self.angle, self.azimuth, self.variance_reduction)
 
     def _filtstream(self, stream, filt_band):
         """Filter data to tilt noise band for best Angle calc"""
@@ -114,7 +115,7 @@ class CleanRotator:
         compare_stream = Stream([trace_view_Z, trace_view_rot_Z])
         compare_stream.plot(equal_scale=True, method="full")
 
-    def apply(self, stream, horiz_too=False):
+    def apply(self, stream, horiz_too=False, rot_limit=20.):
         """
         Rotates vertical channel to minimize noise
 
@@ -124,10 +125,14 @@ class CleanRotator:
             horiz_too: (bool) rotate horizontals also (use if you believe
                 channels are truly orthogonal, probably a bad idea anyway
                 as long as we use a 2-value rotation)
+            rot_limit (float): Do not rotate if self.angle greater then this value
         Returns:
             strm_rot (Stream): rotated stream
         """
         seis_stream, other_stream = SeisRotate.separate_streams(stream)
+        if self.angle > rot_limit:
+            logger.warning(f'{self.angle=} > {rot_limit=}, not rotating!')
+            return stream
         srData = SeisRotate(stream)
         srData.zrotate(self.angle, self.azimuth, horiz_too)
         srData.Z = CS.tag(srData.Z, TRANS_CODE)
@@ -173,17 +178,3 @@ def rotate_clean(stream, avoid_spans=None, horiz_too=False, plot=False,
                        uselogvar, verbose, filt_band)
     return obj.apply(stream), obj.rot_angle, obj.rot_azimuth
 
-
-# def extract_corr_z(evstream, tf_name):
-#     """
-#     Return a corrected stream from ATACR EventStream
-#
-#     Args:
-#         evstream (:class:`obstools.atacr.EventStream`):
-#         tf_name (str): transfer function key
-#     Returns:
-#         outstream (Stream): corrected Z stream
-#     """
-#     stream = evstream.sth.select(component='Z').copy()
-#     stream[0].data = evstream.correct[tf_name].flatten()
-#     return stream

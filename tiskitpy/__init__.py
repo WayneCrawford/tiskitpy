@@ -33,10 +33,12 @@ Functions
 Command-line programs
 =========================
 
+Use the `-h` option for help
+
 - ``tiskitpy_decimate_SDS`` : Decimate data stored in a SeisComp Data Structure
-    database.
-    Inserts the data into the same database and creates a new StationXML file
-    (based on an existing StationXML file for the input database)
+  database.
+- ``tiskitpy_get_SDS_inventory``: Return the inventory corresponding to a
+  SeisComp Data Structure database, using the FDSN Station webservice
 """
 from .clean_rotator import CleanRotator
 from .cleaned_stream import CleanedStream

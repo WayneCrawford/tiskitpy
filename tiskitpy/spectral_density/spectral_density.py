@@ -720,6 +720,7 @@ class SpectralDensity:
 
     @staticmethod
     def plots(sds,
+              line_kws=None,
               x=None,
               overlay=True,
               plot_peterson=True,
@@ -732,9 +733,14 @@ class SpectralDensity:
 
         Args:
             sds (list): SpectralDensity functions to plot
+            line_kws(list of dict): Line keywords for each SpectralDensity function
         Other Properties:
             **kwargs: any arguments used in plot_autospectra, except
                 overlay (always true)
+        Returns:
+            figinfo (list):
+                fig
+                axa (): amplitude axis
         """
         # Validate inputs
         if overlay is not True:
@@ -744,16 +750,21 @@ class SpectralDensity:
         for sd in sds:
             if not isinstance(sd, SpectralDensity):
                 raise ValueError('sds element is not a SpectralDensity object')
+        if line_kws is not None:
+            if not len(line_kws) == len(sds):
+                raise ValueError(f'{len(line_kws)=} != {len(sds)=}')
+        else:
+            line_kws = [{} for x in sds]
 
         rows, cols = 1, 1
-        ax_array = np.ndarray((rows, cols), dtype=tuple)
         fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
         if title is None:
             title = "Auto-spectra, multiple SpectralDensities"
         fig.suptitle(title)
         axa, axp = None, None
         first_time = True
-        for sd in sds:
+        for sd, l_kw in zip(sds, line_kws):
+            assert isinstance(l_kw, dict)
             new_x = sd._get_validate_ids(x)
             for key, i in zip(new_x, range(len(new_x))):
                 axa, axp = sd.plot_one_spectra(
@@ -768,16 +779,17 @@ class SpectralDensity:
                     ax_p=axp,
                     show_phase=False,
                     plot_peterson=plot_peterson,
-                    annotate=False
+                    annotate=False,
+                    **fig_kw,
+                    **l_kw
                 )
                 first_time = False
-        ax_array[0, 0] = (axa, axp)
         plt.legend(fontsize='small')
         if outfile:
             plt.savefig(outfile)
         if show:
             plt.show()
-        return ax_array
+        return fig, axa
 
     def plot(self, **kwargs):
         """Shortcut for `plot_autospectra()`"""
@@ -940,7 +952,8 @@ class SpectralDensity:
         show_phase=True,
         plot_peterson=True,
         outfile=None,
-        annotate=True
+        annotate=True,
+        **plot_kws
     ):
         """
         Plot one spectral density
@@ -968,6 +981,7 @@ class SpectralDensity:
             plot_peterson(bool): plot Peterson Noise model if channel has
                 units of :math:`(m/s^2)^2/Hz`
             outfile (str): save figure to this filename
+            **plot_kws (dict): keywords to pass on to plot command
 
         Returns:
             (tuple): tuple containing
@@ -1024,7 +1038,7 @@ class SpectralDensity:
             label = f"{subkey} ({PSD_units})"
         elif label == "units":
             label = f"{PSD_units}"
-        ax_a.semilogx(f, 10 * np.log10(np.abs(psd)), label=label)
+        ax_a.semilogx(f, 10 * np.log10(np.abs(psd)), label=label, **plot_kws)
         ax_a.set_xlim(f[1], f[-1])
         if plot_peterson is True and PSD_units.lower() == "(m/s^2)^2":
             lownoise, highnoise = Peterson_noise_model(f, True)
@@ -1050,7 +1064,7 @@ class SpectralDensity:
                     (3 * fig_grid[0], 1 * fig_grid[1]),
                     (3 * plot_spot[0] + 2, plot_spot[1] + 0),
                 )
-            ax_p.semilogx(f, np.degrees(np.angle(psd)))
+            ax_p.semilogx(f, np.degrees(np.angle(psd), **plot_kws))
             ax_p.set_ylim(-180, 180)
             ax_p.set_xlim(f[1], f[-1])
             ax_p.set_yticks((-180, 0, 180))

@@ -14,6 +14,7 @@ from obspy.signal.rotate import rotate2zne
 from obspy.core.stream import Stream  # , Trace
 
 from ..logger import init_logger
+from .stream_synchronize import stream_synchronize
 
 logger = init_logger()
 
@@ -24,7 +25,7 @@ class SeisRotate:
     non-deforming rotation
     """
 
-    def __init__(self, stream, uselogvar=False):
+    def __init__(self, stream, uselogvar=False, max_reject_sync=0.01):
         """
         Create a seisRotate object from a 3-component obsPy Stream
 
@@ -32,6 +33,7 @@ class SeisRotate:
             stream (Stream): 3+ component data stream
             uselogvar(bool): use logarithmic variance when searching for
                              best angles
+            max_reject_sync(): max_reject value for stream_synchronize()
 
         Channel names must end in Z, N and E or Z, 1, and 2
         Z is up, 1 and 2 are horizontal orthogonal with 2 90° clockwise
@@ -39,6 +41,7 @@ class SeisRotate:
         except that they are not necessarily aligned with geographic
         cardinals)
         """
+        stream = stream_synchronize(stream, max_reject_sync)
         self.uselogvar = uselogvar
         self.Z, self.N, self.E = SeisRotate._get_seis_traces(stream)
         self.fs = self.Z.stats.sampling_rate
@@ -118,19 +121,22 @@ class SeisRotate:
         lowcut=0.001,
         hicut=0.005,
         ignore_spans=None,
-        uselogvar=None,
-        verbose=False,
+        uselogvar=None
     ):
         """
         Calculate the Z channel rotation angle that minimizes tilt noise
 
         Arguments:
-            lowcut (float): low passband frequency in which to lood for energy
-                             reduction
+            lowcut (float): low passband frequency in which to evaluate
+                            variance reduction
             hicut (float): high passpand frequency "" "" ""
             ignore_spans (:class:`TimeSpans``): time spans to ignore
             uselogvar(bool): use logarithmic variance estimate
-            verbose (bool): output information about the angles tested?
+
+        Returns: (tuple)
+            angle (float): tilt angle (degrees, 0 means no tilt correction)
+            azimuth (float): tilt azimuth (degrees)
+            var_red (float): obtained reduction in variance (0 to 1)
 
         The default (lowcut, hicut) values of (0.001, 0.005) correspond to the
         band where removing tilt noise generally has the greatest effect on
@@ -152,14 +158,13 @@ class SeisRotate:
             filt.E = ignore_spans.zero(filt.E)
 
         # Quick estimate of angles using Z/E and Z/N ratios. DOESN'T HELP: SKIP
-        # (startAngle,startAzimuth)=filt._estimateAngles(verbose)
         startAngle, startAzi = (0, 0)
 
         # Search for the best angles
-        angle, azimuth = filt._searchBestAngles(startAngle, startAzi, verbose)
-        return angle, azimuth
+        angle, azimuth, var_red = filt._searchBestAngles(startAngle, startAzi)
+        return angle, azimuth, var_red
 
-    def _estimateAngles(self, verbose=False):
+    def _estimateAngles(self):
         """
         Estimate how far and in which direction Z is tilted from vertical
         by comparing with N and E
@@ -173,8 +178,6 @@ class SeisRotate:
         (transients, etc) for this to work.  Also doesn't account for any time
         lags: might work better if ratios calculated from cross-corellation
 
-        Arguments:
-            verbose (bool): display extra information?
         """
         logger.debug("Estimating preliminary angle based on signal ratios")
         ZoverN = np.divide(self.Z.data, self.N.data)
@@ -210,19 +213,19 @@ class SeisRotate:
 
         return angle, azimuth
 
-    def _searchBestAngles(self, startAngle=0, startAzimuth=0, verbose=False):
+    def _searchBestAngles(self, startAngle=0, startAzimuth=0):
         """
         Find best Z rotation angles
 
         Arguments:
             startAngle (float): starting guess for the angle (degrees)
             startAzimuth (float): starting guess for the azimuth (degrees)
-            verbose (bool): display extra information?
 
         Returns:
             (tuple): 2-tuple containing:
-                angle (float): best angle (degrees)
-                azimuth (float): best azimuth (degrees)
+                angle (float): best angle (degrees, 0 to 90)
+                azimuth (float): best azimuth (degrees, 0 to 360)
+                var_red (float): variance reduction (0 to 1)
 
         Searches for minimum Z energy as function of angle
         """
@@ -237,29 +240,28 @@ class SeisRotate:
             full_output=True,
             retall=True,
         )
-        bestAngles = xopt
+        bestAngle, bestAzimuth = xopt
+        if bestAngle < 0:
+            bestAngle = -bestAngle
+            bestAzimuth += 180
+        bestAzimuth %= 360.
+        if bestAngle > 90:
+            logger.warning(f'bestAngle > 90! ({bestAngle})')
 
-        if verbose is True:
-            logger.info(f"{fopt=}, {iter=}, {funcalls=}")
-            logger.debug(f"{xopt=}, {warnflag=}")
-        else:
-            logger.debug(f"{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}")
-        
+        logger.debug(f"{xopt=}, {fopt=}, {iter=}, {funcalls=}, {warnflag=}")
+
         if self.uselogvar is False:
-            logger.info(
-                "    variance reduced from "
-                "{:.2e} to {:.2e} ({:.1f}% lower)".format(
-                    start_var, fopt,
-                    100 * (1 - fopt / start_var)))
+            var_red = 1 - fopt / start_var
+            logger.debug("    variance reduced from {:.2e} to {:.2e} ({:.1f}% lower)"
+                        .format(start_var, fopt, 100 * var_red))
         else:
-            logger.info("    log variance reduced from "
-                  "{:.1f} to {:.1f} ({:.1f}% lower)".format(
-                      start_var, fopt,
-                      100 * (1 - 10 ** (fopt - start_var))))
+            var_red = 1 - 10 ** (fopt - start_var)
+            logger.debug("    log variance reduced from {:.1f} to {:.1f} ({:.1f}% lower)"
+                        .format(start_var, fopt, 100 * var_red))
         if warnflag:
-            logger.info(f"{allvecs=}")
+            logger.debug(f"optimization warning flag: {allvecs=}")
 
-        return (bestAngles[0], bestAngles[1])
+        return (bestAngle, bestAzimuth, var_red)
 
     def _rotZ_variance(self, angles):
         """

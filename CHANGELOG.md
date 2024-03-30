@@ -97,11 +97,10 @@ method call parameters.  Created a readthedocs page.
 
 ## 0.5
 
-Added channel identification by ``tiskitpy_id``, which includes cleaning
-information.
-The ``tiskitpy_id`` for uncleaned data is the ``seed_id``.
-
-Added class CleanedStream and revised the guts of several classes, including
-renaming ``SpectralDensity.channel_names`` to ``SpectralDensity.ids``.
-
-_
+- Added channel identification by ``tiskitpy_id``, which includes cleaning
+  information.
+  The ``tiskitpy_id`` for uncleaned data is the ``seed_id``.
+- Added class CleanedStream and revised the guts of several classes, including
+  renaming ``SpectralDensity.channel_names`` to ``SpectralDensity.ids``.
+- CleanRotator class now has a property `variance_reduction` which gives the
+  variance reduction obtained during __init__()

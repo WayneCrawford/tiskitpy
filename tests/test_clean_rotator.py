@@ -33,8 +33,8 @@ class TestMethods(unittest.TestCase):
             remove_eq=str(self.test_path /
                           "20161205T-20161207T_MM5.85_eqcat.qml"),
             save_eq_file=False)
-        self.assertAlmostEqual(rotator.angle, -0.18, delta=0.01)
-        self.assertAlmostEqual(rotator.azimuth, 61.67, delta=0.01)
+        self.assertAlmostEqual(rotator.angle, 0.18, delta=0.01)
+        self.assertAlmostEqual(rotator.azimuth, 241.67, delta=0.01)
         
         rot_stream = rotator.apply(stream)
         rotZ = rot_stream.select(channel='*Z')[0]

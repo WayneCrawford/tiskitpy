@@ -107,17 +107,22 @@ class FIRFilter:
             raise NameError(f"FIR symmetry = {symmetry_code} not implemented")
         return
 
-    def to_obspy(self, sampling_rate, stage_sequence_number=0):
+    def to_obspy(self, sampling_rate, stage_sequence_number=0,
+                 prior_output_units=False):
         """
         Return an obspy FIRResponseStage
         """
+        units = 'count'     # StationXML recommendation
+        if prior_output_units is not False:
+            if prior_output_units[:5].lower() == 'count':
+                units = prior_output_units
         return FIRResponseStage(
             stage_sequence_number=stage_sequence_number,
             stage_gain=1,
             stage_gain_frequency=0,
-            input_units="counts",
+            input_units=units,
             input_units_description="digital counts",
-            output_units="counts",
+            output_units=units,
             output_units_description="digital counts",
             symmetry="NONE",
             name=self.name,

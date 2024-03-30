@@ -78,8 +78,7 @@ def init_logger(file_level='DEBUG', console_level='INFO',
         fmt='{asctime} {levelname:<8s} {module}.{funcName}(): {message}',
         style='{', datefmt='%Y-%m-%d %H:%M:%S'))
     fileHandler.setLevel(file_level.upper())
-    
-    
+
     # Console Handler
     console_log_output = console_log_output.lower()
     if (console_log_output == "stdout"):
@@ -100,3 +99,40 @@ def init_logger(file_level='DEBUG', console_level='INFO',
     logger.addHandler(consoleHandler)
 
     return logger
+    
+def change_level(logger, htype, level):
+    """
+    Change a handler's logging level
+    
+    Args:
+        htype (str): handler type: 'console' or 'file'
+        level (str): 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
+    """
+    assert htype.upper() in ['CONSOLE', 'FILE']
+    assert level.upper() in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+
+    if htype.upper() == 'CONSOLE':
+        handler_type = logging.StreamHandler
+    else:
+        handler_type = logging.RotatingFileHandler
+    for handler in logger.handlers:
+        if isinstance(handler, handler_type):
+            handler.setLevel(level)
+
+def change_console_level(logger, level):
+    """
+    Change consoleHandlers logging level
+    
+    Args:
+        level (str): 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
+    """
+    change_level(logger, 'console', level)
+
+def change_file_level(logger, level):
+    """
+    Change fileHandler's logging level
+    
+    Args:
+        level (str): 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'
+    """
+    change_level(logger, 'file', level)

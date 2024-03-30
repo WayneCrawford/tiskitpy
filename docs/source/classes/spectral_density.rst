@@ -64,6 +64,7 @@ Other Methods
   for the given channels
 - ``plot_one_coherence(in_id, out_id, ...)``: plot coherence
   for the given channels
+- ``plots(spectra_list, ...)``: overlay plot spectra specified in the list
 
 Set Methods
 ^^^^^^^^^^^^^^^^^^

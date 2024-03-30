@@ -16,11 +16,13 @@
 # import obspy
 # from obspy.clients.filesystem import sds
 import time
+# from copy import deepcopy
 from dataclasses import dataclass
 from inspect import getfile, currentframe
 from pathlib import Path
 import warnings
 import fnmatch
+# import logging
 
 from numpy import prod
 from obspy.core.stream import Stream, Trace
@@ -48,6 +50,12 @@ class Decimator:
     """
     decimates: list
     verbose: bool = False
+
+    # def __post_init__(self):
+    #     if self.verbose is True:
+    #         logger.setLevel(logging.INFO)
+    #     else:
+    #         logger.setLevel(logging.WARN)
 
     @property
     def decimation_factor(self):
@@ -247,16 +255,16 @@ class Decimator:
             normalize_firs (bool): normalizes any FIR channel that isn't
                 already
         """
-        logger.info("channel modified from {} ({} sps)".format(
-              ".".join([net, sta, cha.location_code, cha.code]),
-              cha.sample_rate))
+        old_seed_id = ".".join([net, sta, cha.location_code, cha.code])
+        # old_cha = cha.copy()
         input_sample_rate = cha.sample_rate
         self._add_instrument_response(cha, input_sample_rate)
         self._change_chan_loc(cha, input_sample_rate)
         cha.sample_rate /= self.decimation_factor
-        logger.info("to {} ({:g} sps)".format(
-                    ".".join([net, sta, cha.location_code, cha.code]),
-                    cha.sample_rate))
+        seed_id = ".".join([net, sta, cha.location_code, cha.code])
+        logger.info("channel modified from "
+                    f"{old_seed_id} ({input_sample_rate:g} sps) "
+                    f"to {seed_id} ({cha.sample_rate:g} sps) ")
 
     @staticmethod
     def _normalize_firs(cha):
@@ -282,7 +290,7 @@ class Decimator:
                     )
                 if abs(coeff_sum - 1) > 0.01:
                     logger.info(f"DECIMATOR: Sum of FIR coeffs = "
-                                 f"{coeff_sum}, normalizing")
+                                f"{coeff_sum}, normalizing")
                     stg.coefficients = [x / coeff_sum
                                         for x in stg.coefficients]
             elif isinstance(stg, CoefficientsTypeResponseStage):
@@ -354,14 +362,17 @@ class Decimator:
 
     def _add_instrument_response(self, cha, input_sample_rate):
         """
-        Append  decimation object's instrument response to an existing channel's response
+        Append  decimation object's instrument response to an existing
+        channel's response
         """
         stage_number = cha.response.response_stages[-1].stage_sequence_number
         for d in self.decimates:
             fir_filter = FIRFilter.from_SAC(d)
             stage_number += 1
             cha.response.response_stages.append(
-                fir_filter.to_obspy(input_sample_rate, stage_number)
+                fir_filter.to_obspy(
+                    input_sample_rate, stage_number,
+                    cha.response.response_stages[-1].output_units)
             )
             input_sample_rate /= d
         try:
@@ -385,7 +396,7 @@ class Decimator:
             newtr.append(self._run_trace(tr))
         st.traces = newtr
         logger.info("New data has {} samples".format([tr.data.size
-                                                for tr in st]))
+                                                      for tr in st]))
         st.verify()
         return st
 

@@ -32,6 +32,13 @@ Methods
 - ``update_inventory_from_nslc(inv ...)``: Return inventory with only the
   specified network, station, channel, location(s) updated
  
+ Command-line programs
+---------------------
+
+Use these programs' `-h` option for help
+
+- ``tiskitpy_decimate_SDS``: Decimates the data in an SDS directory and updates
+    the corresponding inventory file.
 
 Example
 ---------------------

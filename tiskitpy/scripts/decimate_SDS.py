@@ -8,13 +8,13 @@ from pathlib import Path
 from obspy.core.stream import read
 from obspy.core.inventory import read_inventory
 
-from .decimator import Decimator
-from ..logger import init_logger
+from ..decimate import Decimator
+from ..logger import init_logger, change_console_level
 
 logger = init_logger()
 
 
-def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
+def decimate_SDS(args, inv):
     """
     The main function
 
@@ -24,35 +24,54 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
     Only works for broad-band channels
 
     Args:
-        SDS_root (str or Path): SDS root directory
+        args (:class: argparse): Command line arguments
         inv (:class:`obspy.core.inventory.Inventory`): station inventory
-        input_sample_rate (float): sample rate of data to process
-        decim_list (list): list of decimation factors (integers between
-            2 and 7)
     """
-    SDS_root = Path(SDS_root)
-    decimator = Decimator(decim_list)
-    output_sample_rate = input_sample_rate/decimator.decimation_factor
-    in_band_code = Decimator.get_band_code('B', input_sample_rate)
+    if args.quiet is True:
+        logging_default ='WARNING'
+    else:
+        logging_default = 'DEBUG'
+    change_console_level(logger, logging_default)
+    print(f'{logging_default=}')
+    SDS_root = Path(args.SDS_root)
+    decimator = Decimator(args.decim_factors)
+    output_sample_rate = args.input_sample_rate/decimator.decimation_factor
+    in_band_code = Decimator.get_band_code('B', args.input_sample_rate)
     out_band_code = Decimator.get_band_code('B', output_sample_rate)
     logger.info('output sampling rate will be {:g} sps, band code will be {}'
                  .format(output_sample_rate, out_band_code))
     if in_band_code == out_band_code:
         raise ValueError(f'identical input & output band codes: {in_band_code}')
 
+    out_SDS_root = SDS_root
+    if args.output_dir is not None:
+        out_SDS_root = Path(args.output_dir)
+        
     for year_dir in [x for x in SDS_root.iterdir() if x.is_dir()]:
-        logger.info(f' year={str(year_dir.name)}')
+        year_name = year_dir.name
+        logger.info(f' {year_name=}')
         for net_dir in [x for x in year_dir.iterdir() if x.is_dir()]:
-            logger.info(f'\tnet={str(net_dir.name)}')
+            net_name = net_dir.name
+            logger.info(f'\t{net_name=}')
             for sta_dir in [x for x in net_dir.iterdir() if x.is_dir()]:
-                logger.info(f'\t\tstation={str(sta_dir.name)}')
+                sta_name=sta_dir.name
+                logger.info(f'\t\t{sta_name=}')
                 for cha_dir in [x for x in sta_dir.iterdir() if x.is_dir()]:
-                    logger.info(f'\t\t\tchannel={str(cha_dir.name)}')
                     cha_name = cha_dir.name
                     if not cha_name[0] == in_band_code:
+                        logger.info(f'\t\t\t{cha_name=}: band_code != {in_band_code}, skipping')
                         continue
-                    out_cha_dir = (sta_dir / (out_band_code + cha_name[1:]))
-                    out_cha_dir.mkdir()
+                    elif not _channel_in_inv(inv, net_name, sta_name, cha_name.split('.')[0]):
+                        logger.warning(f'\t\t\t{cha_name=}: not in inventory, skipping')
+                        continue
+                    elif not _ch_sample_rate(inv, net_name, sta_name, cha_name.split('.')[0]) == args.input_sample_rate:
+                        logger.info(f'\t\t\t{cha_name=}: inv sampling rate != {args.input_sample_rate}, skipping')
+                        continue
+                    else:
+                        logger.info(f'\t\t\t{cha_name=}: processing')
+                    # out_cha_dir = (sta_dir / (out_band_code + cha_name[1:]))
+                    out_cha_dir = out_SDS_root / year_name / net_name / sta_name / (out_band_code + cha_name[1:])
+                    out_cha_dir.mkdir(parents=True)
                     logger.info('\t\t\t\tCreating output channel dir "{}"'
                                  .format(out_cha_dir.name))
                     files = list(cha_dir.glob(f'*.{cha_name}.*'))
@@ -64,40 +83,45 @@ def decimate_SDS(SDS_root, inv, input_sample_rate, decim_list):
                                 f"day's stream length ({stream[0].stats.npts})"
                                 " is not divisible by decimator "
                                 f"({decimator.decimation_factor})")
-                        if stream[0].stats.sampling_rate != input_sample_rate:
+                        if stream[0].stats.sampling_rate != args.input_sample_rate:
                             logger.warning(
                                 f"{str(f)} first block's sampling rate != "
-                                f"{input_sample_rate}, skipping...")
+                                f"{args.input_sample_rate}, skipping...")
                         net, sta, loc, ich, typ, yr, dy = str(f.name).split('.')
+                        # logging.getLogger().setLevel(logging.WARN)
+                        change_console_level(logger, 'WARNING')
                         d_stream = decimator.decimate(stream)
+                        change_console_level(logger, logging_default)
+                        # logger.setLevel(logging_default)
                         och = out_band_code + ich[1:]
                         outfname = f'{net}.{sta}.{loc}.{och}.{typ}.{yr}.{dy}'
                         d_stream.write(out_cha_dir / outfname, 'MSEED')
                     inv = decimator.update_inventory(inv, stream)
     return inv
 
+def _channel_in_inv(inv, net, sta, cha):
+    return len(inv.select(network=net, station=sta, channel=cha))> 0
 
-def decimate_SDS_StationXML(SDS_root, inv_file, input_sample_rate, decim_list,
-                            output_file=None):
+def _ch_sample_rate(inv, net, sta, cha):
+    chinfo = inv.select(network=net, station=sta, channel=cha)[0][0][0]
+    return chinfo.sample_rate
+
+
+def decimate_SDS_StationXML(args):
     """
     Applies decimate_SDS when the inventory is in a StationXML file
 
     Args:
-        SDS_root (str or Path): SDS root directory
-        inv_file (str or Path): Path to StationXML file
-        input_sample_rate (float): sample rate of data to process
-        decim_list (list): list of decimation factors (integers between
-            2 and 7)
-        output_file (str): output StationXML filename (None => 
-            infile.replace('.xml', '_decim.xml'))
+        args (:class: argparse): Command line arguments
 
-    The output StationXML file will have the suffix  `_decim.xml`
     """
-    inv = read_inventory(inv_file, 'STATIONXML')
-    inv = decimate_SDS(SDS_root, inv, input_sample_rate, decim_list)
-    if output_file is None:
-        output_file = inv_file.replace('.xml', '_decim.xml')
-    inv.write(output_file, format="STATIONXML")
+    inv = read_inventory(args.inv_file, 'STATIONXML')
+    inv = decimate_SDS(args, inv)
+    if args.output_file is None:
+        of = args.inv_file.replace('.xml', '_decim.xml')
+    else:
+        of = args.output_file
+    inv.write(of, format="STATIONXML")
 
 
 def main():
@@ -109,15 +133,15 @@ def main():
                         help="StationXML file")
     parser.add_argument("input_sample_rate", type=float,
                         help="Process only channels having this sample rate")
-    parser.add_argument("decim_factor", type=int, nargs="+",
+    parser.add_argument("decim_factors", type=int, nargs="+",
                         choices=[2,3,4,5,6,7],
                         help="Sequence of decimation factors to use")
     parser.add_argument("--of", dest="output_file", default=None,
                         help="Output StationXML filename "
                              "(default = infile.replace('.xml', '_decim.xml')")
+    parser.add_argument("--out_dir", dest="output_dir", default=None,
+                        help="Output data to this separate SDS directory")
     parser.add_argument("-q", "--quiet", action="store_true",
-                        help="Suppress information messages")
+                        default=False, help="Suppress information messages")
     args = parser.parse_args()
-    decimate_SDS_StationXML(args.SDS_root, args.inv_file,
-                            args.input_sample_rate, args.decim_factor,
-                            args.output_file)
+    decimate_SDS_StationXML(args)

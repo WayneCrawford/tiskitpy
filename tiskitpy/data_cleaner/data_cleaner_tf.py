@@ -16,7 +16,7 @@ from ..response_functions import ResponseFunctions
 from ..spectral_density import SpectralDensity
 from .rf_list import RFList
 from ..cleaned_stream import CleanedStream
-from ..utils import CleanSequence as CS
+from ..utils import CleanSequence as CS, stream_synchronize
 from tiskitpy.logger import init_logger
 
 logger = init_logger()
@@ -188,11 +188,9 @@ class DataCleaner:
                 out_trace = out_stream.select(id=out_id)[0]
                 out_stream.remove(out_trace)
                 out_trace = self._correct_trace(
-                    in_trace,
-                    out_trace,
-                    rfs.freqs,
-                    rfs.corrector_wrt_counts(out_id),
-                    in_time_domain,
+                    in_trace, out_trace,
+                    rfs.freqs, rfs.corrector_wrt_counts(out_id),
+                    in_time_domain
                 )
                 out_trace = CS.tag(out_trace, in_trace.id)
                 out_stream += out_trace
@@ -204,7 +202,8 @@ class DataCleaner:
         """
         self.RFList.plot()
 
-    def _correct_trace(self, in_trace, out_trace, f, rf, in_time_domain=False):
+    def _correct_trace(self, in_trace, out_trace, f, rf, in_time_domain=False,
+                       max_reject_sync=0.01):
         """
         Correct a trace using an input trace and a frequency response function
 
@@ -217,14 +216,17 @@ class DataCleaner:
             rf (:class:`numpy.ndarray`): frequency response function between the input
                 and output traces (counts/count)
             in_time_domain (bool): do correction in time domain
+            max_reject_sync (float): max_reject for stream_synchronize()
 
         Returns:
             out_trace_corrected (:class:`obspy.core.trace.Trace`): corrected
                 output trace
         """
-        self._validate_streams_synchronized(in_trace, out_trace)
-        in_trace = in_trace.copy()
-        out_trace = out_trace.copy()
+        stream = stream_synchronize(Stream([in_trace, out_trace]), max_reject_sync)
+        in_trace, out_trace = stream[0], stream[1]
+        # self._validate_streams_synchronized(in_trace, out_trace)
+        # in_trace = in_trace.copy()
+        # out_trace = out_trace.copy()
         in_trace.detrend("linear")
         out_trace.detrend("linear")
         if in_time_domain:
