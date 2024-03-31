@@ -16,7 +16,7 @@ from ..response_functions import ResponseFunctions
 from ..spectral_density import SpectralDensity
 from .rf_list import RFList
 from ..cleaned_stream import CleanedStream
-from ..utils import CleanSequence as CS, stream_synchronize
+from ..utils import CleanSequence as CS, stream_synchronize, stream_unmask
 from tiskitpy.logger import init_logger
 
 logger = init_logger()
@@ -168,11 +168,12 @@ class DataCleaner:
         Assumes frequency response function is for counts, not resp_corrected data.
         """
         assert isinstance(stream, Stream)
-
+        
+        stream = stream_unmask(stream)
         # Make sure that the array is not masked
-        if np.any([np.ma.count_masked(tr.data) for tr in stream]):
-            logger.warning('Unmasking masked data (usually a gap or overlap)')
-            stream = stream.split().merge(fill_value='interpolate')
+        # if np.any([np.ma.count_masked(tr.data) for tr in stream]):
+        #     logger.warning('Unmasking masked data (usually a gap or overlap)')
+        #     stream = stream.split().merge(fill_value='interpolate')
 
         out_stream = CleanedStream(stream)
 

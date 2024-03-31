@@ -21,7 +21,7 @@ def decimate_SDS(args, inv):
     Should ensure continuity across day and year boundaries.
     Currently just checks if the requested decimation is an integral divisor
     of the current day's samples and returns an error if not
-    Only works for broad-band channels
+    Only works for broadband channels
 
     Args:
         args (:class: argparse): Command line arguments
@@ -69,34 +69,38 @@ def decimate_SDS(args, inv):
                         continue
                     else:
                         logger.info(f'\t\t\t{cha_name=}: processing')
-                    # out_cha_dir = (sta_dir / (out_band_code + cha_name[1:]))
-                    out_cha_dir = out_SDS_root / year_name / net_name / sta_name / (out_band_code + cha_name[1:])
-                    out_cha_dir.mkdir(parents=True)
-                    logger.info('\t\t\t\tCreating output channel dir "{}"'
-                                 .format(out_cha_dir.name))
-                    files = list(cha_dir.glob(f'*.{cha_name}.*'))
-                    logger.info(f'\t\t\t\t{len(files):d} files to process')
-                    for f in files:
-                        stream = read(str(f), 'MSEED')
-                        if stream[0].stats.npts % decimator.decimation_factor == 0:
-                            ValueError(
-                                f"day's stream length ({stream[0].stats.npts})"
-                                " is not divisible by decimator "
-                                f"({decimator.decimation_factor})")
-                        if stream[0].stats.sampling_rate != args.input_sample_rate:
-                            logger.warning(
-                                f"{str(f)} first block's sampling rate != "
-                                f"{args.input_sample_rate}, skipping...")
-                        net, sta, loc, ich, typ, yr, dy = str(f.name).split('.')
-                        # logging.getLogger().setLevel(logging.WARN)
-                        change_console_level(logger, 'WARNING')
-                        d_stream = decimator.decimate(stream)
-                        change_console_level(logger, logging_default)
-                        # logger.setLevel(logging_default)
-                        och = out_band_code + ich[1:]
-                        outfname = f'{net}.{sta}.{loc}.{och}.{typ}.{yr}.{dy}'
-                        d_stream.write(out_cha_dir / outfname, 'MSEED')
-                    inv = decimator.update_inventory(inv, stream)
+                    if args.station_only is True:
+                        stream = read(str(list(cha_dir.glob(f'*.{cha_name}.*'))[0]), 'MSEED')
+                    else:
+                        out_cha_dir = out_SDS_root / year_name / net_name / sta_name / (out_band_code + cha_name[1:])
+                        out_cha_dir.mkdir(parents=True)
+                        logger.info('\t\t\t\tCreating output channel dir "{}"'
+                                    .format(out_cha_dir.name))
+                        files = list(cha_dir.glob(f'*.{cha_name}.*'))
+                        logger.info(f'\t\t\t\t{len(files):d} files to process')
+                        for f in files:
+                            stream = read(str(f), 'MSEED')
+                            if stream[0].stats.npts % decimator.decimation_factor == 0:
+                                ValueError(
+                                    f"day's stream length ({stream[0].stats.npts})"
+                                    " is not divisible by decimator "
+                                    f"({decimator.decimation_factor})")
+                            if stream[0].stats.sampling_rate != args.input_sample_rate:
+                                logger.warning(
+                                    f"{str(f)} first block's sampling rate != "
+                                    f"{args.input_sample_rate}, skipping...")
+                            net, sta, loc, ich, typ, yr, dy = str(f.name).split('.')
+                            # logging.getLogger().setLevel(logging.WARN)
+                            change_console_level(logger, 'WARNING')
+                            d_stream = decimator.decimate(stream)
+                            change_console_level(logger, logging_default)
+                            # logger.setLevel(logging_default)
+                            och = out_band_code + ich[1:]
+                            outfname = f'{net}.{sta}.{loc}.{och}.{typ}.{yr}.{dy}'
+                            d_stream.write(out_cha_dir / outfname, 'MSEED')
+                    inv = decimator.update_inventory(
+                        inv, stream,
+                        inv_force_overwrite=args.inv_dont_overwrite is False)
     return inv
 
 def _channel_in_inv(inv, net, sta, cha):
@@ -121,27 +125,43 @@ def decimate_SDS_StationXML(args):
         of = args.inv_file.replace('.xml', '_decim.xml')
     else:
         of = args.output_file
+    startfile = of
+    counter = 1
+    while Path(of).exists():
+        of = startfile.replace('.xml', str(counter)+'.xml')
+        counter +=1
     inv.write(of, format="STATIONXML")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Insert decimated channels and create new StationXML file"
+        description="Insert decimated channels and create a new StationXML file"
     )
     parser.add_argument("SDS_root", help='SDS root directory')
-    parser.add_argument("inv_file",
-                        help="StationXML file")
+    parser.add_argument("inv_file", help="StationXML file")
     parser.add_argument("input_sample_rate", type=float,
-                        help="Process only channels having this sample rate")
+                        help="Process channels having this sample rate")
     parser.add_argument("decim_factors", type=int, nargs="+",
                         choices=[2,3,4,5,6,7],
                         help="Sequence of decimation factors to use")
-    parser.add_argument("--of", dest="output_file", default=None,
+    parser.add_argument("--out_file", dest="output_file", default=None,
                         help="Output StationXML filename "
                              "(default = infile.replace('.xml', '_decim.xml')")
     parser.add_argument("--out_dir", dest="output_dir", default=None,
-                        help="Output data to this separate SDS directory")
+                        help="Output data to a separate SDS directory")
+    # group = parser.add_mutually_exclusive_group()
+    # group.add_argument("--out_dir", dest="output_dir", default=None,
+    #                    help="Output data to a separate SDS directory. Triggers "
+    #                          "--out_only_decim")
+    # group.add_argument("--out_only_decim", action="store_true",  default=False,
+    #                    help="Only output decimated channels to the new StationXML file")
+    parser.add_argument("--station_only", action="store_true", default=False,
+                        help="Only create a new StationXML, not new data")
+    parser.add_argument("--inv_dont_overwrite", action="store_true", default=False,
+                        help="Don't overwrite an existing inventory channel")
     parser.add_argument("-q", "--quiet", action="store_true",
                         default=False, help="Suppress information messages")
     args = parser.parse_args()
+    # if args.out_dir is True:
+    #      args.out_only_decim = True
     decimate_SDS_StationXML(args)
