@@ -236,10 +236,7 @@ class SeisRotate:
         xopt, fopt, iter, funcalls, warnflag, allvecs = sp.optimize.fmin(
             func=self._rotZ_variance,
             x0=[startAngle, startAzimuth],
-            disp=False,
-            full_output=True,
-            retall=True,
-        )
+            disp=False, full_output=True, retall=True)
         bestAngle, bestAzimuth = xopt
         if bestAngle < 0:
             bestAngle = -bestAngle

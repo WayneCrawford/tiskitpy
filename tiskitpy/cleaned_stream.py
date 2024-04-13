@@ -39,4 +39,14 @@ class CleanedStream(Stream):
             tagged = Stream(CleanSequence.seedid_tag(self))
             out_stream =  tagged.select(**kwargs)
             out_stream = CleanSequence.seedid_untag(out_stream)
+        if len(out_stream) == 0:
+            logger.debug(f'tagging with tiskit_py_ids returned no traces, '
+                        f'try stripping tags from search terms')
+            for key in kwargs.keys():
+                if key == 'id':
+                    subs = kwargs[key].split('.')  # individual id elements
+                    kwargs[key] = '.'.join([x.split('-')[0] for x in subs])
+                else:
+                    kwargs[key] = kwargs[key].split('-')[0]
+            out_stream =  super().select(**kwargs)
         return out_stream

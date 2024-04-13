@@ -87,9 +87,11 @@ class TimeSpans:
 
         Args:
             starttime (:class:`UTCDateTime` or str): earliest data that will be
-                presented.  If a str, must by ISO8601 compatible
+                presented.  If a str, must by ISO8601 compatible.  Forced
+                to the beginning of the day
             endtime (:class:`UTCDateTime` or str): latest data that will be presented.
-                If a str, must by ISO8601 compatible
+                If a str, must by ISO8601 compatible.  Forced to the
+                end of the day
             minmag (float): EQ Magnitude above which to cut out times
             days_per_magnitude (float): days to cut per magnitude above
                 min_magnitude
@@ -108,6 +110,8 @@ class TimeSpans:
                 endtime = UTCDateTime(endtime)
             except Exception:
                 raise ValueError(f"UTCDateTime() could not read {endtime=}")
+        starttime = starttime.replace(hour=0, minute=0, second=0, microsecond=0)
+        endtime = endtime.replace(hour=23, minute=59, second=59, microsecond=999999)
         if eq_file is None:
             eq_file = _eq_filename(starttime, endtime, minmag)
         if Path(eq_file).is_file():
@@ -533,9 +537,9 @@ def _eq_filename(starttime, endtime, minmag):
         endtime (UTCDateTime): end time
         min_magmitude (float): minimum magnitude saved
     Returns:
-        filename (string):
+        filename (string): includes startday to endday information
     """
-    tfmt = "%Y%m%dT%H%M%S"
+    tfmt = "%Y%m%d"
     return "{}-{}_MM{:g}_eqcat.qml".format(
         starttime.strftime(tfmt), endtime.strftime(tfmt), minmag
     )

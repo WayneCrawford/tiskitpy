@@ -1297,6 +1297,8 @@ class SpectralDensity:
         label=None,
         title=None,
         show_phase=True,
+        outfile=None,
+        show=False,
         **kwargs
     ):
         """
@@ -1321,6 +1323,8 @@ class SpectralDensity:
             ax_p (Axis): use this existing axis for the phase plot
             title (str): title to put on this subplot
             show_phase (bool): show phase as well as amplitude
+            outfile (str): plot to the named file
+            show (bool): show on the screen (False by default: parent function shows)
             kwargs (dict): values to pass on to plotting routines
 
         Returns:
@@ -1403,6 +1407,10 @@ class SpectralDensity:
                             bottom=False, left=False, right=False)
             plt.ylabel(ylabel, fontsize='small')
 
+        if outfile:
+            plt.savefig(outfile)
+        if show:
+            plt.show()
         return ax_a, ax_p
 
     def _get_validate_ids(self, x):
