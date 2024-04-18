@@ -69,23 +69,26 @@ Combining classes, online data example
     [INFO] Decimating data from 100 to 1 Hz (100x)... 
     [INFO] Took 0.5 seconds
     [INFO] New data has [86401, 86401, 86401, 86401] samples
-    [INFO] channel modified from Z5.BB650..HDH (100.0 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LDH (1 sps)
-    [INFO] channel modified from Z5.BB650..HH1 (100.0 sps)
+    [INFO] channel modified from Z5.BB650..HDH (100.0 sps) to Z5.BB650..LDH (1 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LH1 (1 sps)
-    [INFO] channel modified from Z5.BB650..HH2 (100.0 sps)
+    [INFO] channel modified from Z5.BB650..HH1 (100.0 sps) to Z5.BB650..LH1 (1 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LH2 (1 sps)
-    [INFO] channel modified from Z5.BB650..HHZ (100.0 sps)
+    [INFO] channel modified from Z5.BB650..HH2 (100.0 sps) to Z5.BB650..LH2 (1 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LHZ (1 sps)
+    [INFO] channel modified from Z5.BB650..HHZ (100.0 sps) to Z5.BB650..LHZ (1 sps)
 
 .. code-block:: python
 
     sd_orig = SpectralDensity.from_stream(stream_decim, inv=inv_decim)
 
+.. code-block:: console
+
+    [INFO] Didn't find local EQ file '20140101-20140102_MM5.85_eqcat.qml', reading from USGS online catalog...
+    [INFO] Done
+    [INFO] writing catalog to "20140101-20140102_MM5.85_eqcat.qml"
+
+.. code-block:: python
 
     # USE SIMPLE ROTATION TO REDUCE VERTICAL CHANNEL NOISE
     rotator = CleanRotator(stream_decim)
@@ -94,9 +97,7 @@ Combining classes, online data example
 
 .. code-block:: console
 
-    [INFO] fopt=562026.5086189408, iter=107, funcalls=204
-    [INFO]     variance reduced from 1.93e+07 to 5.62e+05 (97.1% lower)
-    [INFO]     Best angle= azimuth is (-0.12, 61.48)
+    [INFO] CleanRotator: angle, azimuth, var_red =  0.12,  241.5, 0.97
 
 .. code-block:: python
 
@@ -108,19 +109,32 @@ Combining classes, online data example
     # directly calculate the spectral density, with the datacleaner as input
     sd_rot_sddc = dc.clean_stream_to_sdf(rot_stream, inv=inv_decim)
 
+.. code-block:: console
+
+     WARNING: FIR normalized: sum[coef]=9.767192E-01;
+     .
+     .
+     .
+    [INFO] z_threshold=3, rejected 4% of windows (3/84)
+
+.. code-block:: python
+
     # PLOT THE RESULTS
-    fig, ax = plt.subplots()
-    for sd, label in zip((sd_orig, sd_rot, sd_rot_dc, sd_rot_sddc),
-                          ('original', 'rotated', 'rot + clean', 'rot+clean(sd)')
-                        ):
-        z_id = fnmatch.filter(sd.ids, '*.LHZ*')[0]
-        ax.semilogx(sd.freqs, 10*np.log10(sd.autospect(z_id)), label=label)
-    ax.set_title(f'{net=}, {sta=}')
-    ax.set_xlabel('Frequency (Hz)')
-    ax.set_ylabel('PSD (dB ref 1 (m/s^2)^2/Hz)')
-    ax.legend()
-    plt.show()
+    SpectralDensity.plots(
+        (sd_orig, sd_rot, sd_rot_dc, sd_rot_sddc),
+        channel='LHZ')
 
 .. image:: images/8_Combined_Online.png
+   :width: 564
+
+.. code-block:: python
+
+    # PLOT THE RESULTS WITH CUSTOM LABELS
+    SpectralDensity.plots(
+        (sd_orig, sd_rot, sd_rot_dc, sd_rot_sddc),
+        labels=('original', 'rotated', 'rot + clean', 'rot+clean(sd)'),
+        channel='LHZ')
+
+.. image:: images/8_Combined_Online_labels.png
    :width: 564
    

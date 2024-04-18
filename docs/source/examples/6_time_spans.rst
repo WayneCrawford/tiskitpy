@@ -27,7 +27,7 @@ TimeSpans example code
     # Zero the data directly in the stream and plot the result
     Zs = ts.zero(Z)  # Returns a CleanedStream object
     Zs += Z
-    Zs.plot(outfile='6_TimeSpans_zeroed.png')
+    Zs.plot()
 
 .. image:: images/6_TimeSpans_zeroed.png
    :width: 564

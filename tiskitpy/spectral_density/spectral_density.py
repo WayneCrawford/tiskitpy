@@ -17,7 +17,7 @@ from scipy import signal, stats
 
 from .Peterson_noise_model import Peterson_noise_model
 from ..time_spans import TimeSpans
-from ..logger import init_logger
+from ..logger import init_logger, change_level
 from ..cleaned_stream import CleanedStream
 from ..utils import match_one_str, CleanSequence as CS
 
@@ -126,20 +126,16 @@ class SpectralDensity:
     @property
     def ids(self):
         """
-        Channel ids
-
+        List of Channel ids: seed_ids + any cleaning information
         ** Previously called _channel_names **
-
-        Returns:
-            (list of str):
         """
-        assert list(self._ds.coords["input"].values) == list(
-            self._ds.coords["output"].values
-        )
-        return list(self._ds.coords["input"].values)
+        outp = list(self._ds.coords["input"].values)
+        assert outp == list(self._ds.coords["output"].values)
+        return outp
 
     @property
     def seed_ids(self):
+        """list of seed_ids"""
         return list(self._ds.coords["seed_ids"].values)
 
     @property
@@ -235,7 +231,8 @@ class SpectralDensity:
     @classmethod
     def from_stream(cls, stream, window_s=1000, windowtype="prol1pi",
                     inv=None, data_cleaner=None, starttimes=None,
-                    time_spans=None, avoid_spans=None, z_threshold=3):
+                    time_spans=None, avoid_spans=None, z_threshold=3,
+                    quiet=False):
         """
         Calculate spectral density functions from the provided stream
 
@@ -262,7 +259,10 @@ class SpectralDensity:
                 is subtracted
             z_threshold (float or None): reject windows with z-score greater
                 than this value.  None: no rejection
+            quiet (bool): only output errors and beyond to console
         """
+        if quiet is True:
+            change_level(logger, 'console','ERROR')
         if not isinstance(stream, Stream):
             raise ValueError(f"stream is a {type(stream)}, not obspy Stream")
         stream = stream.copy()  # avoid modifying original stream
@@ -720,7 +720,9 @@ class SpectralDensity:
 
     @staticmethod
     def plots(sds,
+              channel=None,
               line_kws=None,
+              labels=None,
               x=None,
               overlay=True,
               plot_peterson=True,
@@ -733,7 +735,9 @@ class SpectralDensity:
 
         Args:
             sds (list): SpectralDensity functions to plot
+            channel (str): Limit to the given channel
             line_kws(list of dict): Line keywords for each SpectralDensity function
+            labels(list of dict): labels for each sd
         Other Properties:
             **kwargs: any arguments used in plot_autospectra, except
                 overlay (always true)
@@ -745,16 +749,7 @@ class SpectralDensity:
         # Validate inputs
         if overlay is not True:
             logger.warning('You requested overlay=False, ignored!')
-        if not isinstance(sds, list):
-            raise ValueError('sds is not a list')
-        for sd in sds:
-            if not isinstance(sd, SpectralDensity):
-                raise ValueError('sds element is not a SpectralDensity object')
-        if line_kws is not None:
-            if not len(line_kws) == len(sds):
-                raise ValueError(f'{len(line_kws)=} != {len(sds)=}')
-        else:
-            line_kws = [{} for x in sds]
+        line_kws, labels = _validate_plots_args(sds, line_kws, labels)
 
         rows, cols = 1, 1
         fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
@@ -763,28 +758,34 @@ class SpectralDensity:
         fig.suptitle(title)
         axa, axp = None, None
         first_time = True
-        for sd, l_kw in zip(sds, line_kws):
+        for sd, l_kw, label in zip(sds, line_kws, labels):
             assert isinstance(l_kw, dict)
             new_x = sd._get_validate_ids(x)
             for key, i in zip(new_x, range(len(new_x))):
+                if channel is not None:
+                    if not key.split('.')[-1] == channel:
+                        continue
                 axa, axp = sd.plot_one_spectra(
                     key,
                     key,
                     fig,
                     (1, 1),
                     (0, 0),
-                    show_ylabel=first_time,
-                    show_xlabel=first_time,
+                    show_ylabel=True,   # Would be better to do only LAST time
+                    show_xlabel=True,   # Would be better to do only LAST time
                     ax_a=axa,
                     ax_p=axp,
                     show_phase=False,
                     plot_peterson=plot_peterson,
                     annotate=False,
+                    label=label,
                     **fig_kw,
                     **l_kw
                 )
                 first_time = False
-        plt.legend(fontsize='small')
+        if channel is not None and first_time is True:
+            logger.error(f'No channel matching {channel} found, nothing plotted')
+        plt.legend(fontsize='x-small')
         if outfile:
             plt.savefig(outfile)
         if show:
@@ -966,7 +967,7 @@ class SpectralDensity:
                 a new figure.
             fig_grid (tuple): this plot sits in a grid of this many
                               (rows, columns)
-            subplot_spot (tuple): put this plot at this (row,column) of
+            subplot_spot (tuple): put this plot at this (row, column) of
                                   the figure grid
             show_xlabel (bool): put an xlabel on this subplot
             show_ylabel (bool): put a ylabel on this subplot
@@ -1109,8 +1110,120 @@ class SpectralDensity:
         else:
             return self._seedid_full
 
+    @staticmethod
+    def plots_coherences(sds,
+              sds_names=None,
+              line_kws=None,
+              labels=None,
+              x=None,
+              y=None,
+              display='sparse',
+              overlay=False,
+              show=True,
+              label_by="chan",
+              sort_by="chan",
+              outfile=None,
+              title=None,
+              **fig_kw):
+        """
+        Plot overlaid coherences of multiple SpectralDensity objects
+
+        Args:
+            sds (list): SpectralDensity functions to plot.  Each must have
+                same seed_ids
+            sds_names (list): Names to give to each sd in the plot legend
+            line_kws(list of dict): Line keywords for each SpectralDensity function
+            labels(list of dict): Labels for each SpectralDensity function
+        Other Properties:
+            **kwargs: any arguments used in plot_coherences, except
+                overlay (always true)
+        Returns:
+            figinfo (list):
+                fig
+                axa (): amplitude axis
+        """
+        # Validate inputs
+        if overlay is True:
+            logger.error("Can't overlay multiple coherences")
+            overlay=False
+        assert display=='sparse'
+        line_kws, labels = _validate_plots_args(sds, line_kws, labels)
+        if sds_names is None:
+            sds_names = [max(x.clean_sequences, key=len) for x in sds]
+        else:
+            assert len(sds_names) == len(sds)
+
+        x_inp, y_inp = x, y
+        strfun = sds[0]._seedid_strfun(sort_by)
+        x = sorted(sds[0]._get_validate_ids(x_inp), key=strfun)
+        y = sorted(sds[0]._get_validate_ids(y_inp), key=strfun)
+        # Copied from plot_coherences "sparse" option, there's got
+        # to be a way not to repeat code
+        rows, cols = len(x), len(y)
+        reduce_display = False
+        if x[0] == y[0]:
+            reduce_display = True   # Can get rid of one row and column
+            rows -= 1
+            cols -= 1
+        ax_array = np.ndarray((rows, cols), dtype=tuple)
+        ax_array.fill((None, None))
+        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        net_sta = '.'.join(sds[0].seed_ids[0].split('.')[:2])
+        fig.suptitle(f"{net_sta} Coherences, multiple SpectralDensitys")
+        first_time = True
+        for sd, l_kw in zip(sds, line_kws):
+            sort_strfun = sd._seedid_strfun(sort_by)
+            x = sorted(sd._get_validate_ids(x_inp), key=sort_strfun)
+            y = sorted(sd._get_validate_ids(y_inp), key=sort_strfun)
+            label_strfun = sd._seedid_strfun(label_by)
+            assert isinstance(l_kw, dict)
+            # new_x = sd._get_validate_ids(x)
+            plotted = []
+            for in_chan, i in zip(x, range(len(x))):
+                new_row = True
+                for out_chan, jbase in zip(y, range(len(y))):
+                    j = jbase
+                    if reduce_display==True:
+                        j -= 1
+                    if in_chan == out_chan or (out_chan, in_chan) in plotted:
+                        if i < rows and j >= 0:
+                            axs[i, j].axis('off')
+                        continue
+                    plotted.append((in_chan, out_chan))
+                    in_chan_label = label_strfun(in_chan)
+                    out_chan_label = label_strfun(out_chan)
+                    title = out_chan_label if i == 0 else None
+                    axa, axp = sd.plot_one_coherence(
+                        in_chan,
+                        out_chan,
+                        fig,
+                        (rows, cols),
+                        (i, j),
+                        ax_a=ax_array[i,j][0],
+                        ax_p=ax_array[i,j][1],
+                        show_ylabel=new_row & first_time,
+                        show_xlabel=(i == j)  & first_time,
+                        ylabel=in_chan_label,
+                        title=title,
+                        **l_kw
+                    )
+                    new_row = False
+                    ax_array[i, j] = (axa, axp)
+        i, j = rows-1, 0
+        axs[i,j].axis('on')
+        for sds_name, l_kw, label in zip(sds_names, line_kws, labels):
+            if label is None:
+                label = sds_name
+            axs[i,j].plot([1,1],[1,1], label=label, **l_kw)
+        axs[i,j].legend(fontsize='x-small')
+        if outfile:
+            plt.savefig(outfile)
+        if show:
+            plt.show()
+        return fig, axa
+
     def plot_coherences(self, x=None, y=None, display='full', show=True,
-                        outfile=None, labels="full", sort_by="full",
+                        outfile=None, label_by="full", sort_by="full",
                         overlay=False, **fig_kw):
         """
         Plot coherences
@@ -1128,7 +1241,7 @@ class SpectralDensity:
             overlay (bool): [GRANDFATHERED]: same as display="overlay"
             show (bool): show on desktop
             outfile (str): save to the named file
-            labels (str): labels to put on x and y axes ('full', 'chan' or
+            label_by (str): labels to put on x and y axes ('full', 'chan' or
                 'loc-chan')
             sort_by (str): how to sort x and y axes ('full', 'chan' or
                 'loc-chan')
@@ -1153,7 +1266,7 @@ class SpectralDensity:
             ax_array = np.ndarray((rows, cols), dtype=tuple)
             fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
             fig.suptitle("Coherences")
-            strfun = self._seedid_strfun(labels)
+            strfun = self._seedid_strfun(label_by)
             for in_chan, i in zip(x, range(rows)):
                 for out_chan, j in zip(y, range(cols)):
                     in_chan_label = strfun(in_chan)
@@ -1178,7 +1291,7 @@ class SpectralDensity:
             ax_array = np.ndarray((rows, cols), dtype=tuple)
             fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
             fig.suptitle("Coherences")
-            strfun = self._seedid_strfun(labels)
+            strfun = self._seedid_strfun(label_by)
             plotted = []
             for in_chan, i in zip(x, range(len(x))):
                 new_row = True
@@ -1220,7 +1333,7 @@ class SpectralDensity:
             fig, axs = plt.subplots(rows, cols, sharex=True, sharey=True,
                                     **fig_kw)
             fig.suptitle("Coherencies")
-            strfun = self._seedid_strfun(labels)
+            strfun = self._seedid_strfun(label_by)
             i, j = 0, 0
             for combi in combis:
                 in_chan = combi[0]
@@ -1283,24 +1396,13 @@ class SpectralDensity:
         return ax_array
 
     def plot_one_coherence(
-        self,
-        in_chan,
-        out_chan,
-        fig=None,
-        fig_grid=(1, 1),
-        plot_spot=(0, 0),
-        show_xlabel=True,
-        show_ylabel=True,
-        ax_a=None,
-        ax_p=None,
-        ylabel=None,
-        label=None,
-        title=None,
+        self, in_chan, out_chan,
+        fig=None, fig_grid=(1, 1), plot_spot=(0, 0),
+        show_xlabel=True, show_ylabel=True,
+        ax_a=None, ax_p=None,
+        ylabel=None, label=None, title=None,
         show_phase=True,
-        outfile=None,
-        show=False,
-        **kwargs
-    ):
+        outfile=None, show=False, **kwargs):
         """
         Plot one coherence
 
@@ -1423,9 +1525,11 @@ class SpectralDensity:
         """
         if x is None:
             x = list(self._ds.coords["input"].values)
+            x = self.ids
         else:
             for key in x:
-                if key not in list(self._ds.coords["input"].values):
+                # if key not in list(self._ds.coords["input"].values):
+                if key not in self.ids:
                     ValueError('key "{key}" not in id list')
         return x
 
@@ -1756,6 +1860,36 @@ def _remove_subtracted_loc(id):
         return id
     comps[2] = comps[2].partition("-")[0]
     return ".".join(comps)
+
+
+def _validate_plots_args(sds, line_kws, labels):
+    """ validate arguments passed to plots() and to plots_coherences()"""
+    if not isinstance(sds, (list, tuple)):
+        raise ValueError('sds is not a list or tuple')
+    for i, sd in zip(range(len(sds)), sds):
+        if not isinstance(sd, SpectralDensity):
+            raise ValueError(f'sds[{i}] is not a SpectralDensity object')
+        if i == 0:
+            seed_ids = sorted(sds[0].seed_ids)
+        else:
+            if not (seed_ids == sorted(sd.seed_ids)):
+                raise ValueError(f"sds[{i}].seed_ids={sd.seed_ids}"
+                                 f" does not match {sds[0].seed_ids=}")
+    if line_kws is not None:
+        if not isinstance(line_kws, (list, tuple)):
+            raise ValueError('line_kws is not a list or tuple')
+        if not len(line_kws) == len(sds):
+            raise ValueError(f'{len(line_kws)=} != {len(sds)=}')
+    else:
+        line_kws = [{} for x in sds]
+    if labels is not None:
+        if not isinstance(labels, (list, tuple)):
+            raise ValueError('labels is not a list or tuple')
+        if not len(labels) == len(sds):
+            raise ValueError(f'{len(labels)=} != {len(sds)=}')
+    else:
+        labels = [None for x in sds]
+    return line_kws, labels
 
 
 def _remove_subtracted_chan(id):

@@ -104,3 +104,5 @@ method call parameters.  Created a readthedocs page.
   renaming ``SpectralDensity.channel_names`` to ``SpectralDensity.ids``.
 - CleanRotator class now has a property `variance_reduction` which gives the
   variance reduction obtained during __init__()
+- Added `SpectralDensity.plots()` and `.plots_coherences()`, to compare
+  multiple `SpectralDensity` objects

@@ -14,4 +14,4 @@ rfs = ResponseFunctions(sd, '*H')
 print(rfs)
 
 # Plot the ResponseFunctions
-rfs.plot(outfile='4_ResponseFunctions.png')
+rfs.plot()  # outfile='4_ResponseFunctions.png')

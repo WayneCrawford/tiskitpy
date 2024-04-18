@@ -33,9 +33,7 @@ Combining classes
 
 .. code-block:: console
 
-    [INFO] fopt=510824.2528928297, iter=97, funcalls=185
-    [INFO]     variance reduced from 2.07e+06 to 5.11e+05 (75.4% lower)
-    [INFO]     Best angle= azimuth is (-0.09, 32.28)
+    [INFO] CleanRotator: angle, azimuth, var_red =  0.09,  212.3, 0.75
 
     [INFO] z_threshold=3, rejected 4% of windows (3/84)
 
@@ -51,7 +49,7 @@ Combining classes
     [INFO] z_threshold=3, rejected 4% of windows (3/84)
     [INFO] z_threshold=3, rejected 4% of windows (3/84)
     [INFO] z_threshold=3, rejected 4% of windows (3/84)
-
+    
     [INFO] z_threshold=3, rejected 4% of windows (3/84)
     [INFO] z_threshold=3, rejected 4% of windows (3/84)
     [INFO] z_threshold=3, rejected 4% of windows (3/84)
@@ -74,7 +72,6 @@ Combining classes
 
 .. code-block:: python
 
-
     # Directly calculate the spectral density from the DataCleaner
     sd_rot_sddc = dc_rot.clean_stream_to_sdf(rot_stream, inv=inv)
 
@@ -85,16 +82,10 @@ Combining classes
 .. code-block:: python
 
     # PLOT THE RESULTS
-    fig, ax = plt.subplots()
-    for sd, label in zip(
-            (sd_orig, sd_rot, sd_dc, sd_rot_dc, sd_rot_sddc),
-            ('original', 'rotated', 'cleaned', 'rot + clean', 'rot+clean(sd)')):
-        z_id = fnmatch.filter(sd.channel_names, '*.LHZ*')[0]
-        ax.semilogx(sd.freqs, 10*np.log10(sd.autospect(z_id)), label=label)
-    ax.set_xlabel('Frequency (Hz)')
-    ax.set_ylabel('PSD (dB ref 1 (m/s^2)^2/Hz)')
-    ax.legend()
-    plt.show()
+    SpectralDensity.plots(
+        [sd_orig, sd_rot, sd_dc, sd_rot_dc, sd_rot_sddc],
+        labels=['original', 'rotated', 'cleaned', 'rot + clean', 'rot+clean(sd)'],
+        channel='LHZ')
 
 
 .. image:: images/7_Combined.png

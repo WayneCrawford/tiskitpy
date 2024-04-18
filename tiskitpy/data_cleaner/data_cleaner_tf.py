@@ -185,7 +185,7 @@ class DataCleaner:
         for rfs in self.RFList:
             in_id = rfs.input_channel_id
             for out_id in rfs.output_channel_ids:
-                print(f'{out_stream=}, {in_id=}, {out_id=}')
+                # print(f'{out_stream=}, {in_id=}, {out_id=}')
                 in_trace = out_stream.select(id=in_id)[0]
                 out_trace = out_stream.select(id=out_id)[0]
                 out_stream.remove(out_trace)
