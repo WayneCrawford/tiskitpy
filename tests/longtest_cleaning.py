@@ -13,7 +13,7 @@ from obspy.core.inventory import read_inventory
 import numpy as np
 from matplotlib import pyplot as plt
 
-from tiskit import SpectralDensity, DataCleaner, CleanRotator
+from tiskitpy import SpectralDensity, DataCleaner, CleanRotator
 from make_test_stream import make_test_stream
 
 

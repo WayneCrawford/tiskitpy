@@ -1,10 +1,10 @@
-.. _tiskit.Decimate_SDS_example:
+.. _tiskitpy.Decimate_SDS_example:
 
 ==============================
-tiskit_decimate_SDS example
+tiskitpy_decimate_SDS example
 ==============================
 
-tiskit_decimate_SDS is a console script to decimate data and create associated
+tiskitpy_decimate_SDS is a console script to decimate data and create associated
 metadata, if the data is in an SDS directory and the metadata are in a
 StationXML file.
 The new data are added to the SDS directory, whereas the new and old metadata
@@ -17,8 +17,8 @@ The `-h` option provides basic documentation
 
 .. code-block:: bash
 
-    (obspy) friska:instrumentation 554> tiskit_decimate_SDS -h
-    usage: tiskit_decimate_SDS [-h] [--of OUTPUT_FILE] [-q] SDS_root inv_file input_sample_rate {2,3,4,5,6,7} [{2,3,4,5,6,7} ...]
+    (obspy) friska:instrumentation 554> tiskitpy_decimate_SDS -h
+    usage: tiskitpy_decimate_SDS [-h] [--of OUTPUT_FILE] [-q] SDS_root inv_file input_sample_rate {2,3,4,5,6,7} [{2,3,4,5,6,7} ...]
 
     Insert decimated channels and create new StationXML file
 
@@ -39,7 +39,7 @@ metadat in a file named ALPARRAY.INSU-IPGP.station.xml
 
 .. code-block:: bash
 
-    (obspy) friska:metadata 568> tiskit_decimate_SDS /Volumes/Data/SDS/ ALPARRAY-OBS.INSU-IPGP.station.xml 62.5 5 5 4
+    (obspy) friska:metadata 568> tiskitpy_decimate_SDS /Volumes/Data/SDS/ ALPARRAY-OBS.INSU-IPGP.station.xml 62.5 5 5 4
     INFO:root:output sampling rate will be 0.625 sps, band code will be L
     INFO:root:Working on year 2017
     INFO:root:    Working on net Z3

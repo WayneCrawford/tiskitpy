@@ -3,17 +3,18 @@
 Example codes
 =============================
 
-All of these codes and data can be found in the directory
-``tiskit/_examples/codes``
+These codes and data can be found in the directory
+``tiskitpy/_examples/``
 
 .. toctree::
    :maxdepth: 1
 
-   examples/spectral_density
-   examples/decimator
-   examples/data_cleaner
-   examples/transfer_functions
-   examples/clean_rotator
-   examples/time_spans
-   examples/decimate_SDS
-   examples/combined
+   examples/1_spectral_density
+   examples/2_decimator
+   examples/3_data_cleaner
+   examples/4_response_functions
+   examples/5_clean_rotator
+   examples/6_time_spans
+   examples/7_combined
+   examples/8_combined_online
+   examples/9_decimate_SDS

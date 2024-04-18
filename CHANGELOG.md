@@ -76,3 +76,33 @@ method call parameters.  Created a readthedocs page.
     - Added 'outfile' to TransferFunction.plot()
     - Added TransferFunction.put_response()
     
+## 0.4
+
+- Renamed TransferFunction to ResponseFunction, changed internal and method
+  names to correspond:
+
+    - .response -> instrument_response
+    - .frf -> .value
+    - .frf_wrt_counts -> .value_wrt_counts
+    - SpectralDensity.channel_response -> SpectralDensity.channel_instrument_response
+    - SpectralDensity.put_channel_response -> SpectralDensity.put_channel_instrument_response
+    - SpectralDensity.__init__(response=) -> SpectralDensity.__init__(instrument_response)
+- Internally renamed `tiskit` to `tiskitpy` 
+
+
+## 0.4.1
+    Rewrote tracking of cleaning steps, a lot of internal work, including
+    new classes, but should be invisible when using the command-line codes
+    and mostly invisible when using the API.
+
+## 0.5
+
+- Added channel identification by ``tiskitpy_id``, which includes cleaning
+  information.
+  The ``tiskitpy_id`` for uncleaned data is the ``seed_id``.
+- Added class CleanedStream and revised the guts of several classes, including
+  renaming ``SpectralDensity.channel_names`` to ``SpectralDensity.ids``.
+- CleanRotator class now has a property `variance_reduction` which gives the
+  variance reduction obtained during __init__()
+- Added `SpectralDensity.plots()` and `.plots_coherences()`, to compare
+  multiple `SpectralDensity` objects

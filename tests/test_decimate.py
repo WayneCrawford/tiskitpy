@@ -18,7 +18,8 @@ from obspy.core.stream import read as stream_read
 from matplotlib import pyplot as plt
 import numpy as np
 
-from tiskit.decimate import FIRFilter, Decimator
+from tiskitpy import Decimator
+from tiskitpy.decimate import FIRFilter
 
 
 class TestMethods(unittest.TestCase):
@@ -66,9 +67,9 @@ class TestMethods(unittest.TestCase):
             stage_sequence_number=0,
             stage_gain=1,
             stage_gain_frequency=0,
-            input_units='counts',
+            input_units='count',
             input_units_description='digital counts',
-            output_units='counts',
+            output_units='count',
             output_units_description='digital counts',
             symmetry='NONE',
             name=name,

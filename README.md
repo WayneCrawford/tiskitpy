@@ -1,4 +1,4 @@
-# TiSKit
+# TiSKitPy
 
 Routines for time series data processing
 
@@ -6,7 +6,7 @@ Uses the obspy seismological Trace, Stream (data) and Inventory (metadata)
 classes, but should work for non-seismology datasets as well
 
 
-[Documentation](https://tiskit.readthedocs.io/en/latest/index.html)
+[Documentation](https://tiskitpy.readthedocs.io/en/latest/index.html)
 
 
 ## Classes
@@ -17,7 +17,7 @@ classes, but should work for non-seismology datasets as well
   response
 - `SpectralDensity`: Calculate and manipulate spectral density functions.
 - `TimeSpans`: Specify time spans to be removed, kept, zeroed, etc.
-- `TransferFunctions`: Transfer functions for a given input channel.
+- `ResponseFunctions`: Frequency response functions for a given input channel.
             
                
 ## Functions
@@ -31,12 +31,6 @@ classes, but should work for non-seismology datasets as well
  	Based on Matlab code by E Wielandt, used in Deen et al., 2017
 
 - `PetersonNoiseModel`: return the Peterson High and Low Noise Models
-
-
-## `seismo_tools` submodule: seismology-specific functions
-
-- `plot_response`: plot instrument response (command line?)
-- `plot_sensitivity`: plot instrument sensitivity (command line?)
 
 
 ## Installation
@@ -56,8 +50,4 @@ You can also install in editable mode (for developers), with:
 
 ### Using `pip`
 
-Type `pip install tiskit-py`
-
-Note that I had to call this module `tiskit-py` on PyPI, rather than `tiskit`,
-so you may have to change the `import` calls in your code from `import tiskit`
-to `import tiskit-py as tiskit`
+Type `pip install tiskitpy`

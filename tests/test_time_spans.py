@@ -11,7 +11,7 @@ from pathlib import Path
 from obspy.core import UTCDateTime
 from obspy.core.stream import read as stream_read
 
-from tiskit import TimeSpans
+from tiskitpy import TimeSpans
 
 
 class TestMethods(unittest.TestCase):

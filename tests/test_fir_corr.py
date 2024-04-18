@@ -13,7 +13,7 @@ from pathlib import Path
 
 from obspy import read
 
-from tiskit.fir_corr import fir2caus
+from tiskitpy.fir_corr import fir2caus
 
 
 class TestFirCorrMethods(unittest.TestCase):

@@ -1,6 +1,6 @@
 *.egg-info/
 __pycache__
 **/__pycache__/*
-tiskit/_examples/*/data/
+tiskitpy/_examples/*/data/
 build/
 dist/

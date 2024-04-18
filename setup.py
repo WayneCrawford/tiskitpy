@@ -4,25 +4,26 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
     
 version={}
-with open("tiskit/version.py") as fp:
+with open("tiskitpy/version.py") as fp:
     exec(fp.read(),version)
 
 setuptools.setup(
-    name="tiskit-py",
+    name="tiskitpy",
     version=version['__version__'],
     author="Wayne Crawford",
     author_email="crawford@ipgp.fr",
     description="TIme Series toolKIT",
     long_description=long_description,
     long_description_content_type="text/markdown; charset=UTF-8",
-    url="https://github.com/WayneCrawford/tiskit",
+    url="https://github.com/WayneCrawford/tiskitpy",
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=['obspy>=1.3.0','PyYAML', 'numpy', 'scipy', 'matplotlib',
                       'xarray'],
     entry_points={
          'console_scripts': [
-            'tiskit_decimate_SDS=tiskit.decimate.decimate_SDS:main'
+            'tiskitpy_decimate_SDS=tiskitpy.scripts.decimate_SDS:main', 
+            'tiskitpy_get_SDS_inventory=tiskitpy.scripts.get_SDS_inventory:main'
          ]
     },
     python_requires='>=3.8',
