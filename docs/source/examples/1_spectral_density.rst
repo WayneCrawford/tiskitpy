@@ -19,7 +19,7 @@ SpectralDensity example code
 
 .. code-block:: none
 
-    INFO:root:z_threshold=3 rejected 3 of 84 windows (4%)
+    [INFO] z_threshold=3 rejected 4% of windows (3/84)
 
 .. code-block:: python
 

@@ -31,14 +31,8 @@ sd_rot_dc = SpectralDensity.from_stream(rot_stream_dc, inv=inv)
 sd_rot_sddc = dc_rot.clean_stream_to_sdf(rot_stream, inv=inv)
 
 # PLOT THE RESULTS
-fig, ax = plt.subplots()
-for sd, label in zip(
-        (sd_orig, sd_rot, sd_dc, sd_rot_dc, sd_rot_sddc),
-        ('original', 'rotated', 'cleaned', 'rot + clean', 'rot+clean(sd)')):
-    z_id = fnmatch.filter(sd.ids, '*.LHZ*')[0]
-    ax.semilogx(sd.freqs, 10*np.log10(sd.autospect(z_id)), label=label)
-ax.set_xlabel('Frequency (Hz)')
-ax.set_ylabel('PSD (dB ref 1 (m/s^2)^2/Hz)')
-ax.legend()
-plt.show()
-plt.savefig('7_Combined.png')
+SpectralDensity.plots(
+    (sd_orig, sd_rot, sd_dc, sd_rot_dc, sd_rot_sddc),
+    labels=['original', 'rotated', 'cleaned', 'rot + clean', 'rot+clean(sd)'],
+    channel='LHZ')  # , outfile='7_Combined.png')
+

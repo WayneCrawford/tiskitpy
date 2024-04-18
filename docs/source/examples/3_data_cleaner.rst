@@ -68,7 +68,7 @@ DataCleaner example code
 .. code-block:: python
 
     # compare spectral densities
-    # (tiskitpy plot() automatically include CleanSequence information)
+    # (tiskitpy plot() automatically includes CleanSequence information)
     sd_compare = SpectralDensity.from_stream(z_compare, inv=inv)
     sd_compare.plot(overlay=True)
 

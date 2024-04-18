@@ -25,7 +25,7 @@ if Path(fname).is_file():   # IF YOU'VE ALREADY DOWNLOADED, DON'T DOWNLOAD AGAIN
     print(f'reading data from file "{fname}"')
     stream = read(fname, "MSEED")
 else:
-    print('reading data from FDSN server (should take a long time...)')
+    print('reading data from FDSN server (takes a long time...)')
     stream = client.get_waveforms(network=net, station=sta, channel=cha,
                                   location=loc, starttime=starttime,
                                   endtime=endtime)
@@ -45,7 +45,6 @@ else:
     Path(fname).parent.mkdir(exist_ok=True)
     inv.write(fname, "STATIONXML")
 
-print('1' * 80)
 # DECIMATE DATA DOWN TO 1 Hz
 decim = Decimator([5, 5, 4])
 stream_decim = decim.decimate(stream)
@@ -67,15 +66,12 @@ sd_rot_dc = SpectralDensity.from_stream(rot_stream_dc, inv=inv_decim)
 sd_rot_sddc = dc.clean_stream_to_sdf(rot_stream, inv=inv_decim)
 
 # PLOT THE RESULTS
-fig, ax = plt.subplots()
-for sd, label in zip((sd_orig, sd_rot, sd_rot_dc, sd_rot_sddc),
-                      ('original', 'rotated', 'rot + clean', 'rot+clean(sd)')
-                    ):
-    z_id = fnmatch.filter(sd.ids, '*.LHZ*')[0]
-    ax.semilogx(sd.freqs, 10*np.log10(sd.autospect(z_id)), label=label)
-ax.set_title(f'{net=}, {sta=}')
-ax.set_xlabel('Frequency (Hz)')
-ax.set_ylabel('PSD (dB ref 1 (m/s^2)^2/Hz)')
-ax.legend()
-plt.show()
-plt.savefig('8_Combined_Online.png')
+SpectralDensity.plots(
+    (sd_orig, sd_rot, sd_rot_dc, sd_rot_sddc),
+    channel='LHZ')  # , outfile = '8_Combined_Online.png')
+
+# PLOT THE RESULTS WITH CUSTOM LABELS
+SpectralDensity.plots(
+    (sd_orig, sd_rot, sd_rot_dc, sd_rot_sddc),
+    labels=('original', 'rotated', 'rot + clean', 'rot+clean(sd)'),
+    channel='LHZ')  # , outfile = '8_Combined_Online_labels.png')

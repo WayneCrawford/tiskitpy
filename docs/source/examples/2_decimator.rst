@@ -46,7 +46,7 @@ This example uses data and inventory from a FDSN data server
 
 .. code-block:: none
 
-    Inventory created at 2023-07-15T20:55:39.100100Z
+    Inventory created at 2024-04-17T12:52:36.157100Z
         Created by: IRIS WEB SERVICE: fdsnws-station | version: 1.1.52
                 http://service.iris.edu/fdsnws/station/1/query?starttime=2014-01-01...
         Sending institution: IRIS-DMC (IRIS-DMC)
@@ -84,18 +84,14 @@ This example uses data and inventory from a FDSN data server
 
 .. code-block:: none
 
-    [INFO] channel modified from Z5.BB650..HDH (100.0 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LDH (1 sps)
-    [INFO] channel modified from Z5.BB650..HH1 (100.0 sps)
+    [INFO] channel modified from Z5.BB650..HDH (100.0 sps) to Z5.BB650..LDH (1 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LH1 (1 sps)
-    [INFO] channel modified from Z5.BB650..HH2 (100.0 sps)
+    [INFO] channel modified from Z5.BB650..HH1 (100.0 sps) to Z5.BB650..LH1 (1 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LH2 (1 sps)
-    [INFO] channel modified from Z5.BB650..HHZ (100.0 sps)
+    [INFO] channel modified from Z5.BB650..HH2 (100.0 sps) to Z5.BB650..LH2 (1 sps)
      WARNING: FIR normalized: sum[coef]=9.767192E-01;     
-    [INFO] to Z5.BB650..LHZ (1 sps)
+    [INFO] channel modified from Z5.BB650..HHZ (100.0 sps) to Z5.BB650..LHZ (1 sps)
     
 .. code-block:: python
 
@@ -104,7 +100,7 @@ This example uses data and inventory from a FDSN data server
 
 .. code-block:: none
 
-    Inventory created at 2023-07-15T20:55:39.100100Z
+    Inventory created at 2024-04-17T12:52:36.157100Z
         Created by: IRIS WEB SERVICE: fdsnws-station | version: 1.1.52
                 http://service.iris.edu/fdsnws/station/1/query?starttime=2014-01-01...
         Sending institution: IRIS-DMC (IRIS-DMC)

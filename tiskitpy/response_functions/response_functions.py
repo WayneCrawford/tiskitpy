@@ -274,14 +274,17 @@ class ResponseFunctions(object):
         """
         Change rfs from m/s^2 / Pa to 1 / Pa by multiplying by k / omega^2
         """
+        print(self)
+        print(f'{self.input_units=}')
+        print(f'{self.output_units=}')
         if not self.input_units.upper() == 'PA':
-            raise ValueError(f'{self.input_units=}, not "PA"')
+            logger.error(f'{self.input_units=}, not "PA"')
         om = np.pi * self.freqs
         k = _gravd(om, water_depth)
         rf_multiplier = k / (om**2)
         for oc in self.output_channel_ids:
             if not self.output_units(oc).upper() == 'M/S^2':
-                raise ValueError('{self.output_units(oc)=}, not "M/2^2"')
+                logger.error(f'{self.output_units(oc)=}, not "M/2^2"')
             # 'value' is in physical units, have to change instrument_response
             # so that value w.r.t. counts remains constant
             self._ds["value"].loc[dict(output=oc)] = self.value(oc) * rf_multiplier

@@ -87,9 +87,11 @@ class TimeSpans:
 
         Args:
             starttime (:class:`UTCDateTime` or str): earliest data that will be
-                presented.  If a str, must by ISO8601 compatible
+                presented.  If a str, must by ISO8601 compatible.  Forced
+                to the beginning of the day
             endtime (:class:`UTCDateTime` or str): latest data that will be presented.
-                If a str, must by ISO8601 compatible
+                If a str, must by ISO8601 compatible.  Forced to the
+                end of the day
             minmag (float): EQ Magnitude above which to cut out times
             days_per_magnitude (float): days to cut per magnitude above
                 min_magnitude
@@ -108,23 +110,31 @@ class TimeSpans:
                 endtime = UTCDateTime(endtime)
             except Exception:
                 raise ValueError(f"UTCDateTime() could not read {endtime=}")
+        starttime = starttime.replace(hour=0, minute=0, second=0, microsecond=0)
+        endtime = endtime.replace(hour=23, minute=59, second=59, microsecond=999999)
         if eq_file is None:
             eq_file = _eq_filename(starttime, endtime, minmag)
         if Path(eq_file).is_file():
             cat = read_events(eq_file, format="quakeml")
         else:
-            logger.info("Reading EQs from USGS online catalog...")
-            cat = Client("USGS").get_events(
-                starttime=starttime
-                - _calc_eq_cut(9, minmag, days_per_magnitude),
-                endtime=endtime,
-                minmagnitude=minmag,
-                orderby="time-asc",
-            )
-            logger.info("Done")
-            logger.info(f'writing catalog to "{eq_file}"')
-            if save_eq_file:
-                cat.write(eq_file, format="quakeml")
+            logger.info(f"Didn't find local EQ file '{eq_file}', reading from USGS online catalog...")
+            try:
+                cat = Client("USGS").get_events(
+                    starttime=starttime
+                    - _calc_eq_cut(9, minmag, days_per_magnitude),
+                    endtime=endtime,
+                    minmagnitude=minmag,
+                    orderby="time-asc",
+                )
+                logger.info("Done")
+                logger.info(f'writing catalog to "{eq_file}"')
+                if save_eq_file:
+                    cat.write(eq_file, format="quakeml")
+            except Exception as e:  # except FDSNNoServiceException as e:
+                logger.warning(e)
+                logger.warning('!!!Continuing without removing EQs!!!')
+                return cls([])
+            
 
         new_cat = Catalog(
             events=[x for x in cat if x.preferred_magnitude().mag >= minmag]
@@ -527,9 +537,9 @@ def _eq_filename(starttime, endtime, minmag):
         endtime (UTCDateTime): end time
         min_magmitude (float): minimum magnitude saved
     Returns:
-        filename (string):
+        filename (string): includes startday to endday information
     """
-    tfmt = "%Y%m%dT%H%M%S"
+    tfmt = "%Y%m%d"
     return "{}-{}_MM{:g}_eqcat.qml".format(
         starttime.strftime(tfmt), endtime.strftime(tfmt), minmag
     )

@@ -2,9 +2,21 @@
 Copyright 2023 Wayne Crawford
 """
 import fnmatch  # Allows Unix filename pattern matching
-# from ..logger import init_logger
-# 
-# logger = init_logger()
+
+import numpy as np
+from ..logger import init_logger
+
+logger = init_logger()
+
+def stream_unmask(stream):
+    """
+    Check if a stream is masked and, if so, unmask it
+    Interpolates data in gaps
+        """
+    if np.any([np.ma.count_masked(tr.data) for tr in stream]):
+        logger.warning('Unmasking masked data (usually a gap or overlap)')
+        return stream.split().merge(fill_value='interpolate')
+    return stream
 
 def get_full_id(match_str, stream):
     """

@@ -16,11 +16,13 @@
 # import obspy
 # from obspy.clients.filesystem import sds
 import time
+# from copy import deepcopy
 from dataclasses import dataclass
 from inspect import getfile, currentframe
 from pathlib import Path
 import warnings
 import fnmatch
+# import logging
 
 from numpy import prod
 from obspy.core.stream import Stream, Trace
@@ -49,6 +51,12 @@ class Decimator:
     decimates: list
     verbose: bool = False
 
+    # def __post_init__(self):
+    #     if self.verbose is True:
+    #         logger.setLevel(logging.INFO)
+    #     else:
+    #         logger.setLevel(logging.WARN)
+
     @property
     def decimation_factor(self):
         """Total decimation (product of `decimates`)"""
@@ -72,7 +80,8 @@ class Decimator:
             raise TypeError("data is not a Stream or Trace")
 
     def update_inventory(
-        self, inv, st=None, normalize_firs=False, quiet=False
+        self, inv, st=None, normalize_firs=False, quiet=False,
+        inv_force_overwrite=False
     ):
         """
         Update inventory for channels found in stream
@@ -83,8 +92,11 @@ class Decimator:
                 determine net/sta/chan/loc codes).  If None, will update
                 every channel
             normalize_firs (bool): normalize FIR channels that aren't already
+            inv_force_overwrite (bool): If the target channel seed_id already
+                exists (and it's not the source channel seed_id), overwrite it
 
-        : returns: obspy inventory with new channels
+        Returns:
+            obspy inventory with new channels
         """
         inv = inv.copy()  # Don't overwrite input inventory
         if st is not None:
@@ -112,14 +124,42 @@ class Decimator:
                 location=stats.location,
                 channel=stats.channel,
                 normalize_firs=normalize_firs,
+                insert_in_inv=False 
             )
             if not new_cha.sample_rate == stats.sampling_rate:
                 raise ValueError(
-                    "data and metadata sampling rates are " "different!"
-                )
+                    "data and metadata sampling rates are different!")
             self._modify_chan(
                 new_cha, net=stats.network, sta=stats.station, quiet=quiet
             )
+            seed_id = f'{stats.network}.{stats.station}.{stats.location}{new_cha.code}'
+            if new_cha.code == stats.channel:
+                # Do not overwrite mother channel
+                logger.error('New channel has same code as source channel '
+                             f'({seed_id}), rejected!')
+                continue
+            elif len(inv.select(network=stats.network, station=stats.station,
+                                location=stats.location, channel=new_cha.code)) > 0:
+                boilerplate = 'New channel has same seed_id as an existing channel'
+                if inv_force_overwrite is True:
+                    logger.warning(f'{boilerplate} ({seed_id}), overwriting!')
+                    inv = inv.remove(network=stats.network, station=stats.station,
+                                     location=stats.location, channel=new_cha.code)
+                else:
+                    logger.warning(f'{boilerplate} ({seed_id}), rejected!')
+                    continue
+            # Append new channel to inv
+            appended = False
+            for net in inv:
+                if not net.code == stats.network:
+                    continue
+                for sta in net:
+                    if sta.code == stats.station:
+                        sta.channels.append(new_cha)
+                        appended = True
+                        break
+            if appended is not True:
+                raise ValueError(f'Did not find a home for {seed_id}')        
         return inv
 
     def update_inventory_from_nslc(self, inv, network="*", station="*",
@@ -247,16 +287,16 @@ class Decimator:
             normalize_firs (bool): normalizes any FIR channel that isn't
                 already
         """
-        logger.info("channel modified from {} ({} sps)".format(
-              ".".join([net, sta, cha.location_code, cha.code]),
-              cha.sample_rate))
+        old_seed_id = ".".join([net, sta, cha.location_code, cha.code])
+        # old_cha = cha.copy()
         input_sample_rate = cha.sample_rate
         self._add_instrument_response(cha, input_sample_rate)
         self._change_chan_loc(cha, input_sample_rate)
         cha.sample_rate /= self.decimation_factor
-        logger.info("to {} ({:g} sps)".format(
-                    ".".join([net, sta, cha.location_code, cha.code]),
-                    cha.sample_rate))
+        seed_id = ".".join([net, sta, cha.location_code, cha.code])
+        logger.info("channel modified from "
+                    f"{old_seed_id} ({input_sample_rate:g} sps) "
+                    f"to {seed_id} ({cha.sample_rate:g} sps) ")
 
     @staticmethod
     def _normalize_firs(cha):
@@ -282,7 +322,7 @@ class Decimator:
                     )
                 if abs(coeff_sum - 1) > 0.01:
                     logger.info(f"DECIMATOR: Sum of FIR coeffs = "
-                                 f"{coeff_sum}, normalizing")
+                                f"{coeff_sum}, normalizing")
                     stg.coefficients = [x / coeff_sum
                                         for x in stg.coefficients]
             elif isinstance(stg, CoefficientsTypeResponseStage):
@@ -354,14 +394,17 @@ class Decimator:
 
     def _add_instrument_response(self, cha, input_sample_rate):
         """
-        Append  decimation object's instrument response to an existing channel's response
+        Append  decimation object's instrument response to an existing
+        channel's response
         """
         stage_number = cha.response.response_stages[-1].stage_sequence_number
         for d in self.decimates:
             fir_filter = FIRFilter.from_SAC(d)
             stage_number += 1
             cha.response.response_stages.append(
-                fir_filter.to_obspy(input_sample_rate, stage_number)
+                fir_filter.to_obspy(
+                    input_sample_rate, stage_number,
+                    cha.response.response_stages[-1].output_units)
             )
             input_sample_rate /= d
         try:
@@ -385,7 +428,7 @@ class Decimator:
             newtr.append(self._run_trace(tr))
         st.traces = newtr
         logger.info("New data has {} samples".format([tr.data.size
-                                                for tr in st]))
+                                                      for tr in st]))
         st.verify()
         return st
 
@@ -445,7 +488,8 @@ class Decimator:
     # The following is a combo of obspy's inventory, Network and Station select
     # methods, but which returns the chosen station and channel, not a copy
     def _duplicate_channel(
-        self, inv, network, station, location, channel, normalize_firs=False
+        self, inv, network, station, location, channel, normalize_firs=False,
+        insert_in_inv=True
     ):
         """
         Return Station & Channel matching network, station, location, channel
@@ -492,5 +536,6 @@ class Decimator:
         if normalize_firs is True:
             self._normalize_firs(channels[0])
         new_cha = channels[0].copy()
-        stations[0].channels.append(new_cha)
+        if insert_in_inv is True:
+            stations[0].channels.append(new_cha)
         return new_cha

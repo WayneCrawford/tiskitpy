@@ -1,7 +1,7 @@
 .. _tiskitpy.Decimate_SDS_example:
 
 ==============================
-tiskitpy_decimate_SDS example
+The tiskitpy_decimate_SDS console script
 ==============================
 
 tiskitpy_decimate_SDS is a console script to decimate data and create associated
@@ -26,7 +26,7 @@ The `-h` option provides basic documentation
       SDS_root           SDS root directory
       inv_file           StationXML file
       input_sample_rate  Process only channels having this sample rate
-      {2,3,4,5,6,7}      Sequence of decimation factors to use)
+      {2,3,4,5,6,7}      Sequence of decimation factors to use
 
     optional arguments:
       -h, --help         show this help message and exit
