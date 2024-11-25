@@ -6,7 +6,7 @@ Uses the obspy seismological Trace, Stream (data) and Inventory (metadata)
 classes, but should work for non-seismology datasets as well
 
 
-[Documentation](https://tiskitpy.readthedocs.io/en/latest/index.html)
+[Documentation](https://tiskitpy.readthedocs.io)
 
 
 ## Classes
