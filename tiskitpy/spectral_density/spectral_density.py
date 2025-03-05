@@ -827,6 +827,7 @@ class SpectralDensity:
             rows, cols = _squarish_grid(len(x))
         else:
             rows, cols = 1, 1
+        print(f'{rows=}, {cols=}')
         ax_array = np.ndarray((rows, cols), dtype=tuple)
         fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
         if title is None:
@@ -1757,8 +1758,8 @@ def _squarish_grid(n_elems):
     elif n_elems <= 6:
         return 2, 3
     else:
-        cols = np.ceil(np.sqrt(n_elems))
-        rows = np.ceil(n_elems / cols)
+        cols = int(np.ceil(np.sqrt(n_elems)))
+        rows = int(np.ceil(n_elems / cols))
     return rows, cols
 
 

@@ -106,3 +106,7 @@ method call parameters.  Created a readthedocs page.
   variance reduction obtained during __init__()
 - Added `SpectralDensity.plots()` and `.plots_coherences()`, to compare
   multiple `SpectralDensity` objects
+  
+## 0.5.1
+
+- Fixed bug creating matrix of subplots for autospect

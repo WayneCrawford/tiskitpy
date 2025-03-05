@@ -68,6 +68,10 @@ class CleanRotator:
             logger.info(self.__str__())
         if plot:
             self._plot_filtered_stream(stream, filt_band)
+        if avoid_spans is None:
+            self.trans_code = TRANS_CODE
+        else:
+            self.trans_code = TRANS_CODE + 'AV'
 
     def __str__(self):
         return "CleanRotator: angle, azimuth, var_red = {:5.2f}, {:6.1f}, {:3.2f}".format(
@@ -135,7 +139,7 @@ class CleanRotator:
             return stream
         srData = SeisRotate(stream)
         srData.zrotate(self.angle, self.azimuth, horiz_too)
-        srData.Z = CS.tag(srData.Z, TRANS_CODE)
+        srData.Z = CS.tag(srData.Z, self.trans_code)
         if other_stream is None:
             return CleanedStream(srData.stream())
         else:
