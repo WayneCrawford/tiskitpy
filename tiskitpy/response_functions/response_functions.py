@@ -215,7 +215,7 @@ class ResponseFunctions(object):
         oc = self._match_out_id(output_channel_id)
         rf = np.squeeze(self._ds["value"].sel(output=oc).values)
         if zero_as_none:
-            rf[rf == 0] = None
+            rf[np.abs(rf) == 0] = None  # returns nan + nanj!
         return rf
 
     def value_wrt_counts(self, output_channel_id, zero_as_none=False):
@@ -270,13 +270,15 @@ class ResponseFunctions(object):
         ir = self._ds["instrument_response"].sel(output=oc).values
         return np.squeeze(ir)
 
-    def to_norm_compliance(self, water_depth):
+    def to_norm_compliance(self, water_depth, verbose=False):
         """
         Change rfs from m/s^2 / Pa to 1 / Pa by multiplying by k / omega^2
         """
-        print(self)
-        print(f'{self.input_units=}')
-        print(f'{self.output_units=}')
+        if verbose:
+            print(self)
+            print(f'{self.input_units=}')
+            print(f'{self.output_channel_ids[0]=}')
+            print(f'{self.output_units(self.output_channel_ids[0])=}')
         if not self.input_units.upper() == 'PA':
             logger.error(f'{self.input_units=}, not "PA"')
         om = np.pi * self.freqs
@@ -435,7 +437,8 @@ class ResponseFunctions(object):
         rows = 1
         cols = len(outputs)
         ax_array = np.ndarray((rows, cols), dtype=tuple)
-        fig, axs = plt.subplots(rows, cols, sharex=True)
+        # fig, axs = plt.subplots(rows, cols, sharex=True)
+        fig = plt.figure()
         in_suffix = self._find_str_suffix(inp, outputs)
         for out_id, j in zip(outputs, range(len(outputs))):
             axa, axp = self.plot_one(inp, out_id, fig, (rows, cols),
@@ -541,8 +544,10 @@ class ResponseFunctions(object):
                 frequency response function phase plot
         """
         rf = self.value(out_id).copy()
-        rferr = self.uncertainty(out_id).copy()
-        f = self.freqs
+        iref = np.nonzero(rf)
+        rf = rf[iref]
+        rferr = self.uncertainty(out_id)[iref]
+        f = self.freqs[iref]
         if fig is None:
             fig = plt.gcf()
         # Plot amplitude

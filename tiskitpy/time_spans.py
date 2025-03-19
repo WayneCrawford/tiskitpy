@@ -63,7 +63,7 @@ class TimeSpans:
 
     @property
     def start_times(self):
-        """list of span end times"""
+        """list of span start times"""
         return self._start_times.copy()
 
     @property
@@ -310,10 +310,22 @@ class TimeSpans:
 
     def append(self, new_time_spans):
         """
-        Appends TimeSpan object to self
+        Combines two TimeSpan objects (REPLACED BY COMBINE)
 
         Args:
-            new_time_spans (:class:`TimeSpans`): time spans to append
+            new_time_spans (:class:`TimeSpans`): object to combine with self
+        """
+        logger.warning('TimeSpans.append() has been renamed '
+                       'TimeSpans.combine(), change your code before append()'
+                       ' is deleted!')
+        self.combine(new_time_spans)
+
+    def combine(self, new_time_spans):
+        """
+        Combines two TimeSpan objects
+
+        Args:
+            new_time_spans (:class:`TimeSpans`): object to combine with self
         """
         new_time_spans._validate()
         self._validate()
