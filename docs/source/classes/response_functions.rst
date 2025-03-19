@@ -19,11 +19,12 @@ Properties
 ---------------------
 
 - ``freqs``: Frequency response function frequencies
-- ``n_windows``: Number of time series data windows used
-- ``input_channel``: Frequency response function input channel
+- ``input_channel_id``: Frequency response function input channel
+- ``output_channel_ids``: List of the output channels
 - ``input_units``: Frequency response function input channel units
-- ``output_channels``: List of the output channels
 - ``noise_channels``: Noise channels for each xf
+- ``input_clean_sequence``: Clean sequence text
+- ``n_windows``: Number of time series data windows used
 
 Methods
 ---------------------

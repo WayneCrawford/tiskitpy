@@ -68,6 +68,10 @@ class CleanRotator:
             logger.info(self.__str__())
         if plot:
             self._plot_filtered_stream(stream, filt_band)
+        if avoid_spans is None:
+            self.trans_code = TRANS_CODE
+        else:
+            self.trans_code = TRANS_CODE + 'AV'
 
     def __str__(self):
         return "CleanRotator: angle, azimuth, var_red = {:5.2f}, {:6.1f}, {:3.2f}".format(
@@ -125,17 +129,19 @@ class CleanRotator:
             horiz_too: (bool) rotate horizontals also (use if you believe
                 channels are truly orthogonal, probably a bad idea anyway
                 as long as we use a 2-value rotation)
-            rot_limit (float): Do not rotate if self.angle greater then this value
+            rot_limit (float): Raise ValueError if self.angle is greater
+                than this value
         Returns:
             strm_rot (Stream): rotated stream
         """
         seis_stream, other_stream = SeisRotate.separate_streams(stream)
         if self.angle > rot_limit:
-            logger.warning(f'{self.angle=} > {rot_limit=}, not rotating!')
-            return stream
+            # Choose error over warning to avoid problems downstream
+            # (the user can always use a "try" to bypass the error)
+            raise ValueError(f'{self.angle=} > {rot_limit=}!')
         srData = SeisRotate(stream)
         srData.zrotate(self.angle, self.azimuth, horiz_too)
-        srData.Z = CS.tag(srData.Z, TRANS_CODE)
+        srData.Z = CS.tag(srData.Z, self.trans_code)
         if other_stream is None:
             return CleanedStream(srData.stream())
         else:

@@ -231,8 +231,8 @@ class SpectralDensity:
     @classmethod
     def from_stream(cls, stream, window_s=1000, windowtype="prol1pi",
                     inv=None, data_cleaner=None, starttimes=None,
-                    time_spans=None, avoid_spans=None, z_threshold=3,
-                    quiet=False):
+                    time_spans=None, avoid_spans=None, remove_eqs=False,
+                    z_threshold=3, quiet=False):
         """
         Calculate spectral density functions from the provided stream
 
@@ -257,6 +257,11 @@ class SpectralDensity:
                 time spans.  Incompatible with `starttimes` and "time_spans"
             subtract_rf_suffix (str): suffix to add to channel names if rf
                 is subtracted
+            remove_eqs (bool or str): if str, filename of QuakeML file
+                containing earthquakes to remove using default parameters of
+                TimeSpans.remove_eqs().  If True, download and use earthquakes
+                from USGS website.  If False, do not remove earthquakes. See
+                TimeSpans.remove_eqs() for details.
             z_threshold (float or None): reject windows with z-score greater
                 than this value.  None: no rejection
             quiet (bool): only output errors and beyond to console
@@ -275,11 +280,16 @@ class SpectralDensity:
             stream = CleanedStream(stream).tag('AVOID')
             time_spans = avoid_spans.invert(stream[0].stats.starttime,
                                             stream[0].stats.endtime)
-        if starttimes is not None and time_spans is not None:
-            if avoid_spans is not None:
-                raise RuntimeError("Provided both starttimes and avoid_spans")
+        if remove_eqs is not False:
+            avoid_eqs = TimeSpans.remove_eqs(remove_eqs)
+            ts_avoided = avoid_eqs.invert(stream[0].stats.starttime,
+                                          stream[0].stats.endtime)
+            if time_spans is None:
+                time_spans = ts_avoided
             else:
-                raise RuntimeError("Provided both starttimes and time_spans")
+                time_spans.combine(time_spans, ts_avoided)
+        if starttimes is not None and time_spans is not None:
+            raise RuntimeError("Provided both starttimes and time spans")
 
         stream = _align_traces(stream)
 
@@ -307,7 +317,7 @@ class SpectralDensity:
         clean_seq_dict = {tr.id: tr.stats.get('clean_sequence',[]) for tr in tagged_stream}
         seed_ids = [tr.id for tr in stream]
         if not len(ids) == len(set(ids)):
-            raise ValueError("stream has duplicate IDs")
+            raise ValueError(f"stream has duplicate IDs: {ids}")
         for id in ids:  # Calculate Fourier transforms
             tr_st = tagged_stream.select(id=id)
             if len(tr_st) == 0:
@@ -752,7 +762,8 @@ class SpectralDensity:
         line_kws, labels = _validate_plots_args(sds, line_kws, labels)
 
         rows, cols = 1, 1
-        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        fig = plt.figure(**fig_kw)
         if title is None:
             title = "Auto-spectra, multiple SpectralDensities"
         fig.suptitle(title)
@@ -828,7 +839,8 @@ class SpectralDensity:
         else:
             rows, cols = 1, 1
         ax_array = np.ndarray((rows, cols), dtype=tuple)
-        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        fig = plt.figure(**fig_kw)
         if title is None:
             title = "Auto-spectra"
         fig.suptitle(title)
@@ -900,7 +912,8 @@ class SpectralDensity:
         n_subkeys = len(x)
         rows, cols = n_subkeys, n_subkeys
         ax_array = np.ndarray((rows, cols), dtype=tuple)
-        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        fig = plt.figure(**fig_kw)
         fig.suptitle("Cross-spectra (dB ref UNITS/Hz)")
         for in_chan, i in zip(x, range(len(x))):
             for out_chan, j in zip(x, range(len(x))):
@@ -1264,7 +1277,8 @@ class SpectralDensity:
         if display == 'full':
             rows, cols = len(x), len(y)
             ax_array = np.ndarray((rows, cols), dtype=tuple)
-            fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+            # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+            fig = plt.figure(**fig_kw)
             fig.suptitle("Coherences")
             strfun = self._seedid_strfun(label_by)
             for in_chan, i in zip(x, range(rows)):
@@ -1330,8 +1344,9 @@ class SpectralDensity:
                 rows = 1
             cols = int(np.ceil(len(combis)/rows))
             ax_array = np.ndarray((rows, cols), dtype=tuple)
-            fig, axs = plt.subplots(rows, cols, sharex=True, sharey=True,
-                                    **fig_kw)
+            # fig, axs = plt.subplots(rows, cols, sharex=True, sharey=True,
+            #                         **fig_kw)
+            fig = plt.figure(**fig_kw)
             fig.suptitle("Coherencies")
             strfun = self._seedid_strfun(label_by)
             i, j = 0, 0
@@ -1368,7 +1383,8 @@ class SpectralDensity:
                     i += 1
         elif display == 'overlay':
             ax_array = np.ndarray((1, 1), dtype=tuple)
-            fig, axs = plt.subplots(1, 1, sharex=True, **fig_kw)
+            # fig, axs = plt.subplots(1, 1, sharex=True, **fig_kw)
+            fig = plt.figure(**fig_kw)
             fig.suptitle("Coherences")
             labels = []
             axa, axp = None, None
@@ -1757,8 +1773,8 @@ def _squarish_grid(n_elems):
     elif n_elems <= 6:
         return 2, 3
     else:
-        cols = np.ceil(np.sqrt(n_elems))
-        rows = np.ceil(n_elems / cols)
+        cols = int(np.ceil(np.sqrt(n_elems)))
+        rows = int(np.ceil(n_elems / cols))
     return rows, cols
 
 
@@ -1823,6 +1839,10 @@ def _correct_instrument_response(ft, f, id, stats, inv=None):
     if resp is None and "response" in stats:
         resp = stats.response
     if resp is not None:
+        if resp.response_stages is None:
+            raise ValueError(f'channel {id} has no response_stages')
+        elif len(resp.response_stages) == 0:
+            raise ValueError(f'channel {id} has zero response_stages')
         if "pa" in resp.instrument_sensitivity.input_units.lower():
             evalresp = resp.get_evalresp_response_for_frequencies(f, "VEL")
             units = "Pa"
