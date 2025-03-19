@@ -110,3 +110,5 @@ method call parameters.  Created a readthedocs page.
 ## 0.5.1
 
 - Fixed bug creating matrix of subplots for autospect
+- Fixed bug overwriting axis labels for plots
+- Added ``remove_eqs`` option to SpectralDensity.from_stream()

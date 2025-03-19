@@ -437,7 +437,8 @@ class ResponseFunctions(object):
         rows = 1
         cols = len(outputs)
         ax_array = np.ndarray((rows, cols), dtype=tuple)
-        fig, axs = plt.subplots(rows, cols, sharex=True)
+        # fig, axs = plt.subplots(rows, cols, sharex=True)
+        fig = plt.figure()
         in_suffix = self._find_str_suffix(inp, outputs)
         for out_id, j in zip(outputs, range(len(outputs))):
             axa, axp = self.plot_one(inp, out_id, fig, (rows, cols),
