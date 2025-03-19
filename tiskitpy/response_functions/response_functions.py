@@ -544,8 +544,10 @@ class ResponseFunctions(object):
                 frequency response function phase plot
         """
         rf = self.value(out_id).copy()
-        rferr = self.uncertainty(out_id).copy()
-        f = self.freqs
+        iref = np.nonzero(rf)
+        rf = rf[iref]
+        rferr = self.uncertainty(out_id)[iref]
+        f = self.freqs[iref]
         if fig is None:
             fig = plt.gcf()
         # Plot amplitude

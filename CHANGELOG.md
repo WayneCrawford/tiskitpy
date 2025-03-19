@@ -107,8 +107,9 @@ method call parameters.  Created a readthedocs page.
 - Added `SpectralDensity.plots()` and `.plots_coherences()`, to compare
   multiple `SpectralDensity` objects
   
-## 0.5.1
+## 0.5.2
 
 - Fixed bug creating matrix of subplots for autospect
 - Fixed bug overwriting axis labels for plots
 - Added ``remove_eqs`` option to SpectralDensity.from_stream()
+- Plots of ResponseFunctions only show selected frequencies
