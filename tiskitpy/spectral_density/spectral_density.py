@@ -1131,12 +1131,12 @@ class SpectralDensity:
               x=None,
               y=None,
               display='sparse',
-              overlay=False,
               show=True,
               label_by="chan",
               sort_by="chan",
               outfile=None,
               title=None,
+              channel_pair=False,
               **fig_kw):
         """
         Plot overlaid coherences of multiple SpectralDensity objects
@@ -1147,6 +1147,8 @@ class SpectralDensity:
             sds_names (list): Names to give to each sd in the plot legend
             line_kws(list of dict): Line keywords for each SpectralDensity function
             labels(list of dict): Labels for each SpectralDensity function
+            channel_pair(False or 2-tuple): if a 2-tuple, plot only a single
+             channel_pair, specified as (in_chan, out_chan)
         Other Properties:
             **kwargs: any arguments used in plot_coherences, except
                 overlay (always true)
@@ -1156,9 +1158,6 @@ class SpectralDensity:
                 axa (): amplitude axis
         """
         # Validate inputs
-        if overlay is True:
-            logger.error("Can't overlay multiple coherences")
-            overlay=False
         assert display=='sparse'
         line_kws, labels = _validate_plots_args(sds, line_kws, labels)
         if sds_names is None:
@@ -1180,7 +1179,8 @@ class SpectralDensity:
             cols -= 1
         ax_array = np.ndarray((rows, cols), dtype=tuple)
         ax_array.fill((None, None))
-        fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+        fig = plt.figure(**fig_kw)
         net_sta = '.'.join(sds[0].seed_ids[0].split('.')[:2])
         fig.suptitle(f"{net_sta} Coherences, multiple SpectralDensitys")
         first_time = True
@@ -1199,8 +1199,8 @@ class SpectralDensity:
                     if reduce_display==True:
                         j -= 1
                     if in_chan == out_chan or (out_chan, in_chan) in plotted:
-                        if i < rows and j >= 0:
-                            axs[i, j].axis('off')
+                        # if i < rows and j >= 0:
+                        #    axs[i, j].axis('off')
                         continue
                     plotted.append((in_chan, out_chan))
                     in_chan_label = label_strfun(in_chan)
@@ -1223,12 +1223,15 @@ class SpectralDensity:
                     new_row = False
                     ax_array[i, j] = (axa, axp)
         i, j = rows-1, 0
-        axs[i,j].axis('on')
+        if rows > 1 or cols > 1:
+            ax_legend = plt.subplot2grid((rows, cols), (i, j))
+        else:
+            ax_legend = ax_array[0, 0][0]
         for sds_name, l_kw, label in zip(sds_names, line_kws, labels):
             if label is None:
                 label = sds_name
-            axs[i,j].plot([1,1],[1,1], label=label, **l_kw)
-        axs[i,j].legend(fontsize='x-small')
+            ax_legend.plot([1,1],[1,1], label=label, **l_kw)
+        ax_legend.legend(fontsize='x-small')
         if outfile:
             plt.savefig(outfile)
         if show:

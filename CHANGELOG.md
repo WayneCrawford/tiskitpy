@@ -110,6 +110,10 @@ method call parameters.  Created a readthedocs page.
 ## 0.5.2
 
 - Fixed bug creating matrix of subplots for autospect
-- Fixed bug overwriting axis labels for plots
+- Fixed bug overwriting axis labels for most plots
 - Added ``remove_eqs`` option to SpectralDensity.from_stream()
 - Plots of ResponseFunctions only show selected frequencies
+
+## 0.5.3
+
+- Fixed overwriting axis labels for plots_coherences()
