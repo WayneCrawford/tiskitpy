@@ -1238,7 +1238,7 @@ class SpectralDensity:
             plt.show()
         return fig, axa
 
-    def plot_coherences(self, x=None, y=None, display='full', show=True,
+    def plot_coherences(self, x=None, y=None, display='sparse', show=True,
                         outfile=None, label_by="full", sort_by="full",
                         overlay=False, **fig_kw):
         """

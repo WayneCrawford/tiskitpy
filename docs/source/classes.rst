@@ -13,3 +13,4 @@ Classes
    classes/response_functions
    classes/time_spans
    classes/cleaned_stream
+   classes/compliance_noise

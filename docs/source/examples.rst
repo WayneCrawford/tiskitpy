@@ -18,3 +18,4 @@ These codes and data can be found in the directory
    examples/7_combined
    examples/8_combined_online
    examples/9_decimate_SDS
+   examples/compliance_noise

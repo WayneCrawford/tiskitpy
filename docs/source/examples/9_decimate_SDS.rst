@@ -1,8 +1,8 @@
 .. _tiskitpy.Decimate_SDS_example:
 
-==============================
+========================================
 The tiskitpy_decimate_SDS console script
-==============================
+========================================
 
 tiskitpy_decimate_SDS is a console script to decimate data and create associated
 metadata, if the data is in an SDS directory and the metadata are in a

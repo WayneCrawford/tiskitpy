@@ -117,3 +117,7 @@ method call parameters.  Created a readthedocs page.
 ## 0.5.3
 
 - Fixed overwriting axis labels for plots_coherences()
+
+## 0.6
+
+- Added ``ComplianceNoise`` class and documentation
