@@ -1,4 +1,4 @@
-.. _tiskitpy.SpectralDensity_example:
+.. _tiskitpy.ComplianceNoise_example:
 
 ==============================
 ComplianceNoise example code
