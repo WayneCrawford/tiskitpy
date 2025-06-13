@@ -26,7 +26,8 @@ By default ``remove_eqs=True`` for each constructors, so they
 will run :py:meth:`TimeSpans.from_eqs` to generate time spans to avoid based
 on the USGS earthquake catalog (online or saved in a local file by a previous call).
 The ``z_threshold`` parameter of
-:py:meth:`SpectralDensity.from_stream` sets a level for eliminating 
+:py:meth:`SpectralDensity.from_stream` sets a :py:meth:`scipy.stats.zscore`
+threshold for eliminating 
 outliers in the calculated spectra: this may add to the time spans that are
 "avoided".
 
@@ -57,13 +58,12 @@ the ``avoid_spans`` parameter.
 If the user wants to calculate time spans to avoid themselves, they need
 to convert these spans to :py:meth::`TimeSpans` format and enter using
 ``avoid_spans``
-`
-Using the same time spans for SpectralDensity, DataCleaner and CleanRotator
+
+Using the same time spans for different objects
 =============================================================================
 
-If you want to avoid exactly the same time spans for these three classes, you
-should retrieve the ``avoided_spans`` parameter from one of them and use
-it as input to ``avoid_spans`` on the others, while setting ``remove_eqs=False``.
-Since py:meth:`SpectralDensity.from_stream` has an additional time_span
-removal step (through the ``z_threshold`` calculation), you should probably
-use it as your base object.
+If you want to avoid exactly the same time spans for each class, you
+should retrieve the ``avoided_spans`` parameter from one of them (preferably
+:py:meth:`SpectralDensity.from_stream` since it adds time spans to avoid
+using the z-score )and use
+it as input to ``avoid_spans`` on the others.
