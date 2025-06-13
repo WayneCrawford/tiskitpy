@@ -5,8 +5,8 @@ Avoiding earthquakes and other noisy data
 All of the class constructors that use time series data can remove unwanted
 time spans, including the noisy time after large earthquakes.
 
-The constructors are :py:meth:`SpectralDensity.from_stream`, 
-:py:meth:`DataCleaner.__init__` and :py:meth:`CleanRotator`.
+The constructors are :py:meth:`tiskitpy.SpectralDensity.from_stream`, 
+:py:meth:`DataCleaner` and :py:meth:`tiskitpy.CleanRotator`.
 They share the following input parameters:
 
 - ``avoid_spans`` (:py:class:`TimeSpans`)
