@@ -10,10 +10,10 @@ Authors:  A. Doran, W Crawford
 """
 from copy import deepcopy
 
-import math
+# import math
 import numpy as np
 
-from .earth_model import EarthModel1D
+# from .earth_model import EarthModel1D
 
 
 def gravd(W, h):
@@ -26,7 +26,7 @@ def gravd(W, h):
 
     Returns:
         K (:class:`numpy.ndarray`): wavenumbers (rad/m)
-        
+
     >>> f = np.array([0.0001, 0.001, 0.01, 0.1, 1, 10])
     >>> K = gravd(2 * np.pi * f, 2000)
     >>> wlen = 2 * np.pi * np.power(K, -1)
@@ -44,7 +44,7 @@ def gravd(W, h):
     if np.any(W < 0):
         raise ValueError('there are omegas <= 0')
     G = 9.79329
-    N = len(W)
+    # N = len(W)
     W2 = W*W
     kDEEP = W2/G
     kSHAL = W/(np.sqrt(G*h))
@@ -52,7 +52,7 @@ def gravd(W, h):
     one = np.ones(np.shape(W))
     d = np.copy(one)
     done = np.zeros(np.shape(W))
-    done[W==0] = 1   # if W==0, k is also zero
+    done[W == 0] = 1   # if W==0, k is also zero
     nd = np.where(done == 0)
 
     k1 = np.copy(kDEEP)
@@ -60,7 +60,7 @@ def gravd(W, h):
     e1 = np.copy(erDEEP)
     ktemp = np.copy(done)
     e2 = np.copy(done)
-    e2[W==0] = 0
+    e2[W == 0] = 0
 
     while True:
         e2[nd] = one[nd] - G*k2[nd] * _dtanh(k2[nd]*h)/W2[nd]
@@ -100,7 +100,7 @@ def raydep(P, om, d, ro, vp2, vs2):
         d, rho, vp2 and vs2 have one value for each layer (top to bottom),
             must be same length
         (Normalized compliance = -k*v/(omega*sigzz) )
-        
+
     >>> P = 1/140    # Corresponds to 2000m depth, low freqs
     >>> om = 2 * np.pi * 0.005
     >>> d = np.array([1000, 1000, 1000, 3000, 3000])
@@ -114,7 +114,7 @@ def raydep(P, om, d, ro, vp2, vs2):
     mu = ro * vs2
     n = len(d)
     ist = n-1
-    ysav = 0
+    # ysav = 0
     psq = P*P
     r2 = 2 * mu[ist] * P
     # R and S are the "Wavenumbers" of compress and shear waves in botlayer
@@ -161,7 +161,7 @@ def raydep(P, om, d, ro, vp2, vs2):
         y[4] = ro[i]*g3 - r2*(y[1] - b1)
         ym[i, :] = y
 
-    de = y[4]/np.sqrt(y[0]*y[0] + y[1]*y[1])
+    # de = y[4]/np.sqrt(y[0]*y[0] + y[1]*y[1])
     ynorm = 1/y[2]
     y[0: 4] = np.array([0, -ynorm,  0,  0])
     # *****PROPAGATE BACK DOWN LAYERS*********
@@ -173,7 +173,7 @@ def raydep(P, om, d, ro, vp2, vs2):
         ls = i
         if i >= 1:
             sum = abs(x[i, 0] + i*x[i, 1])
-            pbsq = 1 / vs2[i]
+            # pbsq = 1 / vs2[i]
             if sum < 1e-4:
                 break
 
@@ -194,19 +194,50 @@ def raydep(P, om, d, ro, vp2, vs2):
         y[1] = (cb*e3 - hbs*e4+P*e6) / ro[i]
         y[2] = r2*y[1] - e6
         y[3] = r2*y[0] - e8
-        i = i+1;
+        i = i+1
     #
-    #if x(1,3) == 0
-    #  error('vertical surface stress = 0 in DETRAY');
-    #end
+    # if x(1,3) == 0
+    #   error('vertical surface stress = 0 in DETRAY');
+    # end
     ist = ls
 
-    return x[:,0], x[:,1], x[:,2], x[:,3]
+    return x[:, 0], x[:, 1], x[:, 2], x[:, 3]
+
+
+def compliance(depth, freq, model):
+    """
+    Calculate compliance of a model for a give water depth
+
+    Args:
+        depth (float): water depth (m)
+        freq (:class:`numpy.nparray`): frequencies (1/s)
+        model (:class:`EarthModel1D`): 1D earth model
+    """
+    if np.any(freq <= 0):
+        raise ValueError('At least one freq <= 0: cannot calculate compliance')
+    vpsq = model.vps * model.vps
+    vssq = model.vss * model.vss
+    omega = 2 * np.pi * freq
+    k = gravd(omega, depth)
+    ps = k / omega
+
+    compl = np.zeros((len(ps)))
+    for i in np.arange((len(ps))):
+        v, _, sigzz, _ = raydep(ps[i], omega[i], model.thicks, model.rhos,
+                                    vpsq, vssq)
+        # If raydep returned complex values, would need to divide by a further
+        # 1j to go from (m/s)/Pa to m/Pa.  Returned value should be
+        # negative because seafloor is lowest (DOWN) under maxixum pressure,
+        # for quasi-static
+        compl[i] = v[0] / (omega[i] * sigzz[0])
+    return compl
 
 
 def calc_norm_compliance(depth, freq, model):
     """
     Calculate normalized compliance for a model and water depth
+    
+    norm compliance == k(omega) * compliance
 
     Args:
         depth (float): water depth (m)
@@ -222,34 +253,33 @@ def calc_norm_compliance(depth, freq, model):
     ...                      [3000, 3000, 8200, 4700]])
     >>> np.set_printoptions(precision=1)
     >>> calc_norm_compliance(depth, freqs, model)
-    array([1.4e-11, 2.0e-11, 2.6e-11, 4.2e-11, 9.0e-11])
+    array([-1.4e-11, -2.0e-11, -2.6e-11, -4.2e-11, -9.0e-11])
     """
-    if np.any(freq<=0):
-        raise ValueError('At least one freq <= 0: cannot calculate compliance')
-    vpsq = model.vps * model.vps
-    vssq = model.vss * model.vss
-    omega = 2 * np.pi * freq
-    k = gravd(omega, depth)
-    ps = k / omega
+    k = gravd(2 * np.pi * freq, depth)
+    return k * compliance(depth, freq, model)
 
-    ncomp = np.zeros((len(ps)))
-    for i in np.arange((len(ps))):
-        v, u, sigzz, sigzx = raydep(ps[i], omega[i], model.thicks, model.rhos,
-                                    vpsq, vssq)
-        ncomp[i] = -k[i] * v[1-1] / (omega[i] * sigzz[1-1])
-    # # The following should give the same answer
-    # vs, us, sigzzs, sigzxs = [raydep(p, w, thick, rho, vpsq, vssq)
-    #                           for p, w in zip(ps, omega)]
-    # ncomp = zp_to_norm_compliance(freq, vs/sigzzs, depth)
-    return ncomp
+#     if np.any(freq <= 0):
+#         raise ValueError('At least one freq <= 0: cannot calculate compliance')
+#     vpsq = model.vps * model.vps
+#     vssq = model.vss * model.vss
+#     omega = 2 * np.pi * freq
+#     k = gravd(omega, depth)
+#     ps = k / omega
+# 
+#     ncomp = np.zeros((len(ps)))
+#     for i in np.arange((len(ps))):
+#         v, u, sigzz, sigzx = raydep(ps[i], omega[i], model.thicks, model.rhos,
+#                                     vpsq, vssq)
+#         ncomp[i] = (k[i] / omega[i]) * (v[0] / sigzz[0])
+#     return ncomp
 
 
 def zp_to_norm_compliance(freqs, zp, wdepth, z_units='M/S'):
     """
     Calculate normalized compliance from the z/p ratio, freqs and water depth
-    
+
     normalized compliance is defined as k*Z/P, with Z in m and P in Pa.
-    Its units are therefore 1/Pa
+    Its units are 1/Pa
 
     Args:
         freqs (:class:`numpy.nparray`): frequencies (1/s)
@@ -314,21 +344,22 @@ def _dtanh(x):
     return y
 
 
-def _argdtray(wd,h):
+def _argdtray(wd, h):
     hh = np.sqrt(abs(h))    # magnitude of wavenumber/freq
     th = wd * hh            # # of waves (or e-foldings) in layer (radians)
     if th >= 1.5e-14:
-        if h <= 0:          #  propagating wave
+        if h <= 0:          # propagating wave
             c =  np.cos(th)
             s = -np.sin(th) / hh
         else:               # evenescent wave
-            d=np.exp(th);
+            d=np.exp(th)
             c =  0.5*(d + 1/d)
             s = -0.5*(d - 1/d)/hh
     else:
         c = 1
         s = -wd
-    return c,s
+    return c, s
+
 
 if __name__ == "__main__":
     import doctest

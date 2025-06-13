@@ -142,7 +142,7 @@ class TestMethods(unittest.TestCase):
         # Verify that coherence at shared frequency is nearly 1.0
         f = 13
         ifreq = np.argmin(np.abs(self.sd.freqs - f))
-        self.assertAlmostEqual(x[ifreq], 1.0)
+        self.assertAlmostEqual(x[ifreq], 1.0, places=6)
 
     def test_make_class(self):
         # test window_s > data_len

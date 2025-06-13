@@ -15,6 +15,7 @@ TiSKitPy documentation
   intro
   install
   classes
+  timespans
   examples
   programmers
 

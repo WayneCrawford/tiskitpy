@@ -805,7 +805,8 @@ class SpectralDensity:
 
     def plot(self, **kwargs):
         """Shortcut for `plot_autospectra()`"""
-        self.plot_autospectra(**kwargs)
+        ax_array = self.plot_autospectra(**kwargs)
+        return ax_array
 
     def plot_autospectra(
         self,
@@ -815,6 +816,7 @@ class SpectralDensity:
         show=True,
         outfile=None,
         title=None,
+        ylim=None,
         **fig_kw
     ):
         """
@@ -828,6 +830,7 @@ class SpectralDensity:
             show (bool): show on desktop
             outfile (str): save figure to this filename
             title (str): custom plot title
+            ylim (tuple, None): (min, max) dBs to plot on each y axis
             fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
@@ -858,6 +861,7 @@ class SpectralDensity:
                     show_xlabel=i_row == rows - 1,
                     show_phase=False,
                     plot_peterson=plot_peterson,
+                    ylim=ylim,
                 )
                 ax_array[i_row, i_col] = (axa, axp)
         else:
@@ -875,7 +879,8 @@ class SpectralDensity:
                     ax_p=axp,
                     show_phase=False,
                     plot_peterson=plot_peterson,
-                    annotate=False
+                    annotate=False,
+                    ylim=ylim,
                 )
             ax_array[0, 0] = (axa, axp)
             plt.legend(fontsize='small')
@@ -944,9 +949,13 @@ class SpectralDensity:
 
         Arguments are the same as for `plot_one_spectra()`, except
         there is no `subkey` argument and `show_phase` is ignored
+        
+        Returns:
+            ax_a (:class:`matplotlib.axes.axis`): amplitude plot axis
         """
         kwargs["show_phase"] = False
-        self.plot_one_spectra(key, key, **kwargs)
+        ax_a, ax_p = self.plot_one_spectra(key, key, **kwargs)
+        return ax_a
 
     def plot_one_spectra(
         self,
@@ -967,6 +976,7 @@ class SpectralDensity:
         plot_peterson=True,
         outfile=None,
         annotate=True,
+        ylim=None,
         **plot_kws
     ):
         """
@@ -995,12 +1005,14 @@ class SpectralDensity:
             plot_peterson(bool): plot Peterson Noise model if channel has
                 units of :math:`(m/s^2)^2/Hz`
             outfile (str): save figure to this filename
+            ylim (tuple, None): (min, max) dBs to plot on each y axis
             **plot_kws (dict): keywords to pass on to plot command
 
         Returns:
             (tuple): tuple containing
-                - :class:`matplotlib.axes.axis`: amplitude plot axis
-                - :class:`matplotlib.axes.axis`: phase plot axis
+
+                ax_a (:class:`matplotlib.axes.axis`): amplitude plot axis
+                ax_p (:class:`matplotlib.axes.axis`): phase plot axis
         """
         psd = self.crossspect(key, subkey)
         in_units = self.channel_units(key)
@@ -1012,7 +1024,7 @@ class SpectralDensity:
         f = self.freqs
         if fig is None:
             fig = plt.gcf()
-        # Plot amplitude
+
         if ax_a is None:
             if show_phase:
                 ax_a = plt.subplot2grid(
@@ -1054,6 +1066,8 @@ class SpectralDensity:
             label = f"{PSD_units}"
         ax_a.semilogx(f, 10 * np.log10(np.abs(psd)), label=label, **plot_kws)
         ax_a.set_xlim(f[1], f[-1])
+        if ylim is not None:
+            ax_a.set_ylim(ylim[0], ylim[1])
         if plot_peterson is True and PSD_units.lower() == "(m/s^2)^2":
             lownoise, highnoise = Peterson_noise_model(f, True)
             ax_a.semilogx(f, lownoise, "k--")
@@ -1306,7 +1320,8 @@ class SpectralDensity:
                 rows -= 1
                 cols -= 1
             ax_array = np.ndarray((rows, cols), dtype=tuple)
-            fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+            # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
+            fig = plt.figure(**fig_kw)
             fig.suptitle("Coherences")
             strfun = self._seedid_strfun(label_by)
             plotted = []
@@ -1317,8 +1332,8 @@ class SpectralDensity:
                     if reduce_display==True:
                         j -= 1
                     if in_chan == out_chan or (out_chan, in_chan) in plotted:
-                        if i < rows and j >= 0:
-                            axs[i, j].axis('off')
+                        # if i < rows and j >= 0:
+                        #     axs[i, j].axis('off')
                         continue
                     plotted.append((in_chan, out_chan))
                     in_chan_label = strfun(in_chan)

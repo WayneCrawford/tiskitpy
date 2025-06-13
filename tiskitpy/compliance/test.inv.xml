@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<FDSNStationXML xmlns="http://www.fdsn.org/xml/station/1" schemaVersion="1.2">
+  <Source>ObsPy 1.4.1</Source>
+  <Module>ObsPy 1.4.1</Module>
+  <ModuleURI>https://www.obspy.org</ModuleURI>
+  <Created>2025-05-09T22:29:02.416510Z</Created>
+  <Network code="XX">
+    <Station code="STA">
+      <Latitude unit="DEGREES">0.0</Latitude>
+      <Longitude unit="DEGREES">0.0</Longitude>
+      <Elevation unit="METERS">0.0</Elevation>
+      <Site>
+        <Name></Name>
+      </Site>
+      <Channel code="LHZ" locationCode="00">
+        <Latitude unit="DEGREES">0.0</Latitude>
+        <Longitude unit="DEGREES">0.0</Longitude>
+        <Elevation unit="METERS">0.0</Elevation>
+        <Depth unit="METERS">0.0</Depth>
+        <Dip unit="DEGREES">-90.0</Dip>
+        <Response>
+          <InstrumentSensitivity>
+            <Value>2000.0</Value>
+            <Frequency>1.0</Frequency>
+            <InputUnits>
+              <Name>m/s</Name>
+              <Description>None</Description>
+            </InputUnits>
+            <OutputUnits>
+              <Name>count</Name>
+              <Description>None</Description>
+            </OutputUnits>
+          </InstrumentSensitivity>
+          <Stage number="1">
+            <PolesZeros>
+              <InputUnits>
+                <Name>m/s</Name>
+              </InputUnits>
+              <OutputUnits>
+                <Name>count</Name>
+              </OutputUnits>
+              <PzTransferFunctionType>LAPLACE (RADIANS/SECOND)</PzTransferFunctionType>
+              <NormalizationFactor>1.0</NormalizationFactor>
+              <NormalizationFrequency unit="HERTZ">1.0</NormalizationFrequency>
+            </PolesZeros>
+            <StageGain>
+              <Value>2000</Value>
+              <Frequency>1.0</Frequency>
+            </StageGain>
+          </Stage>
+        </Response>
+      </Channel>
+    </Station>
+  </Network>
+</FDSNStationXML>

@@ -37,11 +37,12 @@ class EarthModel1D():
                 warnings.warn(f'{vs=} > {vp=} / sqrt(3)')
         
     def __str__(self):
-        s = 'EarthModel1D: thickness (m) | rho (kg/m^3) | Vp (m/s) | Vs (m/s)\n'
-        s +='              ------------- | ------------ | -------- | ----------\n'
+        s = '<EarthModel1D>:\n'
+        s += '        thickness (m) | rho (kg/m^3) | Vp (m/s) | Vs (m/s)\n'
+        s += '        ------------- | ------------ | -------- | ----------\n'
         for t, r, vp, vs in zip(self.thicks.tolist(), self.rhos.tolist(),
                               self.vps.tolist(), self.vss.tolist()):
-            s += f"               {t:12.0f} | {r:12.0f} | {vp:8.0f} | {vs:8.0f}\n"
+            s += f"         {t:12.0f} | {r:12.0f} | {vp:8.0f} | {vs:8.0f}\n"
         return s
 
 

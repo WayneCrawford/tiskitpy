@@ -10,6 +10,7 @@ from ..spectral_density.utils import coherence_significance_level
 from ..spectral_density import SpectralDensity
 from ..utils import match_one_str
 from tiskitpy.logger import init_logger
+from ..compliance import gravd
 
 logger = init_logger()
 np.seterr(all="ignore")
@@ -203,7 +204,7 @@ class ResponseFunctions(object):
         oc = self._match_out_id(output_channel_id)
         return str(self._ds.sel(output=oc).coords["noise_chan"].values)
 
-    def value(self, output_channel_id, zero_as_none=False):
+    def value(self, output_channel_id, zero_as_none=False, verbose=False):
         """
         Return frequency response function for the given output channel
 
@@ -213,6 +214,9 @@ class ResponseFunctions(object):
                 of zeros
         """
         oc = self._match_out_id(output_channel_id)
+        if verbose is True:
+            print(f'{output_channel_id=} was matched by {oc=}')
+        
         rf = np.squeeze(self._ds["value"].sel(output=oc).values)
         if zero_as_none:
             rf[np.abs(rf) == 0] = None  # returns nan + nanj!
@@ -272,7 +276,7 @@ class ResponseFunctions(object):
 
     def to_norm_compliance(self, water_depth, verbose=False):
         """
-        Change rfs from m/s^2 / Pa to 1 / Pa by multiplying by k / omega^2
+        Change rfs from m/s^2 / Pa to 1 / Pa by multiplying by k / -omega^2
         """
         if verbose:
             print(self)
@@ -280,19 +284,21 @@ class ResponseFunctions(object):
             print(f'{self.output_channel_ids[0]=}')
             print(f'{self.output_units(self.output_channel_ids[0])=}')
         if not self.input_units.upper() == 'PA':
-            logger.error(f'{self.input_units=}, not "PA"')
-        om = np.pi * self.freqs
-        k = _gravd(om, water_depth)
-        rf_multiplier = k / (om**2)
+            logger.error(f'{self.input_units.upper()=}, not "PA"')
+        om = 2 * np.pi * self.freqs  # Angular frequency ARGH!!!
+        k = gravd(om, water_depth)  # Wavenumber
+        rf_multiplier = k / (-om**2)  # Multiplier from Accel/Press to norm compliance
+        # print(f'RF.to_norm_compliance: {water_depth=}, {om[:5]=}, {k[:5]=}')
         for oc in self.output_channel_ids:
             if not self.output_units(oc).upper() == 'M/S^2':
-                logger.error(f'{self.output_units(oc)=}, not "M/2^2"')
-            # 'value' is in physical units, have to change instrument_response
-            # so that value w.r.t. counts remains constant
+                logger.error(f'{self.output_units(oc).upper()=}, not "M/2^2"')
+            # Multiply rf by -k/om^2
             self._ds["value"].loc[dict(output=oc)] = self.value(oc) * rf_multiplier
+            # Multiply output units by s^2/m
+            self._ds.coords["out_units"].loc[dict(output=oc)] = '1'
+            # Change instrument_response so that value w.r.t. counts remains constant
             self._ds["instrument_response"].loc[dict(output=oc)] = (
                 self.instrument_response(oc) / rf_multiplier)
-            self._ds.coords["out_units"].loc[dict(output=oc)] = '1'
 
     def uncert_mult(self, output_channel_id):
         """
@@ -383,7 +389,7 @@ class ResponseFunctions(object):
         Returns:
             (tuple):
                 H (numpy.array): frequency response function
-                H_err_mult (numpy.array): uncertainty multiplier
+                H_err (numpy.array): uncertainty multiplier
                 corr_mult (numpy.array): value to multiply H by when correcting
                     spectra
         """
@@ -391,35 +397,34 @@ class ResponseFunctions(object):
         f = spect_density.freqs
 
         # Calculate Frequency Response Function
-        if noise_chan == "output" or noise_chan == "equal":
-            Gxx = spect_density.autospect(input)
-            Gxy = spect_density.crossspect(input, output)
-            if noise_chan == "output":
-                H = Gxy / Gxx  # BP86 eqn 6.37
-                corr_mult = np.ones(H.shape)  # No change
-            elif noise_chan == "equal":
-                # Derived from BP86 eqns 6.48, 6.49, 6.51 and 6.52
-                H = (Gxy / Gxx) / np.sqrt(coh)
-                corr_mult = np.sqrt(coh)
+        Gxx = spect_density.autospect(input)
+        Gyy = spect_density.autospect(output)
+        Gxy = spect_density.crossspect(input, output)
+        Gyx = spect_density.crossspect(output, input)
+        # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
+        H_err = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
+        if noise_chan == "output":
+            H = Gxy / Gxx  # BP86 eqn 6.37
+            corr_mult = np.ones(H.shape)  # No change
         elif noise_chan == "input":
-            Gyy = spect_density.autospect(output)
-            Gyx = spect_density.crossspect(output, input)
             H = Gyy / Gyx    # BP86 eqn 6.42
             corr_mult = coh  # derived from BP86 eqns 6.44 and 6.46
-        # elif noise_chan == "unknown":
-        #     rf = H
-        #     # VERY ad-hoc error guesstimate
-        #     maxerr = np.abs(coh ** (-1)) + errbase
-        #     minerr = np.abs(coh) - errbase
-        #     rferr = np.abs(rf * (maxerr - minerr) / 2)
+        elif noise_chan == "equal":
+            # Derived from BP86 eqns 6.48, 6.49, 6.51 and 6.52
+            H = (Gxy / Gxx) / np.sqrt(coh)
+            corr_mult = np.sqrt(coh)
+        elif noise_chan == "unknown":
+            Hmax = (Gyy / Gyx)*(1+H_err)   # high value; all noise on input
+            Hmin = (Gxy / Gxx)/(1+H_err)   # low value: all noise on output
+            H = (Hmin + Hmax)/2
+            H_err = ((Hmax-Hmin)/2)/H
+            corr_mult = np.sqrt(coh) # Just copied "equal", probably wrong
         else:
             raise ValueError(f'unknown noise channel: "{noise_chan}"')
         H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
 
         # Calculate uncertainty
-        # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
-        H_err_mult = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
-        return H, H_err_mult, corr_mult
+        return H, H_err, corr_mult
 
     def plot(self, errorbars=True, show=True, outfile=None):
         """
@@ -545,6 +550,8 @@ class ResponseFunctions(object):
         """
         rf = self.value(out_id).copy()
         iref = np.nonzero(rf)
+        if len(iref[0]) == 0:
+            raise ValueError(f"No nonzero values for {out_id=}")
         rf = rf[iref]
         rferr = self.uncertainty(out_id)[iref]
         f = self.freqs[iref]
@@ -663,61 +670,61 @@ class ResponseFunctions(object):
         return H
 
 
-def _gravd(W, h):
-    """
-    Linear ocean surface gravity wave dispersion
-
-    Args:
-        W (:class:`numpy.ndarray`): angular frequencies (rad/s)
-        h (float): water depth (m)
-
-    Returns:
-        K (:class:`numpy.ndarray`): wavenumbers (rad/m)
-    """
-    # W must be array
-    if not isinstance(W, np.ndarray):
-        W = np.array([W])
-    G = 9.79329
-    # N = len(W)
-    W2 = W*W
-    kDEEP = W2/G
-    kSHAL = W/(np.sqrt(G*h))
-    erDEEP = np.ones(np.shape(W)) - G*kDEEP*_dtanh(kDEEP*h)/W2
-    one = np.ones(np.shape(W))
-    d = np.copy(one)
-    done = np.zeros(np.shape(W))
-    nd = np.where(done == 0)
-
-    k1 = np.copy(kDEEP)
-    k2 = np.copy(kSHAL)
-    e1 = np.copy(erDEEP)
-    ktemp = np.copy(done)
-    e2 = np.copy(done)
-
-    while True:
-        e2[nd] = one[nd] - G*k2[nd] * _dtanh(k2[nd]*h)/W2[nd]
-        d = e2*e2
-        done = d < 1e-20
-        if done.all():
-            K = k2
-            break
-        nd = np.where(done == 0)
-        ktemp[nd] = k1[nd]-e1[nd]*(k2[nd]-k1[nd])/(e2[nd]-e1[nd])
-        k1[nd] = k2[nd]
-        k2[nd] = ktemp[nd]
-        e1[nd] = e2[nd]
-    return K
-
-
-def _dtanh(x):
-    """
-    Stable hyperbolic tangent
-
-    Args:
-        x (:class:`numpy.ndarray`)
-    """
-    a = np.exp(x*(x <= 50))
-    one = np.ones(np.shape(x))
-
-    y = (abs(x) > 50) * (abs(x)/x) + (abs(x) <= 50)*((a-one/a) / (a+one/a))
-    return y
+# def _gravd(W, h):
+#     """
+#     Linear ocean surface gravity wave dispersion
+# 
+#     Args:
+#         W (:class:`numpy.ndarray`): angular frequencies (rad/s)
+#         h (float): water depth (m)
+# 
+#     Returns:
+#         K (:class:`numpy.ndarray`): wavenumbers (rad/m)
+#     """
+#     # W must be array
+#     if not isinstance(W, np.ndarray):
+#         W = np.array([W])
+#     G = 9.79329
+#     # N = len(W)
+#     W2 = W*W
+#     kDEEP = W2/G
+#     kSHAL = W/(np.sqrt(G*h))
+#     erDEEP = np.ones(np.shape(W)) - G*kDEEP*_dtanh(kDEEP*h)/W2
+#     one = np.ones(np.shape(W))
+#     d = np.copy(one)
+#     done = np.zeros(np.shape(W))
+#     nd = np.where(done == 0)
+# 
+#     k1 = np.copy(kDEEP)
+#     k2 = np.copy(kSHAL)
+#     e1 = np.copy(erDEEP)
+#     ktemp = np.copy(done)
+#     e2 = np.copy(done)
+# 
+#     while True:
+#         e2[nd] = one[nd] - G*k2[nd] * _dtanh(k2[nd]*h)/W2[nd]
+#         d = e2*e2
+#         done = d < 1e-20
+#         if done.all():
+#             K = k2
+#             break
+#         nd = np.where(done == 0)
+#         ktemp[nd] = k1[nd]-e1[nd]*(k2[nd]-k1[nd])/(e2[nd]-e1[nd])
+#         k1[nd] = k2[nd]
+#         k2[nd] = ktemp[nd]
+#         e1[nd] = e2[nd]
+#     return K
+# 
+# 
+# def _dtanh(x):
+#     """
+#     Stable hyperbolic tangent
+# 
+#     Args:
+#         x (:class:`numpy.ndarray`)
+#     """
+#     a = np.exp(x*(x <= 50))
+#     one = np.ones(np.shape(x))
+# 
+#     y = (abs(x) > 50) * (abs(x)/x) + (abs(x) <= 50)*((a-one/a) / (a+one/a))
+#     return y
