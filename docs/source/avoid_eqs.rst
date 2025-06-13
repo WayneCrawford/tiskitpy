@@ -52,11 +52,11 @@ in the current working directory.
 
 If the user wants to calculate time spans to avoid based on earthquakes, but
 using different parameters than the default values, they should run
-:py:meth::`TimeSpans.from_eqs` themselves and enter the output to
+:py:meth:`TimeSpans.from_eqs` themselves and enter the output to
 the ``avoid_spans`` parameter.
 
 If the user wants to calculate time spans to avoid themselves, they need
-to convert these spans to :py:meth::`TimeSpans` format and enter using
+to convert these spans to :py:class:`TimeSpans` format and enter using
 ``avoid_spans``
 
 Using the same time spans for different objects
@@ -64,6 +64,5 @@ Using the same time spans for different objects
 
 If you want to avoid exactly the same time spans for each class, you
 should retrieve the ``avoided_spans`` parameter from one of them (preferably
-:py:meth:`SpectralDensity.from_stream` since it adds time spans to avoid
-using the z-score )and use
-it as input to ``avoid_spans`` on the others.
+:py:meth:`SpectralDensity.from_stream` since it uses the z-score to add time
+spans to avoid) and use it as input to ``avoid_spans`` on the others.
