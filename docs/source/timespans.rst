@@ -5,11 +5,11 @@ Avoiding earthquakes and other noisy data
 All of the class constructors that use time series data can remove unwanted
 time spans, including the noisy time after large earthquakes.
 
-The constructors are :py:classmethod::`SpectralDensity.from_stream()`, 
-:py:method::`DataCleaner()` and :py:method::`CleanRotator()`.
+The constructors are :py:meth:`SpectralDensity.from_stream`, 
+:py:meth:`DataCleaner.__init__` and :py:meth:`CleanRotator`.
 They share the following input parameters:
 
-- ``avoid_spans`` (:py:class::`TimeSpans`)
+- ``avoid_spans`` (:py:class:`TimeSpans`)
 - ```remove_eqs``` (``str`` or ``bool``)
 
 and provide the following properties:
@@ -17,8 +17,8 @@ and provide the following properties:
 - ``avoided_spans```: time spans NOT used in processing
 - ``used_spans```: inverse of ``avoided_spans``
 
-By default ``remove_eqs`` is ``True`` for all of the constructors, meaning that they
-will run :py:method::`TimeSpans.from_eqs()` to generate time spans to avoid based
+By default ``remove_eqs=True`` for all of the constructors, meaning that they
+will run :py:meth:`TimeSpans.from_eqs` to generate time spans to avoid based
 on the USGS earthquake catalog (online or saved in a file by a previous call
 to `TimeSpans.from_eqs()`).  If the user sets `remove_eqs` to a string, this must
 correspond to the name of a local file in QuakeML format.
