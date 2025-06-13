@@ -15,7 +15,7 @@ TiSKitPy documentation
   intro
   install
   classes
-  timespans
+  avoid_eqs
   examples
   programmers
 
