@@ -31,35 +31,40 @@ class CleanRotator:
         avoid_spans (:class:`TimeSpans`): timespans to avoid
         plot (bool): Plot comparision of original and rotated vertical
         quickTest (bool): Only run one day's data and do not save results
-        remove_eq (str, True or False): filename of catalog to use to remove
-                earthquakes, will download catalog from USGS if True, not
-                remove EQs if False
+        remove_eqs (bool, str): Avoid time spans associated with
+            earthquakes, using default parameters of
+            :class:`TimeSpans.remove_eqs`
+                - If str: filename of QuakeML file containing earthquakes.
+                - If True, download earthquakes from USGS website or
+                  appropriately-named local file.
+                - If False, do not remove earthquakes.
         uselogvar(bool): use logarithm of variance as metric
         filt_band (tuple): lower, upper frequency limits of band to filter data
                 before calculating rotation
-        save_eq_file (bool): Passed onto TimeSpans.from_eqs()
+        save_eq_file (bool): Passed onto :py:meth:`TimeSpans.from_eqs`
     Attributes:
         angle (float): angle by which Z (or Z-X-Y) was rotated
         azimuth (float): azimuth by which Z (or Z-X-Y) was rotated
         variance_reduction (float): amount by which variance was reduced during
             calculation (0 to 1)
+        avoided_spans (:py:class:`TimeSpans`): avoided time spans
     """
 
     def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,
-                 remove_eq=True, uselogvar=False, verbose=True,
+                 remove_eqs=True, uselogvar=False, verbose=True,
                  filt_band=(0.001, 0.01), save_eq_file=True):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
         """
-        ignore_spans = self._make_eq_spans(
-            remove_eq, stream[0].stats, verbose, save_eq_file
+        self.avoided_spans = self._make_eq_spans(
+            remove_eqs, stream[0].stats, verbose, save_eq_file
         )
         if avoid_spans is not None:
-            ignore_spans += avoid_spans
+            self.avoided_spans += avoid_spans
         filtstream = self._filtstream(stream, filt_band)
         srData = SeisRotate(filtstream)
         (ang, azi, var_red) = srData.calc_zrotate_opt(
-            ignore_spans=ignore_spans, uselogvar=uselogvar
+            ignore_spans=self.avoided_spans, uselogvar=uselogvar
         )
         self.angle = ang
         self.azimuth = azi
@@ -90,14 +95,14 @@ class CleanRotator:
         )
         return filtstream
 
-    def _make_eq_spans(self, remove_eq, stats, verbose, save_eq_file):
-        if isinstance(remove_eq, str):
+    def _make_eq_spans(self, remove_eqs, stats, verbose, save_eq_file):
+        if isinstance(remove_eqs, str):
             return TimeSpans.from_eqs(
-                stats.starttime, stats.endtime,
-                eq_file=remove_eq, save_eq_file=save_eq_file)
-        elif remove_eq is True:
+                (stats.starttime, stats.endtime),
+                eq_file=remove_eqs, save_eq_file=save_eq_file)
+        elif remove_eqs is True:
             return TimeSpans.from_eqs(
-                stats.starttime, stats.endtime, save_eq_file=save_eq_file)
+                (stats.starttime, stats.endtime), save_eq_file=save_eq_file)
         return None
 
     def _plot_filtered_stream(self, stream, filt_band):
@@ -167,7 +172,7 @@ class CleanRotator:
 
 
 def rotate_clean(stream, avoid_spans=None, horiz_too=False, plot=False,
-                 quickTest=False, remove_eq=True, uselogvar=False,
+                 quickTest=False, remove_eqs=True, uselogvar=False,
                  verbose=True, filt_band=(0.001, 0.01)):
     """
     Rotates vertical channel to minimize noise
@@ -180,7 +185,7 @@ def rotate_clean(stream, avoid_spans=None, horiz_too=False, plot=False,
             (float): angle by which Z (or Z-X-Y) was rotated
             (float): azimuth by which Z (or Z-X-Y) was rotated
     """
-    obj = CleanRotator(stream, avoid_spans, plot, quickTest, remove_eq,
+    obj = CleanRotator(stream, avoid_spans, plot, quickTest, remove_eqs,
                        uselogvar, verbose, filt_band)
     return obj.apply(stream), obj.rot_angle, obj.rot_azimuth
 

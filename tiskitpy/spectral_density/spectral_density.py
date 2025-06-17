@@ -41,8 +41,8 @@ class SpectralDensity:
                  data=None, instrument_responses=None):
         """
         Warning:
-            This constructor is rarely used, use instead
-            :meth:`SpectralDensity.from_stream()`
+            This constructor is rarely used, use
+            :meth:`SpectralDensity.from_stream()` instead
         Args:
             freqs (np.ndarray): frequencies
             seed_ids (list of str): seed_ids for each channel
@@ -66,7 +66,6 @@ class SpectralDensity:
             instrument_responses (:class:`np.ndarray`):
                 instrument response for each channel.
                 shape=(n_spects,n_freqs)
-                units=(counts/chan_units)
         """
         n_f, n_ch = len(freqs), len(seed_ids)
         if data is None:
@@ -189,7 +188,7 @@ class SpectralDensity:
     @property
     def used_times(self):
         """
-        TimeSpans object containing time_spans used during processing
+        time spans used during processing
 
         Returns:
             (:class:`obspy.TimeSpans`):
@@ -198,13 +197,14 @@ class SpectralDensity:
                           for x in self.starttimes])
 
     @property
-    def unused_times(self):
+    def avoided_spans(self):
         """
-        TimeSpans object containing time_spans rejected during processing
+        time spans unused during processing
 
         Returns:
             (:class:`obspy.TimeSpans`):
         """
+        # Establish data start and end times
         if self._ds.ts_starttime is not None:
             ts_start = self._ds.ts_starttime
         else:
@@ -216,6 +216,7 @@ class SpectralDensity:
             ts_start = self.starttimes[-1] + self.window_seconds
             logger.info('no endtime information, using end of last window')
 
+        # invert obj.used_times
         return self.used_times.invert(ts_start, ts_end)
 
     @property
@@ -257,11 +258,13 @@ class SpectralDensity:
                 time spans.  Incompatible with `starttimes` and "time_spans"
             subtract_rf_suffix (str): suffix to add to channel names if rf
                 is subtracted
-            remove_eqs (bool or str): if str, filename of QuakeML file
-                containing earthquakes to remove using default parameters of
-                TimeSpans.remove_eqs().  If True, download and use earthquakes
-                from USGS website.  If False, do not remove earthquakes. See
-                TimeSpans.remove_eqs() for details.
+            remove_eqs (bool, str): Avoid time spans associated with
+                earthquakes, using default parameters of
+                :py:meth:`TimeSpans.from_eqs`
+                    - If str: filename of QuakeML file containing earthquakes.
+                    - If True, download earthquakes from USGS website or
+                      appropriately-named local file.
+                    - If False, do not remove earthquakes.
             z_threshold (float or None): reject windows with z-score greater
                 than this value.  None: no rejection
             quiet (bool): only output errors and beyond to console
@@ -281,13 +284,16 @@ class SpectralDensity:
             time_spans = avoid_spans.invert(stream[0].stats.starttime,
                                             stream[0].stats.endtime)
         if remove_eqs is not False:
-            avoid_eqs = TimeSpans.remove_eqs(remove_eqs)
-            ts_avoided = avoid_eqs.invert(stream[0].stats.starttime,
+            if remove_eqs is True:
+                avoid_eqs = TimeSpans.from_eqs(stream)
+            else:
+                avoid_eqs = TimeSpans.from_eqs(stream, eq_file=remove_eqs)
+            ts_unavoided = avoid_eqs.invert(stream[0].stats.starttime,
                                           stream[0].stats.endtime)
             if time_spans is None:
-                time_spans = ts_avoided
+                time_spans = ts_unavoided
             else:
-                time_spans.combine(time_spans, ts_avoided)
+                time_spans.combine(time_spans, ts_unavoided)
         if starttimes is not None and time_spans is not None:
             raise RuntimeError("Provided both starttimes and time spans")
 

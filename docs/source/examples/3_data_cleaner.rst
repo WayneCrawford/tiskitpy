@@ -27,7 +27,7 @@ DataCleaner example code
 .. code-block:: python
 
     # Clean the data, then construct a stream with original and cleaned channels
-    stream_cleaned = dc.clean_stream(stream)
+    stream_cleaned = dc.apply(stream)
     z_compare = stream.select(channel='*Z') + stream_cleaned.select(channel='*Z')
 
 .. code-block:: none

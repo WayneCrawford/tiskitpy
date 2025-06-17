@@ -16,8 +16,7 @@ They share the following input parameters:
 
 and provide the following properties:
 
-- ``avoided_spans```: time spans NOT used in processing
-- ``used_spans```: inverse of ``avoided_spans``
+- ``avoided_spans``: time spans NOT used in processing
 
 Default behavior
 =================
@@ -59,10 +58,13 @@ If the user wants to calculate time spans to avoid themselves, they need
 to convert these spans to :py:class:`TimeSpans` format and enter using
 ``avoid_spans``
 
-Using the same time spans for different objects
+Using the same time spans on different objects
 =============================================================================
 
 If you want to avoid exactly the same time spans for each class, you
-should retrieve the ``avoided_spans`` parameter from one of them (preferably
+should: 
+1) Retrieve the ``avoided_spans`` parameter from one of them (preferably
 :py:meth:`SpectralDensity.from_stream` since it uses the z-score to add time
-spans to avoid) and use it as input to ``avoid_spans`` on the others.
+spans to avoid)
+2) Set ``avoid_spans=avoided_spans``, ``remove_eqs=False`` and
+3) On ``DataCleaner`` or ``SpectralDensity``, set  ``z_threshold=None``

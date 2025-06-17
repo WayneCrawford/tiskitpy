@@ -19,9 +19,9 @@ Methods
 Cleaning
 ^^^^^^^^^^^^
 
-- ``clean_sdf(sdf)``: Clean an existing spectral density function (approximation).
-- ``clean_stream(stream, ...)``: Clean a data stream
-- ``clean_stream_to_sdf(stream, ...)``: Calculate SpectralDensity function directly
+- ``apply_to_sdf(sdf)``: Clean an existing spectral density function (approximation).
+- ``apply(stream, ...)``: Clean a data stream
+- ``apply_to_streams_sdf(stream, ...)``: Calculate SpectralDensity function directly
   from the input stream
 
 Other

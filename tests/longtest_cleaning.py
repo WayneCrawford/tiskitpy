@@ -28,7 +28,7 @@ class TestMethods(unittest.TestCase):
         self.test_path = self.path / "data" / "cleaning"
 
     def test_clean_stream_values(self):
-        """Test clean_stream function on real data, compare to reference values"""
+        """Test apply function on real data, compare to reference values"""
         sp_kwargs = {'window_s': 2048, 'windowtype': 'prol1pi'}
         dc_kwargs = {'max_freq': 0.1, 'show_progress': False, **sp_kwargs}
         dc_tforder = ('*1', '*2', '*H')
@@ -44,8 +44,8 @@ class TestMethods(unittest.TestCase):
         stream_rot = rotator.apply(stream)
         dc = DataCleaner(stream, dc_tforder, **dc_kwargs)
         dc_rot = DataCleaner(stream_rot, dc_tforder, **dc_kwargs)
-        stream_dced = dc.clean_stream(stream, in_time_domain=True)
-        stream_rot_dced = dc_rot.clean_stream(stream_rot, in_time_domain=True)
+        stream_dced = dc.apply(stream, in_time_domain=True)
+        stream_rot_dced = dc_rot.apply(stream_rot, in_time_domain=True)
         fig, ax = plt.subplots(1)
         psds=[]
         for stream, label, minval in zip(

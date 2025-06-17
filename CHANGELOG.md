@@ -122,7 +122,20 @@ Change `MANIFEST.in` to recursively include subfiles/directories of `decimate/`
 
 - Fixed overwriting axis labels for plots_coherences()
 
-## 0.6
+## 1.0
 
-- Added ``ComplianceNoise`` class and documentation
-- Fixed SpectralDensity plot overwriting axis labels
+### Added
+-  ``ComplianceNoise`` class and documentation
+
+### Fixed
+- ``SpectralDensity`` plot overwriting axis labels
+- ``SpectralDensity`` ``remove_eqs=True`` now works
+
+### Renamed
+- ``DataCleaner.clean_stream()`` to ``DataCleaner.apply()``
+- ``DataCleaner.clean_sdf()`` to ``DataCleaner.apply_to_sdf()``
+
+### Other major changes
+- TimeSpans.from_eqs() now takes ``time_bounds`` input instead of ``starttime`` and ``endtime``
+- ``SpectralDensity``, ``DataCleaner`` and ``CleanRotate`` classes take ``remove_eqs``
+  and ``avoid_spans`` as input and provide an ``avoided_spans`` property.

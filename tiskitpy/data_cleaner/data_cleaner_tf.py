@@ -53,12 +53,13 @@ class DataCleaner:
             fast_calc (bool): Calculate corrected spectra directly from
                 previous spectra (ATACR-style).
             kwargs (:class:`SpectralDensity.from_stream()` properties):
-                 window_s, windowtype, z_threshold, avoid_spans, ...
+                 window_s, windowtype, z_threshold, remove_eqs, avoid_spans, ...
         Attributes:
             RFList (list of :class:`ResponseFunctions`): list of data cleaner
                 frequency response functions
             starttimes (list of :class:`obspy.UTCDateTime`): start times for
                 each spectra used
+            avoided_spans (:py:class:`TimeSpans`): avoided time spans
         """
         if not isinstance(stream, Stream):
             raise ValueError("stream is a {type(stream)}, not an obspy Stream")
@@ -67,6 +68,7 @@ class DataCleaner:
         for tr in stream:
             tr.stats.response = None
         sdfs = [SpectralDensity.from_stream(stream, **kwargs)]
+        self.avoided_spans = sdfs[0].avoided_spans
         # Make sure we're using the same starttimes throughout the process
         self.starttimes = sdfs[0].starttimes
         self.RFList = RFList()
@@ -112,7 +114,7 @@ class DataCleaner:
         s += f" response_functions = {self.RFList.__str__()}"
         return s
 
-    def clean_sdf(self, sdf):
+    def apply_to_sdf(self, sdf):
         """
         Correct spectral density functions
 
@@ -130,7 +132,7 @@ class DataCleaner:
             sdf = self._removeRF_SDF(sdf, rf)
         return sdf
 
-    def clean_stream_to_sdf(self, stream, fast_calc=False, **kwargs):
+    def apply_to_streams_sdf(self, stream, fast_calc=False, **kwargs):
         """
         Calculate corrected spectral density functions from an input stream
 
@@ -148,15 +150,15 @@ class DataCleaner:
         assert isinstance(stream, Stream)
         if fast_calc:
             sdf = SpectralDensity.from_stream(stream, **kwargs)
-            sdf = self.clean_sdf(sdf)
+            sdf = self.apply_to_sdf(sdf)
         else:
             sdf = SpectralDensity.from_stream(stream, data_cleaner=self,
                                               **kwargs)
         return sdf
 
-    def clean_stream(self, stream, in_time_domain=False):
+    def apply(self, stream, in_time_domain=False):
         """
-        Calculate corrected data stream
+        Apply DataCleaner to a data stream
 
         Args:
             stream (Stream): list of channels to remove, in order

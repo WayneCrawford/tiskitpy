@@ -8,10 +8,11 @@ import unittest
 import inspect
 from pathlib import Path
 
+from numpy import array
 from obspy.core import UTCDateTime
-from obspy.core.stream import read as stream_read
+from obspy.core.stream import read as stream_read, Stream, Trace
 
-from tiskitpy import TimeSpans
+from tiskitpy import TimeSpans, _get_time_bounds
 
 
 class TestMethods(unittest.TestCase):
@@ -22,6 +23,21 @@ class TestMethods(unittest.TestCase):
         self.path = Path(inspect.getfile(
             inspect.currentframe())).resolve().parent
         self.test_path = self.path / "data" / "time_spans"
+
+    def test_time_bounds(self):
+        """Test `_time_bounds()` method"""
+        st = '2013-07-15T13:59:00'
+        et = '2013-07-15T13:59:10'
+        expected_output = (UTCDateTime(st), UTCDateTime(et))
+        self.assertEqual(expected_output, _get_time_bounds((st, et)))
+        trace = Trace(array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                      {'starttime': UTCDateTime(st),
+                       'sampling_rate': 1})
+        self.assertEqual(expected_output, _get_time_bounds(trace))
+        stream = Stream([trace, trace, trace, trace])
+        self.assertEqual(expected_output, _get_time_bounds(stream))
+        with self.assertRaises(TypeError):
+            _get_time_bounds(24)
 
     def test_overlaps(self):
         """
@@ -169,7 +185,7 @@ class TestMethods(unittest.TestCase):
     def test_from_eqs(self):
         """Test `from_eqs()` method"""
         eq_spans = TimeSpans.from_eqs(
-            UTCDateTime('2013-07-17T00:00'), UTCDateTime('2013-07-28T00:00'),
+            (UTCDateTime('2013-07-17T00:00'), UTCDateTime('2013-07-28T00:00')),
             minmag=5.5, days_per_magnitude=1.5,
             eq_file = str(self.test_path / 'test_cat.qml'))
         self.assertEqual(eq_spans, TimeSpans(

@@ -51,14 +51,14 @@ class TestMethods(unittest.TestCase):
             "      2 | XX.STA.00-1.BX2    | ['XX.STA.00-1.BX3', 'XX.STA.00-1.BDH']\n"
         )
 
-    def test_clean_sdf(self):
-        """Test clean_sdf function"""
+    def test_apply_to_sdf(self):
+        """Test apply_to_sdf function"""
         sdf = SpectralDensity.from_stream(self.stream, window_s=self.window_s)
         seed_ids = ['XX.STA.00.BX1', 'XX.STA.00.BX2', 'XX.STA.00.BX3', 'XX.STA.00.BDH']
         
         # Test dc1 (one channel removed)
         ch_ids = ['XX.STA.00.BX1', 'XX.STA.00-1.BX2', 'XX.STA.00-1.BX3', 'XX.STA.00-1.BDH']
-        cleaned = self.dc1.clean_sdf(sdf)
+        cleaned = self.dc1.apply_to_sdf(sdf)
         self.assertEqual(cleaned.ids, ch_ids)
         self.assertEqual(cleaned.seed_ids, seed_ids)
         for ch_id, cleaned_ids in {
@@ -71,7 +71,7 @@ class TestMethods(unittest.TestCase):
         # Test dc12 (two channels removed)
         ch_ids = ['XX.STA.00.BX1', 'XX.STA.00-1.BX2', 'XX.STA.00-1-2.BX3',                 'XX.STA.00-1-2.BDH']
         clean_seqs = [[],         ['XX.STA.00.BX1'], ['XX.STA.00.BX1','XX.STA.00-1.BX2'], ['XX.STA.00.BX1','XX.STA.00-1.BX2']]
-        cleaned = self.dc12.clean_sdf(sdf)
+        cleaned = self.dc12.apply_to_sdf(sdf)
         self.assertEqual(cleaned.seed_ids, seed_ids)
         self.assertEqual(cleaned.ids, ch_ids)
         self.assertEqual([cleaned.clean_sequence(x) for x in ch_ids], clean_seqs)
@@ -82,16 +82,16 @@ class TestMethods(unittest.TestCase):
             'XX.STA.00-1-2.BDH': ['XX.STA.00.BX1','XX.STA.00-1.BX2']}.items():
             self.assertEqual(cleaned.clean_sequence(ch_id), cleaned_ids)
 
-    def test_clean_stream_to_sdf(self):
-        """Test clean_stream_to_sdf function"""
+    def test_apply_to_streams_sdf(self):
+        """Test apply_to_streams_sdf function"""
         for fast_calc in (False, True):
-            # cleaned = self.dc.clean_stream_to_sdf(self.stream)
-            cleaned = self.dc1.clean_stream_to_sdf(self.stream,
+            # cleaned = self.dc.apply_to_streams_sdf(self.stream)
+            cleaned = self.dc1.apply_to_streams_sdf(self.stream,
                                                    window_s=self.window_s)
             # cleaned.plot(overlay=True)
 
-    def test_clean_stream(self):
-        """Test clean_stream and SpectralDensity.from_stream() functions"""
+    def test_apply(self):
+        """Test apply and SpectralDensity.from_stream() functions"""
         # for itd in (False, True):
         # Time domain too slow for these tests
         clean_tests = [
@@ -108,7 +108,7 @@ class TestMethods(unittest.TestCase):
         for itd in (False,):
             for dc in clean_tests:
                 # Create a stream using the data cleaner
-                cleaned = dc['cleaner'].clean_stream(self.stream, in_time_domain=itd)
+                cleaned = dc['cleaner'].apply(self.stream, in_time_domain=itd)
                 self.assertEqual([x.id for x in cleaned], dc['seed_ids'])
                 self.assertEqual([x.stats.get('clean_sequence', []) for x in cleaned],
                                  dc['clean_seqs'])

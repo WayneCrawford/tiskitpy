@@ -3,11 +3,7 @@
 CleanedStream
 =======================
 
-Calculates the angle and azimuth to rotate the vertical channel to minimize
-noise.
-
-**BUG: The code only rotates about two axes, so it is not appropriate for
-rotating the horizontal axes, which could lose their orientation**
+Subclass of :class:`obspy.Stream` that embeds processing steps
 
 Detailed information is in :ref:`tiskitpy.CleanedStream`
 

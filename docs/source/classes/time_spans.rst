@@ -14,7 +14,7 @@ Constructor
 
 - ``TimeSpans(spans)``: create a TimeSpans object using the
   provided lists of [start_time, end_time]s.
-- ``TimeSpans.from_eqs(start_time, end_time, ...)``: create an object
+- ``TimeSpans.from_eqs(time_bounds, ...)``: create an object
   of TimeSpans to avoid, based on an earthquake catalog.
   If the catalog is not provided, ir will be downloaded from USGS.
 

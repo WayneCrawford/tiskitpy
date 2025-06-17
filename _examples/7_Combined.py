@@ -22,13 +22,13 @@ dc = DataCleaner(stream, ['*1', '*2', '*H'])
 dc_rot = DataCleaner(rot_stream, ['*1', '*2', '*H'])
 
 # Clean the stream, then calculate the spectral density
-stream_dc = dc.clean_stream(stream)
-rot_stream_dc = dc_rot.clean_stream(rot_stream)
+stream_dc = dc.apply(stream)
+rot_stream_dc = dc_rot.apply(rot_stream)
 sd_dc = SpectralDensity.from_stream(stream_dc, inv=inv)
 sd_rot_dc = SpectralDensity.from_stream(rot_stream_dc, inv=inv)
 
 # Directly calculate the spectral density, with the DataCleaner as input
-sd_rot_sddc = dc_rot.clean_stream_to_sdf(rot_stream, inv=inv)
+sd_rot_sddc = dc_rot.apply_to_streams_sdf(rot_stream, inv=inv)
 
 # PLOT THE RESULTS
 SpectralDensity.plots(

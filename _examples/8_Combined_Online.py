@@ -60,10 +60,10 @@ sd_rot = SpectralDensity.from_stream(rot_stream, inv=inv_decim)
 # USE TRANSFER FUNCTION BASED DATA CLEANER TO REDUCE VERTICAL CHANNEL NOISE
 dc = DataCleaner(rot_stream, ['*1', '*2', '*H'])
 # first clean the stream, then calculate the spectral density
-rot_stream_dc = dc.clean_stream(rot_stream)
+rot_stream_dc = dc.apply(rot_stream)
 sd_rot_dc = SpectralDensity.from_stream(rot_stream_dc, inv=inv_decim)
 # directly calculate the spectral density, with the datacleaner as input
-sd_rot_sddc = dc.clean_stream_to_sdf(rot_stream, inv=inv_decim)
+sd_rot_sddc = dc.apply_to_streams_sdf(rot_stream, inv=inv_decim)
 
 # PLOT THE RESULTS
 SpectralDensity.plots(

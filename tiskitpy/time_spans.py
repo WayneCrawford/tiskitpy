@@ -77,7 +77,7 @@ class TimeSpans:
         return [[x, y] for x, y in zip(self._start_times, self._end_times)]
 
     @classmethod
-    def from_eqs(cls, starttime, endtime, minmag=5.85, days_per_magnitude=1.5,
+    def from_eqs(cls, time_bounds, minmag=5.85, days_per_magnitude=1.5,
                  eq_file=None, save_eq_file=True):
         """
         Generate timespans to avoid because of earthquakes
@@ -86,12 +86,15 @@ class TimeSpans:
         saving the information to a file that can be subsequently used
 
         Args:
-            starttime (:class:`UTCDateTime` or str): earliest data that will be
-                presented.  If a str, must by ISO8601 compatible.  Forced
-                to the beginning of the day
-            endtime (:class:`UTCDateTime` or str): latest data that will be presented.
-                If a str, must by ISO8601 compatible.  Forced to the
-                end of the day
+            time_bounds (tuple, :class:`obspy.stream.Stream` or :class:`obspy.stream.Trace`):
+                time bounds to use.  Bounds are forced to be beginning (startime)
+                and end (endtime) of a day:
+                    - if tuple: (starttime, endtime) as :class:`UTCDateTime`
+                      or ISO8601-compatible string
+                    - if :class:`obspy.stream.Trace`: the trace's starttime and
+                      endtime
+                     - if :class:`obspy.stream.Stream`: earliest trace starttime
+                       and latest trace endtime
             minmag (float): EQ Magnitude above which to cut out times
             days_per_magnitude (float): days to cut per magnitude above
                 min_magnitude
@@ -100,16 +103,27 @@ class TimeSpans:
         Returns:
             eq_spans (:class:`TimeSpans`): time spans covering EQ signal
         """
-        if isinstance(starttime, str):
-            try:
-                starttime = UTCDateTime(starttime)
-            except Exception:
-                raise ValueError(f"UTCDateTime() could not read {starttime=}")
-        if isinstance(endtime, str):
-            try:
-                endtime = UTCDateTime(endtime)
-            except Exception:
-                raise ValueError(f"UTCDateTime() could not read {endtime=}")
+        starttime, endtime = _get_time_bounds(time_bounds)
+        if isinstance(time_bounds, tuple):
+            starttime, endtime = time_bounds[0], time_bounds[1]
+            if isinstance(starttime, str):
+                try:
+                    starttime = UTCDateTime(starttime)
+                except Exception:
+                    raise ValueError(f"UTCDateTime() could not read {starttime=}")
+            if isinstance(endtime, str):
+                try:
+                    endtime = UTCDateTime(endtime)
+                except Exception:
+                    raise ValueError(f"UTCDateTime() could not read {endtime=}")
+        elif isinstance(time_bounds, Trace):
+            starttime = time_bounds.stats.starttime
+            endtime = time_bounds.stats.endtime
+        elif isinstance(time_bounds, Stream):
+            starttime = min([x.stats.starttime for x in time_bounds])
+            endtime = max([x.stats.endtime for x in time_bounds])
+        else:
+            raise TypeError(f'{type(time_bounds)=}, not tuple, Trace or Stream')
         starttime = starttime.replace(hour=0, minute=0, second=0, microsecond=0)
         endtime = endtime.replace(hour=23, minute=59, second=59, microsecond=999999)
         if eq_file is None:
@@ -555,3 +569,42 @@ def _eq_filename(starttime, endtime, minmag):
     return "{}-{}_MM{:g}_eqcat.qml".format(
         starttime.strftime(tfmt), endtime.strftime(tfmt), minmag
     )
+
+
+def _get_time_bounds(time_bounds):
+    """
+    Return startime and endtime from input time_bounds object
+    
+    
+    Args:
+        time_bounds (tuple, :class:`obspy.stream.Stream` or :class:`obspy.stream.Trace`):
+            time bounds to use.  Bounds are forced to be beginning (startime)
+            and end (endtime) of a day:
+                - if tuple: (starttime, endtime) as :class:`UTCDateTime`
+                  or ISO8601-compatible string
+                - if :class:`obspy.stream.Trace`: the trace's starttime and
+                  endtime
+                 - if :class:`obspy.stream.Stream`: earliest trace starttime
+                   and latest trace endtime
+    """
+    if isinstance(time_bounds, tuple):
+        starttime, endtime = time_bounds[0], time_bounds[1]
+        if isinstance(starttime, str):
+            try:
+                starttime = UTCDateTime(starttime)
+            except Exception:
+                raise ValueError(f"UTCDateTime() could not read {starttime=}")
+        if isinstance(endtime, str):
+            try:
+                endtime = UTCDateTime(endtime)
+            except Exception:
+                raise ValueError(f"UTCDateTime() could not read {endtime=}")
+    elif isinstance(time_bounds, Trace):
+        starttime = time_bounds.stats.starttime
+        endtime = time_bounds.stats.endtime
+    elif isinstance(time_bounds, Stream):
+        starttime = min([x.stats.starttime for x in time_bounds])
+        endtime = max([x.stats.endtime for x in time_bounds])
+    else:
+        raise TypeError(f'{type(time_bounds)=}, not tuple, Trace or Stream')
+    return starttime, endtime

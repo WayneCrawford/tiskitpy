@@ -53,7 +53,7 @@ from .data_cleaner import DataCleaner, RFList
 from .decimate import Decimator
 from .rptransient import PeriodicTransient
 from .spectral_density import SpectralDensity, Peterson_noise_model
-from .time_spans import TimeSpans
+from .time_spans import TimeSpans, _get_time_bounds  # latter is just for testing
 from .response_functions import ResponseFunctions
 # Functions
 from .read_mseed import read_MSEED

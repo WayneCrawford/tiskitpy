@@ -551,10 +551,17 @@ class ResponseFunctions(object):
         rf = self.value(out_id).copy()
         iref = np.nonzero(rf)
         if len(iref[0]) == 0:
-            raise ValueError(f"No nonzero values for {out_id=}")
-        rf = rf[iref]
-        rferr = self.uncertainty(out_id)[iref]
-        f = self.freqs[iref]
+            # No decent values, use nans to create an empty pot
+            f = self.freqs
+            rf = np.nan * np.ones(f.shape)
+            rferr = np.nan * np.ones(f.shape)
+            # rf = np.array([np.nan, np.nan])
+            # rferr = np.array([np.nan, np.nan])
+            # f = np.array([self.freqs[0], self.freqs[-1]])
+        else:
+            rf = rf[iref]
+            rferr = self.uncertainty(out_id)[iref]
+            f = self.freqs[iref]
         if fig is None:
             fig = plt.gcf()
         # Plot amplitude
