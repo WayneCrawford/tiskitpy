@@ -2,8 +2,8 @@
 
 Routines for time series data processing
 
-Uses the obspy seismological Trace, Stream (data) and Inventory (metadata)
-classes, but should work for non-seismology datasets as well
+Uses the [obspy](https://docs.obspy.org) Stream (data) and Inventory (metadata)
+classes
 
 
 [Documentation](https://tiskitpy.readthedocs.io)

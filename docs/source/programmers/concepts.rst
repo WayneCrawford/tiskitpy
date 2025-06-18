@@ -1,16 +1,23 @@
 *******************************
 Concepts
-*******************************
+**************
+*****************
+
+.. py:module:: tiskitpy
 
 Clean sequences
 =========================
 
-Described in :ref:`clean_sequences`
+Clean sequences are lists of the operations that have been performed on a data stream.
+They are mostly handled by the :py:class:`CleanSequence` class
 
-``tiskitpy_id``
-=========================
-
-This is actually the most difficult part to implement in tiskitpy, because
-this id changes each time that you remove another noise source. 
-**SHOULD PUT A FULL EXPLANATION OF CONCEPT AND IMPLEMENTATION IN EACH
-CLASS, I'M SURE THERE'S A SIMPLER AND STABLER WAY THAN WHAT I'M DOING**
+``tiskitpy_id`` is a textual representation of the clean sequence list, with each
+element separated by "-" and most of the processing codes shortened to their
+first or last unambiguous letters.
+The ``tiskitpy_id``` can be stuffed into a Trace's "location" code for
+plotting purposes, but it shouldn't be stored there permanently because it can
+hinder operations that are based on seed ids, such as finding an instrument
+response in an inventory or comparing two channels.
+The py:method:`CleanSequence.tag` and py:method:`CleanSequence.untag` methods
+are part of a suite of :py:class:`CleanSequence` methods to generate and remove
+``tiskitpy_id`` from strings, seed_ids, etc.

@@ -9,12 +9,26 @@ DOT_REPLACE_CHAR = '_'  # Character to replace id '.'s in cleaner strings
 
 class CleanSequence:
     """
-    Routines to store channel cleaning information
+    Routines to handle channel cleaning information lists.
+    
+    Can store the information in Trace objects (Trace.stats['clean_sequence'])
+    and add or remove this information from the trace's "location" code.
+    
+    Can also match seed_ids independently of whether the clean sequence has
+    been added to the location code.
+    
+    Current clean_sequence codes are:
+    - "-{seed_id}": the given channel's coherent part has been subtracted from this channel (:class:`DataCleaner`)
+    - "ROT" for simple rotation (:class:`CleanRotator`)
+    - "ZEROS" if selected data has been zeroed (:class:`TimeSpans`)
+    
+    In :classL`SpectralDensity` objects, they are stored in the property
+    ``_clean_sequences`` and textually integrated in the ``input`` and
+    ``output`` coordinates
 
-    In Trace and Stream objects, the information is stored in
-    Trace.stats['clean_sequence']
-    In SpectralDensity objects, it is stored in ...
-    In DCRF objects, it is stored in...
+    In :class:`ReceiverFunction` objects, CleanSequence is used to match
+    channels with different levels of processing (it finds the original
+    seed_id to compare)
     
     A string representation can be generated using the `string` method
     

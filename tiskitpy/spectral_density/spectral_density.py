@@ -1267,13 +1267,12 @@ class SpectralDensity:
         Args:
             x (list of str or None): limit to the listed input channels
             y (list of str or None): limit to the listed output channels
-            display (str): how to arrange plots:
-                - "full": a row for every channel, a column for every channel,
-                  every cell filled
-                - "sparse": Only plot the upper diagonal
-                - "minimal": Plot upper diagonal elements in the least
-                  number of cells possible
-                - "overlay": One plot with all upper diagonal elemetns overlain
+            display (str): How to arrange plots: "full": a row for every
+                channel, a column for every channel, every cell filled;
+                "sparse": Only plot the upper diagonal;
+                "minimal": Plot upper diagonal elements in the least
+                number of cells possible
+                "overlay": One plot with all upper diagonal elemetns overlain
             overlay (bool): [GRANDFATHERED]: same as display="overlay"
             show (bool): show on desktop
             outfile (str): save to the named file

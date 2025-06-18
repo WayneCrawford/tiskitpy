@@ -8,4 +8,4 @@ Programmers Corner
    :maxdepth: 2
 
    programmers/concepts
-   programmers/code
+   programmers/helpers

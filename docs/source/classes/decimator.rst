@@ -32,7 +32,7 @@ Methods
 - ``update_inventory_from_nslc(inv ...)``: Return inventory with only the
   specified network, station, channel, location(s) updated
  
- Command-line programs
+Command-line programs
 ---------------------
 
 Use these programs' `-h` option for help

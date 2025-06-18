@@ -1,4 +1,4 @@
-.. _tiskitpy.CleanedStream
+.. _tiskitpy.CleanedStream:
 
 tiskitpy.CleanedStream
 -----------------------------
