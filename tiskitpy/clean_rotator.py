@@ -47,7 +47,7 @@ class CleanRotator:
         azimuth (float): azimuth by which Z (or Z-X-Y) was rotated
         variance_reduction (float): amount by which variance was reduced during
             calculation (0 to 1)
-        avoided_spans (:py:class:`TimeSpans`): avoided time spans
+        avoided_spans (:class:`TimeSpans`): avoided time spans
     """
 
     def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,

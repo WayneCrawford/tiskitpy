@@ -59,7 +59,7 @@ class DataCleaner:
                 frequency response functions
             starttimes (list of :class:`obspy.UTCDateTime`): start times for
                 each spectra used
-            avoided_spans (:py:class:`TimeSpans`): avoided time spans
+            avoided_spans (class:`TimeSpans`): avoided time spans
         """
         if not isinstance(stream, Stream):
             raise ValueError("stream is a {type(stream)}, not an obspy Stream")
