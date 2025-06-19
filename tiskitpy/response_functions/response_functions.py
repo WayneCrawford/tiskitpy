@@ -548,22 +548,13 @@ class ResponseFunctions(object):
                 frequency response function amplitude plot
                 frequency response function phase plot
         """
+        f = self.freqs
         rf = self.value(out_id).copy()
-        iref = np.nonzero(rf)
-        if len(iref[0]) == 0:
-            # No decent values, use nans to create an empty pot
-            f = self.freqs
-            rf = np.nan * np.ones(f.shape)
-            rferr = np.nan * np.ones(f.shape)
-            # rf = np.array([np.nan, np.nan])
-            # rferr = np.array([np.nan, np.nan])
-            # f = np.array([self.freqs[0], self.freqs[-1]])
-        else:
-            rf = rf[iref]
-            rferr = self.uncertainty(out_id)[iref]
-            f = self.freqs[iref]
+        rferr = self.uncertainty(out_id)
+        ibad = (rf == 0).nonzero()
         if fig is None:
             fig = plt.gcf()
+
         # Plot amplitude
         if self.input_units.upper() == 'PA' and self.output_units(out_id) == '1':
             fig.suptitle("Compliance")
@@ -579,25 +570,20 @@ class ResponseFunctions(object):
         if errorbars is True:
             ax_a.errorbar(f, np.abs(rf), np.abs(rferr), fmt='b_', ecolor='k',
                           markersize=3)
-            if np.any(rf is not None):
+            if np.any(rf is not np.nan):
                 ax_a.set_yscale('log')
             ax_a.set_xscale('log')
         else:
             ax_a.loglog(f, np.abs(rf + rferr), color="blue", linewidth=0.5)
             ax_a.loglog(f, np.abs(rf - rferr), color="blue", linewidth=0.5)
             ax_a.loglog(f, np.abs(rf), color="black", label=label)
-        ax_a.set_xlim(f[1], f[-1])
+        ax_a.set_xlim(self.freqs[1], self.freqs[-1])
         if title is not None:
             ax_a.set_title(title, fontsize='medium')
         if label is not None:
             ax_a.legend()
-
         if show_ylabel:
             ax_a.set_ylabel("FRF")
-        # Below doesn't work for removing x tick labels
-        # xt = ax_a.get_xticks()  # Needed to "set" xticks before removing label
-        # ax_a.set_xticks(xt)
-        # ax_a.set_xticklabels([])
         
         # Plot phase
         ax_p = plt.subplot2grid(
@@ -606,6 +592,7 @@ class ResponseFunctions(object):
             sharex=ax_a,
         )
         phases = np.angle(rf, deg=True)
+        phases[ibad] = np.nan
         phase_lim = 220
         igood = np.invert(np.isnan(phases))
         wrap_phases = phases.copy()
@@ -616,7 +603,8 @@ class ResponseFunctions(object):
         else:
             ax_p.semilogx(f, phases)
         ax_p.set_ylim(-phase_lim, phase_lim)
-        ax_p.set_xlim(f[1], f[-1])
+        ax_p.set_xlim(self.freqs[1], self.freqs[-1])
+        # ax_p.set_xlim(f[1], f[-1])
         ax_p.set_yticks((-180, 0, 180))
         if show_ylabel:
             ax_p.set_ylabel("Phase")

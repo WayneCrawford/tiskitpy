@@ -105,6 +105,11 @@ class ComplianceNoise(object):
 
     @property
     def IG_Pa_seafloor(self):
+        """
+        Infragravity wave seafloor pressure PSD
+        
+        Based on self.IG_m_seasurface and self.water_depth)
+        """
         psd = self.IG_m_seasurface.copy()
         if np.any(np.diff(psd.freqs) > self.IG_freqstep):
             psd.resample(np.arange(psd.freqs[0],
@@ -134,7 +139,7 @@ class ComplianceNoise(object):
     @property
     def PSDs(self):
         """
-        Return dictionary of all PSD values
+        Dictionary of all PSDs
         """
         return {'IGP': self.IG_Pa_seafloor,
                 'NOP': self.noise_pressure,

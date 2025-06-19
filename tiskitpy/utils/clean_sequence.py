@@ -32,8 +32,8 @@ class CleanSequence:
     
     A string representation can be generated using the `string` method
     
-    A string representation can be placed in / removed from a Trace/Stream's
-    seed id using the  `seedid_tag()` and `seedid_untag()` methods
+    A string representation can be placed in or removed from a Trace/Stream's
+    seed id using the  :meth:`tag` and :meth:`untag` methods
     """
     @staticmethod
     def tag(inp, clean_code, cleaned_ids=None, verbose=False):
@@ -41,15 +41,15 @@ class CleanSequence:
         Tag Trace stats with a clean_code
 
         Args:
-            inp (:class:`obspy.core.Trace`, :class:`obspy.core.Stream`, a list,
-                or None): the object to tag
+            inp (:class:`Trace`, :class:`Stream`, list or None):
+                the object to tag
             clean_code (str or list of str): transformation code ('ROT', ...)
                 or the seed_id of the cleaned channel
                 If a list, each str in the list will be appended
             cleaned_ids (list): a list of which Stream ids to apply to (can use
                 wildcards). If None, applies to all of the Stream traces
         Returns:
-            outp (:class:`obspy.core.Trace`, :class:`obspy.core.Stream`, or list):
+            outp (:class:`Trace`, :class:`Stream`, or list):
                 trace, stream, or list with modified clean_sequence
         Raises:
             ValueError if cleaned_ids is not None and trace_or_stream is a Trace

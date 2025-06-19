@@ -12,7 +12,7 @@ Clean sequences are lists of the operations that have been performed on a
 data stream.
 They are mostly handled by the :py:class:`CleanSequence` class
 
-``tiskitpy_id`` is a textual representation of the clean sequence list, with each
+The ``tiskitpy_id`` is a textual representation of the clean sequence list, with each
 element separated by "-" and most of the processing codes shortened to their
 first or last unambiguous letters.
 The ``tiskitpy_id``` can be stuffed into a Trace's "location" code for
@@ -25,5 +25,5 @@ are part of a suite of :py:class:`CleanSequence` methods to generate and remove
 ``tiskitpy_id`` from strings, seed_ids, etc.
 
 CleanSequence API
-=======================
+---------------------
 .. autoclass:: tiskitpy.CleanSequence
