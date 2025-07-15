@@ -26,7 +26,7 @@ Methods
 
 Modify a Trace or Stream
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-TimeSpans
+
 - :meth:`cutout <tiskitpy.ResponseFunctions.cutout>`: cuts out data in the time spans
 - :meth:`interp <tiskitpy.TimeSpans.interp>`: linearly interpolate values within the time
   spans from their value at the span start to their value at the span end
