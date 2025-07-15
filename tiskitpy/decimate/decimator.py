@@ -44,18 +44,12 @@ class Decimator:
     Can also update the station inventory with the used filter responses
 
     Args:
-        decimates (list): list of decimation factorst to use (integers between
-                        2 and 7, will be applied in order)
+        decimates (list): list of decimation factors to use (integers between
+            2 and 7, will be applied in order)
         verbose (bool): Be chatty
     """
-    decimates: list
-    verbose: bool = False
-
-    # def __post_init__(self):
-    #     if self.verbose is True:
-    #         logger.setLevel(logging.INFO)
-    #     else:
-    #         logger.setLevel(logging.WARN)
+    decimates: list   # List of decimation factors
+    verbose: bool = False  # Be chatty
 
     @property
     def decimation_factor(self):
