@@ -32,6 +32,11 @@ Methods
 - ``update_inventory(inv, ...)``: Return inventory with decimated channels added
 - ``update_inventory_from_nslc(inv ...)``: Return inventory with only the
   specified network, station, channel, location(s) updated
+- :meth:`tiskitpy.Decimator.decimate`: Decimate the data
+- :meth:`tiskitpy.Decimator.update_inventory`: Return inventory with decimated channels added
+- :meth:`tiskitpy.Decimator.decimate`: Return inventory with only
+  specified networks, stations, channels and/or location updated
+- :meth:`tiskitpy.Decimator.get_band_code`: Return the band code for a given sampling rate
  
 Command-line programs
 ---------------------
