@@ -12,6 +12,10 @@ The main methods are:
 Constructor
 ---------------------
 
+- :meth:`tiskitpy.Decimator.__init__`:  Set up a series of decimations corresponding
+  to the list ``decimates``.
+- :ckass:`tiskitpy.Decimator`:  Set up a series of decimations corresponding
+  to the list ``decimates``.
 - ``Decimator(decimates)``: Set up a series of decimations corresponding
   to the list ``decimates``.
 
