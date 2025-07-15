@@ -26,7 +26,7 @@ Methods
 ---------------------
 
 - ``decimate(Stream or Trace)``: Decimate the data
-- :ref:`tiskitpy.Decimator.decimate`
+- :class:`tiskitpy.Decimator.decimate`
 - ``get_band_code(in_band_code, sample_rate)``: return the band code for a given
   sample rate.
 - ``update_inventory(inv, ...)``: Return inventory with decimated channels added

@@ -67,6 +67,7 @@ html_domain_indices = True
 autodoc_default_options = {
     'members': True,
     'undoc-members': True,
+    'member_order': 'groupwise',
     'show-inheritance': True,
     'special_members': '__init__'
 }
