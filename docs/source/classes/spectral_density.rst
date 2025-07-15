@@ -9,8 +9,9 @@ Also outputs coherences as well.  Plots any of the above.
 Constructor
 ---------------------
 
-- :meth:`SpectralDensity.from_stream`: Make a :ref:`SpectralDensity` object from
-  a an obspy data :class:`Stream <obspy.core.stream.Stream>`
+- :meth:`SpectralDensity.from_stream <tiskitpy.SpectralDensity.from_stream>`:
+    Make a :ref:`tiskitpy.SpectralDensity` object from a an obspy data
+    :class:`Stream <obspy.core.stream.Stream>`
 
 Properties
 ---------------------
@@ -49,7 +50,7 @@ Other Methods
 ^^^^^^^^^^^^^^^^^^
 
 - :meth:`plot_autospectra <tiskitpy.SpectralDensity.plot_autospectra>`: plot autospectra
-- :meth:`plot <tiskitpy.SpectralDensity.plot>`: shortcut for ``plot_autospectra()``
+- :meth:`plot <tiskitpy.SpectralDensity.plot>`: shortcut for :meth:`plot_autospectra <tiskitpy.SpectralDensity.plot_autospectra>`
 - :meth:`plot_cross_spectra <tiskitpy.SpectralDensity.plot_cross_spectra>`: plot cross- (and auto-) spectra
 - :meth:`plot_coherences <tiskitpy.SpectralDensity.plot_coherences>`: plot coherences
 - :meth:`plot_one_autospectra <tiskitpy.SpectralDensity.plot_one_autospectra>`: plot autospectra for one channel

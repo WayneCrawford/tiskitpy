@@ -3,15 +3,11 @@ DataCleaner
 
 Remove coherent noise seen on another channel
 
-Detailed information is in :ref:`tiskitpy.DataCleaner`
-
-The main methods are:
-
 Constructor
 ---------------------
 
-- ``DataCleaner(stream, remove_list,...)``: Calculate the DataCleaner object from
-  a data stram and a list of channels to remove
+- :class:`DataCleaner <tiskitpy.DataCleaner>`: Calculate the DataCleaner object from
+  a data stream and a list of channels to remove
 
 Methods
 ---------------------
@@ -19,15 +15,15 @@ Methods
 Cleaning
 ^^^^^^^^^^^^
 
-- ``apply_to_sdf(sdf)``: Clean an existing spectral density function (approximation).
-- ``apply(stream, ...)``: Clean a data stream
-- ``apply_to_streams_sdf(stream, ...)``: Calculate SpectralDensity function directly
+- :meth:`apply_to_sdf <tiskitpy.DataCleaner.apply_to_sdf>`: Clean an existing spectral density function (approximation).
+- :meth:`apply <tiskitpy.DataCleaner.apply>`: Clean a data stream
+- :meth:`apply_to_streams_sdf <tiskitpy.DataCleaner.apply_to_streams_sdf>`: Calculate SpectralDensity function directly
   from the input stream
 
 Other
 ^^^^^^^^^^^^
 
-- ``plot()``: plot the transfer functions in the DataCleaner
+- :meth:`plot <tiskitpy.DataCleaner.plot>`: plot the transfer functions in the DataCleaner
 
 Example
 ---------------------

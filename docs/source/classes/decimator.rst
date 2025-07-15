@@ -8,7 +8,7 @@ Decimate data and put decimation information in instrument responses.
 Constructor
 ---------------------
 
-- :class:`tiskitpy.Decimator`:  Set up a series of decimations corresponding
+- :class:`DataCleaner <tiskitpy.Decimator>`:  Set up a series of decimations corresponding
   to the list ``decimates``.
 
 Properties
