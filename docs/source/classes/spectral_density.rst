@@ -39,7 +39,7 @@ Get Methods
 - :meth:`crossspect <tiskitpy.SpectralDensity.crossspect>`: Cross-spectral density function between two channels
 - :meth:`channel_id <tiskitpy.SpectralDensity.channel_id>`: Channel id, expanding
   wildcards and verifying that the result is unique
-- :meth:`seed_id <tiskitpy.SpectralDensity.seed_id>`: The specified channel name, expanding
+- :meth:`seed_id <tiskitpy.SpectralDensity.seed_id>`: The specified channel's seed_id, expanding
   wildcards and verifying that the result is unique
 - :meth:`channel_instrument_response <tiskitpy.SpectralDensity.channel_instrument_response>`: Channel's instrument response
 - :meth:`channel_units <tiskitpy.SpectralDensity.channel_units>`: A channel's input (physical) units

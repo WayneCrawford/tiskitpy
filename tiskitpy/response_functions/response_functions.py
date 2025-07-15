@@ -200,7 +200,15 @@ class ResponseFunctions(object):
         return str(self._ds.sel(output=oc).coords["out_units"].values)
 
     def noise_channel(self, output_channel_id):
-        """Frequency response function noise channel string"""
+        """
+        Return the channel assumed to have incoherent noise
+        
+        Args:
+            output_channel_id (str): the channel to use
+            
+        Returns:
+            str: The channel ('input', 'output', 'equal', or 'unknown')
+        """
         oc = self._match_out_id(output_channel_id)
         return str(self._ds.sel(output=oc).coords["noise_chan"].values)
 
@@ -269,6 +277,9 @@ class ResponseFunctions(object):
         Args:
             output_channel_id (str): output channel id
             zero_as_none (bool): NOT USED!
+        
+        Returns:
+            :class:`numpy.ndarray``
         """
         oc = self._match_out_id(output_channel_id)
         ir = self._ds["instrument_response"].sel(output=oc).values

@@ -6,14 +6,10 @@ ResponseFunctions
 Calculate frequency response functions for a given input channel and
 a range of output channels.
 
-Detailed information is in :ref:`tiskitpy.ResponseFunctions`
-
-The main methods are:
-
 Constructor
 ---------------------
 
-- ``ResponseFunction(SpectralDensity, in_chan, ...)`` 
+- :class:`ResponseFunctions <tiskitpy.ResponseFunctions>` 
 
 Properties
 ---------------------
@@ -32,31 +28,30 @@ Methods
 Get
 ^^^^^^^^^^^^^^^^^^^^^
 
-- ``coh_signif(prob)``: Coherence significance level with the given probability
-- ``corrector(output_channel)``: input channel's correction factor with
+- :meth:`coh_signif <tiskitpy.ResponseFunctions.coh_signif>`: Coherence significance level with the given probability
+- :meth:`corrector <tiskitpy.ResponseFunctions.corrector>`: Input channel's correction factor with
   respect to the given channel
-- ``corrector_wrt_counts(output_channel)``: as above, but with respect to
+- :meth:`corrector_wrt_counts <tiskitpy.ResponseFunctions.corrector_wrt_counts>`: As above, but with respect to
   raw data counts
-- ``value (output_channel)``: frequency response function
-- ``value_wrt_counts(output_channel)``: frequency response function with
+- :meth:`value <tiskitpy.ResponseFunctions.value>`: Frequency response function
+- :meth:`value_wrt_counts <tiskitpy.ResponseFunctions.value_wrt_counts>`: Frequency response function with
   respect to raw data counts
-- ``noise_channel(output_channel)``: Return the channel ("input", "output" or
+- :meth:`noise_channel <tiskitpy.ResponseFunctions.noise_channel>`: Return the channel ("input", "output" or
   "equal") assumed to have incoherent noise
-- ``output_units(output_channel)``: output channel units
-- ``instrument_response(output_channel)``: frequency response function's
-  instrument respose 
-  (output_channel_instrument_response / input_channel_instrument_response)
-- ``uncertainty(output_channel)``: uncertainty of the given ``value`` s
-- ``uncertainty_wrt_counts(output_channel)``: uncertainty with respect
-  to raw data counts
+- :meth:`output_units <tiskitpy.ResponseFunctions.output_units>`: Output channel units
+- :meth:`instrument_response <tiskitpy.ResponseFunctions.instrument_response>`: Frequency response function's
+  instrument response (use to switch from counts to physical units)
+- :meth:`uncertainty <tiskitpy.ResponseFunctions.uncertainty>`: Uncertainty of the given ``value`` s
+- :meth:`uncertainty_wrt_counts <tiskitpy.ResponseFunctions.uncertainty_wrt_counts>`:
+    Uncertainty with respect to raw data counts
 
 Other
 ^^^^^^^^^^^^^^^^^^^^^
 
-- ``to_norm_compliance(water_depth)``: convert m/s^2 / Pa transfer functions to
+- :meth:`to_norm_compliance <tiskitpy.ResponseFunctions.to_norm_compliance>`: Convert m/s^2 / Pa transfer functions to
   normalized compliance
-- ``plot``: plot the frequency response functions
-- ``plot_one(in_chan, out_chan, ...)``: plot one frequency response function
+- :meth:`plot <tiskitpy.ResponseFunctions.plot>`: Plot the frequency response functions
+- :meth:`plot_one <tiskitpy.ResponseFunctions.plot_one>``: Plot one frequency response function
 
 Example
 ---------------------
