@@ -36,6 +36,21 @@ default_earth_model = [[1000, 3000, 3000, 1600],
 class ComplianceNoise(object):
     """
     Generate synthetic seismological data based on environmental and noise factors
+
+    Properties:
+        water_depth (float): water depth in meters
+        Z_offset_angles (list): Seismometer's Z offset [angle, azimuth]
+            from vertical, in degrees
+        IG_m_seasurface (:class:`tiskitpy.PSDVals`): Infragravity wave PSD levels (ref m)
+        noise_pressure (:class:`tiskitpy.PSDVals`): Pressure sensor noise levels (ref Pa)
+        noise_seismo (:class:`tiskitpy.PSDVals`): Seismometer noise levels (ref m/s^2)
+        noise_tilt_max (:class:`tiskitpy.PSDVals`): Maximum tilt noise (ref m/s^2))
+        noise_tilt_direction_limits (tuple): minimum and maximum tilt
+            directions (degrees).
+        noise_tilt_variance (float): variance in dB of tilt noise levels
+        earth_model (:class:`tiskitpy.EarthModel1D`): 1D Earth model
+        IG_freqstep (float): maximum frequency step for IG wave and compliance
+            PSDs
     """
     def __init__(self, water_depth=default_water_depth,
                  Z_offset_angles=default_Z_offset_angles,
