@@ -16,8 +16,6 @@ Properties
 - ``decimates``: the list of decimation factors
 - ``decimation_factor``: total decimation (product of ``decimates``)
 - ``verbose``: True if object is chatty.
-- :property:`tiskitpy.Decimator.decimates`: the list of decimation factors
-
 
 Methods
 ---------------------

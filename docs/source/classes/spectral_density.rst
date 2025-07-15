@@ -6,15 +6,11 @@ SpectralDensity
 Calculates auto- and cross-spectral densities for a data stream.
 Also outputs coherences as well.  Plots any of the above.   
 
-Detailed information is in :ref:`tiskitpy.SpectralDensity`
-
-The main methods are:
-
 Constructor
 ---------------------
 
-- ``SpectralDensity.from_stream(...)``: Make a :ref:`SpectralDensity` object from
-  an ``obspy`` data stream
+- :meth:`SpectralDensity.from_stream`: Make a :ref:`SpectralDensity` object from
+  a an obspy data :class:`Stream <obspy.core.stream.Stream>`
 
 Properties
 ---------------------
@@ -37,47 +33,44 @@ Methods
 Get Methods
 ^^^^^^^^^^^^^^^^^^
 
-- ``autospect(id)``: the channel's auto-spectral density function
-- ``coherence(in_id, out_id)``: the coherence between the given
-  channels
-- ``crossspect(in_id, out_id)``: the cross-spectral density function
-  between the given channels
-- ``channel_id(id)``: get the specified channel name, expanding
+- :meth:`autospect <tiskitpy.SpectralDensity.autospect>`: Auto-spectral density function for a channel
+- :meth:`coherence <tiskitpy.SpectralDensity.coherence>`: Coherence between two channels
+- :meth:`crossspect <tiskitpy.SpectralDensity.crossspect>`: Cross-spectral density function between two channels
+- :meth:`channel_id <tiskitpy.SpectralDensity.channel_id>`: Channel id, expanding
   wildcards and verifying that the result is unique
-- ``seed_id(id)``: get the specified channel name, expanding
+- :meth:`seed_id <tiskitpy.SpectralDensity.seed_id>`: The specified channel name, expanding
   wildcards and verifying that the result is unique
-- ``channel_instrument_response(id)``: the channel's instrument response
-- ``channel_units(id)``: the channel's input (physical) units
-- ``units(in_id, out_id)``: get the units of the corresponding
-  cross- or auto-spectra
-- ``coh_signif(probability)``: get the coherence significance level
+- :meth:`channel_instrument_response <tiskitpy.SpectralDensity.channel_instrument_response>`: Channel's instrument response
+- :meth:`channel_units <tiskitpy.SpectralDensity.channel_units>`: A channel's input (physical) units
+- :meth:`units <tiskitpy.SpectralDensity.units>`: Units of a cross- or auto-spectra
+- :meth:`coh_signif <tiskitpy.SpectralDensity.coh_signif>`: The coherence significance level
 
 Other Methods
 ^^^^^^^^^^^^^^^^^^
 
-- ``plot_autospectra(...)``: plot autospectra
-- ``plot(...)``: shortcut for ``plot_autospectra()``
-- ``plot_cross_spectra(...)``: plot cross- (and auto-) spectra
-- ``plot_coherences(...)``: plot coherences
-- ``plot_one_autospectra(channel, ...)``: plot autospectra for one channel
-- ``plot_one_spectra(in_id, out_id, ...)``: plot cross-spectra
+- :meth:`plot_autospectra <tiskitpy.SpectralDensity.plot_autospectra>`: plot autospectra
+- :meth:`plot <tiskitpy.SpectralDensity.plot>`: shortcut for ``plot_autospectra()``
+- :meth:`plot_cross_spectra <tiskitpy.SpectralDensity.plot_cross_spectra>`: plot cross- (and auto-) spectra
+- :meth:`plot_coherences <tiskitpy.SpectralDensity.plot_coherences>`: plot coherences
+- :meth:`plot_one_autospectra <tiskitpy.SpectralDensity.plot_one_autospectra>`: plot autospectra for one channel
+- :meth:`plot_one_spectra <tiskitpy.SpectralDensity.plot_one_spectra>`: plot cross-spectra
   for the given channels
-- ``plot_one_coherence(in_id, out_id, ...)``: plot coherence
+- :meth:`plot_one_coherence <tiskitpy.SpectralDensity.plot_one_coherence>`: plot coherence
   for the given channels
-- ``plots(spectra_list, ...)``: overlay plot spectra specified in the list
+- :meth:`plots <tiskitpy.SpectralDensity.plots>`: overlay plot spectra specified in the list
 
 Set Methods
 ^^^^^^^^^^^^^^^^^^
 
 You probably won't ever use these (should I put a `_` before?)
 
-- ``put_crossspect(in_id, out_id, spect)``: put a cross-spectral
+- :meth:`put_crossspect <tiskitpy.SpectralDensity.put_crossspect>`: put a cross-spectral
   density in the given slot
-- ``put_autospect(id, spect`)`: same as
-  ``put_crossspect(id, channel, spect)``
-- ``put_channel_instrument_response(id, response)``: put a channel
+- :meth:`put_autospect <tiskitpy.SpectralDensity.put_autospect>`: same as
+  :meth:`put_crossspect <tiskitpy.SpectralDensity.put_crossspect>`
+- :meth:`put_channel_instrument_response <tiskitpy.SpectralDensity.put_channel_instrument_response>`: put a channel
   response in the given slot
-- ``replace_channel_id(id, replacement_id)``: change a channel id
+- :meth:`replace_channel_id <tiskitpy.SpectralDensity.replace_channel_id>`: change a channel id
 
 Example
 ---------------------
