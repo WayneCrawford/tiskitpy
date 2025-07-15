@@ -11,6 +11,7 @@ Class DocStrings
    autoclasses/compliance_noise
    autoclasses/decimator
    autoclasses/periodic_transient
+   autoclasses/psd_vals
    autoclasses/spectral_density
    autoclasses/time_spans
    autoclasses/response_functions

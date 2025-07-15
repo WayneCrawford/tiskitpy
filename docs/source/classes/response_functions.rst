@@ -43,7 +43,7 @@ Get
   instrument response (use to switch from counts to physical units)
 - :meth:`uncertainty <tiskitpy.ResponseFunctions.uncertainty>`: Uncertainty of the given ``value`` s
 - :meth:`uncertainty_wrt_counts <tiskitpy.ResponseFunctions.uncertainty_wrt_counts>`:
-    Uncertainty with respect to raw data counts
+  Uncertainty with respect to raw data counts
 
 Other
 ^^^^^^^^^^^^^^^^^^^^^
