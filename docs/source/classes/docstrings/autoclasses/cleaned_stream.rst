@@ -1,6 +1,6 @@
-.. _tiskitpy.CleanedStream:
+.. _tiskitpy.ComplianceNoise:
 
-tiskitpy.CleanedStream
+tiskitpy.ComplianceNoise
 -----------------------------
 
-.. autoclass:: tiskitpy.CleanedStream
+.. autoclass:: tiskitpy.ComplianceNoise

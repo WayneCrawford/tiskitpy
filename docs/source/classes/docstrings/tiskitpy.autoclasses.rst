@@ -8,6 +8,7 @@ Class DocStrings
 
    autoclasses/data_cleaner
    autoclasses/clean_rotator
+   autoclasses/compliance_noise
    autoclasses/decimator
    autoclasses/periodic_transient
    autoclasses/spectral_density
