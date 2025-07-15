@@ -5,13 +5,9 @@ Decimator
 
 Decimate data and put decimation information in instrument responses.
 
-Detailed information is in :ref:`tiskitpy.Decimator`
-
 Constructor
 ---------------------
 
-- :meth:`tiskitpy.Decimator.__init__`:  Set up a series of decimations corresponding
-  to the list ``decimates``.
 - :class:`tiskitpy.Decimator`:  Set up a series of decimations corresponding
   to the list ``decimates``.
 
@@ -20,17 +16,17 @@ Properties
 - ``decimates``: the list of decimation factors
 - ``decimation_factor``: total decimation (product of ``decimates``)
 - ``verbose``: True if object is chatty.
-- :property:`tiskitpy.Decimator.decimates``: the list of decimation factors
+- :property:`tiskitpy.Decimator.decimates`: the list of decimation factors
 
 
 Methods
 ---------------------
 
-- :meth:`tiskitpy.Decimator.decimate`: Decimate the data
-- :meth:`tiskitpy.Decimator.update_inventory`: Return inventory with decimated channels added
-- :meth:`tiskitpy.Decimator.decimate`: Return inventory with only
+- :meth:`decimate <tiskitpy.Decimator.decimate>`: Decimate the data
+- :meth:`update_inventory <tiskitpy.Decimator.update_inventory>`: Return inventory with decimated channels added
+- :meth:`update_inventory_nslc <tiskitpy.Decimator.update_inventory_nslc>`: Return inventory with only
   specified networks, stations, channels and/or location updated
-- :meth:`tiskitpy.Decimator.get_band_code`: Return the band code for a given sampling rate
+- :meth:`get_band_code <tiskitpy.Decimator.get_band_code>`: Return the band code for a given sampling rate
  
 Command-line programs
 ---------------------
