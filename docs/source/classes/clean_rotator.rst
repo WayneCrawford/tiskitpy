@@ -9,28 +9,27 @@ noise.
 **BUG: The code only rotates about two axes, so it is not appropriate for
 rotating the horizontal axes, which could lose their orientation**
 
-Detailed information is in :ref:`tiskitpy.CleanRotator`
-
-The main methods are:
-
 Constructor
 ---------------------
 
-- ``CleanRotator(stream,...)``: Calculate the CleanRotator object from
+- :class:`CleanRotator <tiskitpy.CleanRotator>`: Calculate the CleanRotator object from
   a data stream
 
 Properties
 ---------------------
 
-- ``angle``: angle (degrees) by which Z should be rotated
-- ``azimuth``: azimuth (degrees) by which Z should be rotated
+- ``angle`` (float): angle (degrees) by which Z should be rotated
+- ``azimuth`` (float): azimuth (degrees) by which Z should be rotated
+- ``variance_reduction (float): amount by which variance was reduced during calculation
+    (between 0. and 1.)
+- ``avoided_spans`` (:class:`tiskitpy.TimeSpans`): time spans avoided during calculation
 
 Methods
 ---------------------
 
-- ``apply(stream, horiz_too=False)``: apply the rotation to the given stream
-- ``tfs()``: return the transfer functions equivalent to the rotation. *NOT
-  FULLY TESTED/VALIDATED*
+- :meth:`apply <tiskitpy.CleanRotator.apply>`: Apply the rotation to the given stream
+- :meth:`tfs <tiskitpy.CleanRotator.tfs>`: Return the transfer functions equivalent to the rotation. *NOT
+  VALIDATED*
 
 Example
 ---------------------
