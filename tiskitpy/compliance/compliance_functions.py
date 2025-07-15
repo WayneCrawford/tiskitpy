@@ -43,7 +43,7 @@ def gravd(W, h):
         W = np.array([W])
     if np.any(W < 0):
         raise ValueError('there are omegas <= 0')
-    G = 9.79329
+    G = 9.81  # 9.78 et equator, 9.83 at poles
     # N = len(W)
     W2 = W*W
     kDEEP = W2/G
@@ -278,7 +278,7 @@ def zp_to_norm_compliance(freqs, zp, wdepth, z_units='M/S'):
     """
     Calculate normalized compliance from the z/p ratio, freqs and water depth
 
-    normalized compliance is defined as k*Z/P, with Z in m and P in Pa.
+    normalized compliance is defined as k*Z/P, with k in 1/m, Z in m and P in Pa.
     Its units are 1/Pa
 
     Args:
@@ -291,7 +291,7 @@ def zp_to_norm_compliance(freqs, zp, wdepth, z_units='M/S'):
     omega = 2 * np.pi * freqs
     k = gravd(omega, wdepth)
     if z_units.upper() == 'M':
-        omega_term = np.ones(omega.shape())
+        omega_term = np.ones(omega.shape)
     elif z_units.upper() == 'M/S':
         omega_term = omega**(-1)
     elif z_units.upper() == 'M/S^2':

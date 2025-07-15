@@ -7,6 +7,7 @@ validated anyway)*
 """
 import xarray as xr
 import numpy as np
+import scipy.signal.windows as spsw
 from matplotlib import pyplot as plt
 
 # from obstools.atacr import DayNoise, StaNoise  # removed for readthedocs
@@ -23,6 +24,10 @@ from ..utils import match_one_str, CleanSequence as CS
 
 logger = init_logger()
 np.seterr(all="ignore")
+
+WINDOW_TAPERS = ("hanning", "hamming", "blackman",
+                 "prol1pi", "prol4pi", "dpss1", "dpss2",  "dpss4",
+                 "kaiser1pi", "kaiser2pi", "kaiser4pi")
 
 
 class SpectralDensity:
@@ -840,7 +845,7 @@ class SpectralDensity:
             fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
+            (:class:`numpy.ndarray`): array of axis pairs [row, column][0=amplitude, 1=phase]
         """
         x = self._get_validate_ids(x)
         if not overlay:
@@ -917,7 +922,7 @@ class SpectralDensity:
             fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
-            :class:`numpy.ndarray`: array of axis pairs (amplitude, phase)
+            (:class:`numpy.ndarray`): array of axis pairs [row, column][0=amplitude, 1=phase]
         """
         x = self._get_validate_ids(x)
         n_subkeys = len(x)
@@ -1284,7 +1289,7 @@ class SpectralDensity:
                 and `dpi`) are passed to the `pyplot.figure` call
 
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs (amplitude, phase)
+            (:class:`numpy.ndarray`): array of axis pairs [row, column][0=amplitude, 1=phase]
         """
         if display not in ('full', 'sparse', 'minimal', 'overlay'):
             raise ValueError(f'Unknown display value: "{display}"')
@@ -1582,7 +1587,8 @@ class SpectralDensity:
             trace (:class:`obspy.core.Trace`): Input trace data
             ws (int): Window size, in number of samples
             ss (int): Step size, or number of samples until next window
-            win_taper (str): taper to apply to data  ['hanning', 'prol4pi',
+            win_taper (str): taper to apply to data  ['dpss1', 'dpss2', 'dpss4',
+                ''hanning', 'prol4pi',
                 'prol1pi', 'bartlett', 'blackman', 'hamming']
             starttimes (list of :class:`obspy.UTCDateTime`): Use provided
                 start window times (ignores z_threshold). Incompatible with
@@ -1605,10 +1611,36 @@ class SpectralDensity:
         n2 = _npow2(ws)
         ft = np.fft.rfft(a, n=n2)
         f = np.fft.rfftfreq(ws, 1.0 / sr)
-        # f = np.linspace(0., 1., int(n2/2) + 1) * trace.stats.sampling_rate/2.
         # Don't return zero frequency
         return ft[:, 1:], f[1:], starttimes
 
+    @staticmethod
+    def compare_tapers(N):
+        """
+        Plot a comparison of all window types
+        
+        Args:
+            N (int): window length
+        """
+        fig, ax = plt.subplots()
+        for x in WINDOW_TAPERS:
+            kwargs={}
+            if "1" in x:
+                kwargs ["color"] = 'r'
+            elif "2" in x:
+                kwargs ["color"] = 'g'
+            elif "4" in x:
+                kwargs ["color"] = 'b'
+            if "prol" in x:
+                kwargs ["ls"] = '--'
+            elif "dpss" in x:
+                kwargs ["ls"] = '-.'
+            elif "kaiser" in x:
+                kwargs ["ls"] = ':'
+            ax.plot(SpectralDensity._make_taper(N, x), label=x, **kwargs)
+        plt.legend()
+        plt.show()
+        
     @staticmethod
     def _make_windows(trace, ws, ss, win_taper, starttimes, time_spans):
         """
@@ -1644,15 +1676,7 @@ class SpectralDensity:
         else:
             offsets = SpectralDensity._sliding_window(trace.stats.npts, ws, ss)
 
-        # make window taper
-        if win_taper in ["hanning", "hamming", "blackman", "bartlett"]:
-            taper = eval(f"np.{win_taper}(ws)")
-        elif win_taper == "prol1pi":
-            taper = _prol1pi(ws)
-        elif win_taper == "prol4pi":
-            taper = _prol4pi(ws)
-        else:
-            raise ValueError(f'Unknown taper type "{win_taper}"')
+        taper = SpectralDensity._make_taper(ws, win_taper)
 
         if len(offsets) == 0:
             logger.warning('No offsets returned')
@@ -1669,6 +1693,45 @@ class SpectralDensity:
             starttimes = [st + x/sr for x in offsets]
 
         return a, starttimes
+
+    @staticmethod
+    def _make_taper(ws, win_taper):
+        """
+        Returns:
+            :class:`numpy.ndarray``: 
+            
+        Multipliers chosen to match prolnpi levels (and input PSDVals).
+        There must be a smarter way.
+        """
+        assert win_taper in WINDOW_TAPERS
+        
+        if win_taper == "hanning":
+            taper = 1.65*eval(f"np.{win_taper}(ws)")
+        elif win_taper == "hamming":
+            taper = 1.60*eval(f"np.{win_taper}(ws)")
+        elif win_taper == "blackman":
+            taper = 1.8*eval(f"np.{win_taper}(ws)")
+        elif win_taper == "bartlett":
+            taper = 1.75*eval(f"np.{win_taper}(ws)")
+        elif win_taper == "prol1pi":
+            taper = _prol1pi(ws)
+        elif win_taper == "prol4pi":
+            taper = _prol4pi(ws)
+        elif win_taper == "dpss1":
+            taper = 1.35*eval(f"spsw.dpss(ws, 1)")
+        elif win_taper == "dpss2":
+            taper = 1.7*eval(f"spsw.dpss(ws, 2)")
+        elif win_taper == "dpss4":
+            taper = 2*eval(f"spsw.dpss(ws, 4)")
+        elif win_taper == "kaiser1pi":
+            taper = 1.4*eval(f"spsw.kaiser(ws, 1*np.pi)")
+        elif win_taper == "kaiser2pi":
+            taper = 1.65*eval(f"spsw.kaiser(ws, 2*np.pi)")
+        elif win_taper == "kaiser4pi":
+            taper = 2*eval(f"spsw.kaiser(ws, 4*np.pi)")
+        else:
+            raise ValueError(f'Unknown taper type "{win_taper}"')
+        return(taper)
 
     @staticmethod
     def _sliding_window(npts, ws, ss=None):

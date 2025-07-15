@@ -12,7 +12,9 @@ from .earth_model import EarthModel1D
 from .tide_coefficients import TideCoefficients
 from .psd_vals import PSDVals
 
-default_IG_m_seasurface = ([[0.001, .002], [1, .002]], False)
+default_water_depth = 2400
+default_Z_offset_angles=(2, 15)  # degrees: angle from vertical, azimuth from "N"
+default_IG_m_seasurface = ([[0.001, .02], [1, .02]], False)
 default_noise_pressure = ([[0.001, 60], [0.003, 30], [0.006, 0], [0.01, -10],
                            [0.02, -10], [0.05, -10], [0.1, -10], [1, -10]
                           ],
@@ -21,10 +23,9 @@ default_noise_seismo = ([[0.001, -130], [0.003, -160], [0.006, -170], [0.01, -17
                          [0.02, -175],  [0.05, -180], [ 0.1, -180],   [1, -170]
                         ],
                         True)
-default_tilt_max = ([[f, np.power(10., -6.5) * np.power(f, -1.5)]
-                     for f in np.power(10, np.arange(-3, 0.1, .25))
-                    ],
-                    False)
+default_tilt_max = PSDVals.sloped_freqs_and_values(-220, -30, -3, 0.1, .25)
+default_tilt_variance = 40 # dB
+default_tilt_direction_limits = (100, 130)  # degrees from "N"
 default_earth_model = [[1000, 3000, 3000, 1600],
                        [1000, 3000, 4000, 2300],
                        [1000, 3000, 5000, 2800],
@@ -36,14 +37,14 @@ class ComplianceNoise(object):
     """
     Generate synthetic seismological data based on environmental and noise factors
     """
-    def __init__(self, water_depth=2400,
-                 Z_offset_angles=(2, 15),
+    def __init__(self, water_depth=default_water_depth,
+                 Z_offset_angles=default_Z_offset_angles,
                  IG_m_seasurface=default_IG_m_seasurface,
                  noise_pressure=default_noise_pressure,
                  noise_seismo=default_noise_seismo,
                  noise_tilt_max=default_tilt_max,
-                 noise_tilt_variance=60,
-                 noise_tilt_direction_limits=(100, 130),
+                 noise_tilt_variance=default_tilt_variance,
+                 noise_tilt_direction_limits=default_tilt_direction_limits,
                  earth_model=default_earth_model,
                  IG_freqstep=0.001):
         """
@@ -53,27 +54,23 @@ class ComplianceNoise(object):
             water_depth (numeric): water depth in meters
             Z_offset_angles (list): Seismometer's Z offset [angle, azimuth]
                 from vertical, in degrees: (angle is the most important)
-            IG_m_seasurface (list, None): Infragravity wave PSD levels in format:
+            IG_m_seasurface (tuple): Infragravity wave PSD levels in format:
                 ([[freq1, value1],
                  [freq2, value2],
                  ...
                  [freqN, valueN]],
                  is_dB)
-                Values are wave heights in m (if is_dB is False) or in dB ref
-                1 m^2/Hz.
-                If None, uses ComplianceNoise().default_IG_m_seasurface
-            noise_pressure (list, None): representation of DPG noise levels.
+                Where is_dB is bool.  Values are wave heights in m (if is_dB
+                is False) or in dB ref 1 (m^2)/Hz.
+            noise_pressure (tuple): representation of DPG noise levels.
                 Same format as for IG_m_seasurface, values are in Pa or dB
                 equivalent
-                If None, uses ComplianceNoise().default_noise_pressure
-            noise_seismo (:class:`PSDVals`, None): representation of seismometer
+            noise_seismo (tuple): representation of seismometer
                 noise levels. Same format as for IG_m_seasurface, values are
                 in m/s^2 or dB equivalent
-                If None, uses ComplianceNoise().default_noise_seismo
-            noise_tilt_max (:class: `PSDVals`, None): maximum tilt noise levels
+            noise_tilt_max (tuple): maximum tilt noise levels
                 Same format as for IG_m_seasurface, values are in m/s^2 or dB
                 equivalent.
-                If None, uses ComplianceNoise().default_tilt_max
             noise_tilt_direction_limits (tuple): minimum and maximum tilt
                 directions (degrees).
             noise_tilt_variance (float): variance in dB of tilt noise levels
@@ -82,9 +79,8 @@ class ComplianceNoise(object):
                  [thick2, rho2, vp2, vs2]
                  ...
                  [thickN, rhoN, vpN, vsN]]
-                wher units are meters, kg/m^2, m/s and m/s, and the last row
+                where units are meters, kg/m^2, m/s and m/s, and the last row
                 is treated as a half-space)
-                If None, uses ComplianceNoise().default_earth_model
             IG_freqstep (float): maximum frequency step for IG wave and compliance
                 PSDs (must be small to capture shallow/deep water cutoff)
         """
@@ -96,8 +92,8 @@ class ComplianceNoise(object):
         self.Z_offset_angles = Z_offset_angles
         self.IG_m_seasurface = PSDVals(IG_m_seasurface, "m")
         self.noise_pressure = PSDVals(noise_pressure, 'Pa')
-        self.noise_seismo = PSDVals(noise_seismo, '(m/s^2)')
-        self.noise_tilt_max = PSDVals(noise_tilt_max, '(m/s^2)')
+        self.noise_seismo = PSDVals(noise_seismo, 'm/s^2')
+        self.noise_tilt_max = PSDVals(noise_tilt_max, 'm/s^2')
         self.noise_tilt_direction_limits = noise_tilt_direction_limits
         self.noise_tilt_variance = noise_tilt_variance
         self.earth_model = EarthModel1D(earth_model)
@@ -110,13 +106,17 @@ class ComplianceNoise(object):
         
         Based on self.IG_m_seasurface and self.water_depth)
         """
+        seawater_density = 1030  #  1020-1029 at the surface, up to 1050 at deep seafloor
+        g = 9.81  # 9.78 at equator, 9.83 at poles
         psd = self.IG_m_seasurface.copy()
+        # If frequency spacing larger than specified seafloor freqstep, resample
         if np.any(np.diff(psd.freqs) > self.IG_freqstep):
             psd.resample(np.arange(psd.freqs[0],
                          psd.freqs[-1] + self.IG_freqstep * .999,
                          self.IG_freqstep))
         k = gravd(2 * np.pi * psd.freqs, self.water_depth)
-        psd.values += 100 - self._cosh_dBs(k * self.water_depth)
+        psd.values += 20*np.log10(seawater_density*g)   # meters to Pascals
+        psd.values -=  self._cosh_dBs(k * self.water_depth)  # depth decay
         psd.value_units = 'dB ref 1 Pa^2/Hz'
         return psd
 
@@ -137,19 +137,62 @@ class ComplianceNoise(object):
         return to_DBs(np.sin(np.radians(self.Z_offset_angles[0])))
 
     @property
+    def stream_source_codes(self):
+        """ return dict of streams and each trace's source codes """
+        return {'LH1': ('NOS', 'NT1'),
+                'LH2': ('NOS', 'NT2'),
+                'LHZ': ('NOS', 'NTZ', 'IGZ'),
+                'LDG': ('NOP', 'IGP')}
+    
+    @property
+    def source_codes(self):
+        """ return list of source codes """
+        return ['IGP', 'NOP',  "IGZ", "NOS",
+                "NTH_max", "NTH_min", "NTZ_max", "NTZ_min"]
+    
+    @property
+    def trace_source_codes(self):
+        """ return list of trace source codes """
+        return ['IGP', 'NOP',  "IGZ", "NOS", "NT1", "NT2", "NTZ"]
+
+    @property
     def PSDs(self):
         """
-        Dictionary of all PSDs
+        Dictionary of all seafloor PSDs
         """
-        return {'IGP': self.IG_Pa_seafloor,
-                'NOP': self.noise_pressure,
-                "IGZ": self.compliance_accel,
-                "NOS": self.noise_seismo,
-                "NOT_max": self.noise_tilt_max,
-                "NOT_min": self.noise_tilt_max - self.noise_tilt_variance,
-                "NOT_zmax": self.noise_tilt_max + self.Z_angle_factor_DBs,
-                "NOT_zmin": self.noise_tilt_max + self.Z_angle_factor_DBs
-                              - self.noise_tilt_variance}
+        return {k: self.source_by_code(k) for k in self.source_codes}
+
+    def source_by_code(self, ch_code):
+        """
+        Return PSD by code
+    
+        Args:
+            code (str): a 3-letter code that points to the given source.
+                        If it's got more than three letters, its a combination
+                        source
+        Returns:
+            :class:`PSDVals`: the source PSD
+        """
+        match ch_code:
+            case 'IGP':
+                return self.IG_Pa_seafloor
+            case 'NOP':
+                return self.noise_pressure
+            case 'IGZ':
+                return self.compliance_accel
+            case 'NOS':
+                return self.noise_seismo
+            case 'NTH_max':
+                return self.noise_tilt_max
+            case 'NTH_min':
+                return self.noise_tilt_max - self.noise_tilt_variance
+            case 'NTZ_max':
+                return self.noise_tilt_max + self.Z_angle_factor_DBs
+            case 'NTZ_min':
+                return self.noise_tilt_max + self.Z_angle_factor_DBs - self.noise_tilt_variance
+            case _:
+                raise ValueError(f'"{ch_code}" is not a valide source channel code')
+        return
 
     def __str__(self):
         s = '<ComplianceNoise>:\n'
@@ -159,7 +202,7 @@ class ComplianceNoise(object):
         s += f'    noise_pressure={self.noise_pressure}\n'
         s += f'    noise_seismo={self.noise_seismo}\n'
         s += f'    noise_tilt_max={self.noise_tilt_max}\n'
-        s += f'    tilt_min = noise_tilt_max - {self.noise_tilt_variance} dB\n'
+        s += f'    noise_tilt_min = noise_tilt_max - {self.noise_tilt_variance} dB\n'
         s += f'    earth_model={self.earth_model}'
         return s
 
@@ -233,219 +276,217 @@ class ComplianceNoise(object):
         # Plot
         fig, axs = plt.subplots(2, 1, sharex='col')
         # Plot the pressure signal
-        axs[0].semilogx(f, self.IG_Pa_seafloor.resample_values(f), 'r', label='IG_P')
-        axs[0].semilogx(f, self.noise_pressure.resample_values(f), 'b', label='NO_P')
+        for ch_code, color in zip(('IGP', 'NOP'), ('r', 'b')):
+            axs[0].semilogx(f, self.source_by_code(ch_code).resample_values(f),
+                            color, label=ch_code)
         axs[0].set_ylabel('dB ref 1 Pa^2/Hz')
         axs[0].legend()
         axs[0].set_ylim(-20, 60)
+        axs[1].set_title('Pressure')
         # Plot the accel
-        axs[1].semilogx(f, self.compliance_accel.resample_values(f),
-                        'r', label='IG_S')
-        axs[1].semilogx(f, self.noise_seismo.resample_values(f),
-                        'b', label='NO_S')
-        axs[1].semilogx(f,
-                        self.noise_tilt_max.resample_values(f)+ self.Z_angle_factor_DBs,
-                        'g--', label='NO_Z(max)')
-        axs[1].semilogx(f,
-                        self.noise_tilt_max.resample_values(f)
-                        + self.Z_angle_factor_DBs - self.noise_tilt_variance,
-                        'g-.', label='NO_Z(min)')
+        for ch_code, color in zip(('IGZ', 'NOS', 'NTZ_max', 'NTZ_min', 'NTH_max', 'NTH_min'),
+                                  ('r', 'b', 'g', 'g--', 'm', 'm--')):
+            axs[1].semilogx(f, self.source_by_code(ch_code).resample_values(f),
+                            color, label=ch_code)
         axs[1].set_ylabel('dB ref 1 (m/s^2)^2/Hz')
         axs[1].set_xlabel('Frequency (Hz)')
         axs[1].set_ylim(-200, -100)
         axs[1].legend()
+        axs[1].set_title('Seismometer')
+        plt.suptitle('ComplianceNoise components')
         if outfile is not None:
             plt.savefig(outfile)
         if show is True:
             plt.show()
 
-    def streams(self, ref_trace, s_sensitivity=3774870000,
-                p_sensitivity=495, network='XX', station='SSSSS', plotit=False,
-                forceInt32=False):
+    def source_trace(self, code, trace_base, accel_to_vel=False, phases=None):
+        """
+        Return a :class:`obspy.stream.Trace` corresponding to the given source code
+        
+        code (str): Valid source code
+        trace_base (:class:`obspy.stream.Trace`): Trace to use as reference
+            for dates, length, sampling rate, station, network and response
+        accel_to_vel (bool): source PSDVals is an acceleration and should
+            be converted to velocity.
+        phases (np.array): list of phases to force fft to have (to correlate
+            with another channel)
+        """
+        if accel_to_vel is False:
+            return self.source_by_code(code).as_trace(trace_base, channel=code,
+                                                      phases=phases)
+        else:
+            return self.source_by_code(code).accel_as_vel.as_trace(
+                trace_base, channel=code, phases=phases)
+        
+    def streams(self, ref_trace, s_response=1., p_response=1.,
+                network='XX', station='SSSSS', plotit=False, forceInt32=False):
         """
         Return streams generated from to the noise and signal levels
         Simply multiplies physical values by a sensitivity value, would be
         better to convolve with instrument response.
 
         Args:
-            ref_trace (:class: `obspy.Trace`): trace with time base to use
-            s_sensitivity (float): Desired seismometer sensitivity (counts/m/s)
-            p_sensitivity (float): Desired pressure gauge sensitivity (counts/Pa)
+            ref_trace (:class: `obspy.Trace`): trace with time base to use.
+                band_code must be "L" and sampling rate near 1 sps.
+            s_response (:class:`obspy.core.response.Response` or float):
+                Seismometer response (counts/m/s).  If float, assumes flat
+                response with this gain.
+            p_response (class:`obspy.core.response.Response` or float):
+                Pressure gauge response (counts/Pa).  If float, assumes flat
+                response with this gain.
             network (str): Network code (1-2 characters)
             station (str): Station code (1-5 characters)
             forceInt32 (bool): force output data to have dtype=np.int32
 
         Returns:
-            streams (list):
+            A tuple of (data, sources, inv), where
                 data (:class:`obspy.Stream): synthetic seafloor BB 4C data
                 sources (:class:`obspy.Stream`): individual noises and signals
                 inv (:class:`obspy.core.Inventory`): channel metadata
         """
-        noise_to_vel = False    # Should be True, logically
-        if noise_to_vel is True:
-            print('noise PSDs converted from accel to vel before ifft')
-        else:
-            print('noise PSDs NOT converted from accel to vel')
         # SETUP
+        sr = ref_trace.stats.sampling_rate
         # Validate inputs
         if not ref_trace.stats.channel[0] == 'L':
             raise ValueError("ref_trace channel code ({}) doesn't start with 'L'"
                 .format(ref_trace.stats.channel))
+        if sr > 2 or sr < 0.5:
+            raise ValueError(f'ref_trace sampling_rate={sr} is not between 0.5 and 2 sps')
         # Set up variables
         trace_pts = ref_trace.stats.npts
         npts = 2**int(np.ceil(np.log2(trace_pts)))
-        sr = ref_trace.stats.sampling_rate
         location = ref_trace.stats.location
         channel = ref_trace.stats.channel
         f = np.linspace(0, ref_trace.stats.sampling_rate / 2, npts)
-        velocity_response = Response.from_paz([], [], 1, input_units='m/s', output_units='count')
-        accel_response = Response.from_paz([], [], 1, input_units='m/s**2', output_units='m/s**2')
-        tr = []
+        if not isinstance(p_response, Response):
+            p_response = Response.from_paz([], [], p_response, 1.0, 'm/s', 'count')
+            # obspy doesn't understand Pa units, so have to stuff them in afterwards
+            p_response.instrument_sensitivity.input_units='Pa' 
+            p_response.response_stages[0].input_units='Pa' 
+        if not isinstance(s_response, Response):
+            s_response = Response.from_paz([], [], s_response, 1.0, 'm/s', 'count')
 
-        # Prepare a base_trace for the outputs
-        base_trace = ref_trace.copy()    # Don't overwrite original
-        base_trace.stats.station = station
-        base_trace.stats.network = network
-        if noise_to_vel is True:
-            base_trace.stats.response = velocity_response
-        else:
-            base_trace.stats.response = accel_response
+        # Prepare base seismo and pressure traces
+        s_trace_base = ref_trace.copy()    # Don't overwrite original
+        s_trace_base.stats.station = station
+        s_trace_base.stats.network = network
+        s_trace_base.stats.response = s_response
+        p_trace_base = s_trace_base.copy()
+        p_trace_base.stats.response = p_response
 
         # CREATE NOISE + IG/COMPLIANCE TRACES BY SOURCE
+        sources = Stream([])
+
+        # FOR THE PRESSURE CHANNEL
         # IG wave pressure signal
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "IGP"
-        tr[-1].stats.response = None
-        IG_fft = self.IG_Pa_seafloor.as_fft(f)
-        tr[-1].data = irfft(IG_fft)[:trace_pts]
-
-        # DPG noise model
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "NOP"
-        tr[-1].stats.response = None
-        tr[-1].data = irfft(self.noise_pressure.as_fft(f))[:trace_pts]
-
+        IG_trace, IG_phases = self.source_trace("IGP", p_trace_base)
+        sources += IG_trace
+        sources += self.source_trace("NOP", p_trace_base)[0]
+ 
+        # FOR THE SEISMOMETER CHANNELS
         # Vertical compliance signal
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "IGZ"
-        tr[-1].stats.response = velocity_response
-        # Phase_motion = Phase_pressure + 180° , Phase_velocity = Phase_motion + 90°
-        # Ignores noise_to_vel because we validated accel_as_vel previously
-        tr[-1].data = irfft(self.compliance_accel.accel_as_vel.as_fft(
-            f, phases=np.angle(IG_fft)-np.pi/2))[:trace_pts]
-
-        # Seismometer noise model
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "NOS"
-        if noise_to_vel is True:
-            tr[-1].data = irfft(self.noise_seismo.accel_as_vel.as_fft(f))[:trace_pts]
-        else:
-            tr[-1].data = irfft(self.noise_seismo.as_fft(f))[:trace_pts]
-       
+        # Phase_velocity = Phase_pressure + 270°
+        sources += self.source_trace("IGZ", s_trace_base, True, phases=IG_phases-np.pi/2)[0]
+        sources += self.source_trace("NOS", s_trace_base, True)[0]
         # Tilt noise model
-        if noise_to_vel is True:
-            noise_max = irfft(self.noise_tilt_max.accel_as_vel.as_fft(f))[:trace_pts]
-        else:
-            noise_max = irfft(self.noise_tilt_max.as_fft(f))[:trace_pts]
-        dyntilt_amp, dyntilt_angle = self.make_tilt_ts(base_trace, noise_max)
+        noise_max, _ = self.source_trace('NTH_max', s_trace_base, True)
+        dyntilt_amp, dyntilt_angle = self.make_tilt_ts(noise_max)
         angfact = np.sin(np.radians(self.Z_offset_angles[0]))
         azefact_1 = np.sin(np.radians(self.Z_offset_angles[1]))
         azefact_2 = np.cos(np.radians(self.Z_offset_angles[1]))
         N_noise = dyntilt_amp.data * np.cos(np.radians(dyntilt_angle.data))
         E_noise = dyntilt_amp.data * np.sin(np.radians(dyntilt_angle.data))
         Z_noise = angfact * (azefact_1 * N_noise + azefact_2 * E_noise)
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "NO1"
-        tr[-1].data = N_noise
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "NO2"
-        tr[-1].data = E_noise
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "NOZ"
-        tr[-1].data = Z_noise
+        sources += noise_max.copy()
+        sources[-1].stats.channel = "NT1"
+        sources[-1].data = N_noise
+        sources += noise_max.copy()
+        sources[-1].stats.channel = "NT2"
+        sources[-1].data = E_noise
+        sources += noise_max.copy()
+        sources[-1].stats.channel = "NTZ"
+        sources[-1].data = Z_noise
 
-        sources = Stream(traces=tr)
         if plotit is True:
             sources.plot(equal_scales=False)
 
-        # CREATE SYNTHETIC OBS CHANNELS WITH NOISE + IG/COMPLIANCE
-        # Add signal and noise time series to make synthetic BBOBS channels
-        tr = []
-        base_trace.stats.response = None
-        # LDG: Differential pressure gauge
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "LDG"
-        tr[-1].data = ((sources.select(channel='IGP')[0].data
-                        + sources.select(channel='NOP')[0].data)
-                       * p_sensitivity)
-        # LH1: N-equivalent horizontal seismometer channel
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "LH1"
-        tr[-1].data = ((sources.select(channel='NOS')[0].data
-                        + sources.select(channel='NO1')[0].data)
-                       * s_sensitivity)
-        # LH2: E-equivalent horizontal seismometer channel
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "LH2"
-        tr[-1].data = ((sources.select(channel='NOS')[0].data
-                        + sources.select(channel='NO2')[0].data)
-                       * s_sensitivity)
-        # LHZ: Vertical seismometer channel
-        tr.append(base_trace.copy())
-        tr[-1].stats.channel = "LHZ"
-        tr[-1].data = ((sources.select(channel='NOS')[0].data
-                        + sources.select(channel='IGZ')[0].data
-                        + sources.select(channel='NOZ')[0].data)
-                       * s_sensitivity)
-
-        data = Stream(traces=tr)
+        # CREATE SYNTHETIC BBOBS CHANNELS
+        data = Stream([])
+        for k, v in self.stream_source_codes.items():
+            data += self._summed_channel(k, sources, v)
         if forceInt32 is True:
             for tr in data:
                 tr.data = np.require(tr.data, dtype=np.int32)
         if plotit is True:
             data.plot(equal_scales=False)
 
-        # MAKE INVENTORY
-        pressresp = Response.from_paz([], [], p_sensitivity, 1.0, 'm/s', 'count')
-        seisresp = Response.from_paz([], [], s_sensitivity, input_units='m/s', output_units='count')
-        # doesn't know 'Pa'
-        pressresp.instrument_sensitivity.input_units='Pa' 
-        pressresp.response_stages[0].input_units='Pa' 
-        channels=[Channel('LHZ', location, 0, 0, 0, 0, response=seisresp, dip = -90),
-                  Channel('LH1', location, 0, 0, 0, 0, response=seisresp),             
-                  Channel('LH2', location, 0, 0, 0, 0, response=seisresp),             
-                  Channel('LDG', location, 0, 0, 0, 0, response=pressresp)]
+        # Create Inventory
+        channels = []
+        for k, v in self.stream_source_codes.items():
+            if k[1]=='D':
+                reponse=p_response
+                dip=90.
+            else:
+                response=s_response
+                dip=0.
+                if k[2] == 'Z':
+                    dip=-90.
+            channels.append(Channel(k, location, 0, 0, 0, 0, response=response, dip=dip))
+            for x in v:
+                channels.append(Channel(x, location, 0, 0, 0, 0, response=response, dip=dip))
         stations = [Station(station, 0, 0, 0, channels=channels)]
         networks = [Network(network, stations=stations)]
         inv = Inventory(networks=networks)
 
         return data, sources, inv
 
-    def make_tilt_ts(self, ref_trace, noise_max, coefficients=TideCoefficients()):
+    @staticmethod
+    def _summed_channel(channel, source, source_chs):
+        tr = source.select(channel=source_chs[0])[0].copy()
+        tr.stats.channel = channel
+        if len(source_chs) > 1:
+            for c in source_chs[1:]:
+                new_source = source.select(channel=c)[0]
+                for key in ('station', 'network', 'location', 'response'):
+                    assert new_source.stats[key] == tr.stats[key]
+                tr.data += new_source.data
+        return tr
+
+    def make_tilt_ts(self, noise_max, coefficients=TideCoefficients(),
+                     plotit=False):
         """
         make a simple tilt time series summing signals of given periods,
         amplitudes and starting phases
 
         Args:
-            ref_trace (:class: `obspy.core.Trace`): A trace covering the
-                desired period and with the desired sample rate
             noise_max (:class:`obspy.core.Trace`): maximum tilt noise time series
             coefficients (TideCoefficients): the tidal coefficients
         """
-        assert isinstance(ref_trace, Trace)
-        tide_trace = coefficients.make_trace(ref_trace)
+        tide_trace = coefficients.make_trace(noise_max)
+        tide_trace.stats.channel='TID'
         # normalize between (-self.noise_tilt_variance dB) and 1
-        tide_trace.data -= np.min(tide_trace.data)
-        tide_trace.data /= np.max(tide_trace.data)
-        min_val = 10**(-self.noise_tilt_variance / 20)
-        tide_trace.data[tide_trace.data < min_val] = min_val
+        in_max = np.max(tide_trace.data)
+        in_min = np.min(tide_trace.data)
+        out_max = 1.
+        out_min = 10**(-self.noise_tilt_variance / 20)
+        tide_trace.data = (tide_trace.data - in_min)*(out_max-out_min)/(in_max-in_min) + out_min
+        
+        if plotit:
+            tide_trace.plot()
 
         amp_trace = tide_trace.copy()
+        amp_trace.stats.channel='AMP'
         amp_trace.data *= noise_max
 
         angles_trace = tide_trace.copy()
-        angle_range = abs(self.noise_tilt_direction_limits[1] - self.noise_tilt_direction_limits[0])
-        angles_trace.data = (angles_trace.data * angle_range) + min(self.noise_tilt_direction_limits)
+        angles_trace.stats.channel='ANG'
+        angle_range = abs(self.noise_tilt_direction_limits[1]
+                          - self.noise_tilt_direction_limits[0])
+        angles_trace.data = ((angles_trace.data * angle_range)
+                             + min(self.noise_tilt_direction_limits))
+
+        if plotit:
+            Stream([tide_trace, amp_trace, angles_trace]).plot(equal_scale=False)
 
         return amp_trace, angles_trace
 
@@ -491,5 +532,5 @@ if __name__ == "__main__":
     sd_sources = SpectralDensity.from_stream(sources)
     sd_sources.plot()
     sd_data = SpectralDensity.from_stream(data)
-    # sd_data.plot()
+    sd_data.plot()
     sd_data.plot_coherences()

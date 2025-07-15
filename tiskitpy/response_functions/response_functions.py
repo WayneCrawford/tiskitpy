@@ -403,6 +403,9 @@ class ResponseFunctions(object):
         Gyx = spect_density.crossspect(output, input)
         # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
         H_err = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
+        noise_chans = ("output", "input", "equal", "unknown")
+        if not noise_chan in noise_chans:
+            raise ValueError(f"{noise_chan=} not in {noise_chans}")
         if noise_chan == "output":
             H = Gxy / Gxx  # BP86 eqn 6.37
             corr_mult = np.ones(H.shape)  # No change
@@ -663,63 +666,3 @@ class ResponseFunctions(object):
                     )
             H[~goods] = 0
         return H
-
-
-# def _gravd(W, h):
-#     """
-#     Linear ocean surface gravity wave dispersion
-# 
-#     Args:
-#         W (:class:`numpy.ndarray`): angular frequencies (rad/s)
-#         h (float): water depth (m)
-# 
-#     Returns:
-#         K (:class:`numpy.ndarray`): wavenumbers (rad/m)
-#     """
-#     # W must be array
-#     if not isinstance(W, np.ndarray):
-#         W = np.array([W])
-#     G = 9.79329
-#     # N = len(W)
-#     W2 = W*W
-#     kDEEP = W2/G
-#     kSHAL = W/(np.sqrt(G*h))
-#     erDEEP = np.ones(np.shape(W)) - G*kDEEP*_dtanh(kDEEP*h)/W2
-#     one = np.ones(np.shape(W))
-#     d = np.copy(one)
-#     done = np.zeros(np.shape(W))
-#     nd = np.where(done == 0)
-# 
-#     k1 = np.copy(kDEEP)
-#     k2 = np.copy(kSHAL)
-#     e1 = np.copy(erDEEP)
-#     ktemp = np.copy(done)
-#     e2 = np.copy(done)
-# 
-#     while True:
-#         e2[nd] = one[nd] - G*k2[nd] * _dtanh(k2[nd]*h)/W2[nd]
-#         d = e2*e2
-#         done = d < 1e-20
-#         if done.all():
-#             K = k2
-#             break
-#         nd = np.where(done == 0)
-#         ktemp[nd] = k1[nd]-e1[nd]*(k2[nd]-k1[nd])/(e2[nd]-e1[nd])
-#         k1[nd] = k2[nd]
-#         k2[nd] = ktemp[nd]
-#         e1[nd] = e2[nd]
-#     return K
-# 
-# 
-# def _dtanh(x):
-#     """
-#     Stable hyperbolic tangent
-# 
-#     Args:
-#         x (:class:`numpy.ndarray`)
-#     """
-#     a = np.exp(x*(x <= 50))
-#     one = np.ones(np.shape(x))
-# 
-#     y = (abs(x) > 50) * (abs(x)/x) + (abs(x) <= 50)*((a-one/a) / (a+one/a))
-#     return y

@@ -12,7 +12,7 @@ The main methods are:
 Constructor
 ---------------------
 
-- ``Decimate(decimates)``: Set up a series of decimations corresponding
+- ``Decimator(decimates)``: Set up a series of decimations corresponding
   to the list ``decimates``.
 
 Properties
@@ -26,6 +26,7 @@ Methods
 ---------------------
 
 - ``decimate(Stream or Trace)``: Decimate the data
+- :ref:`tiskitpy.Decimator.decimate`
 - ``get_band_code(in_band_code, sample_rate)``: return the band code for a given
   sample rate.
 - ``update_inventory(inv, ...)``: Return inventory with decimated channels added

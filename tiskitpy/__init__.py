@@ -48,7 +48,7 @@ Use the `-h` option for help
 """
 from .clean_rotator import CleanRotator
 from .cleaned_stream import CleanedStream
-from .compliance import ComplianceNoise, gravd
+from .compliance import ComplianceNoise, gravd, PSDVals
 from .data_cleaner import DataCleaner, RFList
 from .decimate import Decimator
 from .rptransient import PeriodicTransient

@@ -48,14 +48,14 @@ ComplianceNoise example code
                                         station=station, forceInt32=True)
 
 
-.. image:: images/ComplianceNoise_components.png
+.. image:: images/11_ComplianceNoise_components.png
    :width: 564
    
 .. code-block:: python
 
     data.plot(equal_scale=False')
 
-.. image:: images/ComplianceNoise_stream.png
+.. image:: images/11_ComplianceNoise_stream.png
    :width: 564
    
 .. code-block:: python
@@ -66,7 +66,7 @@ ComplianceNoise example code
     data.select(channel='LH2')[0].data += real_data.select(channel='LHE')[0].data
     data.plot(equal_scale=False)
 
-.. image:: images/ComplianceNoise_stream_plus_real.png
+.. image:: images/11_ComplianceNoise_stream_plus_real.png
    :width: 564
    
 .. code-block:: python
@@ -76,9 +76,9 @@ ComplianceNoise example code
     sd_data.plot()
     sd_data.plot_coherences()
 
-.. image:: images/ComplianceNoise_psd_all.png
+.. image:: images/11_ComplianceNoise_psd_all.png
    :width: 564
 
-.. image:: images/ComplianceNoise_coher_all.png
+.. image:: images/11_ComplianceNoise_coher_all.png
    :width: 564
 
