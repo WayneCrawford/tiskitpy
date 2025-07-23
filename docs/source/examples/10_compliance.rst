@@ -15,12 +15,12 @@ Compliance Calculation example code
     import numpy as np
     import matplotlib.pyplot as plt
 
-    from tiskitpy import SpectralDensity, ComplianceNoise, ResponseFunctions
+    from tiskitpy import (SpectralDensity, ComplianceNoise, ResponseFunctions,
+                          Compliance)
 
     # PARAMETERS
-    rho = 2500  # kg/m^3
-    vp  = 4000  # m/s
-    vs  = 2000  # m/s_rate
+    rho, vp, vs = 2500, 4000, 2000  # kg/m^3, m/s, m/s
+
     # Use very low noise levels (essentially no pressure or seismo gauge noise)
     kwargs = {'noise_pressure': ([[0.001, -50], [1, -50]], True),
               'noise_seismo': ([[0.001, -230], [1, -230]], True),
@@ -44,33 +44,49 @@ Compliance Calculation example code
                        header={'sampling_rate': s_rate,
                                'starttime': UTCDateTime(synth_start_time),
                                'channel': 'LHZ'})
-    s_sensitivity = 1e11  # A lower sensitivity makes compliance too low (compliance signal truncated?)
+
+    # Specify sensitivities that keep the compliance values in the passband                           
+    s_sensitivity = 1e13  # Below 1e10 and above 1e15, compliance is too low
+    p_sensitivity = 1e6  # Below 1e2 and above 1e7, compliance is too high
+
     data_synth, sources, inv_synth = noise_model.streams(
-        resp_trace, s_sensitivity=s_sensitivity, station=sta_code, forceInt32=True)
+        resp_trace, s_response=s_sensitivity, p_response=p_sensitivity,
+        station=sta_code, forceInt32=True)
     sd_synth = SpectralDensity.from_stream(data_synth, inv=inv_synth)
-
-    # Calculate normalized compliance from the data
-    ncompl_est = ResponseFunctions(sd_synth,  '*LDG', ['*LHZ'],
-                                   max_freq=max_compl_freq, noise_chan='equal')
-    ncompl_est.to_norm_compliance(noise_model.water_depth)
-
-    # Calculate normalized compliance directly from the model
-    ncompl_real = noise_model.norm_compliance(ncompl_est.freqs)
 
     # Theoretical compliance assuming c << vp, vs
     ncompl_theoretical = - vp**2 / (2 * rho * vs**2 * (vp**2 - vs**2))
 
-    # Compare theoretical, model-calculated and "data-calculated" compliances
-    axes = ncompl_est.plot(show=False)
-    ax = axes[0, 0][0]
-    ax.plot(ncompl_est.freqs, np.abs(ncompl_real), c='b', label='Calculated')
-    ax.axhline(np.abs(ncompl_theoretical), ls='--', c='r', label='Theoretical')
-    ax.legend()
-    print(f'{ncompl_est.value("*LHZ")[1]=}, {ncompl_real[0]=}, {ncompl_theoretical=}, ')
-    plt.show()
+    # Compare theoretical, calculated and "measured" compliance for different
+    # assumptions of which channel the noise is on
+    for noise_chan in ("output", "input", "equal", "unknown"):
+        # Calculate normalized compliance from the data
+        rfs = ResponseFunctions(sd_synth,  '*LDG', ['*LHZ'],
+                                max_freq=max_compl_freq,
+                                noise_channel=noise_chan)
+        ncompl_est = Compliance.from_response_functions(rfs, noise_model.water_depth)
+        # Calculate normalized compliance directly from the model
+        ncompl_real = noise_model.norm_compliance(ncompl_est.freqs)
+
+        # Compare theoretical, model-calculated and "data-calculated" compliances
+        axa, axp = ncompl_est.plot(show=False)
+        axa.plot(ncompl_est.freqs, np.abs(ncompl_real), c='b', label='Calculated')
+        axa.axhline(np.abs(ncompl_theoretical), ls='--', c='r', label='Theoretical')
+        axa.legend()
+        plt.suptitle(f'{noise_chan=}')
+        plt.show()
 
 
 
-.. image:: images/10_Compliance.png
+.. image:: images/10_Compliance_output.png
+   :width: 564
+   
+.. image:: images/10_Compliance_input.png
+   :width: 564
+   
+.. image:: images/10_Compliance_equal.png
+   :width: 564
+   
+.. image:: images/10_Compliance_unknown.png
    :width: 564
    

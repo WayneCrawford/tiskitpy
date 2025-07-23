@@ -10,7 +10,7 @@ from ..spectral_density.utils import coherence_significance_level
 from ..spectral_density import SpectralDensity
 from ..utils import match_one_str
 from tiskitpy.logger import init_logger
-from ..compliance import gravd
+# from ..compliance import gravd
 
 logger = init_logger()
 np.seterr(all="ignore")
@@ -38,7 +38,7 @@ class ResponseFunctions(object):
             will return error if more than one string matches
         out_ids (list of str): output channel ids  (None => all but
             in_id)
-        noise_chan (str): 'input', 'output', 'equal', 'unknown'
+        noise_channel (str): 'input', 'output', 'equal', 'unknown'
         n_to_reject (int): number of neighboring frequencies for which the
             coherence must be above the 95% significance level in order
             to calculate frequency response function (other values are set to
@@ -50,14 +50,22 @@ class ResponseFunctions(object):
         quiet (bool): don't warn if creating a test object
         show_progress (bool): plot response functions and coherences
     """
-    def __init__(self, sdf, in_id, out_ids=None, noise_chan="output",
+    def __init__(self, sdf, in_id, out_ids=None, noise_channel="output",
                  n_to_reject=3, min_freq=None, max_freq=None,
-                 quiet=False, show_progress=False):
+                 quiet=False, show_progress=False, noise_chan=None):
         """
         Attributes:
             _ds (:class: XArray.dataset): container for response functions and
                 attributes
         """
+        # Handle deprecated noise_chan argument
+        if noise_chan is not None:
+            if not noise_channel == "output":
+                logger.warning('ResponseFunctions argument "noise_chan" is obsolete, ignored')
+            else:
+                logger.warning('ResponseFunctions argument "noise_chan" is deprecated, use "noise_channel"')
+                noise_channel = noise_chan
+
         if sdf is None:
             logger.info("Creating test ResponseFunction object (no data)")
             if out_ids is None:
@@ -72,7 +80,7 @@ class ResponseFunctions(object):
                 coords={
                     "input": [in_id],
                     "output": out_ids,
-                    "noise_chan": ("output", [noise_chan for x in out_ids]),
+                    "noise_channel": ("output", [noise_channel for x in out_ids]),
                     "f": f
                 },
                 attrs={
@@ -108,7 +116,7 @@ class ResponseFunctions(object):
                     "f": f,
                     "in_units": ("input", [in_units]),
                     "out_units": ("output", out_units),
-                    "noise_chan": ("output", [noise_chan for x in out_ids]),
+                    "noise_channel": ("output", [noise_channel for x in out_ids]),
                 },
                 attrs={
                     "n_winds": sdf.n_windows,
@@ -117,7 +125,7 @@ class ResponseFunctions(object):
             )
             for out_id in out_ids:
                 rf, err_mult, corr_mult = self._calcrf(
-                    sdf, in_id, out_id, noise_chan,
+                    sdf, in_id, out_id, noise_channel,
                     n_to_reject, min_freq, max_freq)
                 self._ds["value"].loc[dict(input=in_id,
                                            output=out_id)] = rf
@@ -183,7 +191,7 @@ class ResponseFunctions(object):
     @property
     def noise_channels(self):
         """Names of the noise channel for each rf"""
-        return list(self._ds.coords["noise_chan"].values)
+        return list(self._ds.coords["noise_channel"].values)
 
     def coh_signif(self, prob=0.95):
         """
@@ -210,7 +218,7 @@ class ResponseFunctions(object):
             str: The channel ('input', 'output', 'equal', or 'unknown')
         """
         oc = self._match_out_id(output_channel_id)
-        return str(self._ds.sel(output=oc).coords["noise_chan"].values)
+        return str(self._ds.sel(output=oc).coords["noise_channel"].values)
 
     def value(self, output_channel_id, zero_as_none=False, verbose=False):
         """
@@ -285,31 +293,32 @@ class ResponseFunctions(object):
         ir = self._ds["instrument_response"].sel(output=oc).values
         return np.squeeze(ir)
 
-    def to_norm_compliance(self, water_depth, verbose=False):
-        """
-        Change rfs from m/s^2 / Pa to 1 / Pa by multiplying by k / -omega^2
-        """
-        if verbose:
-            print(self)
-            print(f'{self.input_units=}')
-            print(f'{self.output_channel_ids[0]=}')
-            print(f'{self.output_units(self.output_channel_ids[0])=}')
-        if not self.input_units.upper() == 'PA':
-            logger.error(f'{self.input_units.upper()=}, not "PA"')
-        om = 2 * np.pi * self.freqs  # Angular frequency ARGH!!!
-        k = gravd(om, water_depth)  # Wavenumber
-        rf_multiplier = k / (-om**2)  # Multiplier from Accel/Press to norm compliance
-        # print(f'RF.to_norm_compliance: {water_depth=}, {om[:5]=}, {k[:5]=}')
-        for oc in self.output_channel_ids:
-            if not self.output_units(oc).upper() == 'M/S^2':
-                logger.error(f'{self.output_units(oc).upper()=}, not "M/2^2"')
-            # Multiply rf by -k/om^2
-            self._ds["value"].loc[dict(output=oc)] = self.value(oc) * rf_multiplier
-            # Multiply output units by s^2/m
-            self._ds.coords["out_units"].loc[dict(output=oc)] = '1'
-            # Change instrument_response so that value w.r.t. counts remains constant
-            self._ds["instrument_response"].loc[dict(output=oc)] = (
-                self.instrument_response(oc) / rf_multiplier)
+    # REMOVED for integration into Compliance class
+    # def to_norm_compliance(self, water_depth, verbose=False):
+    #     """
+    #     Change rfs from m/s^2 / Pa to 1 / Pa by multiplying by k / -omega^2
+    #     """
+    #     if verbose:
+    #         print(self)
+    #         print(f'{self.input_units=}')
+    #         print(f'{self.output_channel_ids[0]=}')
+    #         print(f'{self.output_units(self.output_channel_ids[0])=}')
+    #     if not self.input_units.upper() == 'PA':
+    #         logger.error(f'{self.input_units.upper()=}, not "PA"')
+    #     om = 2 * np.pi * self.freqs  # Angular frequency ARGH!!!
+    #     k = gravd(om, water_depth)  # Wavenumber
+    #     rf_multiplier = k / (-om**2)  # Multiplier from Accel/Press to norm compliance
+    #     # print(f'RF.to_norm_compliance: {water_depth=}, {om[:5]=}, {k[:5]=}')
+    #     for oc in self.output_channel_ids:
+    #         if not self.output_units(oc).upper() == 'M/S^2':
+    #             logger.error(f'{self.output_units(oc).upper()=}, not "M/2^2"')
+    #         # Multiply rf by -k/om^2
+    #         self._ds["value"].loc[dict(output=oc)] = self.value(oc) * rf_multiplier
+    #         # Multiply output units by s^2/m
+    #         self._ds.coords["out_units"].loc[dict(output=oc)] = '1'
+    #         # Change instrument_response so that value w.r.t. counts remains constant
+    #         self._ds["instrument_response"].loc[dict(output=oc)] = (
+    #             self.instrument_response(oc) / rf_multiplier)
 
     def uncert_mult(self, output_channel_id):
         """
@@ -376,7 +385,7 @@ class ResponseFunctions(object):
                                  "value", "self.output_channel_ids")
         return out_id
 
-    def _calcrf(self, spect_density, input, output, noise_chan="output",
+    def _calcrf(self, spect_density, input, output, noise_channel="output",
                 n_to_reject=1, min_freq=None, max_freq=None):
         """
         Calculate frequency response function between two channels
@@ -414,27 +423,27 @@ class ResponseFunctions(object):
         Gyx = spect_density.crossspect(output, input)
         # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
         H_err = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
-        noise_chans = ("output", "input", "equal", "unknown")
-        if not noise_chan in noise_chans:
-            raise ValueError(f"{noise_chan=} not in {noise_chans}")
-        if noise_chan == "output":
+        noise_channels = ("output", "input", "equal", "unknown")
+        if not noise_channel in noise_channels:
+            raise ValueError(f"{noise_channel=} not in {noise_channels}")
+        if noise_channel == "output":
             H = Gxy / Gxx  # BP86 eqn 6.37
             corr_mult = np.ones(H.shape)  # No change
-        elif noise_chan == "input":
+        elif noise_channel == "input":
             H = Gyy / Gyx    # BP86 eqn 6.42
             corr_mult = coh  # derived from BP86 eqns 6.44 and 6.46
-        elif noise_chan == "equal":
+        elif noise_channel == "equal":
             # Derived from BP86 eqns 6.48, 6.49, 6.51 and 6.52
             H = (Gxy / Gxx) / np.sqrt(coh)
             corr_mult = np.sqrt(coh)
-        elif noise_chan == "unknown":
+        elif noise_channel == "unknown":
             Hmax = (Gyy / Gyx)*(1+H_err)   # high value; all noise on input
             Hmin = (Gxy / Gxx)/(1+H_err)   # low value: all noise on output
             H = (Hmin + Hmax)/2
             H_err = ((Hmax-Hmin)/2)/H
             corr_mult = np.sqrt(coh) # Just copied "equal", probably wrong
         else:
-            raise ValueError(f'unknown noise channel: "{noise_chan}"')
+            raise ValueError(f'unknown noise channel: "{noise_channel}"')
         H = self._zero_bad(H, coh, n_to_reject, f, min_freq, max_freq)
 
         # Calculate uncertainty

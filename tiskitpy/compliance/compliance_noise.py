@@ -7,10 +7,11 @@ from obspy.core import UTCDateTime
 from pathlib import Path
 
 from ..spectral_density import SpectralDensity
-from .compliance_functions import gravd, calc_norm_compliance
+from .compliance import Compliance
 from .earth_model import EarthModel1D
 from .tide_coefficients import TideCoefficients
 from .psd_vals import PSDVals
+from .functions import to_DBs, from_DBs
 
 default_water_depth = 2400
 default_Z_offset_angles=(2, 15)  # degrees: angle from vertical, azimuth from "N"
@@ -129,7 +130,7 @@ class ComplianceNoise(object):
             psd.resample(np.arange(psd.freqs[0],
                          psd.freqs[-1] + self.IG_freqstep * .999,
                          self.IG_freqstep))
-        k = gravd(2 * np.pi * psd.freqs, self.water_depth)
+        k = Compliance.gravd(2 * np.pi * psd.freqs, self.water_depth)
         psd.values += 20*np.log10(seawater_density*g)   # meters to Pascals
         psd.values -=  self._cosh_dBs(k * self.water_depth)  # depth decay
         psd.value_units = 'dB ref 1 Pa^2/Hz'
@@ -252,36 +253,41 @@ class ComplianceNoise(object):
         """
         if f is None:
             f = self.IG_Pa_seafloor.freqs
-        ncompl = calc_norm_compliance(self.water_depth, f, self.earth_model)
-        # print(ncompl[~np.isnan(ncompl)])
+        ncompl = Compliance.calc_norm_compliance(self.water_depth, f, self.earth_model)
         om = 2 * np.pi * f
-        k = gravd(om, self.water_depth)
+        k = Compliance.gravd(om, self.water_depth)
         # print(f'ComplianceNoise._calc_ncompl(): {self.water_depth=}, {om[:5]=}, {k[:5]=}')
         return om, k, ncompl
 
-    def save_compliance(self, max_freq=None,
-                        filename="model_compliance_Pa-1.csv", out_dir=None):
+    def save_compliance(self, max_freq=None, basename="model", out_dir=None):
         """
-        Saves self.earth_model's compliance to a BRUIT-FM CSV file
+        GRANDFATHERED: use Compliance.write() instead
+        Saves self.earth_model's compliance to a file
 
         Args:
             max_freq (float): only save up to this frequency (Hz)
             out_dir(str): output directory
             filename (str): output filename
         """
-        oms, ks, ncompls = self._calc_ncompl()
-        if out_dir is not None:
-            filename = str(Path(out_dir) / filename)
-        freqs = oms / (2 * np.pi)
+        freqs = self.IG_Pa_seafloor.freqs 
         if max_freq is not None:
-            ncompls = ncompls[freqs <= max_freq]
             freqs = freqs[freqs <= max_freq]
-        with open(filename, "w") as fid:
-            fid.write('frequencies;compliance;uncertainty;phase\n')
-            for freq, ncompl in zip(freqs, ncompls):
-                fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'
-                          .format(freq, np.abs(ncompl), 0.000,
-                                  np.angle(ncompl, deg=True)))
+        ncompl = Compliance.from_earth_model_1D(self.water_depth, freqs,
+                                             self.earth_model)
+        ncompl.write(basename, out_dir=out_dir)
+        # oms, ks, ncompls = self._calc_ncompl()
+        # if out_dir is not None:
+        #     filename = str(Path(out_dir) / filename)
+        # freqs = oms / (2 * np.pi)
+        # if max_freq is not None:
+        #     ncompls = ncompls[freqs <= max_freq]
+        #     freqs = freqs[freqs <= max_freq]
+        # with open(filename, "w") as fid:
+        #     fid.write('frequencies;compliance;uncertainty;phase\n')
+        #     for freq, ncompl in zip(freqs, ncompls):
+        #         fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'
+        #                   .format(freq, np.abs(ncompl), 0.000,
+        #                           np.angle(ncompl, deg=True)))
 
     def plot(self, fmin=0.001, fmax=0.1, fstep=0.001, outfile=None, show=True):
         """
@@ -439,16 +445,18 @@ class ComplianceNoise(object):
         channels = []
         for k, v in self.stream_source_codes.items():
             if k[1]=='D':
-                reponse=p_response
+                resp = p_response
                 dip=90.
             else:
-                response=s_response
+                resp = s_response
                 dip=0.
                 if k[2] == 'Z':
                     dip=-90.
-            channels.append(Channel(k, location, 0, 0, 0, 0, response=response, dip=dip))
+            # Add BBOBS channels
+            channels.append(Channel(k, location, 0, 0, 0, 0, response=resp, dip=dip))
+            # Add source channels
             for x in v:
-                channels.append(Channel(x, location, 0, 0, 0, 0, response=response, dip=dip))
+                channels.append(Channel(x, location, 0, 0, 0, 0, response=resp, dip=dip))
         stations = [Station(station, 0, 0, 0, channels=channels)]
         networks = [Network(network, stations=stations)]
         inv = Inventory(networks=networks)

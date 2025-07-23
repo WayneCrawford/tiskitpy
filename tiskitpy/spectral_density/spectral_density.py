@@ -577,14 +577,17 @@ class SpectralDensity:
         Returns:
             (str): Channel's input units
         """
-        if channel not in self._ds["spectra"].coords["input"]:
-            raise ValueError("channel {} not found in spectra.input {}"
-                             .format(
-                                channel,
-                                self._ds["spectra"].coords["input"].values))
-        return str(
-            self._ds["spectra"].sel(input=channel).coords["in_units"].values
-        )
+        # if channel not in self._ds["spectra"].coords["input"]:
+        #     raise ValueError("channel {} not found in spectra.input {}"
+        #                      .format(
+        #                         channel,
+        #                         self._ds["spectra"].coords["input"].values))
+        # return str(
+        #     self._ds["spectra"].sel(input=channel).coords["in_units"].values
+        # )
+        return str(self._ds["spectra"]
+                   .sel(input=self.channel_id(channel))
+                   .coords["in_units"].values)
 
     def clean_sequence(self, channel):
         """
@@ -1462,8 +1465,8 @@ class SpectralDensity:
                                   the figure grid
             show_xlabel (bool): put an xlabel on this subplot
             show_ylabel (bool): put a ylabel on this subplot
-            ylabel (str): label to put on y axis (if show_label).  If not
-                speficied, will use 'dB ref UNITS/Hz'
+            ylabel (str): label to put on y axis (if show_ylabel).  If not
+                speficied, will use 'Coherence'
             label (str): text to put in legend
             ax_a (Axis): use an existing axis for the amplitude plot
             ax_p (Axis): use this existing axis for the phase plot
@@ -1703,8 +1706,6 @@ class SpectralDensity:
         Multipliers chosen to match prolnpi levels (and input PSDVals).
         There must be a smarter way.
         """
-        assert win_taper in WINDOW_TAPERS
-        
         if win_taper == "hanning":
             taper = 1.65*eval(f"np.{win_taper}(ws)")
         elif win_taper == "hamming":
@@ -1975,12 +1976,12 @@ def _validate_plots_args(sds, line_kws, labels):
     for i, sd in zip(range(len(sds)), sds):
         if not isinstance(sd, SpectralDensity):
             raise ValueError(f'sds[{i}] is not a SpectralDensity object')
-        if i == 0:
-            seed_ids = sorted(sds[0].seed_ids)
-        else:
-            if not (seed_ids == sorted(sd.seed_ids)):
-                raise ValueError(f"sds[{i}].seed_ids={sd.seed_ids}"
-                                 f" does not match {sds[0].seed_ids=}")
+        # if i == 0:
+        #     seed_ids = sorted(sds[0].seed_ids)
+        # else:
+        #     if not (seed_ids == sorted(sd.seed_ids)):
+        #         raise ValueError(f"sds[{i}].seed_ids={sd.seed_ids}"
+        #                          f" does not match {sds[0].seed_ids=}")
     if line_kws is not None:
         if not isinstance(line_kws, (list, tuple)):
             raise ValueError('line_kws is not a list or tuple')

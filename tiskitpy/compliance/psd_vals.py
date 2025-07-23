@@ -16,6 +16,7 @@ class PSDVals():
     Attributes:
         freqs (list): frequencies
         values (list): values in dB
+        value_units (str): units of the values
     """
     def __init__(self, freqs_and_vals, value_units="unknown"):
         """
@@ -52,6 +53,23 @@ class PSDVals():
         else:
             # Add parenthesis around value_units
             self.value_units = f'dB ref 1 ({value_units})^2/Hz'
+
+    @classmethod    
+    def from_loglog_slope(cls, val_1Hz, slope, logf_low, logf_high, logf_step,
+                          value_units="unknown"):
+        """Create PSDVals object with a loglog slope
+        
+        Args:
+            val_1Hz (float): PSD level (dBs)  at 1 Hz
+            slope (float): PSD slope in log(dBs)/log(freq)
+            logf_low (float): log10 of minimum frequency
+            logf_high (float): log10 of maximum frequency
+            logf_step (float): log10 frequency step
+            value_units (str): Units of values before converting to dB
+        """
+        x = PSDVals.sloped_freqs_and_values(val_1Hz, slope, logf_low, logf_high,
+                                            logf_step)
+        return cls((x, True), value_units)
 
     def __str__(self):
         s = f"<PSDVals>:\n"
@@ -139,7 +157,7 @@ class PSDVals():
                     for f, v in zip(self.freqs, self.values)]
         return PSDVals((psd_list, True), 'm/s')
         
-    def as_fft(self, freqs, left='taper', right='taper', phases=None,
+    def _as_fft(self, freqs, left='taper', right='taper', phases=None,
                plotit=False):
         """
         Return an fft "equivalent" to the given Power Spectral Density
@@ -181,7 +199,7 @@ class PSDVals():
             fig, ax = plt.subplots()
             ax.loglog(self.freqs, np.power(10., self.values/20), '+', freqs, fft)
             # ax.semilogx(self.freqs, self.values, '+', freqs, 20*np.log10(fft))
-            plt.suptitle('PSDVals.as_fft()')
+            plt.suptitle('PSDVals._as_fft()')
             plt.show()
         fft[0] = 0.  # Make sure the zero-frequency value is zero
         # Scale for sample rate and window length
@@ -212,7 +230,7 @@ class PSDVals():
             channel (str): channel code (default: value in ref Trace, or 'CCC')
             plotit (bool or str): plot the components of the transformation
                 (psd, fft, fresp).  If a string, use as the plot's title.
-            **kwargs (dict): keyword arguments to pass to self.as_fft()
+            **kwargs (dict): keyword arguments to pass to self._as_fft()
         
         Returns:
             tuple:
@@ -247,12 +265,12 @@ class PSDVals():
             plotit = True
         else:
             title_text = None
-        fft = self.as_fft(f, **kwargs)
+        fft = self._as_fft(f, **kwargs)
         if plotit is True:
             fig, ax = plt.subplots()
             ax.loglog(f, np.abs(fft), 'b-', label='fft')
             ax.loglog(f, np.abs(fresp), 'g--', label='fresp')
-            ax.loglog(f, np.abs(self.as_fft(f, **kwargs)*fresp), 'c--', label='fft*fresp')
+            ax.loglog(f, np.abs(self._as_fft(f, **kwargs)*fresp), 'c--', label='fft*fresp')
             ax.loglog(self.freqs, np.power(10., self.values/20), 'r+', label='psd')
             ax.loglog(f, np.abs(fft/np.sqrt(len(f) * sr / 2)), 'b:', label='fft/sqrt(nf*sr/2)')
             if title_text is not None:

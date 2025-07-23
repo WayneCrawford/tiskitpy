@@ -5,6 +5,8 @@ Author:  W Crawford
 import warnings
 
 import numpy as np
+from matplotlib import pyplot as plt
+from .compliance import Compliance
 
 
 class EarthModel1D():
@@ -38,12 +40,49 @@ class EarthModel1D():
         
     def __str__(self):
         s = '<EarthModel1D>:\n'
-        s += '        thickness (m) | rho (kg/m^3) | Vp (m/s) | Vs (m/s)\n'
-        s += '        ------------- | ------------ | -------- | ----------\n'
+        s += '        thickness (m) | rho (kg/m^3) | Vp (m/s) | Vs (m/s) | Vs/Vp  | lambda (GPa) | mu (GPa)\n'
+        s += '        ------------- | ------------ | -------- | -------- | ------ | ------------ | ----------\n'
         for t, r, vp, vs in zip(self.thicks.tolist(), self.rhos.tolist(),
                               self.vps.tolist(), self.vss.tolist()):
-            s += f"         {t:12.0f} | {r:12.0f} | {vp:8.0f} | {vs:8.0f}\n"
+            s += f"         {t:12.0f} | {r:12.0f} | {vp:8.0f} | {vs:8.0f} | {vs/vp:6.3f} | {r*(vp*vp-2*vs*vs)/1e9:12.1f} | {r*vs*vs/1e9:8.1f}\n"
         return s
+
+    def plot(self):
+        prev_depth = 0
+        depths, vps, vss, rhos, mus, comps = [], [], [], [], [], []
+        for thick, rho, vp, vs in zip(self.thicks, self.rhos, self.vps, self.vss):
+            for i in (1,2):  # add tops and bottoms
+                # Add layer tops
+                depths.append(prev_depth)
+                vps.append(vp)
+                vss.append(vs)
+                rhos.append(rho)
+                mus.append(rho*vs*vs)
+                comps.append(rho*vp*vp-2*rho*vs*vs)
+                prev_depth += thick
+            prev_depth -= thick
+        fig, axs = plt.subplots(1, 2, sharey=True)
+        axs[0].plot(vps, depths, 'r', label='vp')            
+        axs[0].plot(vss, depths, 'b', label='vs')            
+        axs[0].plot(rhos, depths, 'g', label='rho') 
+        axs[0].set_xlabel('velocity (m/s) or density (kg/m^3)')         
+        axs[0].set_ylabel('Depth (m))')
+        axs[0].set_title('EarthModel1D')
+        axs[0].invert_yaxis()
+        axs[0].legend()
+        axs[1].plot([x/1.e9 for x in comps], depths, 'r', label='lambda')            
+        axs[1].plot([x/1.e9 for x in mus], depths, 'b', label='mu')            
+        axs[1].set_xlabel('Lame parameter (GPa)')         
+        axs[1].legend()
+        plt.show()       
+
+    def calc_ncompl(self, f, wdepth):
+        """
+        Return the normalized compliance for the given frequencies and water depth
+        
+        Wrapper for :meth:`tiskitpy.Compliance.calc_norm_compliance`
+        """
+        return  Compliance.calc_norm_compliance(wdepth, f, self)
 
 
 if __name__ == '__main__':

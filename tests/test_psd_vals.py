@@ -47,7 +47,7 @@ def test_accel_as_vel(psdv):
     """
     Verify that converting from accel to vel has expected behavior
     """
-    plotit = True
+    plotit = False
 
     stats = {'starttime': UTCDateTime(2010, 1, 1),
              'endtime':   UTCDateTime(2010, 1, 10),

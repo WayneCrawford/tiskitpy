@@ -11,6 +11,9 @@ Classes
    classes/data_cleaner
    classes/clean_rotator
    classes/response_functions
+   classes/compliance_noise
+   classes/compliance
    classes/time_spans
    classes/cleaned_stream
-   classes/compliance_noise
+   classes/earth_model_1D
+   classes/psd_vals

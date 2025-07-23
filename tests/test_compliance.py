@@ -12,6 +12,7 @@ from pathlib import Path
 import pickle
 import datetime
 from copy import deepcopy
+from difflib import unified_diff
 
 from obspy.core.inventory.response import FIRResponseStage
 from obspy import read_inventory
@@ -19,9 +20,8 @@ from obspy.core.stream import read as stream_read
 from matplotlib import pyplot as plt
 import numpy as np
 
-from tiskitpy.compliance import (ComplianceNoise, PSDVals, EarthModel1D, 
-                                 gravd, calc_norm_compliance,
-                                 zp_to_norm_compliance, from_DBs, to_DBs)
+from tiskitpy import Compliance
+from tiskitpy.compliance import EarthModel1D
 
 
 class TestMethods(unittest.TestCase):
@@ -31,10 +31,68 @@ class TestMethods(unittest.TestCase):
     def setUp(self):
         self.path = Path(inspect.getfile(
             inspect.currentframe())).resolve().parent
-        self.test_path = self.path / "data" / "decimate"
-        self.compliance_noise = ComplianceNoise()  # Uses all defaults
+        self.test_path = self.path / "data" / "compliance"
+        freqs = np.arange(0.005, 0.01, 0.001) # Just a few values for testing
+        self.compliance = Compliance(freqs,
+                                     np.ones(freqs.shape),
+                                     1.e-1*np.ones(freqs.shape),
+                                     2300., "output", False)
+
+    def _compare_to_ref_file(self, a, b):
+        "a: test_file, b: reference_file"
+        with open(b, "r") as f:
+            expected_lines = f.readlines()
+        with open(a, "r") as f:
+            actual_lines = f.readlines()
+
+        diff = list(unified_diff(expected_lines, actual_lines))
+        assert diff == [], "Unexpected file contents:\n" + "".join(diff)
+
+    def test_str(self):
+        self.assertEqual(self.compliance.__str__(),
+                         'Compliance object:\n'
+                         '  5 frequencies, from 0.005 to 0.009000000000000001 Hz\n'
+                         "  water_depth='2300.0'\n"
+                         '  noise_channel=output\n'
+                         '  gravity_corrected=False')
+ 
+    def test_write(self):
+        self.compliance.write('test')
+        self._compare_to_ref_file(Path('test_Pa-1.csv'), self.path / 'test_Pa-1.csv')
+        self.compliance.write('test', units='m/Pa')
+        self._compare_to_ref_file(Path('test_m.Pa-1.csv'), self.path / 'test_m.Pa-1.csv')
+        self.compliance.write('test', units='m/s/Pa')
+        self._compare_to_ref_file(Path('test_m.s-1.Pa-1.csv'), self.path / 'test_m.s-1.Pa-1.csv')
+        self.compliance.write('test', units='m/s^2/Pa')
+        self._compare_to_ref_file(Path('test_m.s-2.Pa-1.csv'), self.path / 'test_m.s-2.Pa-1.csv')
+        with self.assertRaises(ValueError):
+            self.compliance.write('test', units='haha')
+
+    def test_correct_gravity_terms(self):
+        return
+
+    def test_convert_compliance(self):
+        c, u = self.compliance._convert_compliance('1/Pa')
+        self.assertEqual(list(c), list(self.compliance.values))
+        self.assertEqual(list(u), list(self.compliance.uncertainties))
+        c_as_mPa = np.array([4596.3589923303625, 3762.2939138026377,
+                             3155.9357563870667, 2692.0314906653507,
+                             2323.3536020140164])
+        om = 2 * np.pi * self.compliance.freqs
+        c, u = self.compliance._convert_compliance('m/Pa')
+        self.assertEqual(list(c.astype('int')), list((c_as_mPa).astype('int')))
+        self.assertEqual(list(u.astype('int')), list((c_as_mPa/10.).astype('int')))
+        c, u = self.compliance._convert_compliance('m/s/Pa')
+        self.assertEqual(list(c.astype('int')), list((c_as_mPa*om).astype('int')))
+        self.assertEqual(list(u.astype('int')), list((c_as_mPa*om/10.).astype('int')))
+        c, u = self.compliance._convert_compliance('m/s^2/Pa')
+        self.assertEqual(list(c.astype('int')), list((c_as_mPa*om**2).astype('int')))
+        self.assertEqual(list(u.astype('int')), list((c_as_mPa*om**2/10.).astype('int')))
+        with self.assertRaises(ValueError):
+            c, u = self.compliance._convert_compliance('Pa')
 
     def test_gravd(self):
+        gravd = Compliance.gravd
         g = 9.81
         # Shallow water cases
         om = 0.001
@@ -61,49 +119,25 @@ class TestMethods(unittest.TestCase):
         for H in (10., 100., 1000., 2000., 4000.): 
             # Differences are bigger as water is deeper (ocean waves are faster)
             print(f'{H=}')
-            nc = calc_norm_compliance(H, freqs, hs_model)
+            nc = Compliance.calc_norm_compliance(H, freqs, hs_model)
             for x in nc:
                 print(f'{np.abs(100*(x-theo_norm_compl)/x):.02f}% difference')
                 self.assertAlmostEqual(x, theo_norm_compl, delta=delta)
         # self.assertEqual(x, theo_norm_compl)
                              
-    def test_zp_to_norm_compliance(self):
+    def test_zp_to_ncompl(self):
+        gravd = Compliance.gravd
         freqs = np.array([.001])
         zp = np.array([1.])
         H = 2000.
         omega = 2 * np.pi * freqs
-        self.assertEqual(zp_to_norm_compliance(freqs, zp, H, 'M'),
+        self.assertEqual(Compliance._zp_to_ncompl(freqs, zp, H, 'M'),
                          gravd(omega, H)*zp)
-        self.assertAlmostEqual(zp_to_norm_compliance(freqs, zp, H, 'M/S')[0],
+        self.assertAlmostEqual(Compliance._zp_to_ncompl(freqs, zp, H, 'M/S')[0],
                          (gravd(omega, H)*zp/omega)[0])
-        self.assertAlmostEqual(zp_to_norm_compliance(freqs, zp, H, 'M/S^2')[0],
+        self.assertAlmostEqual(Compliance._zp_to_ncompl(freqs, zp, H, 'M/S^2')[0],
                          (gravd(omega, H)*zp/omega**2)[0])
                             
-    def test_compliance_noise_IG_Pa_seafloor(self):
-        """
-        Just check that the lowest frequency value is correct
-        """
-        H = self.compliance_noise.water_depth
-        omega_IG = self.compliance_noise.IG_m_seasurface.freqs*2*np.pi
-        k = gravd(omega_IG, H)
-        seawater_density = 1030  #  1020-1029 at the surface, up to 1050 at deep seafloor
-        g = 9.81  # 9.78 at equator, 9.83 at poles
-        Pa_per_m = seawater_density*g
-        self.assertAlmostEqual(self.compliance_noise.IG_Pa_seafloor.values[0],
-                               self.compliance_noise.IG_m_seasurface.values[0]
-                               + 20*np.log10(Pa_per_m/np.cosh(k*H))[0])
-
-    def test_to_DBs(self):
-        self.assertEqual(to_DBs(10.),  20.)
-        self.assertEqual(to_DBs(100.), 40.)
-        self.assertEqual(to_DBs(0.1), -20.)
-
-    def test_from_DBs(self):
-        self.assertEqual(from_DBs( 20.), 10.)
-        self.assertEqual(from_DBs( 40.), 100.)
-        self.assertEqual(from_DBs(-20.), 0.1)
-        for x in (0.03, 0.4, 4.555, np.pi, 246, 1.23e5):
-            self.assertAlmostEqual(from_DBs(to_DBs(x)), x, delta=x/1e8)
 
 def suite():
     return unittest.makeSuite(TestMethods, 'test')

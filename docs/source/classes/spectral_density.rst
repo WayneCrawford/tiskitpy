@@ -25,7 +25,8 @@ Properties
 - ``window_seconds``: Length of each window, in seconds
 - ``starttimes``: get a list containing the starttimes for each data window
 - ``used_times``: time spans used to calculate spectra
-- ``unused_times``: time spans rejected or otherwise unused to calculate spectra
+- ``avoided_spans``: Time spans avoided during PSD calculation
+- ``clean_sequences``: list of clean_sequence lists, for each channel
 
 
 Methods
@@ -45,6 +46,7 @@ Get Methods
 - :meth:`channel_units <tiskitpy.SpectralDensity.channel_units>`: A channel's input (physical) units
 - :meth:`units <tiskitpy.SpectralDensity.units>`: Units of a cross- or auto-spectra
 - :meth:`coh_signif <tiskitpy.SpectralDensity.coh_signif>`: The coherence significance level
+- :meth:`clean_sequence <tiskitpy.SpectralDensity.clean_sequence>`: The clean sequence applied to a channel
 
 Other Methods
 ^^^^^^^^^^^^^^^^^^
@@ -58,7 +60,8 @@ Other Methods
   for the given channels
 - :meth:`plot_one_coherence <tiskitpy.SpectralDensity.plot_one_coherence>`: plot coherence
   for the given channels
-- :meth:`plots <tiskitpy.SpectralDensity.plots>`: overlay plot spectra specified in the list
+- :meth:`plots <tiskitpy.SpectralDensity.plots>`: overlay plot different SpectralDensity objects
+- :meth:`plots_coherences <tiskitpy.SpectralDensity.plots_coherences>`: overlay plot coherences of different SpectralDensity objects
 
 Set Methods
 ^^^^^^^^^^^^^^^^^^
@@ -71,6 +74,8 @@ You probably won't ever use these (should I put a `_` before?)
   :meth:`put_crossspect <tiskitpy.SpectralDensity.put_crossspect>`
 - :meth:`put_channel_instrument_response <tiskitpy.SpectralDensity.put_channel_instrument_response>`: put a channel
   response in the given slot
+- :meth:`put_clean_sequence <tiskitpy.SpectralDensity.put_clean_sequence>`: put a channel's
+  clean_sequence into the object
 - :meth:`replace_channel_id <tiskitpy.SpectralDensity.replace_channel_id>`: change a channel id
 
 Example
