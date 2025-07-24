@@ -21,8 +21,10 @@ Properties
 - ``values`` (:class:`numpy.ndarray`): Normalized compliance values (1/Pa)
 - ``uncertainties`` (:class:`numpy.ndarray`): Normalized compliance uncertainties (1/Pa)
 - ``water_depth`` (float): water depth in meters
-- ``noise_channel`` (str): 'Z', 'P', 'equal', 'unknown'
-- ``gravity_corrected`` (bool): Has the compliance been corrected for
+- ``noise_channel`` (str or None): If a str, the compliance comes from data
+  and this is the channel on which noise was assumed to dominate.  If None,
+  the compliance comes from a calculation.
+- ``gravity_corrected`` (bool): Has data-estimated compliance been corrected for
   gravitational attraction terms?
 
 Dependent properties

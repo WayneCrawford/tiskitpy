@@ -1,7 +1,7 @@
 """
 Python compliance class
 
-Authors:  A. Doran, W Crawford
+Authors:  W. Crawford, A. Doran
 """
 from copy import deepcopy
 
@@ -22,9 +22,10 @@ class Compliance(object):
         values (:class:`numpy.ndarray`): Normalized compliance values (1/Pa)
         uncertainties (:class:`numpy.ndarray`): Normalized compliance uncertainties (1/Pa)
         water_depth (float): water depth in meters
-        noise_channel (str or None): 'Z', 'P', 'equal', 'unknown'
-        gravity_corrected (bool): Has the compliance been corrected for
-            gravitational attraction terms?
+        noise_channel (str or None): If a str, compliance comes from data and
+            this is the channel on which noise was assumed to dominate
+        gravity_corrected (bool): Has data-estimated compliance been corrected
+            for gravitational attraction terms?
     """
     def __init__(self, freqs, values, uncertainties, water_depth, noise_channel,
                  gravity_corrected=False):
@@ -36,9 +37,11 @@ class Compliance(object):
             values (:class:`numpy.ndarray`): Normalized compliance values (1/Pa)
             uncertainties (:class:`numpy.ndarray`): Normalized compliance uncertainties (1/Pa)
             water_depth (float): water depth in meters
-            noise_channel (str): 'Z', 'P', 'equal', 'unknown'
-            gravity_corrected (bool): Has the compliance been corrected for
-                gravitational attraction terms?
+            noise_channel (str): (str or None): If a str, compliance comes from
+                data and this is the channel on which noise was assumed to
+                dominate
+            gravity_corrected (bool): Has data-estimated compliance been corrected
+                for gravitational attraction terms?
         """
         self.freqs = freqs
         self.values =values

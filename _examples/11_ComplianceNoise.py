@@ -11,7 +11,6 @@ Create synthetic OBS training data
 
 """
 from pathlib import Path
-import sys
 
 import numpy as np
 from obspy import read, read_inventory, UTCDateTime
@@ -23,12 +22,7 @@ data_file = 'data/G.TAM_2010059-2010069.mseed'  # post-Maule eq
 inv_file = 'data/G.TAM.2010.station.xml'
 wdepth = 2400
 station = 'SYNV1'
-plot_dir = 'plots_synth_training'
-wt = 'prol4pi'  # windowtype for SpectralDensity calls: 
-                # hamming and prol1pi don't have enough broadband noise rejection
-
-# SpectralDensity.compare_tapers(2048)
-# sys.exit(0)
+wt = 'prol4pi'  # hamming and prol1pi don't have enough broadband noise rejection
 
 # Read the real data and its metadata
 real_data = read(data_file, 'MSEED')
@@ -44,18 +38,19 @@ s_response=inv.select(channel='LHZ')[0][0][0].response
 noise_tilt_max = PSDVals.sloped_freqs_and_values(-180, -30, -3, 0.1, .25)
 noise_model = ComplianceNoise(noise_tilt_max=noise_tilt_max,
                               noise_tilt_variance=30)
+noise_model.save_compliance(max_freq=0.07)
+
 # PLOT: noise model using ComplianceNoise's intrinsic method
 noise_model.plot(outfile='noise_model.png')
-noise_model.save_compliance(max_freq=0.07)
+
+# Create the synthetic and sources data streams
 data_synth, sources, inv_synth = noise_model.streams(
     real_data[0], s_response=s_response, p_response = 100.,
     station=station)
 noisePSDs = noise_model.PSDs
 
-# sd_sources = SpectralDensity.from_stream(sources, inv=inv_synth, windowtype=wt)
+# Compare the PSDs of the noise sources' waveforms to their theoretical valus
 sd_sources = SpectralDensity.from_stream(sources, windowtype=wt)
-
-# PLOT: comparison of each noise component's specifed PSD to it's stream's PSDs
 fig, ax = plt.subplots()
 for component, color in zip(('IGZ', 'NOS', 'NTZ_max', 'NTZ_min'), ('r', 'b', 'g', 'g')):
     ax.semilogx(noisePSDs[component].freqs, noisePSDs[component].values, color, label=component)
@@ -67,10 +62,10 @@ plt.suptitle(f'Z theoretical versus sd(stream, {wt}) noise levels')
 plt.legend()
 plt.show()
 
-# PLOT: synthetic time series
+# PLOT synthetic time series
 data_synth.plot(equal_scale=False)
 
-# PLOT: synthetic PSD versus ComplianceNoise components
+# PLOT synthetic PSD versus ComplianceNoise components
 sd_synth = SpectralDensity.from_stream(data_synth, inv=inv_synth, windowtype=wt)
 ax = sd_synth.plot_one_autospectra(f'XX.{station}.00.LHZ')
 ylim = ax.get_ylim()
@@ -82,16 +77,16 @@ ax.legend()
 plt.gcf().suptitle('Synthetic Data PSD and its sources')
 plt.show()
 
-data = data_synth.copy()
 # Add the real and synthetic data together
+data = data_synth.copy()
 data.select(channel='LHZ')[0].data += real_data.select(channel='LHZ')[0].data
 data.select(channel='LH1')[0].data += real_data.select(channel='LHN')[0].data
 data.select(channel='LH2')[0].data += real_data.select(channel='LHE')[0].data
 
-# PLOT: synthetic + real time series
+# PLOT synthetic + real time series
 data.plot(equal_scale=False)
 
-# PLOT: synthetic + real PSD versus ComplianceNoise components
+# PLOT synthetic + real PSD versus ComplianceNoise components
 sd_synth = SpectralDensity.from_stream(data, inv=inv_synth, windowtype=wt)
 ax = sd_synth.plot_one_autospectra(f'XX.{station}.00.LHZ')
 ylim = ax.get_ylim()
@@ -104,7 +99,7 @@ plt.gcf().suptitle('Synthetic + Real')
 plt.show()
 
 sd_data = SpectralDensity.from_stream(data, windowtype=wt)
-# PLOT: synthetic+real PSD
+# PLOT synthetic+real PSD
 sd_data.plot()
-# PLOT: synthetic+real coherence
+# PLOT synthetic+real coherence
 sd_data.plot_coherences()
