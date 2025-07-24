@@ -10,9 +10,9 @@ Constructor
 ---------------------
 
 - :class:`Compliance <tiskitpy.Compliance>`
-- :meth:`Compliance.from_response_functions <tiskitpy.Compliance.from_response_functions`:
+- :meth:`Compliance.from_response_functions <tiskitpy.Compliance.from_response_functions>`:
   The most common way to create a Compliance object
-- :meth:`Compliance.from_file <tiskitpy.Compliance.from_file`: read compliance from a file
+- :meth:`Compliance.from_file <tiskitpy.Compliance.from_file>`: read compliance from a file
 
 Properties
 ---------------------

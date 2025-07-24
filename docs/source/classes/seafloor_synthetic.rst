@@ -1,4 +1,4 @@
-.. _ComplianceNoise:
+.. _SeafloorSynthetic:
 
 SeafloorSynthetic
 =======================
@@ -6,7 +6,7 @@ SeafloorSynthetic
 Generates synthetic seismological signals based on seafloor low frequency noise
 and infragravity wave signal and noise levels.
 
-Uses :class:`PSDVals <tiskitpy.PSDVals` class objects, which specify a
+Uses :class:`PSDVals <tiskitpy.PSDVals>` class objects, which specify a
 power spectral density using dB values at different frequenceis
 
 Constructor

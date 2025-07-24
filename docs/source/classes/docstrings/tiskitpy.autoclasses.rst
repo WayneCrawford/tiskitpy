@@ -9,6 +9,8 @@ Class DocStrings
    autoclasses/data_cleaner
    autoclasses/clean_rotator
    autoclasses/seafloor_synthetic
+   autoclasses/compliance
+   autoclasses/earth_model_1D
    autoclasses/decimator
    autoclasses/periodic_transient
    autoclasses/psd_vals
