@@ -20,7 +20,7 @@ Properties
 
 - ``angle`` (float): angle (degrees) by which Z should be rotated
 - ``azimuth`` (float): azimuth (degrees) by which Z should be rotated
-- ``variance_reduction (float): amount by which variance was reduced during calculation
+- ``variance_reduction`` (float): amount by which variance was reduced during calculation
     (between 0. and 1.)
 - ``avoided_spans`` (:class:`tiskitpy.TimeSpans`): time spans avoided during calculation
 
