@@ -1,6 +1,6 @@
 .. _ComplianceNoise:
 
-ComplianceNoise
+SeafloorSynthetic
 =======================
 
 Generates synthetic seismological signals based on seafloor low frequency noise
@@ -12,7 +12,7 @@ power spectral density using dB values at different frequenceis
 Constructor
 ---------------------
 
-- :class:`ComplianceNoise <tiskitpy.ComplianceNoise>`:
+- :class:`SeafloorSynthetic <tiskitpy.SeafloorSynthetic>`:
 
 Properties
 ---------------------
@@ -39,11 +39,11 @@ Dependent properties
 Methods
 ---------------------
 
-- :meth:`make_tilt_ts <tiskitpy.ComplianceNoise.make_tilt_ts>`: Make a simple tilt time series
-- :meth:`norm_compliance <tiskitpy.ComplianceNoise.norm_compliance>`: Return normalized compliance of objects ``EarthModel``
-- :meth:`plot <tiskitpy.ComplianceNoise.plot>`: Plot spectral representation of the noise sources
-- :meth:`save_compliance <tiskitpy.ComplianceNoise.save_compliance>`: save ``self.earth_model``'s compliance to a CSV file
-- :meth:`streams <tiskitpy.ComplianceNoise.streams>`: Return streams generated from the noise model
+- :meth:`make_tilt_ts <tiskitpy.SeafloorSynthetic.make_tilt_ts>`: Make a simple tilt time series
+- :meth:`norm_compliance <tiskitpy.SeafloorSynthetic.norm_compliance>`: Return normalized compliance of objects ``EarthModel``
+- :meth:`plot <tiskitpy.SeafloorSynthetic.plot>`: Plot spectral representation of the noise sources
+- :meth:`save_compliance <tiskitpy.SeafloorSynthetic.save_compliance>`: save ``self.earth_model``'s compliance to a CSV file
+- :meth:`streams <tiskitpy.SeafloorSynthetic.streams>`: Return streams generated from the noise model
 
 Example
 ---------------------

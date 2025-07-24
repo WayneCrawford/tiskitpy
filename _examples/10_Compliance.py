@@ -7,7 +7,7 @@ from obspy.core.stream import Trace
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tiskitpy import (SpectralDensity, ComplianceNoise, ResponseFunctions,
+from tiskitpy import (SpectralDensity, SeafloorSynthetic, ResponseFunctions,
                       Compliance)
 
 # PARAMETERS
@@ -25,7 +25,7 @@ kwargs = {'noise_pressure': ([[0.001, -50], [1, -50]], True),
 max_compl_freq = 0.02
 
 # Create noise model
-noise_model = ComplianceNoise(**kwargs)
+noise_model = SeafloorSynthetic(**kwargs)
 
 # Create synthetic data from the noise model
 n_days = 10

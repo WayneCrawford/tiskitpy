@@ -140,11 +140,13 @@ Change `MANIFEST.in` to recursively include subfiles/directories of `decimate/`
 - ``SpectralDensity``, ``DataCleaner`` and ``CleanRotate`` classes take ``remove_eqs``
   and ``avoid_spans`` as input and provide an ``avoided_spans`` property.
 
-## 1.0.1
-Fix bug in ``ResponseFunctions`` plotting
-
 ## 1.1
+- Fixed bug in ``ResponseFunctions`` plotting
 - Added ``Compliance`` class
 - ``ComplianceNoise`` now gives expected outputs
 - ``SpectralDensity``: ``plots()`` and ``plot_coherences()`` methods now accept objects without identical seed_ids
 - ``EarthModel1D``: Added ``plot()`` and ``calc_ncomp()`` methods
+
+## 2.0
+
+Renamed ``ComplianceNoise`` to ``SeafloorSynthetic``

@@ -1,6 +1,6 @@
-.. _tiskitpy.ComplianceNoise:
+.. _tiskitpy.SeafloorSynthetic:
 
-tiskitpy.ComplianceNoise
+tiskitpy.SeafloorSynthetic
 -----------------------------
 
-.. autoclass:: tiskitpy.ComplianceNoise
+.. autoclass:: tiskitpy.SeafloorSynthetic

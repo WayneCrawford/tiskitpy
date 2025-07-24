@@ -9,7 +9,7 @@ Classes
 =========================
 
 - ``CleanRotator`` : Rotate data to minimize noise on vertical channel
-- ``ComplianceNoise``: Generate broadband OBS pressure and acceleration noise
+- ``SeafloorSynthetic``: Generate broadband OBS pressure and acceleration noise
   and compliance signals
 - ``DataCleaner`` : Transfer_Function-based data cleaning
 - ``Decimator`` : Decimate time series and update metadata with the
@@ -48,7 +48,7 @@ Use the `-h` option for help
 """
 from .clean_rotator import CleanRotator
 from .cleaned_stream import CleanedStream
-from .compliance import ComplianceNoise, Compliance, PSDVals, to_DBs, from_DBs
+from .compliance import SeafloorSynthetic, Compliance, PSDVals, to_DBs, from_DBs
 from .data_cleaner import DataCleaner, RFList
 from .decimate import Decimator
 from .rptransient import PeriodicTransient

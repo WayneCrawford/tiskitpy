@@ -45,6 +45,10 @@ class TestMethods(unittest.TestCase):
         with open(a, "r") as f:
             actual_lines = f.readlines()
 
+        print(a)
+        print(expected_lines)
+        print(b)
+        print(actual_lines)
         diff = list(unified_diff(expected_lines, actual_lines))
         assert diff == [], "Unexpected file contents:\n" + "".join(diff)
 
@@ -57,14 +61,28 @@ class TestMethods(unittest.TestCase):
                          '  gravity_corrected=False')
  
     def test_write(self):
-        self.compliance.write('test')
-        self._compare_to_ref_file(Path('test_Pa-1.csv'), self.path / 'test_Pa-1.csv')
+        head = 'test'
+        
+        self.compliance.write(head)
+        fname = head + '_Pa-1.csv'
+        self._compare_to_ref_file(self.path / fname, self.test_path / fname)
+        (self.path / fname).unlink()
+
         self.compliance.write('test', units='m/Pa')
-        self._compare_to_ref_file(Path('test_m.Pa-1.csv'), self.path / 'test_m.Pa-1.csv')
+        fname = head + '_m.Pa-1.csv'
+        self._compare_to_ref_file(self.path / fname, self.test_path / fname)
+        (self.path / fname).unlink()
+
         self.compliance.write('test', units='m/s/Pa')
-        self._compare_to_ref_file(Path('test_m.s-1.Pa-1.csv'), self.path / 'test_m.s-1.Pa-1.csv')
+        fname = head + '_m.s-1.Pa-1.csv'
+        self._compare_to_ref_file(self.path / fname, self.test_path / fname)
+        (self.path / fname).unlink()
+
         self.compliance.write('test', units='m/s^2/Pa')
-        self._compare_to_ref_file(Path('test_m.s-2.Pa-1.csv'), self.path / 'test_m.s-2.Pa-1.csv')
+        fname = head + '_m.s-2.Pa-1.csv'
+        self._compare_to_ref_file(self.path / fname, self.test_path / fname)
+        (self.path / fname).unlink()
+
         with self.assertRaises(ValueError):
             self.compliance.write('test', units='haha')
 

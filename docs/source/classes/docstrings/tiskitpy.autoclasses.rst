@@ -8,7 +8,7 @@ Class DocStrings
 
    autoclasses/data_cleaner
    autoclasses/clean_rotator
-   autoclasses/compliance_noise
+   autoclasses/seafloor_synthetic
    autoclasses/decimator
    autoclasses/periodic_transient
    autoclasses/psd_vals

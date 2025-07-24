@@ -2,7 +2,7 @@
 Create synthetic OBS training data
 
 - Read in real data from a quiet continental site
-- Create a noise model using the ComplianceNoise class with default values
+- Create a noise model using the SeafloorSynthetic class with default values
 - Add the two together
 - Save the result
 - Also save:
@@ -16,7 +16,7 @@ import numpy as np
 from obspy import read, read_inventory, UTCDateTime
 import matplotlib.pyplot as plt
 
-from tiskitpy import SpectralDensity, ComplianceNoise, PSDVals
+from tiskitpy import SpectralDensity, SeafloorSynthetic, PSDVals
 
 data_file = 'data/G.TAM_2010059-2010069.mseed'  # post-Maule eq
 inv_file = 'data/G.TAM.2010.station.xml'
@@ -36,11 +36,11 @@ s_response=inv.select(channel='LHZ')[0][0][0].response
 
 # Create the noise model and synthetic data stream
 noise_tilt_max = PSDVals.sloped_freqs_and_values(-180, -30, -3, 0.1, .25)
-noise_model = ComplianceNoise(noise_tilt_max=noise_tilt_max,
+noise_model = SeafloorSynthetic(noise_tilt_max=noise_tilt_max,
                               noise_tilt_variance=30)
 noise_model.save_compliance(max_freq=0.07)
 
-# PLOT: noise model using ComplianceNoise's intrinsic method
+# PLOT: noise model using SeafloorSynthetic's intrinsic method
 noise_model.plot(outfile='noise_model.png')
 
 # Create the synthetic and sources data streams
@@ -65,7 +65,7 @@ plt.show()
 # PLOT synthetic time series
 data_synth.plot(equal_scale=False)
 
-# PLOT synthetic PSD versus ComplianceNoise components
+# PLOT synthetic PSD versus SeafloorSynthetic components
 sd_synth = SpectralDensity.from_stream(data_synth, inv=inv_synth, windowtype=wt)
 ax = sd_synth.plot_one_autospectra(f'XX.{station}.00.LHZ')
 ylim = ax.get_ylim()
@@ -86,7 +86,7 @@ data.select(channel='LH2')[0].data += real_data.select(channel='LHE')[0].data
 # PLOT synthetic + real time series
 data.plot(equal_scale=False)
 
-# PLOT synthetic + real PSD versus ComplianceNoise components
+# PLOT synthetic + real PSD versus SeafloorSynthetic components
 sd_synth = SpectralDensity.from_stream(data, inv=inv_synth, windowtype=wt)
 ax = sd_synth.plot_one_autospectra(f'XX.{station}.00.LHZ')
 ylim = ax.get_ylim()

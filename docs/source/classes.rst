@@ -11,7 +11,7 @@ Classes
    classes/data_cleaner
    classes/clean_rotator
    classes/response_functions
-   classes/compliance_noise
+   classes/seafloor_synthetic
    classes/compliance
    classes/time_spans
    classes/cleaned_stream

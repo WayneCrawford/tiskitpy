@@ -5,7 +5,7 @@ PSDVals
 
 Synthetic Power Spectral Densities and their waveforms
 
-A helper class for :class:`tiskitpy.ComplianceNoise`
+A helper class for :class:`tiskitpy.SeafloorSynthetic`
 
 
 Constructor

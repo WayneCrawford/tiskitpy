@@ -1,7 +1,7 @@
 .. _tiskitpy.ComplianceNoise_example:
 
 ==============================
-ComplianceNoise example code
+SeafloorSynthetic example code
 ==============================
 
 .. code-block:: python
@@ -10,7 +10,7 @@ ComplianceNoise example code
     Create synthetic OBS training data
 
     - Read in real data from a quiet continental site
-    - Create a noise model using the ComplianceNoise class with default values
+    - Create a noise model using the SeafloorSynthetic class with default values
     - Add the two together
     - Save the result
     - Also save:
@@ -24,7 +24,7 @@ ComplianceNoise example code
     from obspy import read, read_inventory, UTCDateTime
     import matplotlib.pyplot as plt
 
-    from tiskitpy import SpectralDensity, ComplianceNoise, PSDVals
+    from tiskitpy import SpectralDensity, SeafloorSynthetic, PSDVals
 
     data_file = 'data/G.TAM_2010059-2010069.mseed'  # post-Maule eq
     inv_file = 'data/G.TAM.2010.station.xml'
@@ -44,10 +44,10 @@ ComplianceNoise example code
 
     # Create the noise model and synthetic data stream
     noise_tilt_max = PSDVals.sloped_freqs_and_values(-180, -30, -3, 0.1, .25)
-    noise_model = ComplianceNoise(noise_tilt_max=noise_tilt_max,
+    noise_model = SeafloorSynthetic(noise_tilt_max=noise_tilt_max,
                                   noise_tilt_variance=30)
 
-    # PLOT noise model using ComplianceNoise's intrinsic method
+    # PLOT noise model using SeafloorSynthetic's intrinsic method
     noise_model.plot(outfile='noise_model.png')
 
 .. image:: images/11_ComplianceNoise_PSDcomponents.png
@@ -88,7 +88,7 @@ ComplianceNoise example code
    
 .. code-block:: python
 
-    # PLOT synthetic PSD versus ComplianceNoise components
+    # PLOT synthetic PSD versus SeafloorSynthetic components
     sd_synth = SpectralDensity.from_stream(data_synth, inv=inv_synth, windowtype=wt)
     ax = sd_synth.plot_one_autospectra(f'XX.{station}.00.LHZ')
     ylim = ax.get_ylim()
@@ -121,7 +121,7 @@ ComplianceNoise example code
    
 .. code-block:: python
 
-    # PLOT synthetic + real PSD versus ComplianceNoise components
+    # PLOT synthetic + real PSD versus SeafloorSynthetic components
     sd_synth = SpectralDensity.from_stream(data, inv=inv_synth, windowtype=wt)
     ax = sd_synth.plot_one_autospectra(f'XX.{station}.00.LHZ')
     ylim = ax.get_ylim()

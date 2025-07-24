@@ -19,7 +19,7 @@ from obspy.core.stream import read as stream_read
 from matplotlib import pyplot as plt
 import numpy as np
 
-from tiskitpy import ComplianceNoise, Compliance, PSDVals, from_DBs, to_DBs
+from tiskitpy import SeafloorSynthetic, Compliance, PSDVals, from_DBs, to_DBs
 
 
 class TestMethods(unittest.TestCase):
@@ -30,20 +30,20 @@ class TestMethods(unittest.TestCase):
         self.path = Path(inspect.getfile(
             inspect.currentframe())).resolve().parent
         self.test_path = self.path / "data" / "decimate"
-        self.compliance_noise = ComplianceNoise()  # Uses all defaults
+        self.seafloor_synthetic = SeafloorSynthetic()  # Uses all defaults
 
     def test_compliance_noise_IG_Pa_seafloor(self):
         """
         Just check that the lowest frequency value is correct
         """
-        H = self.compliance_noise.water_depth
-        omega_IG = self.compliance_noise.IG_m_seasurface.freqs*2*np.pi
+        H = self.seafloor_synthetic.water_depth
+        omega_IG = self.seafloor_synthetic.IG_m_seasurface.freqs*2*np.pi
         k = Compliance.gravd(omega_IG, H)
         seawater_density = 1030  #  1020-1029 at the surface, up to 1050 at deep seafloor
         g = 9.81  # 9.78 at equator, 9.83 at poles
         Pa_per_m = seawater_density*g
-        self.assertAlmostEqual(self.compliance_noise.IG_Pa_seafloor.values[0],
-                               self.compliance_noise.IG_m_seasurface.values[0]
+        self.assertAlmostEqual(self.seafloor_synthetic.IG_Pa_seafloor.values[0],
+                               self.seafloor_synthetic.IG_m_seasurface.values[0]
                                + 20*np.log10(Pa_per_m/np.cosh(k*H))[0])
 
     def test_to_DBs(self):

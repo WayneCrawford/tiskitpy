@@ -9,15 +9,16 @@ classes
 [Documentation](https://tiskitpy.readthedocs.io)
 
 
-## Classes
+## Primary Classes
 
-- `CleanRotator`: rotate data to minimize noise on vertical channel
-- `DataCleaner`: Transfer_Function-based data cleaning
+- `SpectralDensity`: Calculate and manipulate spectral density functions.
 - `Decimator`: Decimate time series and update metadata with the decimator's
   response
-- `SpectralDensity`: Calculate and manipulate spectral density functions.
-- `TimeSpans`: Specify time spans to be removed, kept, zeroed, etc.
+- `CleanRotator`: rotate data to minimize noise on vertical channel
+- `DataCleaner`: Transfer_Function-based data cleaning
 - `ResponseFunctions`: Frequency response functions for a given input channel.
+- `Compliance`: Seafloor Compliance
+- `SeafloorSynthetic`: Generate synthetic seafloor data, including compliance signal
             
                
 ## Functions

@@ -34,7 +34,7 @@ default_earth_model = [[1000, 3000, 3000, 1600],
                        [3000, 3000, 8200, 4700]]
 
 
-class ComplianceNoise(object):
+class SeafloorSynthetic(object):
     """
     Generate synthetic seismological data based on environmental and noise factors
 
@@ -211,7 +211,7 @@ class ComplianceNoise(object):
         return
 
     def __str__(self):
-        s = '<ComplianceNoise>:\n'
+        s = '<SeafloorSynthetic>:\n'
         s += f'    water_depth={self.water_depth}\n'
         s += f'    Z_offset_angles={self.Z_offset_angles}\n'
         s += f'    IG_m_seasurface={self.IG_m_seasurface}\n'
@@ -256,7 +256,7 @@ class ComplianceNoise(object):
         ncompl = Compliance.calc_norm_compliance(self.water_depth, f, self.earth_model)
         om = 2 * np.pi * f
         k = Compliance.gravd(om, self.water_depth)
-        # print(f'ComplianceNoise._calc_ncompl(): {self.water_depth=}, {om[:5]=}, {k[:5]=}')
+        # print(f'SeafloorSynthetic._calc_ncompl(): {self.water_depth=}, {om[:5]=}, {k[:5]=}')
         return om, k, ncompl
 
     def save_compliance(self, max_freq=None, basename="model", out_dir=None):
@@ -314,7 +314,7 @@ class ComplianceNoise(object):
         axs[1].set_ylim(-200, -100)
         axs[1].legend()
         axs[1].set_title('Seismometer')
-        plt.suptitle('ComplianceNoise components')
+        plt.suptitle('SeafloorSynthetic components')
         if outfile is not None:
             plt.savefig(outfile)
         if show is True:
@@ -541,7 +541,7 @@ def from_DBs(inp):
 if __name__ == "__main__":
     # Show an example
     wdepth = 2000
-    noise_model = ComplianceNoise(wdepth)
+    noise_model = SeafloorSynthetic(wdepth)
     noise_model.plot(outfile='noise_model.png')
     noise_model.save_compliance(max_freq=0.07)
     resp_trace = Trace(np.zeros(86400 * 5),
