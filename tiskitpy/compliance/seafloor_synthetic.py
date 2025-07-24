@@ -1,31 +1,30 @@
-from scipy.fft import irfft
+# from scipy.fft import irfft
 import numpy as np
 from matplotlib import pyplot as plt
 from obspy.core.stream import Trace, Stream
 from obspy.core.inventory import Inventory, Network, Station, Channel, Response
 from obspy.core import UTCDateTime
-from pathlib import Path
+# from pathlib import Path
 
 from ..spectral_density import SpectralDensity
 from .compliance import Compliance
 from .earth_model import EarthModel1D
 from .tide_coefficients import TideCoefficients
 from .psd_vals import PSDVals
-from .functions import to_DBs, from_DBs
+from .functions import to_DBs  # , from_DBs
 
 default_water_depth = 2400
-default_Z_offset_angles=(2, 15)  # degrees: angle from vertical, azimuth from "N"
+default_Z_offset_angles = (2, 15)  # angle from vertical, azimuth from N
 default_IG_m_seasurface = ([[0.001, .02], [1, .02]], False)
 default_noise_pressure = ([[0.001, 60], [0.003, 30], [0.006, 0], [0.01, -10],
-                           [0.02, -10], [0.05, -10], [0.1, -10], [1, -10]
-                          ],
+                           [0.02, -10], [0.05, -10], [0.1, -10], [1, -10]],
                           True)
-default_noise_seismo = ([[0.001, -130], [0.003, -160], [0.006, -170], [0.01, -175],
-                         [0.02, -175],  [0.05, -180], [ 0.1, -180],   [1, -170]
-                        ],
+default_noise_seismo = ([[0.001, -130], [0.003, -160], [0.006, -170],
+                         [0.01, -175], [0.02, -175],  [0.05, -180],
+                         [0.1, -180],   [1, -170]],
                         True)
 default_tilt_max = PSDVals.sloped_freqs_and_values(-220, -30, -3, 0.1, .25)
-default_tilt_variance = 40 # dB
+default_tilt_variance = 40  # dB
 default_tilt_direction_limits = (100, 130)  # degrees from "N"
 default_earth_model = [[1000, 3000, 3000, 1600],
                        [1000, 3000, 4000, 2300],
@@ -97,8 +96,9 @@ class SeafloorSynthetic(object):
                  [thickN, rhoN, vpN, vsN]]
                 where units are meters, kg/m^2, m/s and m/s, and the last row
                 is treated as a half-space)
-            IG_freqstep (float): maximum frequency step for IG wave and compliance
-                PSDs (must be small to capture shallow/deep water cutoff)
+            IG_freqstep (float): maximum frequency step for IG waves and
+                compliance PSDs (must be small enough to capture shallow/deep
+                water cutoff)
         """
         # Validate variables
         assert isinstance(water_depth, (int, float))
@@ -119,20 +119,22 @@ class SeafloorSynthetic(object):
     def IG_Pa_seafloor(self):
         """
         Infragravity wave seafloor pressure PSD
-        
+
         Based on self.IG_m_seasurface and self.water_depth)
         """
-        seawater_density = 1030  #  1020-1029 at the surface, up to 1050 at deep seafloor
+        # Seawater density is 1020-1029 at sea surface and up to 1050 at
+        # the deep seafloor
+        seawater_density = 1030
         g = 9.81  # 9.78 at equator, 9.83 at poles
         psd = self.IG_m_seasurface.copy()
-        # If frequency spacing larger than specified seafloor freqstep, resample
+        # Resample if frequency spacing is larger than the IG freqstep
         if np.any(np.diff(psd.freqs) > self.IG_freqstep):
             psd.resample(np.arange(psd.freqs[0],
                          psd.freqs[-1] + self.IG_freqstep * .999,
                          self.IG_freqstep))
         k = Compliance.gravd(2 * np.pi * psd.freqs, self.water_depth)
         psd.values += 20*np.log10(seawater_density*g)   # meters to Pascals
-        psd.values -=  self._cosh_dBs(k * self.water_depth)  # depth decay
+        psd.values -= self._cosh_dBs(k * self.water_depth)  # depth decay
         psd.value_units = 'dB ref 1 Pa^2/Hz'
         return psd
 
@@ -141,7 +143,9 @@ class SeafloorSynthetic(object):
         """PSD of compliance * IG pressure, in (m/s^2)^2/Hz"""
         om, k, ncompl = self._calc_ncompl()
         ref = 'dB ref 1 Pa^2/Hz'
-        assert self.IG_Pa_seafloor.value_units == ref, f"{self.IG_Pa_seafloor.value_units=} should be '{ref}'"
+        if not self.IG_Pa_seafloor.value_units == ref:
+            raise ValueError("IG_Pa_seafloor.value_units={} are not '{}'"
+                             .format(self.IG_Pa_seafloor.value_units, ref))
         psd = self.IG_Pa_seafloor.copy()
         psd.value_units = 'dB ref 1 (m/s^2)^2/Hz'
         psd.values = psd.values + to_DBs(om * om * abs(ncompl) / k)
@@ -159,13 +163,13 @@ class SeafloorSynthetic(object):
                 'LH2': ('NOS', 'NT2'),
                 'LHZ': ('NOS', 'NTZ', 'IGZ'),
                 'LDG': ('NOP', 'IGP')}
-    
+
     @property
     def source_codes(self):
         """ return list of source codes """
         return ['IGP', 'NOP',  "IGZ", "NOS",
                 "NTH_max", "NTH_min", "NTZ_max", "NTZ_min"]
-    
+
     @property
     def trace_source_codes(self):
         """ return list of trace source codes """
@@ -181,7 +185,7 @@ class SeafloorSynthetic(object):
     def source_by_code(self, ch_code):
         """
         Return PSD by code
-    
+
         Args:
             code (str): a 3-letter code that points to the given source.
                         If it's got more than three letters, its a combination
@@ -205,7 +209,8 @@ class SeafloorSynthetic(object):
             case 'NTZ_max':
                 return self.noise_tilt_max + self.Z_angle_factor_DBs
             case 'NTZ_min':
-                return self.noise_tilt_max + self.Z_angle_factor_DBs - self.noise_tilt_variance
+                return (self.noise_tilt_max + self.Z_angle_factor_DBs
+                        - self.noise_tilt_variance)
             case _:
                 raise ValueError(f'"{ch_code}" is not a valide source channel code')
         return
@@ -231,10 +236,11 @@ class SeafloorSynthetic(object):
     def norm_compliance(self, f=None):
         """
         Return normalized compliance of the object's EarthModel
-        
+
         Args:
             f (list, np.array, None): frequencies at which to calculate.
-                If None, then calculate at the frequencies of self.IG_Pa_seafloor
+                If None, then calculate at the frequencies of
+                self.IG_Pa_seafloor
         """
         _, _, ncompl = self._calc_ncompl(f)
         return ncompl
@@ -242,10 +248,11 @@ class SeafloorSynthetic(object):
     def _calc_ncompl(self, f=None):
         """
         Return normalized compliance of the object's EarthModel
-        
+
         Args:
             f (list, np.array, None): frequencies at which to calculate.
-                If None, then calculate at the frequencies of self.IG_Pa_seafloor
+                If None, then calculate at the frequencies of
+                self.IG_Pa_seafloor
         Returns:
             (tuple): omega (np.array): angular frequencies
                      k (np.array): wavenumbers
@@ -253,10 +260,10 @@ class SeafloorSynthetic(object):
         """
         if f is None:
             f = self.IG_Pa_seafloor.freqs
-        ncompl = Compliance.calc_norm_compliance(self.water_depth, f, self.earth_model)
+        ncompl = Compliance.calc_norm_compliance(self.water_depth, f,
+                                                 self.earth_model)
         om = 2 * np.pi * f
         k = Compliance.gravd(om, self.water_depth)
-        # print(f'SeafloorSynthetic._calc_ncompl(): {self.water_depth=}, {om[:5]=}, {k[:5]=}')
         return om, k, ncompl
 
     def save_compliance(self, max_freq=None, basename="model", out_dir=None):
@@ -269,25 +276,12 @@ class SeafloorSynthetic(object):
             out_dir(str): output directory
             filename (str): output filename
         """
-        freqs = self.IG_Pa_seafloor.freqs 
+        freqs = self.IG_Pa_seafloor.freqs
         if max_freq is not None:
             freqs = freqs[freqs <= max_freq]
         ncompl = Compliance.from_earth_model_1D(self.water_depth, freqs,
-                                             self.earth_model)
+                                                self.earth_model)
         ncompl.write(basename, out_dir=out_dir)
-        # oms, ks, ncompls = self._calc_ncompl()
-        # if out_dir is not None:
-        #     filename = str(Path(out_dir) / filename)
-        # freqs = oms / (2 * np.pi)
-        # if max_freq is not None:
-        #     ncompls = ncompls[freqs <= max_freq]
-        #     freqs = freqs[freqs <= max_freq]
-        # with open(filename, "w") as fid:
-        #     fid.write('frequencies;compliance;uncertainty;phase\n')
-        #     for freq, ncompl in zip(freqs, ncompls):
-        #         fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'
-        #                   .format(freq, np.abs(ncompl), 0.000,
-        #                           np.angle(ncompl, deg=True)))
 
     def plot(self, fmin=0.001, fmax=0.1, fstep=0.001, outfile=None, show=True):
         """
@@ -305,8 +299,9 @@ class SeafloorSynthetic(object):
         axs[0].set_ylim(-20, 60)
         axs[1].set_title('Pressure')
         # Plot the accel
-        for ch_code, color in zip(('IGZ', 'NOS', 'NTZ_max', 'NTZ_min', 'NTH_max', 'NTH_min'),
-                                  ('r', 'b', 'g', 'g--', 'm', 'm--')):
+        for ch_code, color in zip(
+                ('IGZ', 'NOS', 'NTZ_max', 'NTZ_min', 'NTH_max', 'NTH_min'),
+                ('r', 'b', 'g', 'g--', 'm', 'm--')):
             axs[1].semilogx(f, self.source_by_code(ch_code).resample_values(f),
                             color, label=ch_code)
         axs[1].set_ylabel('dB ref 1 (m/s^2)^2/Hz')
@@ -322,8 +317,8 @@ class SeafloorSynthetic(object):
 
     def source_trace(self, code, trace_base, accel_to_vel=False, phases=None):
         """
-        Return a :class:`obspy.stream.Trace` corresponding to the given source code
-        
+        Return the :class:`obspy.stream.Trace` matching the given source code
+
         code (str): Valid source code
         trace_base (:class:`obspy.stream.Trace`): Trace to use as reference
             for dates, length, sampling rate, station, network and response
@@ -338,7 +333,7 @@ class SeafloorSynthetic(object):
         else:
             return self.source_by_code(code).accel_as_vel.as_trace(
                 trace_base, channel=code, phases=phases)
-        
+
     def streams(self, ref_trace, s_response=1., p_response=1.,
                 network='XX', station='SSSSS', plotit=False, forceInt32=False):
         """
@@ -369,23 +364,25 @@ class SeafloorSynthetic(object):
         sr = ref_trace.stats.sampling_rate
         # Validate inputs
         if not ref_trace.stats.channel[0] == 'L':
-            raise ValueError("ref_trace channel code ({}) doesn't start with 'L'"
-                .format(ref_trace.stats.channel))
+            raise ValueError("ref_trace channel code ({}) doesn't start with L"
+                             .format(ref_trace.stats.channel))
         if sr > 2 or sr < 0.5:
-            raise ValueError(f'ref_trace sampling_rate={sr} is not between 0.5 and 2 sps')
+            raise ValueError(f'ref_trace {sr=} is not between 0.5 and 2 sps')
         # Set up variables
         trace_pts = ref_trace.stats.npts
         npts = 2**int(np.ceil(np.log2(trace_pts)))
         location = ref_trace.stats.location
-        channel = ref_trace.stats.channel
-        f = np.linspace(0, ref_trace.stats.sampling_rate / 2, npts)
+        # channel = ref_trace.stats.channel
+        _ = np.linspace(0, ref_trace.stats.sampling_rate / 2, npts)
         if not isinstance(p_response, Response):
-            p_response = Response.from_paz([], [], p_response, 1.0, 'm/s', 'count')
-            # obspy doesn't understand Pa units, so have to stuff them in afterwards
-            p_response.instrument_sensitivity.input_units='Pa' 
-            p_response.response_stages[0].input_units='Pa' 
+            p_response = Response.from_paz([], [], p_response, 1.0, 'm/s',
+                                           'count')
+            # obspy doesn't understand Pa units, stuff them in afterwards
+            p_response.instrument_sensitivity.input_units = 'Pa'
+            p_response.response_stages[0].input_units = 'Pa'
         if not isinstance(s_response, Response):
-            s_response = Response.from_paz([], [], s_response, 1.0, 'm/s', 'count')
+            s_response = Response.from_paz([], [], s_response, 1.0, 'm/s',
+                                           'count')
 
         # Prepare base seismo and pressure traces
         s_trace_base = ref_trace.copy()    # Don't overwrite original
@@ -403,11 +400,12 @@ class SeafloorSynthetic(object):
         IG_trace, IG_phases = self.source_trace("IGP", p_trace_base)
         sources += IG_trace
         sources += self.source_trace("NOP", p_trace_base)[0]
- 
+
         # FOR THE SEISMOMETER CHANNELS
         # Vertical compliance signal
         # Phase_velocity = Phase_pressure + 270°
-        sources += self.source_trace("IGZ", s_trace_base, True, phases=IG_phases-np.pi/2)[0]
+        sources += self.source_trace("IGZ", s_trace_base, True,
+                                     phases=IG_phases-np.pi/2)[0]
         sources += self.source_trace("NOS", s_trace_base, True)[0]
         # Tilt noise model
         noise_max, _ = self.source_trace('NTH_max', s_trace_base, True)
@@ -444,19 +442,21 @@ class SeafloorSynthetic(object):
         # Create Inventory
         channels = []
         for k, v in self.stream_source_codes.items():
-            if k[1]=='D':
+            if k[1] == 'D':
                 resp = p_response
-                dip=90.
+                dip = 90.
             else:
                 resp = s_response
-                dip=0.
+                dip = 0.
                 if k[2] == 'Z':
-                    dip=-90.
+                    dip = -90.
             # Add BBOBS channels
-            channels.append(Channel(k, location, 0, 0, 0, 0, response=resp, dip=dip))
+            channels.append(Channel(k, location, 0, 0, 0, 0, response=resp,
+                                    dip=dip))
             # Add source channels
             for x in v:
-                channels.append(Channel(x, location, 0, 0, 0, 0, response=resp, dip=dip))
+                channels.append(Channel(x, location, 0, 0, 0, 0, response=resp,
+                                        dip=dip))
         stations = [Station(station, 0, 0, 0, channels=channels)]
         networks = [Network(network, stations=stations)]
         inv = Inventory(networks=networks)
@@ -486,23 +486,23 @@ class SeafloorSynthetic(object):
             coefficients (TideCoefficients): the tidal coefficients
         """
         tide_trace = coefficients.make_trace(noise_max)
-        tide_trace.stats.channel='TID'
+        tide_trace.stats.channel = 'TID'
         # normalize between (-self.noise_tilt_variance dB) and 1
         in_max = np.max(tide_trace.data)
         in_min = np.min(tide_trace.data)
         out_max = 1.
         out_min = 10**(-self.noise_tilt_variance / 20)
         tide_trace.data = (tide_trace.data - in_min)*(out_max-out_min)/(in_max-in_min) + out_min
-        
+
         if plotit:
             tide_trace.plot()
 
         amp_trace = tide_trace.copy()
-        amp_trace.stats.channel='AMP'
+        amp_trace.stats.channel = 'AMP'
         amp_trace.data *= noise_max
 
         angles_trace = tide_trace.copy()
-        angles_trace.stats.channel='ANG'
+        angles_trace.stats.channel = 'ANG'
         angle_range = abs(self.noise_tilt_direction_limits[1]
                           - self.noise_tilt_direction_limits[0])
         angles_trace.data = ((angles_trace.data * angle_range)
@@ -512,30 +512,6 @@ class SeafloorSynthetic(object):
             Stream([tide_trace, amp_trace, angles_trace]).plot(equal_scale=False)
 
         return amp_trace, angles_trace
-
-
-def to_DBs(inp):
-    """
-    Converts values to dBs ref 1
-
-    Args:
-        inp (float, list, or np.ndarray): values to convert
-    """
-    if isinstance(inp, (list, tuple)):
-        inp = np.array(inp)
-    return 20 * np.log10(inp)
-
-
-def from_DBs(inp):
-    """
-    Converts values from dBs ref 1
-
-    Args:
-        inp (float, list or np.ndarray): values to convert
-    """
-    if isinstance(inp, (list, tuple)):
-        inp = np.array(inp)
-    return np.power(10., inp / 20)
 
 
 if __name__ == "__main__":
