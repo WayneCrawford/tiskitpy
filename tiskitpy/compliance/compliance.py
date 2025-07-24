@@ -10,7 +10,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from ..response_functions import ResponseFunctions
-# from .earth_model import EarthModel1D
 
 
 class Compliance(object):

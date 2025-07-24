@@ -21,8 +21,8 @@ from obspy.core.stream import read as stream_read, Stream
 from matplotlib import pyplot as plt
 import numpy as np
 
-from tiskitpy.compliance import PSDVals
-from tiskitpy.spectral_density import SpectralDensity
+from tiskitpy.synthetic import PSDVals
+from tiskitpy import SpectralDensity
 
 
 def _sloped_psd_vals(val_1Hz, slope, logf_low, logf_high, logf_step, units="m/s^2"):
@@ -33,11 +33,6 @@ def _sloped_psd_vals(val_1Hz, slope, logf_low, logf_high, logf_step, units="m/s^
     return PSDVals((x, False), units)
 
 
-# @pytest.mark.parametrize("psdv",
-#                          [_sloped_psd_vals(2*np.pi*10.**-6, 1, -4, 0.1, 1),
-#                           _sloped_psd_vals(10.**-6, 0, -4, 0.1, 1),
-#                           _sloped_psd_vals(10.**-7, -1, -4, 0.1, 1),
-#                          ])
 @pytest.mark.parametrize(
     "psdv",
     [PSDVals(PSDVals.sloped_freqs_and_values(-100, 20, -4, 0.1, 1), 'm/s^2'),

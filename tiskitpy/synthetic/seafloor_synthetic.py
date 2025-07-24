@@ -7,8 +7,7 @@ from obspy.core import UTCDateTime
 # from pathlib import Path
 
 from ..spectral_density import SpectralDensity
-from .compliance import Compliance
-from .earth_model import EarthModel1D
+from ..compliance import Compliance, EarthModel1D
 from .tide_coefficients import TideCoefficients
 from .psd_vals import PSDVals
 from .functions import to_DBs  # , from_DBs
