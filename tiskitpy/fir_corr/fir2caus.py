@@ -30,7 +30,7 @@ def fir2caus(stream, firCorrFileName, FIRdecim):
         firCorrFileName (str): name of JSON file containing FIR corrections
         FIRdecim (int): decimation factor associated with FIR to correct
     Returns:
-        s (:class:`obspy.core.stream.Stream`): output waveforms
+        :class:`obspy.core.stream.Stream`: output waveforms
     """
     ##################################################
 

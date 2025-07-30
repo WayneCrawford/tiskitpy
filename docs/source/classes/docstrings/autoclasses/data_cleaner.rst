@@ -4,3 +4,4 @@ tiskitpy.DataCleaner
 -----------------------------
 
 .. autoclass:: tiskitpy.DataCleaner
+    :class-doc-from: both

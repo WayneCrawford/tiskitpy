@@ -4,3 +4,4 @@ tiskitpy.Compliance
 -----------------------------
 
 .. autoclass:: tiskitpy.Compliance
+    :class-doc-from: both

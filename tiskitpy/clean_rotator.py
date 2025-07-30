@@ -25,31 +25,15 @@ class CleanRotator:
     earthquakes’ influence (using .TimeSpans.from_eqs).
     Saves the earthquake file locally to speed up future runs
 
-    Args:
-        stream (Stream): input data, must have a \\*Z, \\*[1|N] and \\*[2|E]
-            channel
-        avoid_spans (:class:`TimeSpans`): timespans to avoid
-        plot (bool): Plot comparision of original and rotated vertical
-        quickTest (bool): Only run one day's data and do not save results
-        remove_eqs (bool, str): Avoid time spans associated with
-            earthquakes, using default parameters of
-            :class:`TimeSpans.remove_eqs`
-                - If str: filename of QuakeML file containing earthquakes.
-                - If True, download earthquakes from USGS website or
-                  appropriately-named local file.
-                - If False, do not remove earthquakes.
-        uselogvar(bool): use logarithm of variance as metric
-        filt_band (tuple): lower, upper frequency limits of band to filter data
-                before calculating rotation
-        save_eq_file (bool): Passed onto :py:meth:`TimeSpans.from_eqs`
-        H_over_Z (float): H gain over Z gain. Affects the calculated angle, 
-            not the result of ``apply()``.
     Attributes:
         angle (float): angle by which Z (or Z-X-Y) was rotated
         azimuth (float): azimuth by which Z (or Z-X-Y) was rotated
         variance_reduction (float): amount by which variance was reduced during
             calculation (0 to 1)
         avoided_spans (:class:`TimeSpans`): avoided time spans
+        H_over_Z (float): Horizontal channel gain over Z gain.
+        trans_code (str): code to enter into stats to indicate that data have
+            been rotated
     """
 
     def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,
@@ -57,6 +41,26 @@ class CleanRotator:
                  filt_band=(0.001, 0.01), save_eq_file=True, H_over_Z=1.):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
+
+        Args:
+            stream (Stream): input data, must have a \\*Z, \\*[1|N] and \\*[2|E]
+                channel
+            avoid_spans (:class:`TimeSpans`): timespans to avoid
+            plot (bool): Plot comparision of original and rotated vertical
+            quickTest (bool): Only run one day's data and do not save results
+            remove_eqs (bool, str): Avoid time spans associated with
+                earthquakes, using default parameters of
+                :class:`TimeSpans.remove_eqs`
+                    - If str: filename of QuakeML file containing earthquakes.
+                    - If True, download earthquakes from USGS website or
+                      appropriately-named local file.
+                    - If False, do not remove earthquakes.
+            uselogvar(bool): use logarithm of variance as metric
+            filt_band (tuple): lower, upper frequency limits of band to filter data
+                    before calculating rotation
+            save_eq_file (bool): Passed onto :py:meth:`TimeSpans.from_eqs`
+            H_over_Z (float): H gain over Z gain. Affects the calculated angle, 
+                not the result of ``apply()``.
         """
         self.avoided_spans = self._make_eq_spans(
             remove_eqs, stream[0].stats, verbose, save_eq_file

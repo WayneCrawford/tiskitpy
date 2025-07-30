@@ -53,12 +53,11 @@ def Peterson_noise_model(periods, as_freqs=False):
     """
     Return Peterson low and high seismological noise models
 
-    returns the acceleration noise models in dB ref to 1 (m/s^2)^2/Hz
-
-    :param periods: periods to use (should be increasing).
-    :type freqs: list
-    :param as_freqs: interpret "periods" as frequencies instead
-    :type as_freqs: bool, opt
+    Args:
+        periods (list): periods to use (should be increasing).
+        as_freqs (bool): interpret "periods" as frequencies instead
+    Returns:
+        tuple: (lownoise, highnoise) values in dB ref to 1 (m/s^2)^2/Hz
     """
     if not as_freqs:
         lownoise = _fit_points(periods, LPAB)

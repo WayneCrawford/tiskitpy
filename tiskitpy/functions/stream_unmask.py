@@ -8,9 +8,14 @@ logger = init_logger()
 
 def stream_unmask(stream):
     """
-    Check if a stream is masked and, if so, unmask it
+    Check if a stream is masked and, if so, unmask it.
     Interpolates data in gaps
-        """
+    
+    Args:
+        stream (:class:`obspy.core.stream.Stream`): input stream
+    Returns:
+        :class:`obspy.core.stream.Stream`: output stream
+    """
     if np.any([np.ma.count_masked(tr.data) for tr in stream]):
         logger.warning('Unmasking masked data (usually a gap or overlap)')
         return stream.split().merge(fill_value='interpolate')

@@ -31,31 +31,31 @@ class ResponseFunctions(object):
     The input and output channel_ids should be tikitpy_ids (seed_codes +
     cleaned_sequence info)
 
-    Args:
-        sdf (:class:`.SpectralDensity`): Spectral density functions objet
-        in_id (str): input channel id.  Can use Unix wildcards ('*', '?') but
-            will return error if more than one string matches
-        out_ids (list of str): output channel ids  (None => all but
-            in_id)
-        noise_channel (str): 'input', 'output', 'equal', 'unknown'
-        n_to_reject (int): number of neighboring frequencies for which the
-            coherence must be above the 95% significance level in order
-            to calculate frequency response function (other values are set to
-            0, n_to_reject=0 means use all frequencies)
-        min_freq (float or None): Return zero for frequencies below
-            this value
-        max_freq (float or None): Return zero for frequencies above
-            this value
-        quiet (bool): don't warn if creating a test object
-        show_progress (bool): plot response functions and coherences
+    Attributes:
+        _ds (:class: XArray.dataset): container for response functions and
+            attributes
     """
     def __init__(self, sdf, in_id, out_ids=None, noise_channel="output",
                  n_to_reject=3, min_freq=None, max_freq=None,
                  quiet=False, show_progress=False, noise_chan=None):
         """
-        Attributes:
-            _ds (:class: XArray.dataset): container for response functions and
-                attributes
+        Args:
+            sdf (:class:`.SpectralDensity`): Spectral density functions objet
+            in_id (str): input channel id.  Can use Unix wildcards ('*', '?') but
+                will return error if more than one string matches
+            out_ids (list of str): output channel ids  (None => all but
+                in_id)
+            noise_channel (str): 'input', 'output', 'equal', 'unknown'
+            n_to_reject (int): number of neighboring frequencies for which the
+                coherence must be above the 95% significance level in order
+                to calculate frequency response function (other values are set to
+                0, n_to_reject=0 means use all frequencies)
+            min_freq (float or None): Return zero for frequencies below
+                this value
+            max_freq (float or None): Return zero for frequencies above
+                this value
+            quiet (bool): don't warn if creating a test object
+            show_progress (bool): plot response functions and coherences
         """
         # Handle deprecated noise_chan argument
         if noise_chan is not None:

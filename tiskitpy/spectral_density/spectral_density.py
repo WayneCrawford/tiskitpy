@@ -250,7 +250,8 @@ class SpectralDensity:
         Args:
             stream (:class:`obspy.core.stream.Stream`): data
             window_s (float): desired window length in seconds
-            windowtype (str): window taper type, must be a valid
+            windowtype (str): window taper type.  Must be in
+                :py:data:`WINDOW_TAPERS`
             inv (:class:`obspy.core.inventory.Inventory`): inventory containing
                 instrument responses.  If none is found for the given channel,
                 will look in the channel's stats.response object

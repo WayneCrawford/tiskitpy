@@ -4,3 +4,4 @@ tiskitpy.SeafloorSynthetic
 -----------------------------
 
 .. autoclass:: tiskitpy.SeafloorSynthetic
+    :class-doc-from: both
