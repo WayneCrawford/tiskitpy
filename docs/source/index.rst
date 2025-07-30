@@ -15,6 +15,7 @@ TiSKitPy documentation
   intro
   install
   classes
+  functions
   avoid_eqs
   examples
   programmers

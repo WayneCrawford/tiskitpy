@@ -7,7 +7,8 @@ import unittest
 
 from obspy.core.stream import Stream
 
-from tiskitpy import CleanedStream, CleanSequence as CS
+from tiskitpy import CleanedStream
+from tiskitpy.utils import CleanSequence as CS
 from make_test_stream import make_test_stream
 
 

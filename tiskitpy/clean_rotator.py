@@ -42,6 +42,8 @@ class CleanRotator:
         filt_band (tuple): lower, upper frequency limits of band to filter data
                 before calculating rotation
         save_eq_file (bool): Passed onto :py:meth:`TimeSpans.from_eqs`
+        H_over_Z (float): H gain over Z gain. Affects the calculated angle, 
+            not the result of ``apply()``.
     Attributes:
         angle (float): angle by which Z (or Z-X-Y) was rotated
         azimuth (float): azimuth by which Z (or Z-X-Y) was rotated
@@ -52,7 +54,7 @@ class CleanRotator:
 
     def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,
                  remove_eqs=True, uselogvar=False, verbose=True,
-                 filt_band=(0.001, 0.01), save_eq_file=True):
+                 filt_band=(0.001, 0.01), save_eq_file=True, H_over_Z=1.):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
         """
@@ -62,13 +64,14 @@ class CleanRotator:
         if avoid_spans is not None:
             self.avoided_spans += avoid_spans
         filtstream = self._filtstream(stream, filt_band)
-        srData = SeisRotate(filtstream)
+        srData = SeisRotate(filtstream, H_over_Z=H_over_Z)
         (ang, azi, var_red) = srData.calc_zrotate_opt(
             ignore_spans=self.avoided_spans, uselogvar=uselogvar
         )
         self.angle = ang
         self.azimuth = azi
         self.variance_reduction = var_red
+        self.H_over_Z = H_over_Z
         if verbose:
             logger.info(self.__str__())
         if plot:
@@ -114,7 +117,7 @@ class CleanRotator:
             "highpass", freq=filt_band[0], corners=4, zerophase=True
         )
         viewData = SeisRotate(viewstream)
-        viewData.zrotate(self.angle, self.azi)
+        viewData.zrotate(self.angle, self.azimuth)
         view_rot = viewData.stream()
         # PLOT RESULTS (Z channels)
         trace_view_Z = viewstream.select(component="Z")[0]
@@ -144,8 +147,9 @@ class CleanRotator:
             # Choose error over warning to avoid problems downstream
             # (the user can always use a "try" to bypass the error)
             raise ValueError(f'{self.angle=} > {rot_limit=}!')
-        srData = SeisRotate(stream)
+        srData = SeisRotate(stream, H_over_Z=self.H_over_Z)
         srData.zrotate(self.angle, self.azimuth, horiz_too)
+        srData.Z.data = np.divide(srData.Z.data, self.H_over_Z)
         srData.Z = CS.tag(srData.Z, self.trans_code)
         if other_stream is None:
             return CleanedStream(srData.stream())

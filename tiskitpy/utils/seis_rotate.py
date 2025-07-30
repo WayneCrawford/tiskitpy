@@ -14,7 +14,7 @@ from obspy.signal.rotate import rotate2zne
 from obspy.core.stream import Stream  # , Trace
 
 from ..logger import init_logger
-from .stream_synchronize import stream_synchronize
+from ..functions import stream_synchronize
 
 logger = init_logger()
 
@@ -25,7 +25,8 @@ class SeisRotate:
     non-deforming rotation
     """
 
-    def __init__(self, stream, uselogvar=False, max_reject_sync=0.01):
+    def __init__(self, stream, uselogvar=False, max_reject_sync=0.01,
+                 H_over_Z = 1.):
         """
         Create a seisRotate object from a 3-component obsPy Stream
 
@@ -34,6 +35,7 @@ class SeisRotate:
             uselogvar(bool): use logarithmic variance when searching for
                              best angles
             max_reject_sync(): max_reject value for stream_synchronize()
+            H_over_Z (float): H gain over Z gain (Z will be multiplied by this)
 
         Channel names must end in Z, N and E or Z, 1, and 2
         Z is up, 1 and 2 are horizontal orthogonal with 2 90° clockwise
@@ -44,6 +46,7 @@ class SeisRotate:
         stream = stream_synchronize(stream, max_reject_sync)
         self.uselogvar = uselogvar
         self.Z, self.N, self.E = SeisRotate._get_seis_traces(stream)
+        self.Z.data = np.multiply(self.Z.data, H_over_Z)
         self.fs = self.Z.stats.sampling_rate
         # Verify that all channels have same length
         if not len(self.Z.data) == len(self.N.data):
@@ -101,27 +104,16 @@ class SeisRotate:
         dip_N = angle * M.cos(np.deg2rad(azimuth))
         dip_E = angle * M.sin(np.deg2rad(azimuth))
 
-        [self.Z.data, N, E] = rotate2zne(
-            self.Z.data,
-            azimuth,
-            dip_Z,
-            self.N.data,
-            0,
-            dip_N,
-            self.E.data,
-            90,
-            dip_E,
-        )
+        [self.Z.data, N, E] = rotate2zne(self.Z.data, azimuth, dip_Z,
+                                         self.N.data, 0, dip_N,
+                                         self.E.data, 90, dip_E)
+        
         if horiz_also:
             self.N.data = N
             self.E.data = E
 
-    def calc_zrotate_opt(
-        self,
-        lowcut=0.001,
-        hicut=0.005,
-        ignore_spans=None,
-        uselogvar=None
+    def calc_zrotate_opt(self, lowcut=0.001,  hicut=0.005, ignore_spans=None,
+                         uselogvar=None
     ):
         """
         Calculate the Z channel rotation angle that minimizes tilt noise

@@ -3,47 +3,50 @@ Python compliance class
 
 Authors:  W. Crawford, A. Doran
 """
-from copy import deepcopy
+from pathlib import Path
 
 # import math
 import numpy as np
 from matplotlib import pyplot as plt
 
-from ..response_functions import ResponseFunctions
+# from ..response_functions import ResponseFunctions
 
 
 class Compliance(object):
     """
     Seafloor compliance class
-    
-    Properties:
+
+    Attributes:
         freqs (:class:`numpy.ndarray`): Frequencies (Hz)
         values (:class:`numpy.ndarray`): Normalized compliance values (1/Pa)
-        uncertainties (:class:`numpy.ndarray`): Normalized compliance uncertainties (1/Pa)
+        uncertainties (:class:`numpy.ndarray`): Normalized compliance
+            uncertainties (1/Pa)
         water_depth (float): water depth in meters
         noise_channel (str or None): If a str, compliance comes from data and
             this is the channel on which noise was assumed to dominate
         gravity_corrected (bool): Has data-estimated compliance been corrected
             for gravitational attraction terms?
     """
-    def __init__(self, freqs, values, uncertainties, water_depth, noise_channel,
-                 gravity_corrected=False):
+    def __init__(self, freqs, values, uncertainties, water_depth,
+                 noise_channel, gravity_corrected=False):
         """
         Seafloor compliance data class
 
         Args:
             freqs (:class:`numpy.ndarray`): Frequencies (Hz)
-            values (:class:`numpy.ndarray`): Normalized compliance values (1/Pa)
-            uncertainties (:class:`numpy.ndarray`): Normalized compliance uncertainties (1/Pa)
+            values (:class:`numpy.ndarray`): Normalized compliance values
+                (1/Pa)
+            uncertainties (:class:`numpy.ndarray`): Normalized compliance
+                uncertainties (1/Pa)
             water_depth (float): water depth in meters
-            noise_channel (str): (str or None): If a str, compliance comes from
-                data and this is the channel on which noise was assumed to
-                dominate
-            gravity_corrected (bool): Has data-estimated compliance been corrected
-                for gravitational attraction terms?
+            noise_channel (str): (str or None): If a str, compliance comes
+                from data and this is the channel on which noise was assumed
+                to dominate
+            gravity_corrected (bool): Has data-estimated compliance been
+                corrected for gravitational attraction terms?
         """
         self.freqs = freqs
-        self.values =values
+        self.values = values
         self.uncertainties = uncertainties
         self.water_depth = water_depth
         self.noise_channel = noise_channel
@@ -54,34 +57,33 @@ class Compliance(object):
     def from_response_functions(cls, rfs, wdepth, max_freq=None, z_str='*Z'):
         """
         Extracts compliance from ResponseFunctions object
-        
-        
 
         Args:
-            rfs (:class:`tiskitpy.ResponseFunctions`): z/p transfer function(s).
-                the input_channel should be the pressure channel
+            rfs (:class:`tiskitpy.ResponseFunctions`): z/p transfer
+                function(s). The input_channel should be the pressure channel
             wdepth (float): water depth (m)
             max_freq (float): maximum frequency to save.  If None, use
                 sqrt(g/(2*pi*wdepth))
-            z_str(str): channel_id to use for z channel (may include '*' wildcard)
+            z_str(str): channel_id to use for z channel (may include '*'
+                wildcard)
         """
         # Validate input fields
         if not rfs.input_units.upper() == 'PA':
             raise ValueError(f'{rfs.input_units.upper()=}, not "PA"')
-        try:   
+        try:
             _ = rfs.value(z_str)
         except Exception:
-            raise ValueError(f'output channel "{z_str}" not in {output_channel_ids=}')
+            raise ValueError(f'output channel "{z_str}" not in '
+                             f'{rfs.output_channel_ids=}')
         if max_freq is None:
-            max_freq = np.sqrt(9.8/(2*np.pi*wdepth)) # about one wavelength
+            max_freq = Compliance.max_freq(wdepth)  # about one wavelength
 
-
-        f = rfs.freqs[rfs.freqs<=max_freq]
-        compl = rfs.value(z_str)[rfs.freqs <= max_freq]
-        uncert = rfs.uncertainty(z_str)[rfs.freqs <= max_freq]
+        f = rfs.freqs[rfs.freqs <= max_freq]
+        zp = rfs.value(z_str)[rfs.freqs <= max_freq]
+        zp_uncert = rfs.uncertainty(z_str)[rfs.freqs <= max_freq]
         z_units = rfs.output_units(z_str)
-        return cls(f, Compliance._zp_to_ncompl(f, compl, wdepth, z_units),
-                   Compliance._zp_to_ncompl(f, uncert, wdepth, z_units),
+        return cls(f, Compliance._zp_to_ncompl(f, zp, wdepth, z_units),
+                   Compliance._zp_to_ncompl(f, zp_uncert, wdepth, z_units),
                    wdepth, rfs.noise_channel)
 
     @classmethod
@@ -90,34 +92,73 @@ class Compliance(object):
         return
 
     @classmethod
-    def from_earth_model_1D(cls, water_depth, freqs, earth_model):
+    def from_earth_model_1D(cls, water_depth, freqs, earth_model,
+                            limit_freqs=True):
         """
         Create object with the compliance of a 1D earth model
-        
+
         Args:
             water_depth (float): water depth (m)
             freqs (list or :class:`numpy.ndarray`): frequencies
-            earth_model (:class:`tiskitpy.compliance.EarthModel1D`): 1D earth model
+            earth_model (:class:`tiskitpy.compliance.EarthModel1D`): 1D earth
+                model
+            limit_freqs (bool): limit frequencies to below
+                Compliance.max_freq()?
         """
         if isinstance(freqs, list):
             freqs = np.array(freqs)
-        ncompl = Compliance.calc_norm_compliance(water_depth, freqs, earth_model)
+        if limit_freqs is True:
+            freqs = freqs[freqs < Compliance.max_freq(water_depth)]
+
+        ncompl = Compliance.calc_norm_compliance(water_depth, freqs,
+                                                 earth_model)
         uncert = np.zeros(ncompl.shape)
         return cls(freqs, ncompl, uncert, water_depth, None, True)
-        return
+
+    @classmethod
+    def from_seafloor_synthetic(cls, obj, max_freq=True):
+        """
+        Create object with the compliance of a SeafloorSynthetic object
+
+        Uses objs earth_model, IG_Pa_seafloor.freqs and water_depth attributes
+
+        Args:
+            obj (:class:`tiskitpy.SeafloorSynthetic`): the object
+            max_freq (bool or float): limit frequencies to:
+                True: below Compliance.max_freq()
+                float: below the value
+                False: no limit applied
+        """
+        freqs = obj.IG_Pa_seafloor.freqs
+        if not isinstance(max_freq, bool):
+            freqs = freqs[freqs < max_freq]
+            max_freq = False
+
+        return cls.from_earth_model_1D(obj.water_depth, freqs, obj.earth_model,
+                                       max_freq)
+
+    @staticmethod
+    def max_freq(water_depth):
+        """
+        Return estimated maximum compliance frequency for the given water depth
+
+        About one wavelength, from Janiszewski et al. (2019?)
+        """
+        return np.sqrt(9.8/(2*np.pi*water_depth))
 
     def __str__(self):
         s = f"{self.__class__.__name__} object:\n"
-        s += f"  {len(self.freqs)} frequencies, from {np.min(self.freqs)} to {np.max(self.freqs)} Hz\n"
+        s +=  "  {} frequencies, from {} to {} Hz\n".format(
+            len(self.freqs), np.min(self.freqs), np.max(self.freqs))
         s += f"  water_depth='{self.water_depth}'\n"
         s += f"  noise_channel={self.noise_channel}\n"
         s += f"  gravity_corrected={self.gravity_corrected}"
         return s
-    
+
     def correct_gravity_terms(self):
         "NOT YET IMPLEMENTED"
         return
-    
+
     def write(self, base_name, units='1/Pa', out_dir=None):
         """
         Save compliance to a CSV file
@@ -127,16 +168,17 @@ class Compliance(object):
             units (str): units in which to save compliance.  One of
                 '1/Pa', 'm/Pa', 'm/s/Pa', 'm/s^2/Pa'
                 ('1/Pa' is normalized compliance)
-            out_dir(str): output directory (None: save to working directory)
+            out_dir (str or :class:`Path`): output directory (None: save to
+                working directory)
         """
         if units == '1/Pa':
-                filename = f'{base_name}_Pa-1.csv'
+            filename = f'{base_name}_compliance_Pa-1.csv'
         elif units == 'm/Pa':
-                filename = f'{base_name}_m.Pa-1.csv'
+            filename = f'{base_name}_compliance_m.Pa-1.csv'
         elif units == 'm/s/Pa':
-                filename = f'{base_name}_m.s-1.Pa-1.csv'
+            filename = f'{base_name}_compliance_m.s-1.Pa-1.csv'
         elif units == 'm/s^2/Pa':
-                filename = f'{base_name}_m.s-2.Pa-1.csv'
+            filename = f'{base_name}_compliance_m.s-2.Pa-1.csv'
         else:
             raise ValueError(f"{base_name=} is not in ('1/Pa', 'm/Pa', "
                              "'m/s/Pa', 'm/s^2/Pa')")
@@ -149,19 +191,63 @@ class Compliance(object):
             fid.write(f'# noise_channel={self.noise_channel}\n')
             fid.write(f'# gravity_corrected={self.gravity_corrected}\n')
             fid.write('frequencies;compliance;uncertainty;phase\n')
-            for freq, ncompl, uncert in zip(self.freqs, self.values, self.uncertainties):
+            for freq, ncompl, uncert in zip(self.freqs, self.values,
+                                            self.uncertainties):
                 fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'
-                          .format(freq, np.abs(ncompl), uncert,
+                          .format(freq, np.abs(ncompl), np.abs(uncert),
                                   np.angle(ncompl, deg=True)))
+
+    def write_counts(self, base_name, z_response, p_response, out_dir=None):
+        """
+        Save compliance IN COUNTS to a CSV file
+
+        Only useful for creating compliance values for people who don't
+        know how to use inventories
+
+        Args:
+            base_name (str): base filename.  "_{units}.csv" will be appended
+            z_reponse (:class:`obspy.core.inventory.Response`): response of
+                the z channel
+            p_reponse (:class:`obspy.core.inventory.Response`): response of
+                the p channel
+            out_dir (str or :class:`Path`): output directory (None: save to
+                working directory)
+        """
+        filename = f'{base_name}_compliance_COUNTS.csv'
+
+        assert p_response.instrument_sensitivity.input_units.lower() == 'pa'
+        if z_response.instrument_sensitivity.input_units.lower() == 'm/s':
+            v, u = self._convert_compliance('m/s/Pa')
+        elif z_response.instrument_sensitivity.input_units.lower() == 'm/s^2':
+            v, u = self._convert_compliance('m/s^2/Pa')
+        elif z_response.instrument_sensitivity.input_units.lower() == 'm':
+            v, u = self._convert_compliance('m/Pa')
+        z_resp_f = z_response.get_evalresp_response_for_frequencies(self.freqs)
+        p_resp_f = p_response.get_evalresp_response_for_frequencies(self.freqs)
+        # responses are in counts/physical units, so multiply by z_resp/p_resp
+        v = v * z_resp_f/p_resp_f
+        u = u * z_resp_f/p_resp_f
+        if out_dir is not None:
+            filename = str(Path(out_dir) / filename)
+        with open(filename, "w") as fid:
+            fid.write('# units=COUNTS/COUNTS\n')
+            fid.write(f'# water_depth={self.water_depth}\n')
+            fid.write(f'# noise_channel={self.noise_channel}\n')
+            fid.write(f'# gravity_corrected={self.gravity_corrected}\n')
+            fid.write('frequencies;compliance;uncertainty;phase\n')
+            for freq, ncompl, uncert in zip(self.freqs, v, u):
+                fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'.format(
+                          freq, np.abs(ncompl), np.abs(uncert),
+                          np.angle(ncompl, deg=True)))
 
     def _convert_compliance(self,  units):
         """
         Convert object's compliance and uncertainty values to the given units
-        
+
         Args:
             units (str): units to convert to.  One of '1/Pa', 'm/Pa', 'm/s/Pa',
                 or 'm/s^2/Pa' ('1/Pa' changes nothing)
-        
+
         Returns:
             tuple:
                 :class:`numpy.ndarray`: converted compliances
@@ -179,7 +265,7 @@ class Compliance(object):
                 multiplier = (2 * np.pi * self.freqs)**2 / k
             else:
                 raise ValueError(f"{units=} is not in ('1/Pa', 'm/Pa', "
-                                "'m/s/Pa', 'm/s^2/Pa')")
+                                 "'m/s/Pa', 'm/s^2/Pa')")
             return self.values * multiplier, self.uncertainties * multiplier
 
     def plot(self, errorbars=True, show=True, outfile=None):
@@ -200,26 +286,28 @@ class Compliance(object):
         # fig, axs = plt.subplots(2, 1, sharex=True)
         ncompl = self.values.copy()
         nuncert = self.uncertainties.copy()
-        ibad = (ncompl==0).nonzero()
- 
-         # Plot amplitude
+        ibad = (ncompl == 0).nonzero()
+
+        # Plot amplitude
         fig.suptitle("Compliance")
         ncompl[ncompl == 0] = np.nan
         nuncert[nuncert == 0] = np.nan
         if errorbars is True:
-            ax_a.errorbar(self.freqs, np.abs(ncompl), np.abs(nuncert), fmt='b_', ecolor='k',
-                          markersize=3)
+            ax_a.errorbar(self.freqs, np.abs(ncompl), np.abs(nuncert),
+                          fmt='b_', ecolor='k', markersize=3, label='Estimated')
             if np.any(ncompl is not np.nan):
                 ax_a.set_yscale('log')
             ax_a.set_xscale('log')
         else:
-            ax_a.loglog(self.freqs, np.abs(ncompl + nuncert), color="blue", linewidth=0.5)
-            ax_a.loglog(self.freqs, np.abs(ncompl - nuncert), color="blue", linewidth=0.5)
-            ax_a.loglog(self.freqs, np.abs(ncompl), color="black")
+            ax_a.loglog(self.freqs, np.abs(ncompl + nuncert), color="blue",
+                        linewidth=0.5)
+            ax_a.loglog(self.freqs, np.abs(ncompl - nuncert), color="blue",
+                        linewidth=0.5)
+            ax_a.loglog(self.freqs, np.abs(ncompl), color="black", label='Estimated')
         # ax_a.set_xlim(self.freqs[1], self.freqs[-1])
         ax_a.set_ylabel("Norm Compliance (1/Pa)")
         ax_a.tick_params('x', which='both', direction="in")
-        
+
         # Plot phase
         phases = np.angle(ncompl, deg=True)
         phases[ibad] = np.nan
@@ -228,7 +316,7 @@ class Compliance(object):
         wrap_phases = phases.copy()
         wrap_phases[igood] = np.unwrap(phases[igood], period=360)
         if (np.all(wrap_phases[igood] > -phase_lim)
-            and np.all(wrap_phases[igood] < phase_lim)):
+                and np.all(wrap_phases[igood] < phase_lim)):
             ax_p.semilogx(self.freqs, wrap_phases)
         else:
             ax_p.semilogx(self.freqs, phases)
@@ -239,7 +327,7 @@ class Compliance(object):
         ax_p.set_xlabel("Frequency (Hz)")
 
         # Show and/or save plot
-        fig.tight_layout()
+        # fig.tight_layout()
         if outfile:
             plt.savefig(outfile)
         if show:
@@ -247,15 +335,13 @@ class Compliance(object):
 
         return ax_a, ax_p
 
-
-    # def zp_to_norm_compliance(freqs, zp, wdepth, z_units='M/S'):
     @staticmethod
     def _zp_to_ncompl(freqs, zp, wdepth, z_units):
         """
         Calculate compliance from the z/p ratio, freqs and water depth
 
-        normalized compliance is defined as k*Z/P, with k in 1/m, Z in m and P in Pa.
-        Its units are 1/Pa
+        normalized compliance is defined as k*Z/P, with k in 1/m, Z in m and
+        P in Pa. Its units are 1/Pa
 
         Args:
             freqs (:class:`numpy.nparray`): frequencies (1/s)
@@ -276,7 +362,7 @@ class Compliance(object):
             raise ValueError(f'Z_units ({z_units}) is not in ("M", "M/S", "M/S^2")')
         return zp * k * omega_term
 
-    @staticmethod       
+    @staticmethod
     def gravd(W, h):
         """
         Return linear ocean surface gravity wave wavenumbers
@@ -346,9 +432,10 @@ class Compliance(object):
             P (float): surface wave slowness (s/m)
             om (float): surface wave angular frequency (radians/sec)
             d (:class:`numpy.ndarray`): layer thicknesses (meters?)
-            rho (:class:`numpy.ndarray`): layer densities (kg/m^3) (gm/cc * 1000)
+            rho (:class:`numpy.ndarray`): layer densities (kg/m^3)
             vp2 (:class:`numpy.ndarray`): layer P velocities squared (m/s)^2
-            vs2 (:class:`numpy.ndarray`): layer shear velocities squared (m/s)^2
+            vs2 (:class:`numpy.ndarray`): layer shear velocities squared
+                (m/s)^2
 
         Returns:
             (list): Parameters, each value is at layer top
@@ -465,85 +552,88 @@ class Compliance(object):
         return x[:, 0], x[:, 1], x[:, 2], x[:, 3]
 
 
-    @staticmethod
-    def plot_compliance_stack(psd, zstr, pstr, water_depth, seawater_density=1030,
-                              show=True, outfile=None):
-        """
-        Plot from top to bottom: Z PSD, P PSD, coherence, Z/P
-    
-        Args:
-            psd (SpectralDensity): PSDs including Z and P
-            zstr (str): channel id sub/string matching the Z channel (see
-                :meth:`SpectralDensity.channel_id() documentation)
-            pstr (str): channel id sub/string matching the P channel
-            water_depth (float): water depth in meters
-            seawater_density (float): average water density overhead (kg/m^3)
-            show (bool): show the result on the screen
-            outfile (str): save the plot to the named file
-        """
-        # Validate inputs
-        try:
-            _ = psd.channel_id(zstr)
-        except Exception:
-            raise ValueError(f'{zstr=} not a valid/unique channel id for {psd=}')
-        try:
-            _ = psd.channel_id(pstr)
-        except Exception:
-            raise ValueError(f'{pstr=} not a valid/unique channel id for {psd=}')
-        assert water_depth > 0, f'{water_depth=} is not greater than 0'
-        for id, units in zip((zstr, pstr), ('m/s^2', 'Pa')):
-            assert psd.channel_units(id) == units, f'{id} units are {psd.channel_units(id)},  not "{units}"'
-
-        fig, axs = plt.subplots(4, 1, sharex=True)
-        fig.subplots_adjust(hspace=0)
-        # Plot Z PSD
-        axs[0].semilogx(psd.freqs, 20*np.log10(np.abs(psd.autospect(zstr))))
-        axs[0].set_ylabel(r'Z (dB ref 1 $m/s^2/\sqrt{Hz}$)', fontsize='small')
-        axs[0].set_title('Compliance Stack')
-        # Plot Pressure PSD
-        axs[1].semilogx(psd.freqs, 10*np.log10(np.abs(psd.autospect(pstr))))
-        axs[1].set_ylabel(r'P (dB ref 1 $Pa/\sqrt{Hz}$)', fontsize='small')
-        # Plot Pressure-Z coherence
-        psd.plot_one_coherence(pstr, zstr, fig=fig, ax_a=axs[2], show_phase=False,
-                               ylabel='')
-        axs[2].set_ylabel('Coherence', fontsize='small')
-        axs[2].set_ylim([0.001, 1])
-        # Plot Z/P ratios
-        for noise_channel, label, color in zip(('output', 'input'),
-                                               ('z_noise', 'p_noise'),
-                                               ('r', 'b')):
-            frf = ResponseFunctions(psd, pstr, [zstr], noise_channel=noise_channel)
-            igood = np.abs(frf.uncertainty(zstr)) < np.abs(frf.value(zstr))
-            # igood = np.abs(frf.uncertainty(zstr)) == np.abs(frf.uncertainty(zstr))
-            # axs[3].plot(frf.freqs[igood], np.abs(frf.value(zstr))[igood], c=color, label=label)
-            axs[3].errorbar(frf.freqs[igood],
-                            y=np.abs(frf.value(zstr))[igood],
-                            yerr=np.abs(frf.uncertainty(zstr))[igood],
-                            fmt='.', ms=1, c=color, label=label)
-        # Overlay theoretical Z/P relation for LF Rayleigh waves (seafloor moving
-        # water column): m/s^2/Pa = 1/rho*H
-        axs[3].axhline(1/(seawater_density*water_depth), c='k', ls='--')
-        axs[3].text(frf.freqs[0], 1/(seawater_density*water_depth), r'1/$\rho H$',
-                    verticalalignment='bottom')
-        axs[3].set_ylabel(f'Z/P ({frf.output_units(zstr)}/{frf.input_units})',
-                          fontsize='small')
-        axs[3].set_xlabel('Frequency (Hz)')
-        axs[3].set_yscale('log')
-        # Put predicted compliance max frequency vertical line on each plot
-        IG_fmax = np.sqrt(9.8/(2*np.pi*water_depth)) # about one wavelength
-        for ax in axs:
-            ax.axvline(IG_fmax, c='k', ls='--')
-        axs[0].text(IG_fmax, np.max(20*np.log10(np.abs(psd.autospect(zstr)))),
-                   r'$\sqrt{\frac{g}{2 \pi H}}$', rotation='vertical', horizontalalignment='right',
-                   verticalalignment='top')
-
-        # Show or save plot
-        if show is False and outfile is None:
-            raise ValueError('Plot neither shown nor saved!')
-        if show is True:
-            plt.show()
-        if outfile is not None:
-            plot.savefig(outfile)
+#     @staticmethod
+#     def plot_compliance_stack(psd, zstr, pstr, water_depth,
+#                               seawater_density=1030, show=True,
+#                               outfile=None):
+#         """
+#         Plot from top to bottom: Z PSD, P PSD, coherence, Z/P
+#
+#         Args:
+#             psd (SpectralDensity): PSDs including Z and P
+#             zstr (str): channel id sub/string matching the Z channel (see
+#                 :meth:`SpectralDensity.channel_id() documentation)
+#             pstr (str): channel id sub/string matching the P channel
+#             water_depth (float): water depth in meters
+#             seawater_density (float): average water density overhead (kg/m^3)
+#             show (bool): show the result on the screen
+#             outfile (str): save the plot to the named file
+#         """
+#         # Validate inputs
+#         try:
+#             _ = psd.channel_id(zstr)
+#         except Exception:
+#             raise ValueError(f'{zstr=} invalid/unique channel id for {psd=}')
+#         try:
+#             _ = psd.channel_id(pstr)
+#         except Exception:
+#             raise ValueError(f'{pstr=} invalid/unique channel id for {psd=}')
+#         assert water_depth > 0, f'{water_depth=} is not greater than 0'
+#         for id, units in zip((zstr, pstr), ('m/s^2', 'Pa')):
+#             assert psd.channel_units(id) == units, f'{id} units are {psd.channel_units(id)},  not "{units}"'
+#
+#         fig, axs = plt.subplots(4, 1, sharex=True)
+#         fig.subplots_adjust(hspace=0)
+#         # Plot Z PSD
+#         axs[0].semilogx(psd.freqs, 20*np.log10(np.abs(psd.autospect(zstr))))
+#         axs[0].set_ylabel(r'Z (dB ref 1 $m/s^2/\sqrt{Hz}$)', fontsize='small')
+#         axs[0].set_title('Compliance Stack')
+#         # Plot Pressure PSD
+#         axs[1].semilogx(psd.freqs, 10*np.log10(np.abs(psd.autospect(pstr))))
+#         axs[1].set_ylabel(r'P (dB ref 1 $Pa/\sqrt{Hz}$)', fontsize='small')
+#         # Plot Pressure-Z coherence
+#         psd.plot_one_coherence(pstr, zstr, fig=fig, ax_a=axs[2],
+#                                show_phase=False, ylabel='')
+#         axs[2].set_ylabel('Coherence', fontsize='small')
+#         axs[2].set_ylim([0.001, 1])
+#         # Plot Z/P ratios
+#         for noise_channel, label, color in zip(('output', 'input'),
+#                                                ('z_noise', 'p_noise'),
+#                                                ('r', 'b')):
+#             frf = ResponseFunctions(psd, pstr, [zstr],
+#                                     noise_channel=noise_channel)
+#             igood = np.abs(frf.uncertainty(zstr)) < np.abs(frf.value(zstr))
+#             # igood = np.abs(frf.uncertainty(zstr)) == np.abs(frf.uncertainty(zstr))
+#             # axs[3].plot(frf.freqs[igood], np.abs(frf.value(zstr))[igood],
+#                           c=color, label=label)
+#             axs[3].errorbar(frf.freqs[igood],
+#                             y=np.abs(frf.value(zstr))[igood],
+#                             yerr=np.abs(frf.uncertainty(zstr))[igood],
+#                             fmt='.', ms=1, c=color, label=label)
+#         # Overlay theoretical Z/P relation for LF Rayleigh waves (seafloor
+#         # moving water column): m/s^2/Pa = 1/rho*H
+#         axs[3].axhline(1/(seawater_density*water_depth), c='k', ls='--')
+#         axs[3].text(frf.freqs[0], 1/(seawater_density*water_depth), r'1/$\rho H$',
+#                     verticalalignment='bottom')
+#         axs[3].set_ylabel(f'Z/P ({frf.output_units(zstr)}/{frf.input_units})',
+#                           fontsize='small')
+#         axs[3].set_xlabel('Frequency (Hz)')
+#         axs[3].set_yscale('log')
+#         # Put predicted compliance max frequency vertical line on each plot
+#         IG_fmax = np.sqrt(9.8/(2*np.pi*water_depth)) # about one wavelength
+#         for ax in axs:
+#             ax.axvline(IG_fmax, c='k', ls='--')
+#         axs[0].text(IG_fmax, np.max(20*np.log10(np.abs(psd.autospect(zstr)))),
+#                    r'$\sqrt{\frac{g}{2 \pi H}}$', rotation='vertical',
+#                    horizontalalignment='right', verticalalignment='top')
+#
+#         # Show or save plot
+#         if show is False and outfile is None:
+#             raise ValueError('Plot neither shown nor saved!')
+#         if show is True:
+#             plt.show()
+#         if outfile is not None:
+#             plot.savefig(outfile)
 
     @staticmethod
     def calc_compliance(wdepth, freq, model):
@@ -565,12 +655,12 @@ class Compliance(object):
 
         compl = np.zeros((len(ps)))
         for i in np.arange((len(ps))):
-            v, _, sigzz, _ = Compliance.raydep(ps[i], omega[i], model.thicks, model.rhos,
-                                    vpsq, vssq)
-            # If raydep returned complex values, would need to divide by a further
-            # 1j to go from (m/s)/Pa to m/Pa.  Returned value should be
-            # negative because seafloor is lowest (DOWN) under maxixum pressure,
-            # for quasi-static
+            v, _, sigzz, _ = Compliance.raydep(ps[i], omega[i], model.thicks,
+                                               model.rhos, vpsq, vssq)
+            # If raydep returned complex values, would need to divide by a
+            # further 1j to go from (m/s)/Pa to m/Pa.  Returned value should
+            # be negative because seafloor is lowest (DOWN) under maxixum
+            # pressure, for quasi-static
             compl[i] = v[0] / (omega[i] * sigzz[0])
         return compl
 
@@ -599,7 +689,6 @@ class Compliance(object):
         """
         k = Compliance.gravd(2 * np.pi * freq, wdepth)
         return k * Compliance.calc_compliance(wdepth, freq, model)
-
 
 
 def _dtanh(x):
@@ -634,33 +723,33 @@ def _argdtray(wd, h):
 
 
 # Now that we have Compliance.from_response_functions, do we need this?
-def frf_to_compliance(xf, wdepth, z_units='M/S'):
-    """
-    Changes the response for each out_channel from z_units/Pa
-    to 1/Pa (normalized compliance)
-
-    Args:
-        xf (:class:`tiskitpy.ResponseFunctions`): z/p transfer function(s)
-        wdepth (float): water depth (m)
-        z_units (str): z units, one of 'M', 'M/S' or 'M/S^2'
-    """
-    compl = deepcopy(xf)
-    for oc in compl.output_channels:
-        if not compl.output_units(oc).upper() == z_units:
-            raise ValueError('output_units({}) ({}) != "{}"'.format(
-                oc, compl.output_units(oc), z_units))
-        if not compl.input_units.upper() == 'PA':
-            raise ValueError(f'input_units ({compl.input_units}) != "PA"')
-        orig_resp = compl.response(oc)
-        new_resp = zp_to_norm_compliance(compl.freqs, orig_resp,
-                                         wdepth, z_units)
-        # print(f'{new_resp/orig_resp=}')
-        # print(f'BEFORE {compl.response(oc)=}')
-        compl.put_response(new_resp, oc)
-        # print(f'AFTER {compl.response(oc)=}')
-        # compl._ds["response"].loc[dict(input=compl.input_channel,
-        #                             output=oc)] = new_resp
-    return compl
+# def frf_to_compliance(xf, wdepth, z_units='M/S'):
+#     """
+#     Changes the response for each out_channel from z_units/Pa
+#     to 1/Pa (normalized compliance)
+#
+#     Args:
+#         xf (:class:`tiskitpy.ResponseFunctions`): z/p transfer function(s)
+#         wdepth (float): water depth (m)
+#         z_units (str): z units, one of 'M', 'M/S' or 'M/S^2'
+#     """
+#     compl = deepcopy(xf)
+#     for oc in compl.output_channels:
+#         if not compl.output_units(oc).upper() == z_units:
+#             raise ValueError('output_units({}) ({}) != "{}"'.format(
+#                 oc, compl.output_units(oc), z_units))
+#         if not compl.input_units.upper() == 'PA':
+#             raise ValueError(f'input_units ({compl.input_units}) != "PA"')
+#         orig_resp = compl.response(oc)
+#         new_resp = Compliance._zp_to_ncompl(compl.freqs, orig_resp,
+#                                          wdepth, z_units)
+#         # print(f'{new_resp/orig_resp=}')
+#         # print(f'BEFORE {compl.response(oc)=}')
+#         compl.put_response(new_resp, oc)
+#         # print(f'AFTER {compl.response(oc)=}')
+#         # compl._ds["response"].loc[dict(input=compl.input_channel,
+#         #                             output=oc)] = new_resp
+#     return compl
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-.. _tiskitpy.SeafloorSynthetic:
+.. _tiskitpy.CleanedStream:
 
-tiskitpy.SeafloorSynthetic
+tiskitpy.CleanedStream
 -----------------------------
 
-.. autoclass:: tiskitpy.SeafloorSynthetic
+.. autoclass:: tiskitpy.CleanedStream

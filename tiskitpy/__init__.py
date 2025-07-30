@@ -35,6 +35,7 @@ Functions
     same starttime and endtime).  Raises ValueError if not all streams have
     the same sample_rate
 - ``stream_unmask`` : unmasks data in a stream, interpolating to fill any gaps
+- ``plot_compliance_stack`` : plot Z spectra, P spectra, coherence and freq resp function
 
 Command-line programs
 =========================
@@ -46,6 +47,7 @@ Use the `-h` option for help
 - ``tiskitpy_get_SDS_inventory``: Return the inventory corresponding to a
   SeisComp Data Structure database, using the FDSN Station webservice
 """
+# Classes
 from .clean_rotator import CleanRotator
 from .cleaned_stream import CleanedStream
 from .compliance import Compliance
@@ -53,15 +55,15 @@ from .synthetic import SeafloorSynthetic, PSDVals, to_DBs, from_DBs
 from .data_cleaner import DataCleaner, RFList
 from .decimate import Decimator
 from .rptransient import PeriodicTransient
-from .spectral_density import SpectralDensity, Peterson_noise_model
-from .time_spans import TimeSpans, _get_time_bounds  # latter is just for testing
 from .response_functions import ResponseFunctions
+from .spectral_density import SpectralDensity
+from .time_spans import TimeSpans, _get_time_bounds  # latter is just for testing
+
 # Functions
-from .read_mseed import read_MSEED
+from .functions import (plot_compliance_stack, read_MSEED, stream_synchronize,
+                        stream_unmask, Peterson_noise_model)
 from .fir_corr import fir2caus
-from .utils import stream_synchronize, stream_unmask
+
 # These are only here for tests, there is probably a better way to access/hide them
 from .logger import init_logger
-from .utils import CleanSequence
-
-# from .utils import remove_cleaner_string, CleanerString, CleanSequence
+# from .utils import CleanSequence

@@ -20,17 +20,17 @@ Compliance Calculation example code
 
     # PARAMETERS
     rho, vp, vs = 2500, 4000, 2000  # kg/m^3, m/s, m/s
+    no_noise = True
 
-    # Use very low noise levels (essentially no pressure or seismo gauge noise)
-    kwargs = {'noise_pressure': ([[0.001, -50], [1, -50]], True),
-              'noise_seismo': ([[0.001, -230], [1, -230]], True),
-              'noise_tilt_max': ([[f, np.power(10., -17) * np.power(f, -1.51)]
-                                  for f in np.power(10, np.arange(-3, 0.1, .25))],
-                                 False),
+    # Almost perfectly leveled Z to get measureable compliance without cleaning
+    kwargs = {'Z_offset_angles': (0.01, 0),
               'earth_model': [[1000, rho, vp, vs],
+                              [1000, rho, vp, vs],
                               [1000, rho, vp, vs]]}
-
-    max_compl_freq = 0.02
+    if no_noise is True:
+        kwargs['Z_offset_angles'] = (0.00, 0)
+        kwargs['noise_pressure'] = ([[0.001, -150], [1, -150]], True)
+        kwargs['noise_seismo'] =   ([[0.001, -250], [1, -250]], True)
 
     # Create noise model
     noise_model = SeafloorSynthetic(**kwargs)
@@ -47,12 +47,15 @@ Compliance Calculation example code
 
     # Specify sensitivities that keep the compliance values in the passband                           
     s_sensitivity = 1e13  # Below 1e10 and above 1e15, compliance is too low
-    p_sensitivity = 1e6  # Below 1e2 and above 1e7, compliance is too high
+    p_sensitivity = 1e5  # Below 1e2 and above 1e7, compliance is too high
 
     data_synth, sources, inv_synth = noise_model.streams(
         resp_trace, s_response=s_sensitivity, p_response=p_sensitivity,
         station=sta_code, forceInt32=True)
-    sd_synth = SpectralDensity.from_stream(data_synth, inv=inv_synth)
+
+    # If I use the standard prol4pi (or kaiser4pi or dpss4) taper, high frequency
+    # values are too high (because pressure drops faster than motion?)
+    sd_synth = SpectralDensity.from_stream(data_synth, inv=inv_synth, windowtype='dpss1')
 
     # Theoretical compliance assuming c << vp, vs
     ncompl_theoretical = - vp**2 / (2 * rho * vs**2 * (vp**2 - vs**2))
@@ -62,19 +65,19 @@ Compliance Calculation example code
     for noise_chan in ("output", "input", "equal", "unknown"):
         # Calculate normalized compliance from the data
         rfs = ResponseFunctions(sd_synth,  '*LDG', ['*LHZ'],
-                                max_freq=max_compl_freq,
                                 noise_channel=noise_chan)
         ncompl_est = Compliance.from_response_functions(rfs, noise_model.water_depth)
         # Calculate normalized compliance directly from the model
-        ncompl_real = noise_model.norm_compliance(ncompl_est.freqs)
+        ncompl_computed = Compliance.from_seafloor_synthetic(noise_model)
 
-        # Compare theoretical, model-calculated and "data-calculated" compliances
+        # Plot comparison of theoretical, model-computed and "data-estimated" compliances
         axa, axp = ncompl_est.plot(show=False)
-        axa.plot(ncompl_est.freqs, np.abs(ncompl_real), c='b', label='Calculated')
+        axa.plot(ncompl_computed.freqs, np.abs(ncompl_computed.values), c='b', label='Computed')
         axa.axhline(np.abs(ncompl_theoretical), ls='--', c='r', label='Theoretical')
         axa.legend()
         plt.suptitle(f'{noise_chan=}')
         plt.show()
+        plt.close()
 
 
 

@@ -64,22 +64,22 @@ class TestMethods(unittest.TestCase):
         head = 'test'
         
         self.compliance.write(head)
-        fname = head + '_Pa-1.csv'
+        fname = head + '_compliance_Pa-1.csv'
         self._compare_to_ref_file(self.path / fname, self.test_path / fname)
         (self.path / fname).unlink()
 
         self.compliance.write('test', units='m/Pa')
-        fname = head + '_m.Pa-1.csv'
+        fname = head + '_compliance_m.Pa-1.csv'
         self._compare_to_ref_file(self.path / fname, self.test_path / fname)
         (self.path / fname).unlink()
 
         self.compliance.write('test', units='m/s/Pa')
-        fname = head + '_m.s-1.Pa-1.csv'
+        fname = head + '_compliance_m.s-1.Pa-1.csv'
         self._compare_to_ref_file(self.path / fname, self.test_path / fname)
         (self.path / fname).unlink()
 
         self.compliance.write('test', units='m/s^2/Pa')
-        fname = head + '_m.s-2.Pa-1.csv'
+        fname = head + '_compliance_m.s-2.Pa-1.csv'
         self._compare_to_ref_file(self.path / fname, self.test_path / fname)
         (self.path / fname).unlink()
 

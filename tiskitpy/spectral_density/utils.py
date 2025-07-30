@@ -4,9 +4,8 @@ Functions to calculate spectra, coherences and transfer functions
 from obspy.signal.invsim import cosine_taper
 import numpy as np
 
-from ..logger import init_logger
-
-logger = init_logger()
+# from ..logger import init_logger
+# logger = init_logger()
 
 # Set variables
 # spect_library = 'scipy'  # 'mlab' or 'scipy': mlab gives weird coherences!
@@ -109,30 +108,3 @@ def _prol4pi(n):
 
 def _prol4pi_times(data):
     return data * _prol4pi(len(data))
-
-
-def coherence_significance_level(n_windows, prob=0.95):
-    """
-    Definition: L_1(alpha, q) = sqrt(1-alpha**(1/q))
-
-    where alpha = 1-prob and 2(q+1) = nwinds (degree of freedom)
-
-    For nwinds >> 1, L1 ~ sqrt(1-alpha**(2/nwinds))
-    For a 95% signif level this comes out to
-        sqrt(1-.05**(2/nwinds)) for nwinds >> 1.
-    I previously used sqrt(2/nwinds) for the 95% signif level (alpha=0.05),
-    but L1 is much closer to sqrt(6/nwinds).
-
-    Args:
-        n_windows (int): number of windows
-        prob (float): significance level (between 0 and 1)
-    """
-    assert prob >= 0 and prob <= 1
-    alpha = 1 - prob
-    q = n_windows/2 - 1
-    return np.sqrt(1 - alpha ** (1. / q))
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

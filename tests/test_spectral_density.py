@@ -41,7 +41,7 @@ class TestMethods(unittest.TestCase):
             "\tchannel_units=['Counts', 'Counts', 'Counts', 'Counts']\n"
             "\t8192 frequencies, from 0.0061 to 50Hz\n"
             "\tn_windows=6\n"
-            "\twindow_type=prol1pi",
+            "\twindow_type=prol4pi",
         )
 
     def test_ids(self):
@@ -66,7 +66,7 @@ class TestMethods(unittest.TestCase):
     def test_other_properties(self):
         """Test other properties"""
         # window_type
-        self.assertEqual(self.sd.window_type, "prol1pi")
+        self.assertEqual(self.sd.window_type, "prol4pi")
         sts = self.sd.starttimes
         self.assertEqual(sts[0], self.stream[0].stats.starttime)
         self.assertEqual(len(sts), 6)

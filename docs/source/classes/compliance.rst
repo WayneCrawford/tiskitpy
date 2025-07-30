@@ -11,7 +11,11 @@ Constructor
 
 - :class:`Compliance <tiskitpy.Compliance>`
 - :meth:`Compliance.from_response_functions <tiskitpy.Compliance.from_response_functions>`:
-  The most common way to create a Compliance object
+  Create a Compliance object from an :class:`ResponseFunctions <tiskitpy.ResponseFunctions>`
+  object
+- :meth:`Compliance.from_earth_model_1D <tiskitpy.Compliance.from_earth_model_1D>`:
+  Calculate compliance from an
+  :class:`compliance.EarthModel1D <tiskitpy.compliance.EarthModel1D>` object
 - :meth:`Compliance.from_file <tiskitpy.Compliance.from_file>`: read compliance from a file
 
 Properties

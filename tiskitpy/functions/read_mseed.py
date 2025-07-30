@@ -61,3 +61,7 @@ def read_MSEED(filenames, starttime, endtime, verbose=False):
             outstream = outstream + stream
         firstTime = False
     return outstream
+
+if __name__ == '__main__':
+    print('not a command line code')
+    sys.exit(1)

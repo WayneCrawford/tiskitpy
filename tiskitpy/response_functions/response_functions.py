@@ -6,11 +6,10 @@ import numpy as np
 import xarray as xr
 from matplotlib import pyplot as plt
 
-from ..spectral_density.utils import coherence_significance_level
-from ..spectral_density import SpectralDensity
-from ..utils import match_one_str
+from ..spectral_density import SpectralDensity   # Only imported to check that input is a SpectralDensity function
+# from ..utils import match_one_str, coherence_significance_level
+import tiskitpy.utils as baseutils
 from tiskitpy.logger import init_logger
-# from ..compliance import gravd
 
 logger = init_logger()
 np.seterr(all="ignore")
@@ -92,6 +91,8 @@ class ResponseFunctions(object):
         else:
             if not isinstance(sdf, SpectralDensity):
                 raise TypeError("sdf is not a SpectralDensity object")
+            # if not type(sdf) == "SpectralDensity":
+            #     raise TypeError(f"{type(sdf).split['.'][-1]=} is not 'SpectralDensity'")
             in_id, out_ids = self._expand_ids(sdf, in_id, out_ids)
             in_units = sdf.channel_units(in_id)
             clean_sequence = sdf.clean_sequence(in_id)
@@ -200,7 +201,7 @@ class ResponseFunctions(object):
         Args:
             prob (float): significance level (between 0 and 1)
         """
-        return coherence_significance_level(self.n_windows, prob)
+        return baseutils.coherence_significance_level(self.n_windows, prob)
 
     def output_units(self, output_channel_id):
         """Frequency response function output channel units"""
@@ -293,33 +294,6 @@ class ResponseFunctions(object):
         ir = self._ds["instrument_response"].sel(output=oc).values
         return np.squeeze(ir)
 
-    # REMOVED for integration into Compliance class
-    # def to_norm_compliance(self, water_depth, verbose=False):
-    #     """
-    #     Change rfs from m/s^2 / Pa to 1 / Pa by multiplying by k / -omega^2
-    #     """
-    #     if verbose:
-    #         print(self)
-    #         print(f'{self.input_units=}')
-    #         print(f'{self.output_channel_ids[0]=}')
-    #         print(f'{self.output_units(self.output_channel_ids[0])=}')
-    #     if not self.input_units.upper() == 'PA':
-    #         logger.error(f'{self.input_units.upper()=}, not "PA"')
-    #     om = 2 * np.pi * self.freqs  # Angular frequency ARGH!!!
-    #     k = gravd(om, water_depth)  # Wavenumber
-    #     rf_multiplier = k / (-om**2)  # Multiplier from Accel/Press to norm compliance
-    #     # print(f'RF.to_norm_compliance: {water_depth=}, {om[:5]=}, {k[:5]=}')
-    #     for oc in self.output_channel_ids:
-    #         if not self.output_units(oc).upper() == 'M/S^2':
-    #             logger.error(f'{self.output_units(oc).upper()=}, not "M/2^2"')
-    #         # Multiply rf by -k/om^2
-    #         self._ds["value"].loc[dict(output=oc)] = self.value(oc) * rf_multiplier
-    #         # Multiply output units by s^2/m
-    #         self._ds.coords["out_units"].loc[dict(output=oc)] = '1'
-    #         # Change instrument_response so that value w.r.t. counts remains constant
-    #         self._ds["instrument_response"].loc[dict(output=oc)] = (
-    #             self.instrument_response(oc) / rf_multiplier)
-
     def uncert_mult(self, output_channel_id):
         """
         Return uncertainty as a fraction of the frequency response function
@@ -356,7 +330,7 @@ class ResponseFunctions(object):
         Also returns all output channels if out_ids is None
         """
         # Validate in_id
-        verified_in_id = match_one_str(in_id, sdf.ids, "in_id", "sdf.ids")
+        verified_in_id = baseutils.match_one_str(in_id, sdf.ids, "in_id", "sdf.ids")
 
         # Validate out_ids
         if out_ids is None:
@@ -367,7 +341,7 @@ class ResponseFunctions(object):
                 raise TypeError("Error: out_ids is not a list")
             verified_out_ids = []
             for out_id in out_ids:
-                voc = match_one_str(out_id, sdf.ids, "out_id", "sdf.ids")
+                voc = baseutils.match_one_str(out_id, sdf.ids, "out_id", "sdf.ids")
                 verified_out_ids.append(voc)
 
         return verified_in_id, verified_out_ids
@@ -381,7 +355,7 @@ class ResponseFunctions(object):
         # Validate in_id
         if not isinstance(value, str):
             raise TypeError("Error: value is not a str")
-        out_id = match_one_str(value, self.output_channel_ids,
+        out_id = baseutils.match_one_str(value, self.output_channel_ids,
                                  "value", "self.output_channel_ids")
         return out_id
 
@@ -479,6 +453,8 @@ class ResponseFunctions(object):
             plt.savefig(outfile)
         if show:
             plt.show()
+        else:
+            plt.close()
         return ax_array
 
     def _plot_progress(self, spect_dens, show=True):
@@ -574,6 +550,7 @@ class ResponseFunctions(object):
         f = self.freqs
         rf = self.value(out_id).copy()
         rferr = self.uncertainty(out_id)
+        rfunits = self.output_units(out_id) + "/" + self.input_units
         ibad = (rf == 0).nonzero()
         if fig is None:
             fig = plt.gcf()
@@ -592,10 +569,11 @@ class ResponseFunctions(object):
         rferr[rferr == 0] = np.nan
         if errorbars is True:
             ax_a.errorbar(f, np.abs(rf), np.abs(rferr), fmt='b_', ecolor='k',
-                          markersize=3)
+                          markersize=3, label=rfunits)
             if np.any(rf is not np.nan):
                 ax_a.set_yscale('log')
             ax_a.set_xscale('log')
+            ax_a.legend()
         else:
             ax_a.loglog(f, np.abs(rf + rferr), color="blue", linewidth=0.5)
             ax_a.loglog(f, np.abs(rf - rferr), color="blue", linewidth=0.5)

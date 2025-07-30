@@ -150,3 +150,24 @@ Change `MANIFEST.in` to recursively include subfiles/directories of `decimate/`
 ## 2.0
 
 Renamed ``ComplianceNoise`` to ``SeafloorSynthetic``
+
+## 2.1.0
+- General
+	- Closes figures that are not shown
+	- Added ``plot_compliance_stack()`` function
+- ``CleanRotator`` and ``SeisRotate`` classes:
+	- Added optional ``H_over_Z`` parameter to account for inequal Horizontal and Z sensitivites
+- ``SpectralDensity`` class:
+	- Changed default windowtype from ``prol1pi`` to ``prol4pi``
+- ``ResponseFunctions`` class:
+	- removed ``to_norm_compliance()`` method (replaced by ``Compliance.from_response_functions()``
+	- Added response function units to plots
+- ``SeafloorSynthetic`` class:
+	- Change default tilt noise parameters to more typical/reasonable values
+- ``Compliance`` class:
+	- Fixed Path bug
+	- Added ``from_seafloor_synthetic`` class method
+	- Added ``max_freq()`` static method and use it to limit frequencies by default
+	- Added '_compliance' to ``write()`` method output filename
+	- Added ``write_counts()`` method
+	- Removed ``frf_to_compliance()`` (replaced by ``Compliance.from_from_response_functions()``)

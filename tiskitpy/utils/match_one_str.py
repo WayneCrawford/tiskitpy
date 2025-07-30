@@ -3,32 +3,6 @@ Copyright 2023 Wayne Crawford
 """
 import fnmatch  # Allows Unix filename pattern matching
 
-import numpy as np
-from ..logger import init_logger
-
-logger = init_logger()
-
-def stream_unmask(stream):
-    """
-    Check if a stream is masked and, if so, unmask it
-    Interpolates data in gaps
-        """
-    if np.any([np.ma.count_masked(tr.data) for tr in stream]):
-        logger.warning('Unmasking masked data (usually a gap or overlap)')
-        return stream.split().merge(fill_value='interpolate')
-    return stream
-
-def get_full_id(match_str, stream):
-    """
-    Return stream trace's channel seed_id matching match_str
-    
-    Args:
-        match_str (str): string to match (may have \* and \? wildcards)
-        stream (:class:`obspy.core.Stream`): stream
-    """
-    return match_one_str(match_str, [x.get_id() for x in stream],
-                          "match_str", "stream_ids")
-    
 
 def match_one_str(one_str, str_list, one_str_name, str_list_name):
     """
@@ -41,7 +15,6 @@ def match_one_str(one_str, str_list, one_str_name, str_list_name):
         str_list_name (str): name to give str_list in error messages
     Returns:
         matched_str (str): str_list item that matches one_str
-
     Raises:
         TypeError of one_str is not a str
         ValueError if there is not exactly one match

@@ -8,8 +8,10 @@ from pathlib import Path
 import inspect
 
 from obspy.core.stream import Stream
+import numpy as np
 
-from tiskitpy.utils import get_full_id, match_one_str
+from tiskitpy.utils import (get_full_id, match_one_str,
+                            coherence_significance_level)
 from make_test_stream import make_test_stream
 
 
@@ -46,6 +48,15 @@ class TestMethods(unittest.TestCase):
             get_full_id('*Z', self.stream)
         with self.assertRaises(ValueError):
             get_full_id('?1', self.stream)
+        
+    def test_coherence_significance_level(self):
+        """Test add_trace()"""
+        self.assertTrue(np.isnan(coherence_significance_level(1)))
+        self.assertEqual(coherence_significance_level(2), 1)
+        self.assertAlmostEqual(coherence_significance_level(10),  0.7260366)
+        self.assertAlmostEqual(coherence_significance_level(100), 0.2435283)
+        with self.assertRaises(ValueError):
+            coherence_significance_level(-1)
         
 
 def suite():

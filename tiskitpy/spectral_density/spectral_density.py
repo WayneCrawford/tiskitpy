@@ -11,16 +11,16 @@ import scipy.signal.windows as spsw
 from matplotlib import pyplot as plt
 
 # from obstools.atacr import DayNoise, StaNoise  # removed for readthedocs
-from .utils import _prol1pi, _prol4pi, coherence_significance_level
+from .utils import _prol1pi, _prol4pi
 from obspy.core.stream import Stream
 from obspy.core import UTCDateTime
 from scipy import signal, stats
 
-from .Peterson_noise_model import Peterson_noise_model
-from ..time_spans import TimeSpans
+import tiskitpy.functions as tfunc
+import tiskitpy.time_spans as time_spans
 from ..logger import init_logger, change_level
-from ..cleaned_stream import CleanedStream
-from ..utils import match_one_str, CleanSequence as CS
+import tiskitpy.cleaned_stream as cleaned_stream
+import tiskitpy.utils as baseutils
 
 logger = init_logger()
 np.seterr(all="ignore")
@@ -53,7 +53,8 @@ class SpectralDensity:
             seed_ids (list of str): seed_ids for each channel
             chan_units (list of str): channel physical units (e.g m/s^2, Pa)
             n_windows (int): of windows used to calculate spectra
-            window_type (str): type of window used
+            window_type (str): type of window taper used.  Must be in
+                :py:data:`WINDOW_TAPERS`
             window_s (float): length of data windows in seconds
             chan_clean_sequences (list of list of str): clean_sequences
                 applied to each channel.
@@ -84,7 +85,8 @@ class SpectralDensity:
                 assert isinstance(y, str)
         _validate_dimensions(freqs, seed_ids, chan_units, starttimes,
                              chan_clean_sequences, data, instrument_responses)
-        ids = [CS.tiskitpy_id(s,cs) for (s, cs) in zip(seed_ids, chan_clean_sequences)]
+        ids = [baseutils.CleanSequence.tiskitpy_id(s, cs)
+               for (s, cs) in zip(seed_ids, chan_clean_sequences)]
         self._ds = xr.Dataset(
             data_vars={
                 "spectra": (("input", "output", "f"), data),
@@ -198,8 +200,8 @@ class SpectralDensity:
         Returns:
             (:class:`obspy.TimeSpans`):
         """
-        return TimeSpans([[x, x + self.window_seconds]
-                          for x in self.starttimes])
+        return time_spans.TimeSpans([[x, x + self.window_seconds]
+                                     for x in self.starttimes])
 
     @property
     def avoided_spans(self):
@@ -235,7 +237,7 @@ class SpectralDensity:
         return self._ds.n_windows
 
     @classmethod
-    def from_stream(cls, stream, window_s=1000, windowtype="prol1pi",
+    def from_stream(cls, stream, window_s=1000, windowtype="prol4pi",
                     inv=None, data_cleaner=None, starttimes=None,
                     time_spans=None, avoid_spans=None, remove_eqs=False,
                     z_threshold=3, quiet=False):
@@ -248,7 +250,7 @@ class SpectralDensity:
         Args:
             stream (:class:`obspy.core.stream.Stream`): data
             window_s (float): desired window length in seconds
-            windowtype (str): window type, must be a valid
+            windowtype (str): window taper type, must be a valid
             inv (:class:`obspy.core.inventory.Inventory`): inventory containing
                 instrument responses.  If none is found for the given channel,
                 will look in the channel's stats.response object
@@ -275,26 +277,27 @@ class SpectralDensity:
             quiet (bool): only output errors and beyond to console
         """
         if quiet is True:
-            change_level(logger, 'console','ERROR')
+            change_level(logger, 'console', 'ERROR')
         if not isinstance(stream, Stream):
             raise ValueError(f"stream is a {type(stream)}, not obspy Stream")
         stream = stream.copy()  # avoid modifying original stream
 
         if time_spans is not None:
-            stream = CleanedStream(stream).tag('SPANS')
+            stream = cleaned_stream.CleanedStream(stream).tag('SPANS')
         if avoid_spans is not None:
             if time_spans is not None:
                 raise RuntimeError("Provided both time_spans and avoid_spans")
-            stream = CleanedStream(stream).tag('AVOID')
+            stream = cleaned_stream.CleanedStream(stream).tag('AVOID')
             time_spans = avoid_spans.invert(stream[0].stats.starttime,
                                             stream[0].stats.endtime)
         if remove_eqs is not False:
             if remove_eqs is True:
-                avoid_eqs = TimeSpans.from_eqs(stream)
+                avoid_eqs = time_spans.TimeSpans.from_eqs(stream)
             else:
-                avoid_eqs = TimeSpans.from_eqs(stream, eq_file=remove_eqs)
+                avoid_eqs = time_spans.TimeSpans.from_eqs(stream,
+                                                          eq_file=remove_eqs)
             ts_unavoided = avoid_eqs.invert(stream[0].stats.starttime,
-                                          stream[0].stats.endtime)
+                                            stream[0].stats.endtime)
             if time_spans is None:
                 time_spans = ts_unavoided
             else:
@@ -323,18 +326,22 @@ class SpectralDensity:
 
         # Calculate FFTs
         ft, evalresps, units = {}, {}, []
-        tagged_stream = CS.seedid_tag(stream)
+        tagged_stream = baseutils.CleanSequence.seedid_tag(stream)
         ids = [tr.id for tr in tagged_stream]
-        clean_seq_dict = {tr.id: tr.stats.get('clean_sequence',[]) for tr in tagged_stream}
+        clean_seq_dict = {tr.id: tr.stats.get('clean_sequence', [])
+                          for tr in tagged_stream}
         seed_ids = [tr.id for tr in stream]
         if not len(ids) == len(set(ids)):
             raise ValueError(f"stream has duplicate IDs: {ids}")
         for id in ids:  # Calculate Fourier transforms
             tr_st = tagged_stream.select(id=id)
             if len(tr_st) == 0:
-                raise ValueError(f'{id=} not found in tagged stream = {tagged_stream.__str__()}')
+                raise ValueError('id={} not found in tagged stream = {}'
+                                 .format(id, tagged_stream.__str__()))
             elif not len(tr_st) == 1:
-                raise ValueError(f'{len(tr_st)} {id=}s found in tagged stream = {tagged_stream.__str__()}')
+                raise ValueError('{} id={}s found in tagged stream = {}'
+                                 .format(len(tr_st), id,
+                                         tagged_stream.__str__()))
             tr = tr_st[0]
             ft[id], f, sts = SpectralDensity._windowed_rfft(
                 tr, ws, ws, windowtype, starttimes, time_spans)
@@ -349,7 +356,7 @@ class SpectralDensity:
         n_winds = len(sts)
         # Remove outliers
         if starttimes is None and z_threshold is not None:
-            n_winds_orig = len(sts)
+            # n_winds_orig = len(sts)
             ft, sts = cls._remove_outliers(ft, sts, z_threshold)
             n_winds_new = len(sts)
             if not n_winds_new == n_winds:
@@ -362,9 +369,9 @@ class SpectralDensity:
         # Clean data
         new_clean_seq_dict = {}
         if data_cleaner is not None:  # clean data using correlated noise
-            rf_list = data_cleaner.RFList  # the ids here are beyond those in ft
+            rf_list = data_cleaner.RFList  # ids here are beyond those in ft
             ft, new_clean_seq_dict = rf_list.ft_subtract_rfs(ft, evalresps)
-            clean_seq_dict = {k: clean_seq_dict.get(k,[]) + new_clean_seq_dict.get(k,[]) for k in ids}
+            clean_seq_dict = {k: clean_seq_dict.get(k, []) + new_clean_seq_dict.get(k, []) for k in ids}
 
         clean_seq_list = [clean_seq_dict.get(x, []) for x in ids]
         # Create object
@@ -380,14 +387,18 @@ class SpectralDensity:
                   starttimes=sts)
         # Fill object with Cross-Spectral Density Functions
         for inp in ids:
-            in_id = CS.tiskitpy_id(CS.seed_id(inp), clean_seq_dict.get(inp,[]))
+            in_id = baseutils.CleanSequence.tiskitpy_id(
+                baseutils.CleanSequence.seed_id(inp), clean_seq_dict.get(inp, []))
             if evalresps[inp] is not None:
                 obj.put_channel_instrument_response(in_id, evalresps[inp])
             for outp in ids:
-                out_id = CS.tiskitpy_id(CS.seed_id(outp), clean_seq_dict.get(outp,[]))
+                out_id = baseutils.CleanSequence.tiskitpy_id(
+                    baseutils.CleanSequence.seed_id(outp),
+                    clean_seq_dict.get(outp, []))
                 # (p 547, Bendat and Piersol, 2010)
-                obj.put_crossspect(in_id, out_id, 2 * multfac * np.mean(
-                    np.conj(ft[inp])*ft[outp], axis=0))
+                obj.put_crossspect(
+                    in_id, out_id,
+                    2 * multfac * np.mean(np.conj(ft[inp])*ft[outp], axis=0))
         return obj
 
     @staticmethod
@@ -407,7 +418,7 @@ class SpectralDensity:
         sts = sts.copy()
         n_reject = 1  # Just starting the motor...
         while n_reject > 0:
-            # norm should have as many columns as windows, as many rows as keys
+            # norm should have as many columns as windows, rows as keys
             norm = np.array([np.mean(np.log10(np.abs(ft[id]*np.conj(ft[id]))),
                                      axis=1) for id in ft.keys()])
             # calculate a score for each channel (row) and window(column)
@@ -470,8 +481,8 @@ class SpectralDensity:
         """
         if not isinstance(test_id, str):
             raise TypeError(f"{ch_identifier} is a {type(test_id)}, not a str")
-        name = match_one_str(test_id, self.ids,
-                             "test_id", "self.ids")
+        name = baseutils.match_one_str(test_id, self.ids,
+                                       "test_id", "self.ids")
         return name
 
     def seed_id(self, id):
@@ -740,7 +751,7 @@ class SpectralDensity:
         Returns:
             (float):
         """
-        return coherence_significance_level(self.n_windows, prob)
+        return baseutils.coherence_significance_level(self.n_windows, prob)
 
     @staticmethod
     def plots(sds,
@@ -760,9 +771,9 @@ class SpectralDensity:
         Args:
             sds (list): SpectralDensity functions to plot
             channel (str): Limit to the given channel
-            line_kws(list of dict): Line keywords for each SpectralDensity function
+            line_kws(list of dict): Line keywords for each SpectralDensity
+                function
             labels(list of dict): labels for each sd
-        Other Properties:
             **kwargs: any arguments used in plot_autospectra, except
                 overlay (always true)
         Returns:
@@ -775,7 +786,7 @@ class SpectralDensity:
             logger.warning('You requested overlay=False, ignored!')
         line_kws, labels = _validate_plots_args(sds, line_kws, labels)
 
-        rows, cols = 1, 1
+        # rows, cols = 1, 1
         # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
         fig = plt.figure(**fig_kw)
         if title is None:
@@ -809,7 +820,7 @@ class SpectralDensity:
                 )
                 first_time = False
         if channel is not None and first_time is True:
-            logger.error(f'No channel matching {channel} found, nothing plotted')
+            logger.error(f'No match for {channel=}, nothing plotted')
         plt.legend(fontsize='x-small')
         if outfile:
             plt.savefig(outfile)
@@ -848,7 +859,8 @@ class SpectralDensity:
             fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs [row, column][0=amplitude, 1=phase]
+            :class:`numpy.ndarray`: array of axis pairs
+                [row, column][0=amplitude, 1=phase]
         """
         x = self._get_validate_ids(x)
         if not overlay:
@@ -925,7 +937,8 @@ class SpectralDensity:
             fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs [row, column][0=amplitude, 1=phase]
+            :class:`numpy.ndarray`: array of axis pairs
+                [row, column][0=amplitude, 1=phase]
         """
         x = self._get_validate_ids(x)
         n_subkeys = len(x)
@@ -963,7 +976,7 @@ class SpectralDensity:
 
         Arguments are the same as for `plot_one_spectra()`, except
         there is no `subkey` argument and `show_phase` is ignored
-        
+
         Returns:
             ax_a (:class:`matplotlib.axes.axis`): amplitude plot axis
         """
@@ -1083,7 +1096,7 @@ class SpectralDensity:
         if ylim is not None:
             ax_a.set_ylim(ylim[0], ylim[1])
         if plot_peterson is True and PSD_units.lower() == "(m/s^2)^2":
-            lownoise, highnoise = Peterson_noise_model(f, True)
+            lownoise, highnoise = tfunc.Peterson_noise_model(f, True)
             ax_a.semilogx(f, lownoise, "k--")
             ax_a.semilogx(f, highnoise, "k--")
 
@@ -1153,19 +1166,19 @@ class SpectralDensity:
 
     @staticmethod
     def plots_coherences(sds,
-              sds_names=None,
-              line_kws=None,
-              labels=None,
-              x=None,
-              y=None,
-              display='sparse',
-              show=True,
-              label_by="chan",
-              sort_by="chan",
-              outfile=None,
-              title=None,
-              channel_pair=False,
-              **fig_kw):
+                         sds_names=None,
+                         line_kws=None,
+                         labels=None,
+                         x=None,
+                         y=None,
+                         display='sparse',
+                         show=True,
+                         label_by="chan",
+                         sort_by="chan",
+                         outfile=None,
+                         title=None,
+                         channel_pair=False,
+                         **fig_kw):
         """
         Plot overlaid coherences of multiple SpectralDensity objects
 
@@ -1173,11 +1186,11 @@ class SpectralDensity:
             sds (list): SpectralDensity functions to plot.  Each must have
                 same seed_ids
             sds_names (list): Names to give to each sd in the plot legend
-            line_kws(list of dict): Line keywords for each SpectralDensity function
+            line_kws(list of dict): Line keywords for each SpectralDensity
+                function
             labels(list of dict): Labels for each SpectralDensity function
             channel_pair(False or 2-tuple): if a 2-tuple, plot only a single
-             channel_pair, specified as (in_chan, out_chan)
-        Other Properties:
+                channel_pair, specified as (in_chan, out_chan)
             **kwargs: any arguments used in plot_coherences, except
                 overlay (always true)
         Returns:
@@ -1186,7 +1199,7 @@ class SpectralDensity:
                 axa (): amplitude axis
         """
         # Validate inputs
-        assert display=='sparse'
+        assert display == 'sparse'
         line_kws, labels = _validate_plots_args(sds, line_kws, labels)
         if sds_names is None:
             sds_names = [max(x.clean_sequences, key=len) for x in sds]
@@ -1224,7 +1237,7 @@ class SpectralDensity:
                 new_row = True
                 for out_chan, jbase in zip(y, range(len(y))):
                     j = jbase
-                    if reduce_display==True:
+                    if reduce_display is True:
                         j -= 1
                     if in_chan == out_chan or (out_chan, in_chan) in plotted:
                         # if i < rows and j >= 0:
@@ -1240,26 +1253,30 @@ class SpectralDensity:
                         fig,
                         (rows, cols),
                         (i, j),
-                        ax_a=ax_array[i,j][0],
-                        ax_p=ax_array[i,j][1],
+                        ax_a=ax_array[i, j][0],
+                        ax_p=ax_array[i, j][1],
                         show_ylabel=new_row & first_time,
-                        show_xlabel=(i == j)  & first_time,
+                        show_xlabel=(i == j) & first_time,
                         ylabel=in_chan_label,
                         title=title,
                         **l_kw
                     )
                     new_row = False
                     ax_array[i, j] = (axa, axp)
-        i, j = rows-1, 0
+
+        # Add the legend (colors of different sdss in the list)
         if rows > 1 or cols > 1:
-            ax_legend = plt.subplot2grid((rows, cols), (i, j))
+            ax_legend = plt.subplot2grid((rows, cols), (rows-1, 0))
+            ax_legend.set_axis_off()
         else:
             ax_legend = ax_array[0, 0][0]
         for sds_name, l_kw, label in zip(sds_names, line_kws, labels):
             if label is None:
                 label = sds_name
-            ax_legend.plot([1,1],[1,1], label=label, **l_kw)
+            ax_legend.plot([1, 1], [1, 1], label=label, **l_kw)
         ax_legend.legend(fontsize='x-small')
+
+        # Plot and/or save the figure
         if outfile:
             plt.savefig(outfile)
         if show:
@@ -1292,7 +1309,8 @@ class SpectralDensity:
                 and `dpi`) are passed to the `pyplot.figure` call
 
         Returns:
-            (:class:`numpy.ndarray`): array of axis pairs [row, column][0=amplitude, 1=phase]
+            :class:`numpy.ndarray`: array of axis pairs
+                [row, column][0=amplitude, 1=phase]
         """
         if display not in ('full', 'sparse', 'minimal', 'overlay'):
             raise ValueError(f'Unknown display value: "{display}"')
@@ -1342,7 +1360,7 @@ class SpectralDensity:
                 new_row = True
                 for out_chan, jbase in zip(y, range(len(y))):
                     j = jbase
-                    if reduce_display==True:
+                    if reduce_display is True:
                         j -= 1
                     if in_chan == out_chan or (out_chan, in_chan) in plotted:
                         # if i < rows and j >= 0:
@@ -1442,14 +1460,13 @@ class SpectralDensity:
             plt.show()
         return ax_array
 
-    def plot_one_coherence(
-        self, in_chan, out_chan,
-        fig=None, fig_grid=(1, 1), plot_spot=(0, 0),
-        show_xlabel=True, show_ylabel=True,
-        ax_a=None, ax_p=None,
-        ylabel=None, label=None, title=None,
-        show_phase=True,
-        outfile=None, show=False, **kwargs):
+    def plot_one_coherence(self, in_chan, out_chan,
+                           fig=None, fig_grid=(1, 1), plot_spot=(0, 0),
+                           show_xlabel=True, show_ylabel=True,
+                           ax_a=None, ax_p=None,
+                           ylabel=None, label=None, title=None,
+                           show_phase=True,
+                           outfile=None, show=False, **kwargs):
         """
         Plot one coherence
 
@@ -1473,7 +1490,8 @@ class SpectralDensity:
             title (str): title to put on this subplot
             show_phase (bool): show phase as well as amplitude
             outfile (str): plot to the named file
-            show (bool): show on the screen (False by default: parent function shows)
+            show (bool): show on the screen (False by default: parent
+                function shows)
             kwargs (dict): values to pass on to plotting routines
 
         Returns:
@@ -1590,9 +1608,9 @@ class SpectralDensity:
             trace (:class:`obspy.core.Trace`): Input trace data
             ws (int): Window size, in number of samples
             ss (int): Step size, or number of samples until next window
-            win_taper (str): taper to apply to data  ['dpss1', 'dpss2', 'dpss4',
-                ''hanning', 'prol4pi',
-                'prol1pi', 'bartlett', 'blackman', 'hamming']
+            win_taper (str): taper to apply to data  ['dpss1', 'dpss2',
+                'dpss4', 'hanning', 'prol4pi', 'prol1pi', 'bartlett',
+                'blackman', 'hamming']
             starttimes (list of :class:`obspy.UTCDateTime`): Use provided
                 start window times (ignores z_threshold). Incompatible with
                 `time_spans`
@@ -1607,8 +1625,8 @@ class SpectralDensity:
                 t (list of UTCDateTime): Times of window starts
         """
         # Extract data windows
-        a, starttimes = SpectralDensity._make_windows(trace, ws, ss, win_taper,
-                                                      starttimes, time_spans)
+        a, starttimes = SpectralDensity._make_windows(
+            trace, ws, ss, win_taper, starttimes, time_spans)
         sr = trace.stats.sampling_rate
         # Fourier transform
         n2 = _npow2(ws)
@@ -1621,29 +1639,30 @@ class SpectralDensity:
     def compare_tapers(N):
         """
         Plot a comparison of all window types
-        
+
         Args:
             N (int): window length
         """
         fig, ax = plt.subplots()
         for x in WINDOW_TAPERS:
-            kwargs={}
+            kwargs = {}
             if "1" in x:
-                kwargs ["color"] = 'r'
+                kwargs["color"] = 'r'
             elif "2" in x:
-                kwargs ["color"] = 'g'
+                kwargs["color"] = 'g'
             elif "4" in x:
-                kwargs ["color"] = 'b'
+                kwargs["color"] = 'b'
             if "prol" in x:
-                kwargs ["ls"] = '--'
+                kwargs["ls"] = '--'
             elif "dpss" in x:
-                kwargs ["ls"] = '-.'
+                kwargs["ls"] = '-.'
             elif "kaiser" in x:
-                kwargs ["ls"] = ':'
+                kwargs["ls"] = ':'
             ax.plot(SpectralDensity._make_taper(N, x), label=x, **kwargs)
         plt.legend()
         plt.show()
-        
+        plt.close()
+
     @staticmethod
     def _make_windows(trace, ws, ss, win_taper, starttimes, time_spans):
         """
@@ -1701,8 +1720,8 @@ class SpectralDensity:
     def _make_taper(ws, win_taper):
         """
         Returns:
-            :class:`numpy.ndarray``: 
-            
+            :class:`numpy.ndarray``:
+
         Multipliers chosen to match prolnpi levels (and input PSDVals).
         There must be a smarter way.
         """
@@ -1719,20 +1738,20 @@ class SpectralDensity:
         elif win_taper == "prol4pi":
             taper = _prol4pi(ws)
         elif win_taper == "dpss1":
-            taper = 1.35*eval(f"spsw.dpss(ws, 1)")
+            taper = 1.35*spsw.dpss(ws, 1)
         elif win_taper == "dpss2":
-            taper = 1.7*eval(f"spsw.dpss(ws, 2)")
+            taper = 1.7*spsw.dpss(ws, 2)
         elif win_taper == "dpss4":
-            taper = 2*eval(f"spsw.dpss(ws, 4)")
+            taper = 2*spsw.dpss(ws, 4)
         elif win_taper == "kaiser1pi":
-            taper = 1.4*eval(f"spsw.kaiser(ws, 1*np.pi)")
+            taper = 1.4*spsw.kaiser(ws, 1*np.pi)
         elif win_taper == "kaiser2pi":
-            taper = 1.65*eval(f"spsw.kaiser(ws, 2*np.pi)")
+            taper = 1.65*spsw.kaiser(ws, 2*np.pi)
         elif win_taper == "kaiser4pi":
-            taper = 2*eval(f"spsw.kaiser(ws, 4*np.pi)")
+            taper = 2*spsw.kaiser(ws, 4*np.pi)
         else:
             raise ValueError(f'Unknown taper type "{win_taper}"')
-        return(taper)
+        return taper
 
     @staticmethod
     def _sliding_window(npts, ws, ss=None):

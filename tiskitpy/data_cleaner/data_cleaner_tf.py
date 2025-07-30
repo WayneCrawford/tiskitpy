@@ -16,7 +16,8 @@ from ..response_functions import ResponseFunctions
 from ..spectral_density import SpectralDensity
 from .rf_list import RFList
 from ..cleaned_stream import CleanedStream
-from ..utils import CleanSequence as CS, stream_synchronize, stream_unmask
+from ..utils import CleanSequence as CS
+from ..functions import stream_synchronize, stream_unmask
 from tiskitpy.logger import init_logger
 
 logger = init_logger()

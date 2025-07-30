@@ -87,3 +87,8 @@ def _get_sampling_rate(stream):
         if not sr == srate:
             return False
     return srate
+
+
+if __name__ == '__main__':
+    print('not a command line code')
+    sys.exit(1)

@@ -1,4 +1,12 @@
-# from scipy.fft import irfft
+"""
+Class to generate seafloor seismological noise models
+
+Lacks:
+- Microseisms
+- 2nd order tilt effects on the vertical channel
+- non-stationary IG wave spectra
+- Gravitational attraction effects
+"""
 import numpy as np
 from matplotlib import pyplot as plt
 from obspy.core.stream import Trace, Stream
@@ -22,8 +30,8 @@ default_noise_seismo = ([[0.001, -130], [0.003, -160], [0.006, -170],
                          [0.01, -175], [0.02, -175],  [0.05, -180],
                          [0.1, -180],   [1, -170]],
                         True)
-default_tilt_max = PSDVals.sloped_freqs_and_values(-220, -30, -3, 0.1, .25)
-default_tilt_variance = 40  # dB
+default_tilt_max = PSDVals.sloped_freqs_and_values(-145, -30, -3, 0.1, .25)
+default_tilt_variance = 50  # dB
 default_tilt_direction_limits = (100, 130)  # degrees from "N"
 default_earth_model = [[1000, 3000, 3000, 1600],
                        [1000, 3000, 4000, 2300],
@@ -36,7 +44,7 @@ class SeafloorSynthetic(object):
     """
     Generate synthetic seismological data based on environmental and noise factors
 
-    Properties:
+    Attributes:
         water_depth (float): water depth in meters
         Z_offset_angles (list): Seismometer's Z offset [angle, azimuth]
             from vertical, in degrees
@@ -265,22 +273,20 @@ class SeafloorSynthetic(object):
         k = Compliance.gravd(om, self.water_depth)
         return om, k, ncompl
 
-    def save_compliance(self, max_freq=None, basename="model", out_dir=None):
+    def save_compliance(self, max_freq=True, base_name="model", out_dir=None):
         """
         GRANDFATHERED: use Compliance.write() instead
         Saves self.earth_model's compliance to a file
 
         Args:
-            max_freq (float): only save up to this frequency (Hz)
-            out_dir(str): output directory
+            max_freq (float or bool): if float, only save up to given freq (Hz).
+                If true, cut off at water depth based predicted compliance cutoff
+                If false, use all of  IG_Pa_seafloor.freqs
+            out_dir(str or :class:`Path`): output directory
             filename (str): output filename
         """
-        freqs = self.IG_Pa_seafloor.freqs
-        if max_freq is not None:
-            freqs = freqs[freqs <= max_freq]
-        ncompl = Compliance.from_earth_model_1D(self.water_depth, freqs,
-                                                self.earth_model)
-        ncompl.write(basename, out_dir=out_dir)
+        ncompl = Compliance.from_seafloor_synthetic(self, max_freq)
+        ncompl.write(base_name, out_dir=out_dir)
 
     def plot(self, fmin=0.001, fmax=0.1, fstep=0.001, outfile=None, show=True):
         """
@@ -313,6 +319,7 @@ class SeafloorSynthetic(object):
             plt.savefig(outfile)
         if show is True:
             plt.show()
+        return axs
 
     def source_trace(self, code, trace_base, accel_to_vel=False, phases=None):
         """

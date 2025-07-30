@@ -9,7 +9,7 @@ import inspect
 
 from obspy.core.stream import Stream
 
-from tiskitpy.utils import stream_synchronize
+from tiskitpy import stream_synchronize
 from make_test_stream import make_test_stream
 
 class TestMethods(unittest.TestCase):

@@ -10,7 +10,8 @@ from pathlib import Path
 
 from obspy.core.stream import read as stream_read
 
-from tiskitpy import CleanRotator, CleanSequence as CS
+from tiskitpy import CleanRotator
+from tiskitpy.utils import CleanSequence as CS
 
 
 class TestMethods(unittest.TestCase):
