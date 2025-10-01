@@ -1,16 +1,23 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
 cff-version: 1.2.0
-title: "tiskitpy: TIme Series toolKIT"
-version: 2.1.0
-license: "GPL-3.0"
+title: 'tiskitpy: TIme Series toolKIT'
+message: 'If you use this software, please cite it as below.'
 type: software
-abstract: "TIme Series data processing toolKIT, for cleaning data series and calculating the coherencies and frequence response functions between them."
-message: "If you use this software, please cite it as below."
 authors:
   - given-names: Wayne C
     family-names: Crawford
     affiliation: Institut de Physique du Globe de Paris
-    orcid: "https://orcid.org/0000-0002-3260-1826"
+    orcid: 'https://orcid.org/0000-0002-3260-1826'
+url: 'https://tiskitpy.readthedocs.io'
+abstract: >-
+  TIme Series data processing toolKIT, for cleaning data
+  series and calculating the coherencies and frequence
+  response functions between them.
 keywords:
   - geophysics
   - seismology
   - data processing
+license: GPL-3.0
+version: 2.1.1
