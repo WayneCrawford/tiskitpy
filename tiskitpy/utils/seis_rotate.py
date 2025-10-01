@@ -26,7 +26,7 @@ class SeisRotate:
     """
 
     def __init__(self, stream, uselogvar=False, max_reject_sync=0.01,
-                 H_over_Z = 1.):
+                 H_over_Z = 1., N_E_comps=('1', '2')):
         """
         Create a seisRotate object from a 3-component obsPy Stream
 
@@ -36,16 +36,14 @@ class SeisRotate:
                              best angles
             max_reject_sync(): max_reject value for stream_synchronize()
             H_over_Z (float): H gain over Z gain (Z will be multiplied by this)
+             N_E_comps (tuple): the horizontal subsource codes whose relative
+                geometry correponds to ("N", "E") (ignored if there are "N"
+                and "E" components)
 
-        Channel names must end in Z, N and E or Z, 1, and 2
-        Z is up, 1 and 2 are horizontal orthogonal with 2 90° clockwise
-        of "1"  (in other words, "1" corresponds to "N" and "2" to "E",
-        except that they are not necessarily aligned with geographic
-        cardinals)
         """
         stream = stream_synchronize(stream, max_reject_sync)
         self.uselogvar = uselogvar
-        self.Z, self.N, self.E = SeisRotate._get_seis_traces(stream)
+        self.Z, self.N, self.E = SeisRotate._get_seis_traces(stream, N_E_comps)
         self.Z.data = np.multiply(self.Z.data, H_over_Z)
         self.fs = self.Z.stats.sampling_rate
         # Verify that all channels have same length
@@ -294,16 +292,22 @@ class SeisRotate:
         return seis_stream, other_stream
 
     @staticmethod
-    def _get_seis_traces(stream):
+    def _get_seis_traces(stream, , N_E_comps=('1', '2')):
         Z = SeisRotate._get_one_trace(stream, "Z")
         try:
             N = SeisRotate._get_one_trace(stream, "N")
         except IndexError:
-            N = SeisRotate._get_one_trace(stream, "1")
+            try:
+                N = SeisRotate._get_one_trace(stream, N_E_comps[0])
+            except:
+                raise ValueError('Neither "N" nor {N_Ecomps[0]=} component found')
         try:
             E = SeisRotate._get_one_trace(stream, "E")
         except IndexError:
-            E = SeisRotate._get_one_trace(stream, "2")
+            try:
+                E = SeisRotate._get_one_trace(stream, N_E_comps[1])
+            except:
+                raise ValueError('Neither "E" nor {N_Ecomps[1]=} component found')
         return Z, N, E
 
     @staticmethod

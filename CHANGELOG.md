@@ -171,3 +171,10 @@ Renamed ``ComplianceNoise`` to ``SeafloorSynthetic``
 	- Added '_compliance' to ``write()`` method output filename
 	- Added ``write_counts()`` method
 	- Removed ``frf_to_compliance()`` (replaced by ``Compliance.from_from_response_functions()``)
+
+### 2.1.1
+
+- Allow ``compliance.write_out()`` to accept ``None`` for p_response and z_response,
+  in which case the compliance is assumed to already have been in counts/counts
+- SeafloorSynthetic.streams() now puts `-self.water_depth` into the output inventory's
+  station and channel elevations

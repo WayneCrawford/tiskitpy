@@ -457,13 +457,13 @@ class SeafloorSynthetic(object):
                 if k[2] == 'Z':
                     dip = -90.
             # Add BBOBS channels
-            channels.append(Channel(k, location, 0, 0, 0, 0, response=resp,
+            channels.append(Channel(k, location, 0, 0, -self.water_depth, 0, response=resp,
                                     dip=dip))
             # Add source channels
             for x in v:
-                channels.append(Channel(x, location, 0, 0, 0, 0, response=resp,
+                channels.append(Channel(x, location, 0, 0, -self.water_depth, 0, response=resp,
                                         dip=dip))
-        stations = [Station(station, 0, 0, 0, channels=channels)]
+        stations = [Station(station, 0, 0,  -self.water_depth, channels=channels)]
         networks = [Network(network, stations=stations)]
         inv = Inventory(networks=networks)
 

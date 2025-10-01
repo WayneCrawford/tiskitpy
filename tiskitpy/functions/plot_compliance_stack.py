@@ -17,7 +17,7 @@ def plot_compliance_stack(psd, zstr, pstr, water_depth, seawater_density=1030,
     Args:
         psd (SpectralDensity): PSDs including Z and P
         zstr (str): channel id sub/string matching the Z channel (see
-            :meth:`SpectralDensity.channel_id() documentation)
+            :meth:`SpectralDensity.channel_id` documentation)
         pstr (str): channel id sub/string matching the P channel
         water_depth (float): water depth in meters
         seawater_density (float): average water density overhead (kg/m^3)

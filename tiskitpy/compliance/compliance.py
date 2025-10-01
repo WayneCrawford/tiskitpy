@@ -9,7 +9,8 @@ from pathlib import Path
 import numpy as np
 from matplotlib import pyplot as plt
 
-# from ..response_functions import ResponseFunctions
+from ..logger import init_logger
+logger = init_logger()
 
 
 class Compliance(object):
@@ -206,27 +207,36 @@ class Compliance(object):
 
         Args:
             base_name (str): base filename.  "_{units}.csv" will be appended
-            z_reponse (:class:`obspy.core.inventory.Response`): response of
-                the z channel
-            p_reponse (:class:`obspy.core.inventory.Response`): response of
-                the p channel
+            z_reponse (:class:`obspy.core.inventory.Response` or None):
+                response of the z channel.  If None, expects p_response
+                to be None too and assumes compliance and uncertainty were
+                already in counts/counts
+            p_reponse (:class:`obspy.core.inventory.Response` or None):
+                response of the p channel
             out_dir (str or :class:`Path`): output directory (None: save to
                 working directory)
         """
         filename = f'{base_name}_compliance_COUNTS.csv'
 
-        assert p_response.instrument_sensitivity.input_units.lower() == 'pa'
-        if z_response.instrument_sensitivity.input_units.lower() == 'm/s':
-            v, u = self._convert_compliance('m/s/Pa')
-        elif z_response.instrument_sensitivity.input_units.lower() == 'm/s^2':
-            v, u = self._convert_compliance('m/s^2/Pa')
-        elif z_response.instrument_sensitivity.input_units.lower() == 'm':
-            v, u = self._convert_compliance('m/Pa')
-        z_resp_f = z_response.get_evalresp_response_for_frequencies(self.freqs)
-        p_resp_f = p_response.get_evalresp_response_for_frequencies(self.freqs)
-        # responses are in counts/physical units, so multiply by z_resp/p_resp
-        v = v * z_resp_f/p_resp_f
-        u = u * z_resp_f/p_resp_f
+        if z_response is None:
+            assert p_response is None
+            v, u = self.values, self.uncertainties
+            logger.warning('Assuming Compliance values were actually in '
+                           'counts/counts, not 1/Pa')
+        else:
+            # Remove the instrument response
+            assert p_response.instrument_sensitivity.input_units.lower() == 'pa'
+            if z_response.instrument_sensitivity.input_units.lower() == 'm/s':
+                v, u = self._convert_compliance('m/s/Pa')
+            elif z_response.instrument_sensitivity.input_units.lower() == 'm/s^2':
+                v, u = self._convert_compliance('m/s^2/Pa')
+            elif z_response.instrument_sensitivity.input_units.lower() == 'm':
+                v, u = self._convert_compliance('m/Pa')
+            z_resp_f = z_response.get_evalresp_response_for_frequencies(self.freqs)
+            p_resp_f = p_response.get_evalresp_response_for_frequencies(self.freqs)
+            # responses are in counts/physical units, so multiply by z_resp/p_resp
+            v = v * z_resp_f/p_resp_f
+            u = u * z_resp_f/p_resp_f
         if out_dir is not None:
             filename = str(Path(out_dir) / filename)
         with open(filename, "w") as fid:

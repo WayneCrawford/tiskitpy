@@ -40,6 +40,7 @@ Methods
 
 - :meth:`correct_gravity_terms <tiskitpy.Compliance.correct_gravity_terms>`: Correct gravity terms
 - :meth:`write <tiskitpy.Compliance.write>`: Write compliance to a text file
+- :meth:`write <tiskitpy.Compliance.write_counts>`: Write compliance as counts, to a text file
 - :meth:`plot <tiskitpy.Compliance.plot>`: Plot the compliance
 
 Static Methods

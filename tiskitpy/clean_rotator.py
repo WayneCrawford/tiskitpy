@@ -38,7 +38,8 @@ class CleanRotator:
 
     def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,
                  remove_eqs=True, uselogvar=False, verbose=True,
-                 filt_band=(0.001, 0.01), save_eq_file=True, H_over_Z=1.):
+                 filt_band=(0.001, 0.01), save_eq_file=True, H_over_Z=1.,
+                 N_E_comps=('1', '2'):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
 
@@ -61,6 +62,8 @@ class CleanRotator:
             save_eq_file (bool): Passed onto :py:meth:`TimeSpans.from_eqs`
             H_over_Z (float): H gain over Z gain. Affects the calculated angle, 
                 not the result of ``apply()``.
+            N_E_comps (tuple): the horizontal subsource codes whose relative
+                geometry correponds to ("N", "E")
         """
         self.avoided_spans = self._make_eq_spans(
             remove_eqs, stream[0].stats, verbose, save_eq_file
@@ -68,7 +71,7 @@ class CleanRotator:
         if avoid_spans is not None:
             self.avoided_spans += avoid_spans
         filtstream = self._filtstream(stream, filt_band)
-        srData = SeisRotate(filtstream, H_over_Z=H_over_Z)
+        srData = SeisRotate(filtstream, H_over_Z=H_over_Z, N_E_comps)
         (ang, azi, var_red) = srData.calc_zrotate_opt(
             ignore_spans=self.avoided_spans, uselogvar=uselogvar
         )

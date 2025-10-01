@@ -1,0 +1,28 @@
+{
+    "creators": [
+        {
+            "name": "Crawford, Wayne C",
+            "orcid": "0000-0002-3260-1826",
+            "affiliation": "Institut de Physique du Globe de Paris",
+            "type": "ProjectMember"
+        }
+    ],
+    "title": "tiskitpy: TIme Series toolKIT",
+    "version": "2.1.0",
+    "access_right": "open",
+    "related_identifiers": [
+        {
+            "identifier": "https://doi.org/10.1002/9781118032428",
+            "relation": "Cites",
+            "resource_type": "publication-article"
+        }
+    ],
+    "keywords": [
+        "geophysics",
+        "seismology",
+        "data processing"
+    ],
+    "license": "GPL-3.0",
+    "upload_type": "software",
+    "language": "eng",
+}
