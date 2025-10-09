@@ -39,7 +39,7 @@ class CleanRotator:
     def __init__(self, stream, avoid_spans=None, plot=False, quickTest=False,
                  remove_eqs=True, uselogvar=False, verbose=True,
                  filt_band=(0.001, 0.01), save_eq_file=True, H_over_Z=1.,
-                 N_E_comps=('1', '2'):
+                 N_E_comps=('1', '2')):
         """
         Calculate rotation angles needed to minimize noise on vertical channel
 
@@ -71,7 +71,7 @@ class CleanRotator:
         if avoid_spans is not None:
             self.avoided_spans += avoid_spans
         filtstream = self._filtstream(stream, filt_band)
-        srData = SeisRotate(filtstream, H_over_Z=H_over_Z, N_E_comps)
+        srData = SeisRotate(filtstream, H_over_Z=H_over_Z, N_E_comps=N_E_comps)
         (ang, azi, var_red) = srData.calc_zrotate_opt(
             ignore_spans=self.avoided_spans, uselogvar=uselogvar
         )

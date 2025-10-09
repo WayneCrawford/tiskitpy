@@ -771,7 +771,7 @@ class SpectralDensity:
 
         Args:
             sds (list): SpectralDensity functions to plot
-            channel (str): Limit to the given channel
+            channel (str): Limit to the given channel code
             line_kws(list of dict): Line keywords for each SpectralDensity
                 function
             labels(list of dict): labels for each sd
@@ -1203,7 +1203,7 @@ class SpectralDensity:
         assert display == 'sparse'
         line_kws, labels = _validate_plots_args(sds, line_kws, labels)
         if sds_names is None:
-            sds_names = [max(x.clean_sequences, key=len) for x in sds]
+            sds_names = [max(s.clean_sequences, key=len) for s in sds]
         else:
             assert len(sds_names) == len(sds)
 
@@ -1213,6 +1213,15 @@ class SpectralDensity:
         y = sorted(sds[0]._get_validate_ids(y_inp), key=strfun)
         # Copied from plot_coherences "sparse" option, there's got
         # to be a way not to repeat code
+        if channel_pair is not False:
+            x1 = [i for i in x if i.split('.')[-1] == channel_pair[0] ]
+            y1 = [i for i in y if i.split('.')[-1] == channel_pair[1] ]
+            if len(x1) == 0:
+                print(f'No match for {channel_pair[0]}, ignoring...')
+            if len(y1) == 0:
+                print(f'No match for {channel_pair[1]}, ignoring...')
+            else:
+                x, y = x1, y1
         rows, cols = len(x), len(y)
         reduce_display = False
         if x[0] == y[0]:
@@ -1230,6 +1239,15 @@ class SpectralDensity:
             sort_strfun = sd._seedid_strfun(sort_by)
             x = sorted(sd._get_validate_ids(x_inp), key=sort_strfun)
             y = sorted(sd._get_validate_ids(y_inp), key=sort_strfun)
+            if channel_pair is not False:
+                x1 = [i for i in x if i.split('.')[-1] == channel_pair[0] ]
+                y1 = [i for i in y if i.split('.')[-1] == channel_pair[1] ]
+                if len(x1) == 0:
+                    print(f'No match for {channel_pair[0]}, ignoring...')
+                if len(y1) == 0:
+                    print(f'No match for {channel_pair[1]}, ignoring...')
+                else:
+                    x, y = x1, y1
             label_strfun = sd._seedid_strfun(label_by)
             assert isinstance(l_kw, dict)
             # new_x = sd._get_validate_ids(x)
@@ -1241,8 +1259,6 @@ class SpectralDensity:
                     if reduce_display is True:
                         j -= 1
                     if in_chan == out_chan or (out_chan, in_chan) in plotted:
-                        # if i < rows and j >= 0:
-                        #    axs[i, j].axis('off')
                         continue
                     plotted.append((in_chan, out_chan))
                     in_chan_label = label_strfun(in_chan)

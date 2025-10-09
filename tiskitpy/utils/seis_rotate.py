@@ -292,7 +292,7 @@ class SeisRotate:
         return seis_stream, other_stream
 
     @staticmethod
-    def _get_seis_traces(stream, , N_E_comps=('1', '2')):
+    def _get_seis_traces(stream, N_E_comps=('1', '2')):
         Z = SeisRotate._get_one_trace(stream, "Z")
         try:
             N = SeisRotate._get_one_trace(stream, "N")
