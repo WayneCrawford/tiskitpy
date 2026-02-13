@@ -29,31 +29,43 @@ class Compliance(object):
             for gravitational attraction terms?
     """
     def __init__(self, freqs, values, uncertainties, water_depth,
-                 noise_channel, gravity_corrected=False):
+                 noise_channel, gravity_corrected=False, coherence=None):
         """
         Seafloor compliance data class
 
         Args:
             freqs (:class:`numpy.ndarray`): Frequencies (Hz)
-            values (:class:`numpy.ndarray`): Normalized compliance values
-                (1/Pa)
+            values (:class:`numpy.ndarray`): Normalized compliance values at
+                each frequency (1/Pa)
             uncertainties (:class:`numpy.ndarray`): Normalized compliance
-                uncertainties (1/Pa)
+                uncertainties at each frequency (1/Pa)
             water_depth (float): water depth in meters
             noise_channel (str): (str or None): If a str, compliance comes
                 from data and this is the channel on which noise was assumed
                 to dominate
             gravity_corrected (bool): Has data-estimated compliance been
                 corrected for gravitational attraction terms?
+            coherence (:class:`numpy.ndarray` or None): coherences at each
+                frequency
         """
+        # Validate inputs
+        if not len(freqs) == len(values):
+            raise ValueError('values are not the same length as freqs')
+        if not len(uncertainties) == len(freqs):
+            raise ValueError('uncertainties are not the same length as freqs')
+        if coherence is not None:
+            if not len(freqs) == len(coherence):
+                raise ValueError('coherences are not the same length as freqs')  
+
+        # Assign inputs       
         self.freqs = freqs
         self.values = values
         self.uncertainties = uncertainties
         self.water_depth = water_depth
         self.noise_channel = noise_channel
         self.gravity_corrected = gravity_corrected
+        self.coherence = coherence
 
-    # def frf_to_compliance(xf, wdepth, z_units='M/S'):
     @classmethod
     def from_response_functions(cls, rfs, wdepth, max_freq=None, z_str='*Z'):
         """
@@ -78,14 +90,20 @@ class Compliance(object):
                              f'{rfs.output_channel_ids=}')
         if max_freq is None:
             max_freq = Compliance.max_freq(wdepth)  # about one wavelength
-
+            if max_freq is None:
+                max_freq = np.max(rfs.freqs)
         f = rfs.freqs[rfs.freqs <= max_freq]
         zp = rfs.value(z_str)[rfs.freqs <= max_freq]
         zp_uncert = rfs.uncertainty(z_str)[rfs.freqs <= max_freq]
+        coherence = rfs.coherence(z_str)[rfs.freqs <= max_freq]
         z_units = rfs.output_units(z_str)
-        return cls(f, Compliance._zp_to_ncompl(f, zp, wdepth, z_units),
+        print(f'{coherence=}')
+        return cls(f,
+                   Compliance._zp_to_ncompl(f, zp, wdepth, z_units),
                    Compliance._zp_to_ncompl(f, zp_uncert, wdepth, z_units),
-                   wdepth, rfs.noise_channel)
+                   wdepth,
+                   rfs.noise_channel,
+                   coherence=coherence)
 
     @classmethod
     def from_file(cls, filename):
@@ -145,7 +163,14 @@ class Compliance(object):
 
         About one wavelength, from Janiszewski et al. (2019?)
         """
-        return np.sqrt(9.8/(2*np.pi*water_depth))
+        if water_depth > 0:
+            return np.sqrt(9.8/(2*np.pi*water_depth))
+
+        if water_depth == 0:
+            logger.warning('Water depth is zero, there is no compliance max frequency')
+        elif water_depth is None:
+            logger.warning('No water depth provided, no compliance max frequency possible')
+        return None
 
     def __str__(self):
         s = f"{self.__class__.__name__} object:\n"
@@ -191,12 +216,21 @@ class Compliance(object):
             fid.write(f'# water_depth={self.water_depth}\n')
             fid.write(f'# noise_channel={self.noise_channel}\n')
             fid.write(f'# gravity_corrected={self.gravity_corrected}\n')
-            fid.write('frequencies;compliance;uncertainty;phase\n')
-            for freq, ncompl, uncert in zip(self.freqs, self.values,
-                                            self.uncertainties):
-                fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'
-                          .format(freq, np.abs(ncompl), np.abs(uncert),
-                                  np.angle(ncompl, deg=True)))
+            if self.coherence is not None:
+                fid.write('frequencies;compliance;uncertainty;phase;coherence\n')
+                for freq, ncompl, uncert, coh in zip(self.freqs, self.values,
+                                                     self.uncertainties,
+                                                     self.coherence):
+                    fid.write('{:.5g};{:.5g};{:.5g};{:.5g};{:.5g}\n'
+                              .format(freq, np.abs(ncompl), np.abs(uncert),
+                                      np.angle(ncompl, deg=True), coh))
+            else:
+                fid.write('frequencies;compliance;uncertainty;phase\n')
+                for freq, ncompl, uncert in zip(self.freqs, self.values,
+                                                       self.uncertainties):
+                    fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'
+                              .format(freq, np.abs(ncompl), np.abs(uncert),
+                                      np.angle(ncompl, deg=True)))
 
     def write_counts(self, base_name, z_response, p_response, out_dir=None):
         """
@@ -244,11 +278,19 @@ class Compliance(object):
             fid.write(f'# water_depth={self.water_depth}\n')
             fid.write(f'# noise_channel={self.noise_channel}\n')
             fid.write(f'# gravity_corrected={self.gravity_corrected}\n')
-            fid.write('frequencies;compliance;uncertainty;phase\n')
-            for freq, ncompl, uncert in zip(self.freqs, v, u):
-                fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'.format(
-                          freq, np.abs(ncompl), np.abs(uncert),
-                          np.angle(ncompl, deg=True)))
+            if self.coherence is not None:
+                fid.write('frequencies;compliance;uncertainty;phase;coherence\n')
+                for freq, ncompl, uncert, coh in zip(self.freqs, v, u,
+                                                     self.coherence):
+                    fid.write('{:.5g};{:.5g};{:.5g};{:.5g};{:.5g}\n'.format(
+                              freq, np.abs(ncompl), np.abs(uncert),
+                              np.angle(ncompl, deg=True), coh))
+            else:
+                fid.write('frequencies;compliance;uncertainty;phase\n')
+                for freq, ncompl, uncert in zip(self.freqs, v, u):
+                    fid.write('{:.5g};{:.5g};{:.5g};{:.5g}\n'.format(
+                              freq, np.abs(ncompl), np.abs(uncert),
+                              np.angle(ncompl, deg=True)))
 
     def _convert_compliance(self,  units):
         """

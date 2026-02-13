@@ -182,6 +182,39 @@ class TestMethods(unittest.TestCase):
             interped.select(component='Z')[0].trim(st, et).data[0], 213.70,
             delta=0.01)
 
+    def test_time_spans_split(self):
+        """
+        Test TimeSpan object's split().
+        """
+        stream = stream_read(str(self.test_path / 'XS.S10D.LH.mseed'))
+        st = stream[0].stats.starttime
+        et = UTCDateTime(2016, 12, 5, 12)
+        ts = TimeSpans([[st-3600, st+3600],
+                        [st+2*3600, st+4*3600],
+                        [st+6*3600, st+12*3600],
+                        [st+200*3600, st+204*3600]])
+        split_stream = ts.split(stream)
+        # split_stream.plot(equal_scale=False)
+        self.assertEqual(len(stream), len(split_stream))
+        split_stream = ts.split(stream, merge=False)
+        self.assertEqual(3*len(stream), len(split_stream))
+
+    def test_time_spans_and_or(self):
+        """
+        Test TimeSpan object's and().
+        """
+        st = UTCDateTime('2016-12-05')
+        ts_a = TimeSpans([[st + 0*3600, st + 2*3600],
+                          [st + 6*3600, st + 12*3600]])
+        ts_b = TimeSpans([[st + 1*3600, st + 3*3600],
+                          [st + 5*3600, st + 7*3600]])
+        ts_and = ts_a & ts_b
+        self.assertEqual(ts_and, TimeSpans([[st + 1*3600, st + 2*3600],
+                                            [st + 6*3600, st + 7*3600]]))
+        ts_or = ts_a | ts_b
+        self.assertEqual(ts_or, TimeSpans([[st + 0*3600, st + 3*3600],
+                                           [st + 5*3600, st + 12*3600]]))
+
     def test_from_eqs(self):
         """Test `from_eqs()` method"""
         eq_spans = TimeSpans.from_eqs(

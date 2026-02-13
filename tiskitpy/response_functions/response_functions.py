@@ -109,6 +109,7 @@ class ResponseFunctions(object):
                     "value": (dims, np.zeros(shape, dtype="complex")),
                     "uncert_mult": (dims, np.zeros(shape)),
                     "corr_mult": (dims, np.zeros(shape)),
+                    "coherence": (dims, np.zeros(shape)),
                     "instrument_response": (dims, np.ones(shape, dtype="complex"))
                 },
                 coords={
@@ -134,6 +135,8 @@ class ResponseFunctions(object):
                                                  output=out_id)] = err_mult
                 self._ds["corr_mult"].loc[dict(input=in_id,
                                                output=out_id)] = corr_mult
+                self._ds["coherence"].loc[dict(input=in_id,
+                                               output=out_id)] = sdf.coherence(in_id, out_id)
                 self._ds["instrument_response"].loc[
                     dict(input=in_id, output=out_id)
                 ] = (sdf.channel_instrument_response(out_id)
@@ -238,6 +241,26 @@ class ResponseFunctions(object):
         if zero_as_none:
             rf[np.abs(rf) == 0] = None  # returns nan + nanj!
         return rf
+
+    def coherence(self, output_channel_id, zero_as_none=False, verbose=False):
+        """
+        Return coherence for the given output channel
+        
+        coherence is real valued gamma_xy^2, defined by Bendat & Piersol (1986), Appendix B
+
+        Args:
+            output_channel_id (str): output channel id
+            zero_as_none (bool): return non-calculated values as Nones instead
+                of zeros
+        """
+        oc = self._match_out_id(output_channel_id)
+        if verbose is True:
+            print(f'{output_channel_id=} was matched by {oc=}')
+        
+        outp = np.squeeze(self._ds["coherence"].sel(output=oc).values)
+        if zero_as_none:
+            outp[np.abs(rf) == 0] = None  # returns nan + nanj!
+        return outp
 
     def value_wrt_counts(self, output_channel_id, zero_as_none=False):
         """

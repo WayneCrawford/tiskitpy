@@ -248,7 +248,28 @@ class TestMethods(unittest.TestCase):
         # Both starttimes and time_spans specified
         with self.assertRaises(RuntimeError):
             cls._make_windows(tr, ws, ws, "hanning", starttimes, ts)
-       
+
+    def test_check_for_gaps(self):
+        """Test the _check_for_gaps() function"""
+        # Test a window = data but whos power of two is larger
+        logging.disable()
+        stream = self.stream.copy()
+        st = stream[0].stats.starttime
+        et = stream[0].stats.endtime
+        duration = et-st
+
+        time_spans = TimeSpans([[st, st+duration/4],
+                                [st+duration/2, et-duration/10]])
+        stream = time_spans.split(stream) 
+        
+        stream, ungap_time_spans = SpectralDensity._check_for_gaps(stream, None)
+        sr = stream[0].stats.sampling_rate
+        self.assertEqual(len(time_spans), len(ungap_time_spans))
+        for span, ungap_span in zip(time_spans.spans, ungap_time_spans.spans):
+            for s, u in zip(span, ungap_span):
+                diff = abs(s-u)
+                # print(f'{diff=}, {1/sr=}')
+                self.assertLess(diff, 1/sr)
 
     def test_remove_outliers(self):
         """Test the _remove_outliers() method"""

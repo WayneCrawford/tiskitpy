@@ -361,10 +361,11 @@ class SeafloorSynthetic(object):
             forceInt32 (bool): force output data to have dtype=np.int32
 
         Returns:
-            A tuple of (data, sources, inv), where
-                data (:class:`obspy.Stream): synthetic seafloor BB 4C data
-                sources (:class:`obspy.Stream`): individual noises and signals
-                inv (:class:`obspy.core.Inventory`): channel metadata
+            tuple:  (data, sources, inv), where:
+            
+                - data (:class:`obspy.Stream`): synthetic seafloor BB 4C data
+                - sources (:class:`obspy.Stream`): individual noises and signals
+                - inv (:class:`obspy.core.Inventory`): channel metadata
         """
         # SETUP
         sr = ref_trace.stats.sampling_rate

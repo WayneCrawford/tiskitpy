@@ -1,4 +1,79 @@
-## v0.1:
+
+## 2.2.0
+
+- Added ``TimeSpans.split()``, ``__and__()`` and ``__or__()`` methods
+- Modified ``SpectralDensity.from_stream()`` to account for streams with data
+  gaps (masked arrays or separate Traces with the same seed_id)
+- Added ``coherence`` property to :class:`ResponseFunctions`
+  and :class:`Compliance`, and ``coherence`` column to CSV file written by 
+  ``Compliance.write()``
+
+### 2.1.2
+
+- Fix error in SpectralDensity class when specifying time_spans (namespace conflict)
+
+### 2.1.1
+
+- Allow ``compliance.write_out()`` to accept ``None`` for p_response and z_response,
+  in which case the compliance is assumed to already have been in counts/counts
+- SeafloorSynthetic.streams() now puts `-self.water_depth` into the output inventory's
+  station and channel elevations
+  
+## 2.1
+- General
+	- Closes figures that are not shown
+	- Added ``plot_compliance_stack()`` function
+- ``CleanRotator`` and ``SeisRotate`` classes:
+	- Added optional ``H_over_Z`` parameter to account for inequal Horizontal and Z sensitivites
+- ``SpectralDensity`` class:
+	- Changed default windowtype from ``prol1pi`` to ``prol4pi``
+- ``ResponseFunctions`` class:
+	- removed ``to_norm_compliance()`` method (replaced by ``Compliance.from_response_functions()``
+	- Added response function units to plots
+- ``SeafloorSynthetic`` class:
+	- Change default tilt noise parameters to more typical/reasonable values
+- ``Compliance`` class:
+	- Fixed Path bug
+	- Added ``from_seafloor_synthetic`` class method
+	- Added ``max_freq()`` static method and use it to limit frequencies by default
+	- Added '_compliance' to ``write()`` method output filename
+	- Added ``write_counts()`` method
+	- Removed ``frf_to_compliance()`` (replaced by ``Compliance.from_from_response_functions()``)
+
+# 2.0
+
+Renamed ``ComplianceNoise`` to ``SeafloorSynthetic``
+
+--------
+
+## 1.1
+- Fixed bug in ``ResponseFunctions`` plotting
+- Added ``Compliance`` class
+- ``ComplianceNoise`` now gives expected outputs
+- ``SpectralDensity``: ``plots()`` and ``plot_coherences()`` methods now accept objects without identical seed_ids
+- ``EarthModel1D``: Added ``plot()`` and ``calc_ncomp()`` methods
+
+# 1.0
+
+#### Added
+-  ``ComplianceNoise`` class and documentation
+
+#### Fixed
+    - ``SpectralDensity`` plot overwriting axis labels
+    - ``SpectralDensity`` ``remove_eqs=True`` now works
+
+#### Renamed
+    - ``DataCleaner.clean_stream()`` to ``DataCleaner.apply()``
+    - ``DataCleaner.clean_sdf()`` to ``DataCleaner.apply_to_sdf()``
+
+#### Other major changes
+    - TimeSpans.from_eqs() now takes ``time_bounds`` input instead of ``starttime`` and ``endtime``
+    - ``SpectralDensity``, ``DataCleaner`` and ``CleanRotate`` classes take ``remove_eqs``
+      and ``avoid_spans`` as input and provide an ``avoided_spans`` property.
+
+--------
+
+## 0.1:
 
 combined time series codes that I had in different projects:
 
@@ -23,7 +98,7 @@ method call parameters.  Created a readthedocs page.
 
 ## 0.3:
 
-### MAJOR
+#### MAJOR
 
 - `SpectralDensity`:
     - Added required argument `window_s` to creator
@@ -38,7 +113,7 @@ method call parameters.  Created a readthedocs page.
       location code slot (second from last element in string separated by '.'s)
     - Removed unused `fast_calc` parameter from `clean_sdf()`
 
-### BUGFIXES
+#### BUGFIXES
 
 - Changed `SpectralDensity.from_stream()` z_threshold to apply to log10(spectra)
   rather than (spectra) (otherwise, "standard" zthreshold=3 rejects more than
@@ -50,7 +125,7 @@ method call parameters.  Created a readthedocs page.
     - fixed (and simplified) calculation of uncertainty
 - `DataCleaner` uses `TransferFunction`'s `corrector` property.
   
-### MINOR
+#### MINOR
 
 - `SpectralDensity`:
     - Added arguments `ts_starttime` and `ts_endtime` to creator
@@ -122,59 +197,3 @@ Change `MANIFEST.in` to recursively include subfiles/directories of `decimate/`
 
 - Fixed overwriting axis labels for plots_coherences()
 
-## 1.0
-
-### Added
--  ``ComplianceNoise`` class and documentation
-
-### Fixed
-- ``SpectralDensity`` plot overwriting axis labels
-- ``SpectralDensity`` ``remove_eqs=True`` now works
-
-### Renamed
-- ``DataCleaner.clean_stream()`` to ``DataCleaner.apply()``
-- ``DataCleaner.clean_sdf()`` to ``DataCleaner.apply_to_sdf()``
-
-### Other major changes
-- TimeSpans.from_eqs() now takes ``time_bounds`` input instead of ``starttime`` and ``endtime``
-- ``SpectralDensity``, ``DataCleaner`` and ``CleanRotate`` classes take ``remove_eqs``
-  and ``avoid_spans`` as input and provide an ``avoided_spans`` property.
-
-## 1.1
-- Fixed bug in ``ResponseFunctions`` plotting
-- Added ``Compliance`` class
-- ``ComplianceNoise`` now gives expected outputs
-- ``SpectralDensity``: ``plots()`` and ``plot_coherences()`` methods now accept objects without identical seed_ids
-- ``EarthModel1D``: Added ``plot()`` and ``calc_ncomp()`` methods
-
-## 2.0
-
-Renamed ``ComplianceNoise`` to ``SeafloorSynthetic``
-
-## 2.1.0
-- General
-	- Closes figures that are not shown
-	- Added ``plot_compliance_stack()`` function
-- ``CleanRotator`` and ``SeisRotate`` classes:
-	- Added optional ``H_over_Z`` parameter to account for inequal Horizontal and Z sensitivites
-- ``SpectralDensity`` class:
-	- Changed default windowtype from ``prol1pi`` to ``prol4pi``
-- ``ResponseFunctions`` class:
-	- removed ``to_norm_compliance()`` method (replaced by ``Compliance.from_response_functions()``
-	- Added response function units to plots
-- ``SeafloorSynthetic`` class:
-	- Change default tilt noise parameters to more typical/reasonable values
-- ``Compliance`` class:
-	- Fixed Path bug
-	- Added ``from_seafloor_synthetic`` class method
-	- Added ``max_freq()`` static method and use it to limit frequencies by default
-	- Added '_compliance' to ``write()`` method output filename
-	- Added ``write_counts()`` method
-	- Removed ``frf_to_compliance()`` (replaced by ``Compliance.from_from_response_functions()``)
-
-### 2.1.1
-
-- Allow ``compliance.write_out()`` to accept ``None`` for p_response and z_response,
-  in which case the compliance is assumed to already have been in counts/counts
-- SeafloorSynthetic.streams() now puts `-self.water_depth` into the output inventory's
-  station and channel elevations

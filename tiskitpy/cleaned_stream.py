@@ -21,6 +21,14 @@ class CleanedStream(Stream):
         inp = Stream(baseutils.CleanSequence.seedid_tag(self))
         return inp.plot(**kwargs)
 
+    def seedid_tag(self, **kwargs):
+        """Add tiskitpy tags to seed_id"""
+        return baseutils.CleanSequence.seedid_tag(self)
+
+    def seedid_untag(self, **kwargs):
+        """Remove tiskitpy tags from seed_id"""
+        return baseutils.CleanSequence.seedid_untag(self)
+
     def tag(self, the_tag, **kwargs):
         """Return object with tag added to clean_sequence
         

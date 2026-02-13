@@ -1,6 +1,7 @@
 #!env python3
 """Class of time spans to remove, keep, zero, etc. in Trace or Stream data"""
 from pathlib import Path
+from copy import deepcopy
 
 from obspy.clients.fdsn import Client
 from obspy.core.event import Catalog, read_events
@@ -41,7 +42,7 @@ class TimeSpans:
                 self._end_times = [UTCDateTime(x[1]) for x in spans]
             except Exception as err:
                 raise TypeError('Could not convert at least one of the span '
-                                f'input values to UTCDateTime')
+                                f'input values to UTCDateTime: {err}')
         elif start_times is not None and end_times is not None:
             if not len(start_times) == len(end_times):
                 raise ValueError(
@@ -57,8 +58,8 @@ class TimeSpans:
                 raise TypeError('Could not convert at least one of the '
                                 f'end_times to UTCDateTime(): {err}')
         else:
-            raise ValueError('You must provide spans or start_times '
-                                 'and end_times')
+                self._start_times = []
+                self._end_times = []
         self._organize()
 
     @property
@@ -80,7 +81,7 @@ class TimeSpans:
     def from_eqs(cls, time_bounds, minmag=5.85, days_per_magnitude=1.5,
                  eq_file=None, save_eq_file=True):
         """
-        Generate timespans to avoid because of earthquakes
+        Generate timespans to avoid because of earthquakes.
 
         Will read earthquakes from the USGS online catalog the first time,
         saving the information to a file that can be subsequently used
@@ -209,19 +210,65 @@ class TimeSpans:
         else:
             return self.__add__(other)
 
-    def _get_addrs(self, starttime, endtime, stats):
+    def __and__(self, other):
+        """
+        Combine two TimeSpans, eliminating everything not in both
+        """
+        if not isinstance(other, TimeSpans):
+            raise TypeError(f"Tried to and a {type(other)} to a TimeSpans")
+        # Make sure both are ordered and have non-overlapping elements
+        self._organize()
+        other._organize()
+        
+        out_time_spans = TimeSpans([])
+        for span in self.spans:
+            for and_span in other.spans:
+                if (overlap := _span_overlap(span, and_span)) is not None:
+                    out_time_spans += TimeSpans([overlap])      
+        return out_time_spans
+
+    def __or__(self, other):
+        """
+        Combine two TimeSpans, keeping everything in eaither
+        """
+        new = deepcopy(self)
+        new._organize()
+        other._organize()
+        
+        new._start_times.extend(other.start_times)
+        new._end_times.extend(other.end_times)
+        new._organize()
+
+        return new
+
+    @staticmethod
+    def _get_addrs(starttime, endtime, trace_stats):
+        """
+        Return Trace addresses corresponding to a given time span
+        
+        Special cases:
+          - returns 0, end_addr if span starts before the Trace
+          - returns start_addr, trace-stats.npts if span ends after the Trace
+          - returns 0, trace_stats.npts if span covers the entire Trace
+          - returns None, None if span is not in the trace
+        
+        Args:
+            starttime: span start time
+            endtime: span end time
+            trace_stats: Trace statistics
+        """
         if not isinstance(starttime, UTCDateTime):
             raise TypeError(f"starttime is {type(starttime)}, not UTCDateTime")
         if not isinstance(endtime, UTCDateTime):
             raise TypeError(f"endtime is {type(endtime)}, not UTCDateTime")
-        if endtime < stats.starttime or starttime > stats.endtime:
+        if endtime < trace_stats.starttime or starttime > trace_stats.endtime:
             return None, None
         start_addr = max(
-            np.floor((starttime - stats.starttime) * stats.sampling_rate), 0
+            np.floor((starttime - trace_stats.starttime) * trace_stats.sampling_rate), 0
         )
         end_addr = min(
-            np.ceil((endtime - stats.starttime) * stats.sampling_rate),
-            stats.npts,
+            np.ceil((endtime - trace_stats.starttime) * trace_stats.sampling_rate),
+            trace_stats.npts,
         )
         return int(start_addr), int(end_addr)
 
@@ -324,7 +371,7 @@ class TimeSpans:
 
     def append(self, new_time_spans):
         """
-        Combines two TimeSpan objects (REPLACED BY COMBINE)
+        Combines two TimeSpans objects (REPLACED BY COMBINE)
 
         Args:
             new_time_spans (:class:`TimeSpans`): object to combine with self
@@ -336,7 +383,7 @@ class TimeSpans:
 
     def combine(self, new_time_spans):
         """
-        Combines two TimeSpan objects
+        Combines two TimeSpan objects, keeping everything in either
 
         Args:
             new_time_spans (:class:`TimeSpans`): object to combine with self
@@ -347,21 +394,63 @@ class TimeSpans:
         self._end_times.extend(new_time_spans.end_times)
         self._organize()
 
+#     def or(self, or_time_spans):
+#         """
+#         Combines two TimeSpan objects, keeping everything in eaither
+# 
+#         Args:
+#             new_time_spans (:class:`TimeSpans`): object to combine with self
+#             
+#         Returns:
+#             TimeSpans
+#         """
+#         # Make sure both are ordered and have non-overlapping elements
+#         or_time_spans._organize()
+#         self._organize()
+#         
+#         out_time_spans = self.copy()
+#         return out_time_spans.combine(or_time_spans)
+# 
+#     def and(self, and_time_spans):
+#         """
+#         Combines two TimeSpan objects, eliminating everything not in both
+#         
+#         Returns in place
+# 
+#         Args:
+#             new_time_spans (:class:`TimeSpans`): object to combine with self
+#             
+#         Returns:
+#             TimeSpans
+#         """
+#         # Make sure both are ordered and have non-overlapping elements
+#         and_time_spans._organize()
+#         self._organize()
+#         
+#         out_time_spans = TimeSpans()
+#         for span in self.spans:
+#             for and_span in and_time_spans:
+#                 if (overlap := _span_overlap (span, and_span) is not None):
+#                     out_time_spans += overlap           
+#         
+#         return out_time_spans
+
     def _organize(self):
         """
-        Order starttimes and endtimes by increasing starttime, and consolidate
+        Order starttimes and endtimes by increasing starttime, and combine
         overlapping time spans
         """
         if self._validate() is True:
+            # Already ordered and non-overlapping
             return
 
-        # sort by time
+        # sort by start_times
         self._end_times = [
             x for _, x in sorted(zip(self.start_times, self.end_times))
         ]
         self._start_times = sorted(self.start_times)
 
-        # remove any overlaps
+        # combine any overlaps
         start_times = [self.start_times[0]]
         end_times = [self.end_times[0]]
         for st, et in zip(self.start_times[1:], self.end_times[1:]):
@@ -380,11 +469,11 @@ class TimeSpans:
         Zero out data in the time spans
 
         Arguments:
-            inp (Trace or Stream): seismological data
-            plot: plot traces with spans cut out
+            inp (:class:`obspy.core.Trace` or :class:`obspy.core.Stream`): seismological data
+            plot: plot data with spans cut out
 
         Returns:
-            Trace or Stream with spans set to zero
+            :class:`obspy.core.Trace` or :class:`obspy.core.Stream`
         """
         if isinstance(inp, Trace):
             tr = inp.copy()  # Do not destroy original
@@ -393,7 +482,6 @@ class TimeSpans:
                 if start_addr is not None:
                     tr.data[start_addr: end_addr + 1] = 0.0
                     tr = CleanSequence.tag(tr, ZERO_TAG)
-                    # tr.stats.channel = "XX" + tr.stats.channel[2]  # Mark channel code
             if plot:
                 Stream([trace,inp]).plot(color="blue", equal_scale=False)
             return tr
@@ -403,16 +491,50 @@ class TimeSpans:
                 new_tr = self.zero(tr)
                 stream.remove(tr)
                 stream.append(new_tr)
-            # stream = stream.tag(ZERO_TAG)
             if plot:
                 (stream + inp).plot(color="blue", equal_scale=False)
             return stream
         else:
             raise (ValueError, "inp is not an obspy Trace or Stream")
 
+    def split(self, in_stream, merge=True, plot=False):
+        """
+        Returns a Stream containing only the specified time spans
+
+        Arguments:
+            inp (:class:`obspy.core.Trace` or :class:`obspy.core.Stream`): seismological data
+            merge (bool): Merge traces with the same seed_id into masked arrays.
+            plot: plot result
+
+        Returns:
+            :class:`obspy.core.Stream`
+        """
+        if isinstance(in_stream, Trace):
+            return _split_trace(in_stream)
+        elif isinstance(in_stream, Stream):
+            new_stream = Stream()
+            for tr in in_stream:
+                new_stream += self._split_trace(tr)
+            if merge is True:
+                new_stream.merge(fill_value=None)
+            if plot:
+               new_stream.plot(color="blue", equal_scale=False)
+            return new_stream
+        else:
+            raise (ValueError, "inp is not an obspy Trace or Stream")
+
+    def _split_trace(self, in_trace):
+        stream = Stream()
+        for st, et in zip(self.start_times, self.end_times):
+            start_addr, end_addr = self._get_addrs(st, et, in_trace.stats)
+            if start_addr is not None:
+                stream.append(in_trace.copy().trim(st, et))
+        return stream
+
+
     def has_zeros(self, starttime, endtime):
         """
-        Does a trace's time span intersect any of the TimeSpans?
+        Does the given time span intersect any of the TimeSpans?
 
         Arguments:
             starttime (UTCDateTime): start time
@@ -433,7 +555,7 @@ class TimeSpans:
         Interpolate data from the start to end values in each time span
 
         Arguments:
-            inp (Trace or Stream): seismological data
+            inp (Trace or :class:`obspy.core.Stream`): seismological data
             plot: plot traces with spans cut out
 
         Returns:
@@ -465,33 +587,30 @@ class TimeSpans:
 
     def cutout(self, inp, plot=False):
         """
-        Cut out data in the time spans (using Trace/Stream.cutout)
+        Cut out data in the indicated time spans.
+        Actually, it seems just to set the values to zero
 
         Arguments:
-            inp (Trace or Stream): seismological data
+            inp (:class:`obspy.core.Stream`): seismological data
 
         Returns:
-            new Trace or Stream
+            :class:`obspy.core.Stream`
         """
-        if not isinstance(inp, Trace) and not isinstance(inp, Stream):
-            raise (ValueError, "inp is not an obspy Trace or Stream")
+        if not isinstance(inp, Stream):
+            raise (ValueError, "inp is not an obspy Stream")
         outp = inp.copy()
         for tr in outp:
-            tr.stats.channel = "XX" + tr.stats.channel[2]
-
             for st, et in zip(self.start_times, self.end_times):
                 # Skip events that don't cover the trace time range
                 if et < tr.stats.starttime:
                     continue
                 if st > tr.stats.endtime:
                     continue
-                start_sample = max(st - tr.stats.starttime, 0)
-                end_sample = min(et - tr.stats.starttime, tr.stats.npts)
+                start_sample = int(max(st - tr.stats.starttime, 0))
+                end_sample = int(min(et - tr.stats.starttime, tr.stats.npts))
                 tr.data[start_sample:end_sample] = 0.0
         if plot:
             (outp + inp).plot(color="blue", equal_scale=False)
-        if isinstance(inp, Trace):
-            return outp[0]
         return outp
 
     def plot(self, stream=None, color="red", alpha=0.25, title=None, **kwargs):
@@ -569,6 +688,23 @@ def _eq_filename(starttime, endtime, minmag):
     return "{}-{}_MM{:g}_eqcat.qml".format(
         starttime.strftime(tfmt), endtime.strftime(tfmt), minmag
     )
+
+
+def _span_overlap(span_1, span_2):
+    """
+    Return the overlap between two time spans
+    
+    Args:
+        span_1 (tuple): (start_time_1, end_time_1)
+        span_2 (tuple): (start_time_2, end_time_2)
+        
+    Returns:
+        tuple: start_time_overlapped, end_time_overlapped (None if no overlap)
+    """
+    if span_1[0] > span_2[1] or (span_2[0] > span_1[1]):
+        return None
+    else:
+        return (max([span_1[0], span_2[0]]), min([span_1[1], span_2[1]]))
 
 
 def _get_time_bounds(time_bounds):

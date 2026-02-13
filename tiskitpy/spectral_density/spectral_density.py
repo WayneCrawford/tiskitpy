@@ -17,7 +17,7 @@ from obspy.core import UTCDateTime
 from scipy import signal, stats
 
 import tiskitpy.functions as tfunc
-import tiskitpy.time_spans as time_spans
+import tiskitpy.time_spans as time_spans_module
 from ..logger import init_logger, change_level
 import tiskitpy.cleaned_stream as cleaned_stream
 import tiskitpy.utils as baseutils
@@ -194,13 +194,18 @@ class SpectralDensity:
 
     @property
     def used_times(self):
+        """GRANDFATHERED.  Use .used_spans"""
+        return self.used_spans
+
+    @property
+    def used_spans(self):
         """
         time spans used during processing
 
         Returns:
-            (:class:`obspy.TimeSpans`):
+            (:class:`tiskitpy.TimeSpans`):
         """
-        return time_spans.TimeSpans([[x, x + self.window_seconds]
+        return time_spans_module.TimeSpans([[x, x + self.window_seconds]
                                      for x in self.starttimes])
 
     @property
@@ -209,7 +214,7 @@ class SpectralDensity:
         time spans unused during processing
 
         Returns:
-            (:class:`obspy.TimeSpans`):
+            (:class:`tiskitpy.TimeSpans`):
         """
         # Establish data start and end times
         if self._ds.ts_starttime is not None:
@@ -240,7 +245,7 @@ class SpectralDensity:
     def from_stream(cls, stream, window_s=1000, windowtype="prol4pi",
                     inv=None, data_cleaner=None, starttimes=None,
                     time_spans=None, avoid_spans=None, remove_eqs=False,
-                    z_threshold=3, quiet=False):
+                    z_threshold=3, quiet=False, ignore_gaps=False):
         """
         Calculate spectral density functions from the provided stream
 
@@ -276,12 +281,16 @@ class SpectralDensity:
             z_threshold (float or None): reject windows with z-score greater
                 than this value.  None: no rejection
             quiet (bool): only output errors and beyond to console
+            ignore_gaps (bool): Ignore gaps in the data (otherwise, integrates
+                them into the time_spans attribute)
         """
         if quiet is True:
             change_level(logger, 'console', 'ERROR')
         if not isinstance(stream, Stream):
             raise ValueError(f"stream is a {type(stream)}, not obspy Stream")
         stream = stream.copy()  # avoid modifying original stream
+        
+        stream, time_spans = cls._check_for_gaps(stream, time_spans)
 
         if time_spans is not None:
             stream = cleaned_stream.CleanedStream(stream).tag('SPANS')
@@ -293,10 +302,9 @@ class SpectralDensity:
                                             stream[0].stats.endtime)
         if remove_eqs is not False:
             if remove_eqs is True:
-                avoid_eqs = time_spans.TimeSpans.from_eqs(stream)
+                avoid_eqs = time_spans_module.TimeSpans.from_eqs(stream)
             else:
-                avoid_eqs = time_spans.TimeSpans.from_eqs(stream,
-                                                          eq_file=remove_eqs)
+                avoid_eqs = time_spans_module.TimeSpans.from_eqs(stream, eq_file=remove_eqs)
             ts_unavoided = avoid_eqs.invert(stream[0].stats.starttime,
                                             stream[0].stats.endtime)
             if time_spans is None:
@@ -405,6 +413,9 @@ class SpectralDensity:
     @staticmethod
     def _remove_outliers(ft, sts, z_threshold=3, recursive=True):
         """Remove  windows with z-score above z_threshold
+        
+        z-score is calculated on the average spectral (dB) value of each
+        unfiltered Fourier transform
 
         Args:
             ft (dict): Fourier transforms.  Each value is an np.array where
@@ -1797,6 +1808,37 @@ class SpectralDensity:
             # "slide" the window along the samples
             offsets.append(i*ss)
         return offsets
+
+    @staticmethod
+    def _check_for_gaps(stream, time_spans):
+        """
+        Check if the stream has data gaps.  If so, set time_spans that avoid gaps
+        """
+        has_data_gaps = False
+        tagged_stream = cleaned_stream.CleanedStream(stream).seedid_tag() # Differently tagged CleanStreams are not the same trace!
+        tiskitpy_ids = []
+        # First check if there are any masked arrays
+        for tr in tagged_stream:
+            if isinstance(tr.data, np.ma.masked_array):
+                has_data_gaps = True
+                break
+            if tr.id in tiskitpy_ids:
+                has_data_gaps = True
+                break
+            else:
+                tiskitpy_ids.append(tr.id)
+            
+        if has_data_gaps == False:
+            return stream, time_spans
+    
+        logger.info('data has time gaps: setting TimeSpans to avoid them')
+        spans = [[x.stats.starttime, x.stats.endtime] for x in stream.split()]
+        new_time_spans = time_spans_module.TimeSpans(spans)
+        if time_spans is not None:
+            logger.warning('Data has gaps AND you provided time_spans. '
+                           'returning spans that are in BOTH')
+            new_time_spans = time_spans & new_time_spans
+        return stream, new_time_spans
 
 
 def _validate_dimensions(freqs, seed_ids, chan_units, starttimes,
