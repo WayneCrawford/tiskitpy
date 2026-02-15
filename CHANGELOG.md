@@ -13,7 +13,7 @@
     - Added ``coherence`` property 
     - Added  ``coherence`` column to CSV file written by ``write()`` method
 - ``CleanRotator`` and ``DataCleaner`` classes:
-    - ``apply()`` method returns, by default, the same data dtype as the input
+    - ``apply()`` methods now return, by default, the same data dtype as the input
 
 ### 2.1.2
 

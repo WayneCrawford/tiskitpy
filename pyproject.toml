@@ -1,0 +1,50 @@
+[project]
+name = "tiskitpy"
+description = "TIme Series toolKIT"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name = "Wayne Crawford", email = "crawford@ipgp.fr"}]
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE.txt"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics"
+]
+dependencies = ['obspy>=1.3.0',
+                'PyYAML',
+                'numpy',
+                'scipy',
+                'matplotlib',
+                'xarray']
+keywords = ['oceanography', 'marine', 'OBS']
+dynamic = ["version"]
+
+[project.scripts]
+tiskitpy_decimate_SDS = "tiskitpy.scripts.decimate_SDS:main"
+tiskitpy_get_SDS_inventory = "tiskitpy.scripts.get_SDS_inventory:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "tiskitpy.version.__version__"}
+
+[tool.setuptools.package-data]
+mypkg = ["dec*"]
+
+[project.urls]
+Repository = "https://github.com/WayneCrawford/tiskitpy.git"
+Documentation = "https://readthedocs.org"
+Changelog = "https://github.com/WayneCrawford/tiskitpy/blob/master/CHANGELOG.md"
+Issues = "https://github.com/WayneCrawford/tiskitpy/issues"
+
+[project.optional-dependencies]
+test = ["pytest"]
