@@ -3,13 +3,13 @@
 Helper Classes
 ======================
 
-tiskitpy.utils.CleanSequence
+tiskitpy.util_classes.CleanSequence
 -----------------------------
 
-.. autoclass:: tiskitpy.utils.CleanSequence
+.. autoclass:: tiskitpy.util_classes.CleanSequence
 
-tiskitpy.utils.SeisRotate
+tiskitpy.util_classes.SeisRotate
 -----------------------------
 
-.. autoclass:: tiskitpy.utils.SeisRotate
+.. autoclass:: tiskitpy.util_classes.SeisRotate
 

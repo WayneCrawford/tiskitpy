@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from ..response_functions import ResponseFunctions
-from ..utils import CleanSequence as CS
+from ..util_classes import CleanSequence as CS
 from ..logger import init_logger
 
 logger = init_logger()

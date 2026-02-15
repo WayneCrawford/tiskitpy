@@ -7,8 +7,7 @@ import xarray as xr
 from matplotlib import pyplot as plt
 
 from ..spectral_density import SpectralDensity   # Only imported to check that input is a SpectralDensity function
-# from ..utils import match_one_str, coherence_significance_level
-import tiskitpy.utils as baseutils
+import tiskitpy.util_functions as baseutils
 from tiskitpy.logger import init_logger
 
 logger = init_logger()

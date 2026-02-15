@@ -10,7 +10,7 @@ from copy import deepcopy
 
 from obspy.core import Stream, Trace
 
-from tiskitpy.utils import SeisRotate
+from tiskitpy.util_classes import SeisRotate
 
 
 class TestMethods(unittest.TestCase):

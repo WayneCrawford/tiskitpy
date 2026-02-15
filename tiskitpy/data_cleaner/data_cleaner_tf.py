@@ -16,8 +16,9 @@ from ..response_functions import ResponseFunctions
 from ..spectral_density import SpectralDensity
 from .rf_list import RFList
 from ..cleaned_stream import CleanedStream
-from ..utils import CleanSequence as CS
-from ..functions import stream_synchronize, stream_unmask
+from ..util_classes import CleanSequence as CS
+from ..util_functions import (stream_synchronize, stream_unmask,
+                              get_stream_dtype, set_stream_dtype)
 from tiskitpy.logger import init_logger
 
 logger = init_logger()
@@ -157,7 +158,7 @@ class DataCleaner:
                                               **kwargs)
         return sdf
 
-    def apply(self, stream, in_time_domain=False):
+    def apply(self, stream, in_time_domain=False, set_dtype=True):
         """
         Apply DataCleaner to a data stream
 
@@ -165,6 +166,10 @@ class DataCleaner:
             stream (Stream): list of channels to remove, in order
             in_time_domain(bool): do work in time domain (default is freq
                 domain, time_domain is much slower)
+           set_dtype (bool or :class:`numpy.dtype`): Set the output dtype to be
+              True: the same as the input dtype
+              :class:`numpy.dtype`: the given dtype
+              False: Don't change the dtype
         Returns:
             stream (:class:`obspy.core.stream.Stream`): corrected data
 
@@ -172,6 +177,15 @@ class DataCleaner:
         """
         assert isinstance(stream, Stream)
         
+        stream = stream.copy()  # Protect the input stream
+
+        if set_dtype is True:
+            dtype = get_stream_dtype (stream)
+        elif isinstance(set_dtype, np.dtype):
+            dtype = set_dtype
+        elif set_dtype is not False:
+            raise TypeError(f'{type(set_dtype)=} is neither bool nor numpy.dtype')
+
         stream = stream_unmask(stream)
         # Make sure that the array is not masked
         # if np.any([np.ma.count_masked(tr.data) for tr in stream]):
@@ -199,6 +213,10 @@ class DataCleaner:
                 )
                 out_trace = CS.tag(out_trace, in_trace.id)
                 out_stream += out_trace
+
+        if set_dtype is not False:
+            out_stream = set_stream_dtype(out_stream, dtype)
+
         return out_stream
 
     def plot(self):

@@ -8,7 +8,7 @@ import unittest
 from obspy.core.stream import read
 
 from tiskitpy import SpectralDensity, DataCleaner
-from tiskitpy.utils import CleanSequence as CS
+from tiskitpy.util_classes import CleanSequence as CS
 from make_test_stream import make_test_stream
 
 

@@ -10,7 +10,7 @@ import inspect
 from obspy.core.stream import Stream
 import numpy as np
 
-from tiskitpy.utils import (get_full_id, match_one_str,
+from tiskitpy.util_functions import (get_full_id, match_one_str,
                             coherence_significance_level)
 from make_test_stream import make_test_stream
 

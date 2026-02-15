@@ -14,7 +14,7 @@ from obspy.signal.rotate import rotate2zne
 from obspy.core.stream import Stream  # , Trace
 
 from ..logger import init_logger
-from ..functions import stream_synchronize
+from ..util_functions import stream_synchronize
 
 logger = init_logger()
 
@@ -281,9 +281,10 @@ class SeisRotate:
             seis_stream (Stream): stream containt 3C seismometer channels
             other_stream (Stream): all other channels, or None
         """
+        stream = stream.copy()  # don't change the input stream
         Z, N, E = SeisRotate._get_seis_traces(stream)
         if len(stream) == 3:
-            return stream.copy(), None
+            return stream, None
         other_stream = stream.copy()
         seis_stream = Stream(traces=(Z, N, E))
         other_stream.remove(Z)

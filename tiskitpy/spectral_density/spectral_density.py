@@ -16,11 +16,11 @@ from obspy.core.stream import Stream
 from obspy.core import UTCDateTime
 from scipy import signal, stats
 
-import tiskitpy.functions as tfunc
 import tiskitpy.time_spans as time_spans_module
 from ..logger import init_logger, change_level
 import tiskitpy.cleaned_stream as cleaned_stream
-import tiskitpy.utils as baseutils
+import tiskitpy.util_classes as baseutils
+import tiskitpy.util_functions as tfunc
 
 logger = init_logger()
 np.seterr(all="ignore")
@@ -493,7 +493,7 @@ class SpectralDensity:
         """
         if not isinstance(test_id, str):
             raise TypeError(f"{ch_identifier} is a {type(test_id)}, not a str")
-        name = baseutils.match_one_str(test_id, self.ids,
+        name = tfunc.match_one_str(test_id, self.ids,
                                        "test_id", "self.ids")
         return name
 
@@ -763,7 +763,7 @@ class SpectralDensity:
         Returns:
             (float):
         """
-        return baseutils.coherence_significance_level(self.n_windows, prob)
+        return tfunc.coherence_significance_level(self.n_windows, prob)
 
     @staticmethod
     def plots(sds,

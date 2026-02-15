@@ -60,10 +60,10 @@ from .spectral_density import SpectralDensity
 from .time_spans import TimeSpans, _get_time_bounds  # latter is just for testing
 
 # Functions
-from .functions import (plot_compliance_stack, read_MSEED, stream_synchronize,
-                        stream_unmask, Peterson_noise_model)
+from .util_functions import (plot_compliance_stack, read_MSEED, stream_synchronize,
+                             stream_unmask, Peterson_noise_model)
 from .fir_corr import fir2caus
 
 # These are only here for tests, there is probably a better way to access/hide them
 from .logger import init_logger
-# from .utils import CleanSequence
+# from .util_classes import CleanSequence

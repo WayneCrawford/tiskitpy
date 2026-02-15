@@ -11,7 +11,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.dates import date2num
 
-from .utils import CleanSequence
+from .util_classes import CleanSequence
 from .cleaned_stream import CleanedStream
 from .logger import init_logger
 

@@ -1,7 +1,7 @@
 from obspy.core import Stream, Trace
 
 from ..logger import init_logger
-from .get_full_id import get_full_id
+from ..util_functions import get_full_id
 
 logger = init_logger()
 DOT_REPLACE_CHAR = '_'  # Character to replace id '.'s in cleaner strings

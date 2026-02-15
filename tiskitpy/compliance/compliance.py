@@ -97,7 +97,6 @@ class Compliance(object):
         zp_uncert = rfs.uncertainty(z_str)[rfs.freqs <= max_freq]
         coherence = rfs.coherence(z_str)[rfs.freqs <= max_freq]
         z_units = rfs.output_units(z_str)
-        print(f'{coherence=}')
         return cls(f,
                    Compliance._zp_to_ncompl(f, zp, wdepth, z_units),
                    Compliance._zp_to_ncompl(f, zp_uncert, wdepth, z_units),

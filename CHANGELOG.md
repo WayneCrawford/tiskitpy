@@ -1,12 +1,19 @@
 
 ## 2.2.0
 
-- Added ``TimeSpans.split()``, ``__and__()`` and ``__or__()`` methods
-- Modified ``SpectralDensity.from_stream()`` to account for streams with data
+- ``TimeSpans`` class:
+    - Added ``split()``, ``__and__()`` and ``__or__()`` methods
+    - Grandfathered ``used_times()`` method, now named ``used_spans()``
+- ``SpectralDensity`` class:
+    - Modified ``from_stream()`` to account for streams with data
   gaps (masked arrays or separate Traces with the same seed_id)
-- Added ``coherence`` property to :class:`ResponseFunctions`
-  and :class:`Compliance`, and ``coherence`` column to CSV file written by 
-  ``Compliance.write()``
+- ``ResponseFunctions`` class:
+    - Added ``coherence`` property
+- ``Compliance`` class:
+    - Added ``coherence`` property 
+    - Added  ``coherence`` column to CSV file written by ``write()`` method
+- ``CleanRotator`` and ``DataCleaner`` classes:
+    - ``apply()`` method returns, by default, the same data dtype as the input
 
 ### 2.1.2
 

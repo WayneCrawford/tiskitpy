@@ -16,9 +16,9 @@ from obspy.core import UTCDateTime
 
 from ..spectral_density import SpectralDensity
 from ..compliance import Compliance, EarthModel1D
+from .functions import to_DBs  # , from_DBs
 from .tide_coefficients import TideCoefficients
 from .psd_vals import PSDVals
-from .functions import to_DBs  # , from_DBs
 
 default_water_depth = 2400
 default_Z_offset_angles = (2, 15)  # angle from vertical, azimuth from N

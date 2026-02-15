@@ -10,7 +10,8 @@ from obspy import UTCDateTime
 
 from .time_spans import TimeSpans
 from .cleaned_stream import CleanedStream
-from .utils import SeisRotate, CleanSequence as CS
+from .util_classes import SeisRotate, CleanSequence as CS
+from .util_functions import get_stream_dtype, set_stream_dtype
 from .logger import init_logger
 
 logger = init_logger()
@@ -134,7 +135,7 @@ class CleanRotator:
         compare_stream = Stream([trace_view_Z, trace_view_rot_Z])
         compare_stream.plot(equal_scale=True, method="full")
 
-    def apply(self, stream, horiz_too=False, rot_limit=20.):
+    def apply(self, stream, horiz_too=False, rot_limit=20., set_dtype=True):
         """
         Rotates vertical channel to minimize noise
 
@@ -146,9 +147,22 @@ class CleanRotator:
                 as long as we use a 2-value rotation)
             rot_limit (float): Raise ValueError if self.angle is greater
                 than this value
+           set_dtype (bool or :class:`numpy.dtype`): Set the output dtype to be
+              True: the same as the input dtype
+              :class:`numpy.dtype`: the given dtype
+              False: Don't change the dtype
         Returns:
             strm_rot (Stream): rotated stream
         """
+        stream = stream.copy()  # Protect the input stream
+        
+        if set_dtype is True:
+            dtype = get_stream_dtype (stream)
+        elif isinstance(set_dtype, np.dtype):
+            dtype = set_dtype
+        elif set_dtype is not False:
+            raise TypeError(f'{type(set_dtype)=} is neither bool nor numpy.dtype')
+
         seis_stream, other_stream = SeisRotate.separate_streams(stream)
         if self.angle > rot_limit:
             # Choose error over warning to avoid problems downstream
@@ -158,10 +172,16 @@ class CleanRotator:
         srData.zrotate(self.angle, self.azimuth, horiz_too)
         srData.Z.data = np.divide(srData.Z.data, self.H_over_Z)
         srData.Z = CS.tag(srData.Z, self.trans_code)
+        
         if other_stream is None:
-            return CleanedStream(srData.stream())
+            return_stream = srData.stream()
         else:
-            return CleanedStream(srData.stream() + other_stream)
+            return_stream = srData.stream() + other_stream
+            
+        if set_dtype is not False:
+            return_stream = set_stream_dtype(return_stream, dtype)
+                    
+        return CleanedStream(return_stream)
 
     def tfs(self):
         """

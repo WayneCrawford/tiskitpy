@@ -1,7 +1,7 @@
 from obspy.core import Stream
 
 from .logger import init_logger
-import tiskitpy.utils as baseutils
+import tiskitpy.util_classes as baseutils
 
 logger = init_logger()
 

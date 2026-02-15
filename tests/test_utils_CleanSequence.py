@@ -9,7 +9,7 @@ import inspect
 
 from obspy.core.stream import read
 
-from tiskitpy.utils import CleanSequence as CS
+from tiskitpy.util_classes import CleanSequence as CS
 from make_test_stream import make_test_stream
 
 
