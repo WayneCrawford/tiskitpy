@@ -42,7 +42,7 @@ mypkg = ["dec*"]
 
 [project.urls]
 Repository = "https://github.com/WayneCrawford/tiskitpy.git"
-Documentation = "https://readthedocs.org"
+Documentation = "https://tiskitpy.readthedocs.io/latest/"
 Changelog = "https://github.com/WayneCrawford/tiskitpy/blob/master/CHANGELOG.md"
 Issues = "https://github.com/WayneCrawford/tiskitpy/issues"
 

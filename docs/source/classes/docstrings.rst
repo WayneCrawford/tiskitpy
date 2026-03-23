@@ -8,4 +8,3 @@ Class and Function DocStrings
    :maxdepth: 2
 
    docstrings/tiskitpy.autoclasses
-   docstrings/tiskitpy.util_functions

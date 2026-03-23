@@ -15,6 +15,9 @@
 - ``CleanRotator`` and ``DataCleaner`` classes:
     - ``apply()`` methods now return, by default, the same data dtype as the input
 
+**post1 and post2**
+Debugging of script paths, and debug documentation
+
 ### 2.1.2
 
 - Fix error in SpectralDensity class when specifying time_spans (namespace conflict)

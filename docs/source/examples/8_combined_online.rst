@@ -1,8 +1,8 @@
 .. _tiskitpy.combined_example:
 
-==============================
+======================================
 Combining classes, online data example
-==============================
+======================================
 
 .. code-block:: python
 
