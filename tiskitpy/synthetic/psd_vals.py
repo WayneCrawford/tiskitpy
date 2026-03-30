@@ -21,7 +21,8 @@ class PSDVals():
     def __init__(self, freqs_and_vals, value_units="unknown"):
         """
         Args:
-            freqs_and_vals (tuple)): frequencies, PSD values, and is_dB (bool), entered as:
+            freqs_and_vals (tuple)): frequencies, PSD values, and is_dB (bool),
+                entered as:
                 ([[freq1, value1],
                   [freq2, value1],
                   ...
@@ -237,7 +238,6 @@ class PSDVals():
                 trace (class:`obspy.stream.Trace`)
                 phases (:class:`numpy.ndarray`): FFT phases (radians)
                     used to create this trace
-                
         """
         if isinstance(ref_trace, dict):
             trace = self._make_trace(ref_trace)
