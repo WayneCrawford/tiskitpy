@@ -1,4 +1,8 @@
 
+## 2.3.0
+- Added ``Pressure_Noise_Model()`` function
+- Added documentation on `PeriodicTransient` class
+
 ## 2.2.0
 
 - ``TimeSpans`` class:

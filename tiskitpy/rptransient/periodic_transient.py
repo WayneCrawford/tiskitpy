@@ -39,7 +39,7 @@ class PeriodicTransient:
                    for better values
         clips (tuple): clip values outside of this range (low, high).
                 Should contain the max range of the transient
-        transient_starttime (~class `obspy.core.UTCDateTime`): onset
+        transient_starttime (str or ~class `obspy.core.UTCDateTime`): onset
                 time of earliest transient.
 
     """
@@ -49,9 +49,7 @@ class PeriodicTransient:
         self.name = name
         self.period = float(period)
         self.dp = float(dp)
-        self.clips = [None, None]
-        self.clips[0] = float(clips[0])
-        self.clips[1] = float(clips[1])
+        self.clips = (float(clips[0]), float(clips[1]))
         if isinstance(transient_starttime, str):
             transient_starttime = UTCDateTime(transient_starttime)
         assert isinstance(transient_starttime, UTCDateTime)
@@ -70,23 +68,23 @@ class PeriodicTransient:
         s += f", transient_starttime={self.transient_starttime}"
         return s
 
-    def calc_timing(self, trace, eq_remover):
+    def calc_timing(self, trace, eq_spans):
         """
         Calculate transient time parameters
 
         Args:
             trace (class obspy.core.Trace): data
-            eq_remover (class EQRemover):
+            eq_spans (:class:`TimeSpans`): times spans in which to zero data
         """
-        self._verify(trace, eq_remover)
+        self._verify(trace, eq_spans)
 
-    def calc_transient(self, trace, eq_remover, match=True, plots=False):
+    def calc_transient(self, trace, eq_spans, match=True, plots=False):
         """
         Calculate transient for a given trace and transient parameters
 
         Args:
-            trace ( ~class `obspy.stream.Trace`): input data trace
-            eq_remover (class EQRemover):
+            trace (:class:`obspy.core.stream.Trace`): input data trace
+            eq_spans (:class:`TimeSpans`): times spans in which to zero data
             match (bool): match and cancel each pulse separately
             plots (bool): plot results
         """
@@ -97,7 +95,7 @@ class PeriodicTransient:
                 trace.stats.starttime + self._transient_offset(trace)
             )
         transient, dc, nG, tm, tp, cbuff = comb_calc(
-            trace, self, plots, eq_remover, slice_starttime
+            trace, self, plots, eq_spans, slice_starttime
         )
         transient.stats.channel = f"TR{trace.stats.channel[-1]}"
         if plots:
@@ -129,31 +127,31 @@ class PeriodicTransient:
             Stream([trace, out, synth]).plot(method="full")
         return out
 
-    def _verify(self, trace, eq_remover):
+    def _verify(self, trace, eq_spans):
         """
         Interactively verify transient parameters
 
         Args:
             trace (~class `obspy.stream.Trace`): input data trace
-            eq_remover (class EQRemover):
+            eq_spans (:class:`TimeSpans`): times spans in which to zero data
         """
         slice_starttime = self._calc_slice_starttime(trace)
 
         # Set/verify clip levels
-        self._ask_clips(trace, eq_remover, slice_starttime)
+        self._ask_clips(trace, eq_spans, slice_starttime)
 
         # SET/VERIFY TRANSIENT PERIOD
         cliptrace = trace.copy()
         cliptrace.data.clip(self.clips[0], self.clips[1], out=cliptrace.data)
-        self._ask_period(cliptrace, eq_remover, slice_starttime)
+        self._ask_period(cliptrace, eq_spans, slice_starttime)
 
-    def _ask_clips(self, trace, eq_remover, slice_starttime):
+    def _ask_clips(self, trace, eq_spans, slice_starttime):
         """
         Show clip levels and ask to update them until acceptable
 
         Args:
             trace (~class `obspy.core.stream.Trace``): seismological trace
-            eq_remover (class EQRemover):
+            eq_spans (:class:`TimeSpans`): times spans in which to zero data
             slice_starttime (UTCDateTime): first slice starttime
             testper (float): length of each slice (seconds)
             clip (tuple): default clip values (lo, hi)
@@ -163,7 +161,7 @@ class PeriodicTransient:
         sta = trace.stats.station
 
         stack_trace = trace.copy()
-        stack_trace = eq_remover.zero(stack_trace)
+        stack_trace = eq_spans.zero(stack_trace)
         if slice_starttime > stt:
             stack_trace = stack_trace.slice(starttime=slice_starttime)
         stack = stack_data(stack_trace.data, self.period * sps)
@@ -200,7 +198,7 @@ class PeriodicTransient:
         plt.close(fig)
         plt.ioff()
 
-    def _ask_period(self, trace, eq_remover, slice_starttime):
+    def _ask_period(self, trace, eq_spans, slice_starttime):
         """
         Show transient alignment and ask to update period until acceptable
 
@@ -209,7 +207,7 @@ class PeriodicTransient:
 
         Args:
             trace (~class obspy.core.stream.Trace): seismological trace
-            eq_remover (class EQRemover): times to zero data
+            eq_spans (:class:`TimeSpans`): times spans in which to zero data
             slice_starttime (UTCDateTime): first slice starttime
         """
         stt = trace.stats.starttime
@@ -217,7 +215,7 @@ class PeriodicTransient:
         sta = trace.stats.station
 
         stack_trace = trace.copy()
-        stack_trace = eq_remover.zero(stack_trace)
+        stack_trace = eq_spans.zero(stack_trace)
         if slice_starttime > stt:
             stack_trace = stack_trace.slice(starttime=slice_starttime)
         fig, ax = plt.subplots(1, 1, num="Select transient period")

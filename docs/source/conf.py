@@ -23,7 +23,7 @@ copyright = '2022, IPGP'
 author = 'Wayne Crawford' 
 
 # The full version, including alpha/beta/rc tags
-release = '2.2.0.post2'
+release = '2.3.0rc1'
 
 
 # -- General configuration ---------------------------------------------------

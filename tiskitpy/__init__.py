@@ -31,6 +31,8 @@ Functions
 - ``read_MSEED`` : Read MSEED data, even if the file is too big (> 2 GB)
     for obspy's read() function
 - ``Peterson_noise_model`` : Return the Peterson High and Low Noise Models
+- ``Seismo_noise_model`` : Return the Peterson  + xxx High and Low Noise Models
+- ``Pressure_noise_model`` : Return the Brown et al. [2014] High and Low Noise Models
 - ``stream_synchronize`` : Return a synchronized stream (all traces have
     same starttime and endtime).  Raises ValueError if not all streams have
     the same sample_rate
@@ -61,7 +63,7 @@ from .time_spans import TimeSpans, _get_time_bounds  # latter is just for testin
 
 # Functions
 from .util_functions import (plot_compliance_stack, read_MSEED, stream_synchronize,
-                             stream_unmask, Peterson_noise_model)
+                             stream_unmask, Peterson_noise_model, Pressure_noise_model)
 from .fir_corr import fir2caus
 
 # These are only here for tests, there is probably a better way to access/hide them

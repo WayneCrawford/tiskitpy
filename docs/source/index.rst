@@ -6,23 +6,35 @@
 TiSKitPy documentation
 ========================================
 
+tiskitpy is the TIme Series data processing toolKIT, 
+used for cleaning data series and calculating
+the coherencies and frequence response functions between them.
+Most of the algorithms are based on `BP2010`_.
+
+Classes, functions and command_line programs are listed in the
+:ref:`Overview`
+
+The cleaning algorithms can create multiple instances of the 'same' data stream.
+In order to keep track of these instances, tiskitpy stores clean_sequence
+information, as described in :ref:`clean_sequences`
 
 .. toctree::
   :maxdepth: 2
   :caption: Table of Contents:
   :glob:
   
-  intro
+  overview
   install
   classes
   functions
+  periodic_transients
   avoid_eqs
   examples
+  clean_sequences
   programmers
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+:ref:`genindex`
+
+.. [BP2010] Bendat J. S. and A. G. Piersol (1986), Random Data:
+    Analysis and Measurement Procedures, 566 pp.

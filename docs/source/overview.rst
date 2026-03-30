@@ -1,5 +1,5 @@
 *******************************
-Module overview
+Overview
 *******************************
 
 .. automodule:: tiskitpy
