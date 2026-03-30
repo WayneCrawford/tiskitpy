@@ -5,7 +5,7 @@ CleanedStream
 
 Subclass of :class:`obspy.Stream` that embeds processing steps
 
-Uses the concept of a :ref:`tiskitpy_id <tiskitpy_id>`, in which th processing
+Uses the concept of a :ref:`tiskitpy_id <tiskitpy_id>`, in which the processing
 steps are embedded into a seed_id.
 
 Constructor
