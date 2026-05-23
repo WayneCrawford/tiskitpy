@@ -28,6 +28,11 @@ Properties
     - ``clips`` (tuple): clip values outside of this range (low, high).
       Should include the max range of the transient
     - ``transient_starttime`` (`UTCDateTime``): onset time of earliest transient.
+    - ``freq_HP`` (float or bool): highpass corner frequency used for training
+      and matching.  If True, sets to 1/period.  If False, do not cut off
+      low frequencies
+    - ``freq_LP`` (float): lowpass corner frequency used for training and
+      matching (0.05 is a good value to remove microseisms)
 - Calculated by ``PeriodicTransient.calc_transient()``
     - ``transient_model`` (): Model of the periodic transient.
     - ``dirac_comb`` (): offsets of transients from the first one, in seconds

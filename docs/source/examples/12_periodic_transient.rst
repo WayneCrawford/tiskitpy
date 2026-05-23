@@ -1,4 +1,4 @@
-.. _tiskitpy.PeridicTransient_example:
+.. _tiskitpy.PeriodicTransient_example:
 
 ==============================
 PeriodicTransient example code
@@ -253,7 +253,7 @@ the data at the same frequency as ``calc_timing`` and ``calc_transient``.
     stream_compare.filter("lowpass", freq=pt.freq_LP)
     stream_compare.plot()
 
-`.. image:: images/12_PeriodicTransient_result.png
+.. image:: images/12_PeriodicTransient_result.png
 
 The new waveform lacks most of the hourly transients that plagued the original
 data.  But there are still a few sections with the transients.  Room for
