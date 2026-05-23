@@ -1,29 +1,24 @@
-## 2.4.0
+## 2.3.0
 
 - Minor
+    - Added ``Pressure_Noise_Model()`` function
     - Added ``FIRConverter`` class: converts zero-phase filtered output to its
       equivalent minimum phase form
     - Improvements to ``PeriodicTransient()``, including:
     	    - Automatic filtering of data for the modeling and matching part
-    	    - Default calculation of EQ times (using TimeSpans.from_eqs)
+    	    - Default calculation of EQ times (using ``TimeSpans.from_eqs``)
     	    - Using filtered data to improve alignment of diracs
     	- `TimeSpans.from_eqs()` now saves QML files in `.time_spans/` directory
 - Maintenance
+    - Added documentation on ``PeriodicTransient`` class
     - ``Decimator`` verifies that decimates contains only valid integers
     - Added (not uniformly) some plotting parameters:
 	    - ``title`` to ``SpectralDensity.plot_coherences()`` and
 	      ``ResponseFunctions.plot()``
 	    - ``grid`` to `ResponseFunctions.plot()` and ``SpectralDensity.plot()``
     - Normalized order and names of the first three arguments to the
-     `SpectralDensity` `.plots()` and ``.plots_coherences()`` methods 
-    = Corrected legend line colors in ``plots_coherences()``
-
-## 2.3.0
-
-- Minor
-    - Added ``Pressure_Noise_Model()`` function
-- Maintenance
-    - Added documentation on ``PeriodicTransient`` class
+     ``SpectralDensity`` ``.plots()`` and ``.plots_coherences()`` methods 
+    - Corrected legend line colors in ``plots_coherences()``
 
 ## 2.2.0
 
