@@ -50,7 +50,7 @@ SeafloorSynthetic example code
     # PLOT noise model using SeafloorSynthetic's intrinsic method
     noise_model.plot(outfile='noise_model.png')
 
-.. image:: images/11_ComplianceNoise_PSDcomponents.png
+.. image:: images/12_PeridocTransient_timing_clips_1000.png
    :width: 564
    
 .. code-block:: python

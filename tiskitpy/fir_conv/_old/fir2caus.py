@@ -382,22 +382,6 @@ def fir2caus_subr(intrace, firCorrFileName, returnOrigDType=True):
     # fdig = book["fdig"]
 
     x = x[::-1]  # flip in time
-    # ===================
-    # Original code
-    # ===================
-    # mx = len(a)
-    # nx = len(x)
-    # # Buffer x with mx zeros at beginning
-    # x=np.concatenate((np.zeros(mx,dtype='double'),x))
-    # # Set up y as all zeros
-    # y=np.zeros(len(x),dtype='double')
-    # for i in range(0,nx) :                  # (i=0; i< ndat2; i++) {
-    #     y[i+mx] = np.dot(x[i+mx:i:-1],b)           # MA
-    #     y[i+mx] += np.dot(y[i+mx-1:i:-1],a[1:])    # AR
-    # y=y[mx:]  # Remove buffer
-    # ===================
-    # Faster replacement
-    # ===================
     a[1:] *= -1  # because lfilter subtracts "a"s, invert all EXCEPT first
     y = sig.lfilter(b, a, x)
 

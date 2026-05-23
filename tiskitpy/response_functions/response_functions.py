@@ -445,13 +445,15 @@ class ResponseFunctions(object):
         # Calculate uncertainty
         return H, H_err, corr_mult
 
-    def plot(self, errorbars=True, show=True, outfile=None):
+    def plot(self, errorbars=True, grid=False, show=True, title=None, outfile=None):
         """
         Plot frequency response functions
 
         Args:
             errorbars (bool): plot error bars
+            grid (bool or str): False, True, 'major', 'minor', or 'both'
             show (bool): show on the screen
+            title (str): replace overall title
             outfile (str): save figure to this filename
         Returns:
             (numpy.ndarray): array of axis pairs (amplitude, phase)
@@ -463,12 +465,16 @@ class ResponseFunctions(object):
         ax_array = np.ndarray((rows, cols), dtype=tuple)
         # fig, axs = plt.subplots(rows, cols, sharex=True)
         fig = plt.figure()
+        if title is None:
+            title = "ResponseFunctions"
+        fig.suptitle(title)
         in_suffix = self._find_str_suffix(inp, outputs)
         for out_id, j in zip(outputs, range(len(outputs))):
             axa, axp = self.plot_one(inp, out_id, fig, (rows, cols),
                                      (0, j), show_ylabel=j == 0,
                                      errorbars=errorbars,
                                      title=f"{out_id}/{in_suffix}",
+                                     grid=grid,
                                      show_xlabel=True)
         ax_array[0, j] = (axa, axp)
         if outfile:
@@ -544,7 +550,8 @@ class ResponseFunctions(object):
 
     def plot_one(self, in_id, out_id,
                  fig=None, fig_grid=(1, 1), plot_spot=(0, 0), errorbars=True,
-                 label=None, title=None, show_xlabel=True, show_ylabel=True):
+                 label=None, title=None, show_xlabel=True, show_ylabel=True,
+                 grid=False):
         """
         Plot one frequency response function
 
@@ -563,6 +570,7 @@ class ResponseFunctions(object):
             title (str): string to put in title
             show_xlabel (bool): put an xlabel on this subplot
             show_ylabel (bool): put a y label on this subplot
+            grid (bool or str): False, True, 'major', 'minor', or 'both'
 
         Returns:
             tuple:
@@ -607,6 +615,14 @@ class ResponseFunctions(object):
             ax_a.legend()
         if show_ylabel:
             ax_a.set_ylabel("FRF")
+        ax_a.tick_params(axis='x', labelbottom=False)
+        if grid is not False:
+            if grid is True:
+                ax_a.grid(visible=True)
+            elif grid in ('major', 'minor', 'both'):
+                ax_a.grid(visible=True, which=grid)
+            else:
+                raise ValueError(f'Invalid {grid=}')
         
         # Plot phase
         ax_p = plt.subplot2grid(
@@ -635,6 +651,14 @@ class ResponseFunctions(object):
             ax_p.set_yticklabels([])
         if show_xlabel:
             ax_p.set_xlabel("Frequency (Hz)")
+        if grid is not False:
+            if grid is True:
+                ax_p.grid(visible=True)
+            elif grid in ('major', 'minor', 'both'):
+                ax_p.grid(visible=True, which=grid)
+            else:
+                raise ValueError(f'Invalid {grid=}')
+
         return ax_a, ax_p
 
     def _zero_bad(self, H, coh, n_to_reject, f, min_freq, max_freq):

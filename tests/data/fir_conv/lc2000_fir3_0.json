@@ -1,7 +1,9 @@
 {
    "method": "POLYNOMIAL ROOTING",
    "firname": "lc2000.fir3",
-   "fdig": "0",
+   "fdig": 0,
+   "input_type": "linear",
+   "sps": "0",
    "firdata_eff": [
       "-26",
       "-247",
@@ -105,8 +107,8 @@
       "-247",
       "-26"
    ],
+   "decimation_factor": 2,
    "ar": [
-      "1.",
       "8.964694194",
       "-40.4111919455",
       "121.840583023",
@@ -173,6 +175,5 @@
       "-8.964694194",
       "1."
    ],
-   "timetag": "50",
-   "comments": " How to remove the noncausal FIR filter response from a digital record x[n]:\n    1. Reverse sequence x[n] in time to obtain sequence x'[n]\n    2. Filter reversed input sequence x'[] using the\n        difference equation: \n\n                mx                      mx \n                --                      --\n        y'[i] =  > a[k]*y'[i-k]   + > b[l] x'[i-l]\n             __                 __\n             k=1                l=0\n\n       This corresponds to equ. (8.15) in 'Scherbaum, F: Of poles and zeros,\n       Fundamentals of Digital Seismology, Kluwer Academic Publ., 1996' \n       mx = number of AR coefficients \n       b[l] = MA coefficients for l = 0, mx\n       a[k] = AR coefficients for k = 1, mx\n       y'[] = output sequence                                   \n    3. Reverse the output sequence y'[] in time again to obtain the corrected \n        sequence y[n]! \n    4. Apply the time tag correction! Since the correction procedure works on\n        the time inverted trace (cf. step 1), a signal front (onset) will appear\n        TIMETAG samples (= TIMETAG/FDIG_EFF secs) too early in the corrected \n        sequence. In contrast, the envelope of a bandlimited signal, will not be \n        advanced quite as much. The amount is given by the negative group delay\n        of the correction filter. For a discussion of onset properties and how \n        they are affected by filters, see Scherbaum, F: Of poles and zeros.\n"
+   "timetag": "50"
 }

@@ -18,6 +18,7 @@ Classes
 - ``SpectralDensity`` : Calculate and manipulate spectral density functions.
 - ``TimeSpans`` : Specify time spans to be removed, kept, zeroed, etc.
 - ``ResponseFunctions`` : Frequency response functions for a given input channel.
+- ``FIRConverter``: Converts data from a zero-phase to minimum phase last stage
 - ``CleanedStream`` : obspy `Stream` subclass that handles ``cleaned_sequence``
     information
               
@@ -25,9 +26,6 @@ Classes
 Functions
 =========================
 
-- ``fir2caus`` : Transform zero-phase data to minimum phase (only works
-    for LCHEAPO loggers, need to update to calculate/work for any
-    zero-phase filter)
 - ``read_MSEED`` : Read MSEED data, even if the file is too big (> 2 GB)
     for obspy's read() function
 - ``Peterson_noise_model`` : Return the Peterson High and Low Noise Models
@@ -56,7 +54,7 @@ from .compliance import Compliance
 from .synthetic import SeafloorSynthetic, PSDVals, to_DBs, from_DBs
 from .data_cleaner import DataCleaner, RFList
 from .decimate import Decimator
-from .rptransient import PeriodicTransient
+from .periodic_transient import PeriodicTransient
 from .response_functions import ResponseFunctions
 from .spectral_density import SpectralDensity
 from .time_spans import TimeSpans, _get_time_bounds  # latter is just for testing
@@ -64,7 +62,7 @@ from .time_spans import TimeSpans, _get_time_bounds  # latter is just for testin
 # Functions
 from .util_functions import (plot_compliance_stack, read_MSEED, stream_synchronize,
                              stream_unmask, Peterson_noise_model, Pressure_noise_model)
-from .fir_corr import fir2caus
+from .fir_conv import FIRConverter
 
 # These are only here for tests, there is probably a better way to access/hide them
 from .logger import init_logger

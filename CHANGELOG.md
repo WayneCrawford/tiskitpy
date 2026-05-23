@@ -1,23 +1,48 @@
+## 2.4.0
+
+- Minor
+    - Added ``FIRConverter`` class: converts zero-phase filtered output to its
+      equivalent minimum phase form
+    - Improvements to ``PeriodicTransient()``, including:
+    	    - Automatic filtering of data for the modeling and matching part
+    	    - Default calculation of EQ times (using TimeSpans.from_eqs)
+    	    - Using filtered data to improve alignment of diracs
+    	- `TimeSpans.from_eqs()` now saves QML files in `.time_spans/` directory
+- Maintenance
+    - ``Decimator`` verifies that decimates contains only valid integers
+    - Added (not uniformly) some plotting parameters:
+	    - ``title`` to ``SpectralDensity.plot_coherences()`` and
+	      ``ResponseFunctions.plot()``
+	    - ``grid`` to `ResponseFunctions.plot()` and ``SpectralDensity.plot()``
+    - Normalized order and names of the first three arguments to the
+     `SpectralDensity` `.plots()` and ``.plots_coherences()`` methods 
+    = Corrected legend line colors in ``plots_coherences()``
 
 ## 2.3.0
-- Added ``Pressure_Noise_Model()`` function
-- Added documentation on `PeriodicTransient` class
+
+- Minor
+    - Added ``Pressure_Noise_Model()`` function
+- Maintenance
+    - Added documentation on ``PeriodicTransient`` class
 
 ## 2.2.0
 
-- ``TimeSpans`` class:
-    - Added ``split()``, ``__and__()`` and ``__or__()`` methods
-    - Grandfathered ``used_times()`` method, now named ``used_spans()``
-- ``SpectralDensity`` class:
-    - Modified ``from_stream()`` to account for streams with data
-  gaps (masked arrays or separate Traces with the same seed_id)
-- ``ResponseFunctions`` class:
-    - Added ``coherence`` property
-- ``Compliance`` class:
-    - Added ``coherence`` property 
-    - Added  ``coherence`` column to CSV file written by ``write()`` method
-- ``CleanRotator`` and ``DataCleaner`` classes:
-    - ``apply()`` methods now return, by default, the same data dtype as the input
+- Minor
+    - ``ResponseFunctions`` class:
+        - Added ``coherence`` property
+    - ``Compliance`` class:
+        - Added ``coherence`` property 
+        - Added  ``coherence`` column to CSV file written by ``write()`` method
+- Maintenance
+    - ``TimeSpans`` class:
+        - Added ``split()``, ``__and__()`` and ``__or__()`` methods
+        - Grandfathered ``used_times()`` method, now named ``used_spans()``
+    - ``SpectralDensity`` class:
+        - Modified ``from_stream()`` to handle streams with data gaps
+          (masked arrays or separate Traces with the same seed_id)
+    - ``CleanRotator`` and ``DataCleaner`` classes:
+        - ``apply()`` methods now return, by default, the same data dtype as
+          the input
 
 **post1 and post2**
 Debugging of script paths, and debug documentation

@@ -51,10 +51,18 @@ class Decimator:
     decimates: list   # List of decimation factors
     verbose: bool = False  # Be chatty
 
+    def __post_init__(self):
+        for x in self.decimates:
+            if not x == int(x):
+                raise ValueError(f'decimates item {x} is not an integer')
+            if not x in [2, 3, 4, 5, 6, 7]:
+                raise ValueError(f'decimates value {x} is not in (2, 3, 4, 5, 6, 7)')
+        self.decimates = [int(x) for x in self.decimates]
+
     @property
     def decimation_factor(self):
         """Total decimation (product of `decimates`)"""
-        return prod(self.decimates)
+        return int(prod(self.decimates))
 
     def decimate(self, data, keep_dtype=True):
         """

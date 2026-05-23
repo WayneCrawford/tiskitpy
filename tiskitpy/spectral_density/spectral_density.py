@@ -767,25 +767,26 @@ class SpectralDensity:
 
     @staticmethod
     def plots(sds,
-              channel=None,
-              line_kws=None,
               labels=None,
+              channel=None,
               x=None,
               overlay=True,
               plot_peterson=True,
               show=True,
               outfile=None,
               title=None,
+              line_kws=None,
               **fig_kw):
         """
         Plot overlaid autospectra of multiple SpectralDensity objects
 
         Args:
-            sds (list): SpectralDensity functions to plot
+            sds (list): SpectralDensity objects to plot
+            labels(list of dict): labels for each SpectralDensity object
             channel (str): Limit to the given channel code
-            line_kws(list of dict): Line keywords for each SpectralDensity
-                function
-            labels(list of dict): labels for each sd
+            x, overlay, plot_peterson, show, outfile, title: see `plot()`
+            line_kws(list of dict): :class:`matplotlib.lines.Line2D` keywords
+                for each SpectralDensity function
             **kwargs: any arguments used in plot_autospectra, except
                 overlay (always true)
         Returns:
@@ -833,7 +834,7 @@ class SpectralDensity:
                 first_time = False
         if channel is not None and first_time is True:
             logger.error(f'No match for {channel=}, nothing plotted')
-        plt.legend(fontsize='x-small')
+        plt.legend(fontsize='small')
         if outfile:
             plt.savefig(outfile)
         if show:
@@ -854,6 +855,7 @@ class SpectralDensity:
         outfile=None,
         title=None,
         ylim=None,
+        grid=False,
         **fig_kw
     ):
         """
@@ -868,6 +870,7 @@ class SpectralDensity:
             outfile (str): save figure to this filename
             title (str): custom plot title
             ylim (tuple, None): (min, max) dBs to plot on each y axis
+            grid (bool or str): False, True, 'major', 'minor', or 'both'
             fig_kw (dict): all additional keyword arguments (such as `figsize`
                 and `dpi`) are passed to the `pyplot.figure` call
         Returns:
@@ -885,6 +888,13 @@ class SpectralDensity:
         if title is None:
             title = "Auto-spectra"
         fig.suptitle(title)
+        if grid is not False:
+            if grid is True:
+                plt.grid(visible=True)
+            elif grid in ('major', 'minor', 'both'):
+                plt.grid(visible=True, which=grid)
+            else:
+                raise ValueError(f'Invalid {grid=}')
         if not overlay:
             for key, i in zip(x, range(len(x))):
                 i_row = int(i / cols)
@@ -1178,33 +1188,39 @@ class SpectralDensity:
 
     @staticmethod
     def plots_coherences(sds,
-                         sds_names=None,
-                         line_kws=None,
                          labels=None,
+                         channel_pair=None,
+                         # sds_names=None,
                          x=None,
                          y=None,
                          display='sparse',
                          show=True,
+                         outfile=None,
                          label_by="chan",
                          sort_by="chan",
-                         outfile=None,
                          title=None,
-                         channel_pair=False,
+                         line_kws=None,
                          **fig_kw):
         """
         Plot overlaid coherences of multiple SpectralDensity objects
 
         Args:
-            sds (list): SpectralDensity functions to plot.  Each must have
-                same seed_ids
-            sds_names (list): Names to give to each sd in the plot legend
-            line_kws(list of dict): Line keywords for each SpectralDensity
-                function
-            labels(list of dict): Labels for each SpectralDensity function
-            channel_pair(False or 2-tuple): if a 2-tuple, plot only a single
+            sds (list): SpectralDensity objects to plot.  Each must have
+                the same seed_ids
+            labels (list of str): labels for each sds object
+            channel_pair(None or 2-tuple): if a 2-tuple, plot only a single
                 channel_pair, specified as (in_chan, out_chan)
-            **kwargs: any arguments used in plot_coherences, except
-                overlay (always true)
+            x (None or list):: x-axis channel names
+            y (None or list): y-axis channel names
+            display (str): UNUSED
+            show (bool): plot to the scrren
+            outfile (None or str): save plot to the given filename
+            label_by= (None or str): organize labels by 'full', 'chan', or 'loc-chan'
+            sort_by= (None or str): sort labels by 'full', 'chan', or 'loc-chan'
+            title (str): Title for figure
+            line_kws(list of dict): :class:`matplotlib.lines.Line2D`
+                keywords for each SpectralDensity object
+            **fig_kws: any arguments for the figure)
         Returns:
             figinfo (list):
                 fig
@@ -1213,18 +1229,18 @@ class SpectralDensity:
         # Validate inputs
         assert display == 'sparse'
         line_kws, labels = _validate_plots_args(sds, line_kws, labels)
-        if sds_names is None:
-            sds_names = [max(s.clean_sequences, key=len) for s in sds]
-        else:
-            assert len(sds_names) == len(sds)
+        sds_names = [max(s.clean_sequences, key=len) for s in sds]
+        # fill labels, x and y with sds_names if they are empty
+        labels = [l if l is not None else s for l, s in zip (labels, sds_names)]
 
         x_inp, y_inp = x, y
         strfun = sds[0]._seedid_strfun(sort_by)
         x = sorted(sds[0]._get_validate_ids(x_inp), key=strfun)
         y = sorted(sds[0]._get_validate_ids(y_inp), key=strfun)
+        print(f'{x=}, {y=}')
         # Copied from plot_coherences "sparse" option, there's got
         # to be a way not to repeat code
-        if channel_pair is not False:
+        if channel_pair is not None:
             x1 = [i for i in x if i.split('.')[-1] == channel_pair[0] ]
             y1 = [i for i in y if i.split('.')[-1] == channel_pair[1] ]
             if len(x1) == 0:
@@ -1246,11 +1262,11 @@ class SpectralDensity:
         net_sta = '.'.join(sds[0].seed_ids[0].split('.')[:2])
         fig.suptitle(f"{net_sta} Coherences, multiple SpectralDensitys")
         first_time = True
-        for sd, l_kw in zip(sds, line_kws):
+        for sd, l_kw, label in zip(sds, line_kws, labels):
             sort_strfun = sd._seedid_strfun(sort_by)
             x = sorted(sd._get_validate_ids(x_inp), key=sort_strfun)
             y = sorted(sd._get_validate_ids(y_inp), key=sort_strfun)
-            if channel_pair is not False:
+            if channel_pair is not None:
                 x1 = [i for i in x if i.split('.')[-1] == channel_pair[0] ]
                 y1 = [i for i in y if i.split('.')[-1] == channel_pair[1] ]
                 if len(x1) == 0:
@@ -1286,23 +1302,23 @@ class SpectralDensity:
                         show_ylabel=new_row & first_time,
                         show_xlabel=(i == j) & first_time,
                         ylabel=in_chan_label,
+                        label=label,
+                        plot_legend=False,
                         title=title,
                         **l_kw
                     )
                     new_row = False
                     ax_array[i, j] = (axa, axp)
+                    # if i==0 and j==0 and channel_pair is not None:
+                    #     axa.legend()
 
         # Add the legend (colors of different sdss in the list)
-        if rows > 1 or cols > 1:
+        if channel_pair is None:
+            # If there are multiple plots, put the legend in the bottom
+            # left corner
             ax_legend = plt.subplot2grid((rows, cols), (rows-1, 0))
             ax_legend.set_axis_off()
-        else:
-            ax_legend = ax_array[0, 0][0]
-        for sds_name, l_kw, label in zip(sds_names, line_kws, labels):
-            if label is None:
-                label = sds_name
-            ax_legend.plot([1, 1], [1, 1], label=label, **l_kw)
-        ax_legend.legend(fontsize='x-small')
+            ax_legend.legend(handles=ax_array[0,0][0].lines,  fontsize='small')
 
         # Plot and/or save the figure
         if outfile:
@@ -1313,7 +1329,7 @@ class SpectralDensity:
 
     def plot_coherences(self, x=None, y=None, display='sparse', show=True,
                         outfile=None, label_by="full", sort_by="full",
-                        overlay=False, **fig_kw):
+                        overlay=False, title=None, **fig_kw):
         """
         Plot coherences
 
@@ -1328,6 +1344,7 @@ class SpectralDensity:
                 "overlay": One plot with all upper diagonal elemetns overlain
             overlay (bool): [GRANDFATHERED]: same as display="overlay"
             show (bool): show on desktop
+            title (str): Customize overall figure title
             outfile (str): save to the named file
             label_by (str): labels to put on x and y axes ('full', 'chan' or
                 'loc-chan')
@@ -1353,22 +1370,20 @@ class SpectralDensity:
         if display == 'full':
             rows, cols = len(x), len(y)
             ax_array = np.ndarray((rows, cols), dtype=tuple)
-            # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
             fig = plt.figure(**fig_kw)
-            fig.suptitle("Coherences")
             strfun = self._seedid_strfun(label_by)
             for in_chan, i in zip(x, range(rows)):
                 for out_chan, j in zip(y, range(cols)):
                     in_chan_label = strfun(in_chan)
                     out_chan_label = strfun(out_chan)
-                    title = out_chan_label if i == 0 else None
+                    ax_title = out_chan_label if i == 0 else None
                     axa, axp = self.plot_one_coherence(
                         in_chan, out_chan,
                         fig, (rows, cols), (i, j),
                         show_ylabel=j == 0,
                         show_xlabel=i == rows - 1,
                         ylabel=in_chan_label,
-                        title=title,
+                        title=ax_title,
                     )
                     ax_array[i, j] = (axa, axp)
         if display == 'sparse':
@@ -1379,9 +1394,7 @@ class SpectralDensity:
                 rows -= 1
                 cols -= 1
             ax_array = np.ndarray((rows, cols), dtype=tuple)
-            # fig, axs = plt.subplots(rows, cols, sharex=True, **fig_kw)
             fig = plt.figure(**fig_kw)
-            fig.suptitle("Coherences")
             strfun = self._seedid_strfun(label_by)
             plotted = []
             for in_chan, i in zip(x, range(len(x))):
@@ -1391,21 +1404,18 @@ class SpectralDensity:
                     if reduce_display is True:
                         j -= 1
                     if in_chan == out_chan or (out_chan, in_chan) in plotted:
-                        # if i < rows and j >= 0:
-                        #     axs[i, j].axis('off')
                         continue
                     plotted.append((in_chan, out_chan))
                     in_chan_label = strfun(in_chan)
                     out_chan_label = strfun(out_chan)
-                    title = out_chan_label if i == 0 else None
+                    ax_title = out_chan_label if i == 0 else None
                     axa, axp = self.plot_one_coherence(
                         in_chan, out_chan,
                         fig, (rows, cols), (i, j),
                         show_ylabel=new_row,
-                        # show_xlabel=i == rows - 1,
                         show_xlabel=i == j,
                         ylabel=in_chan_label,
-                        title=title,
+                        title=ax_title,
                     )
                     new_row = False
                     ax_array[i, j] = (axa, axp)
@@ -1421,10 +1431,7 @@ class SpectralDensity:
                 rows = 1
             cols = int(np.ceil(len(combis)/rows))
             ax_array = np.ndarray((rows, cols), dtype=tuple)
-            # fig, axs = plt.subplots(rows, cols, sharex=True, sharey=True,
-            #                         **fig_kw)
             fig = plt.figure(**fig_kw)
-            fig.suptitle("Coherencies")
             strfun = self._seedid_strfun(label_by)
             i, j = 0, 0
             for combi in combis:
@@ -1432,7 +1439,7 @@ class SpectralDensity:
                 out_chan = combi[1]
                 in_chan_label = strfun(in_chan)
                 out_chan_label = strfun(out_chan)
-                title = out_chan_label if i == 0 else None
+                ax_title = out_chan_label if i == 0 else None
                 # Get unique part of in_chan_label
                 for ctr in range(len(in_chan_label)):
                     if ctr > len(out_chan_label):
@@ -1460,9 +1467,7 @@ class SpectralDensity:
                     i += 1
         elif display == 'overlay':
             ax_array = np.ndarray((1, 1), dtype=tuple)
-            # fig, axs = plt.subplots(1, 1, sharex=True, **fig_kw)
             fig = plt.figure(**fig_kw)
-            fig.suptitle("Coherences")
             labels = []
             axa, axp = None, None
             for in_chan, i in zip(x, range(len(x))):
@@ -1482,6 +1487,9 @@ class SpectralDensity:
                     )
                     labels.append(label)
             ax_array[0, 0] = (axa, axp)
+        if title is None:
+            title = "Coherences"
+        fig.suptitle(title)
         if outfile:
             plt.savefig(outfile)
         if show:
@@ -1493,7 +1501,7 @@ class SpectralDensity:
                            show_xlabel=True, show_ylabel=True,
                            ax_a=None, ax_p=None,
                            ylabel=None, label=None, title=None,
-                           show_phase=True,
+                           show_phase=True, plot_legend=True,
                            outfile=None, show=False, **kwargs):
         """
         Plot one coherence
@@ -1557,9 +1565,8 @@ class SpectralDensity:
             ls="--",
         )
         ax_a.set_ylim(0, 1)
-        # ax_a.set_yticklabels([])
         # Plot amplitude
-        if label is not None:
+        if label is not None and plot_legend is True:
             ax_a.legend(fontsize='small')
         if not show_ylabel:
             ax_a.set_yticklabels([])
@@ -2048,18 +2055,17 @@ def _remove_subtracted_loc(id):
 
 
 def _validate_plots_args(sds, line_kws, labels):
-    """ validate arguments passed to plots() and to plots_coherences()"""
+    """
+    Validate arguments passed to plots() and to plots_coherences()
+    """
+    # sds must be a list or tuple
     if not isinstance(sds, (list, tuple)):
         raise ValueError('sds is not a list or tuple')
+    # sds items must be SpectralDensity instances
     for i, sd in zip(range(len(sds)), sds):
         if not isinstance(sd, SpectralDensity):
             raise ValueError(f'sds[{i}] is not a SpectralDensity object')
-        # if i == 0:
-        #     seed_ids = sorted(sds[0].seed_ids)
-        # else:
-        #     if not (seed_ids == sorted(sd.seed_ids)):
-        #         raise ValueError(f"sds[{i}].seed_ids={sd.seed_ids}"
-        #                          f" does not match {sds[0].seed_ids=}")
+    # line_kws must be None, or a list/tuple of the same length as sds
     if line_kws is not None:
         if not isinstance(line_kws, (list, tuple)):
             raise ValueError('line_kws is not a list or tuple')
@@ -2067,6 +2073,7 @@ def _validate_plots_args(sds, line_kws, labels):
             raise ValueError(f'{len(line_kws)=} != {len(sds)=}')
     else:
         line_kws = [{} for x in sds]
+    # labels must be None, or a list/tuple of the same length as sds
     if labels is not None:
         if not isinstance(labels, (list, tuple)):
             raise ValueError('labels is not a list or tuple')

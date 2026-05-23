@@ -1,18 +1,12 @@
 #!env python3
 """ Model and remove transients from BBOBS data"""
-
-# import math as M
-# import sys
-# import glob
-# import obspy
-
+from scipy.signal import butter, sosfiltfilt
 from obspy.core import UTCDateTime
 from obspy.core import Stream  # , Trace
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
-
-# from scipy import signal
+from ..time_spans import TimeSpans
 
 from .dirac_comb import comb_calc, comb_remove
 from .utils import stack_data, input_float, input_float_tuple
@@ -30,22 +24,52 @@ class PeriodicTransient:
     The program will make transient slices starting between
     transient_starttime and 1/3 of self.period earlier
 
-    transient_starttime must not be too late, a few seconds early is ok
+    To include the entire transient in each trace slice,
+    transient_starttime must not be too late. A few seconds early is OK.
 
-    Args:
+    Parameters:
         name (str): name of this periodic transient (e.g., 'hourly')
         period (float): seconds between each transient
         dp (float): how many seconds to change the period by when testing
-                   for better values
+                   for better values.  Should be equal to or slightly greater
+                   than the uncertainty in your estimate of `period`
         clips (tuple): clip values outside of this range (low, high).
                 Should contain the max range of the transient
         transient_starttime (str or ~class `obspy.core.UTCDateTime`): onset
                 time of earliest transient.
-
+        freq_HP (float or bool): highpass corner frequency used for training
+            and matching.  If True, sets to 1/period.  If False, do not cut off
+            low frequencies
+        freq_LP (float): lowpass corner frequency used for training and
+            matching (0.05 is a good value to remove microseisms)
+        transient_model: Model of the transient
+        dirac_comb: the dirac comb to convolve with the transient
+        n_transients_used: number of transients used to calculate the model
+        self.tm: transient model shifted one left
+        self.tp: transient model shifted one right
     """
 
-    def __init__(self, name, period, dp, clips, transient_starttime):
-        """Initialization"""
+    def __init__(self, name, period, dp, clips, transient_starttime,
+                 freq_HP=True, freq_LP=0.05):
+        """
+        Constructor
+
+        Args:
+            name (str): name of this periodic transient (e.g., 'hourly')
+            period (float): seconds between each transient
+            dp (float): how many seconds to change the period by when testing
+                       for better values.  Should be equal to or slightly greater
+                       than the uncertainty in your estimate of `period`
+            clips (tuple): clip values outside of this range (low, high).
+                    Should contain the max range of the transient
+            transient_starttime (str or ~class `obspy.core.UTCDateTime`): onset
+                    time of earliest transient.
+            freq_HP (float or bool): highpass corner frequency used for training
+                and matching.  If True, sets to 1/period.  If False, do not cut off
+                low frequencies
+            freq_LP (float): lowpass corner frequency used for training and
+                matching (0.05 is a good value to remove microseisms)
+        """
         self.name = name
         self.period = float(period)
         self.dp = float(dp)
@@ -54,6 +78,8 @@ class PeriodicTransient:
             transient_starttime = UTCDateTime(transient_starttime)
         assert isinstance(transient_starttime, UTCDateTime)
         self.transient_starttime = transient_starttime
+        self.freq_HP = freq_HP
+        self.freq_LP = freq_LP
         # Values to be calculated
         self.transient_model = None
         self.dirac_comb = None
@@ -65,37 +91,69 @@ class PeriodicTransient:
 
     def __str__(self):
         s = f'"{self.name}": {self.period:.2f}s+-{self.dp}, clips={self.clips}'
+        s += f", training and matching freq bounds=({self.freq_HP}, {self.freq_LP})"
         s += f", transient_starttime={self.transient_starttime}"
         return s
 
-    def calc_timing(self, trace, eq_spans):
+    def calc_timing(self, trace, eq_spans=True):
         """
-        Calculate transient time parameters
+        Interactively calculate transient timing parameters.
 
+        The user chooses the transient period, clip levels and starttime
+        best fitting the data.
+        
         Args:
             trace (class obspy.core.Trace): data
-            eq_spans (:class:`TimeSpans`): times spans in which to zero data
+            eq_spans (:class:`TimeSpans` or bool): 
+                if TimeSpans: times spans in which to zero data
+                if True: use TimeSpans.from_eqs()
         """
-        self._verify(trace, eq_spans)
+        if eq_spans is True:
+            eq_spans = TimeSpans.from_eqs(trace)
+        elif eq_spans is False:
+            eq_spans = TimeSpans(None)
 
-    def calc_transient(self, trace, eq_spans, match=True, plots=False):
+        slice_starttime = self._calc_slice_starttime(trace)
+
+        # Set/verify clip levels
+        cliptrace = self._filtered_trace(trace)
+        self._ask_clips(cliptrace, eq_spans, slice_starttime)
+        print(f'clips level set to {self.clips}')
+
+        # Set/verify transient period
+        cliptrace.data.clip(self.clips[0], self.clips[1], out=cliptrace.data)
+        self._ask_period_or_time(cliptrace, eq_spans, slice_starttime, True)
+        print(f'period set to {self.period}')
+        
+        # Set/verify transient_starttime
+        self._ask_period_or_time(cliptrace, eq_spans, slice_starttime, False)
+        print(f'transient starttime set to {self.transient_starttime}')
+
+    def calc_transient(self, trace, eq_spans=True, match=True, plots=False):
         """
         Calculate transient for a given trace and transient parameters
 
         Args:
             trace (:class:`obspy.core.stream.Trace`): input data trace
-            eq_spans (:class:`TimeSpans`): times spans in which to zero data
-            match (bool): match and cancel each pulse separately
+            eq_spans (:class:`TimeSpans` or bool): 
+                if TimeSpans: times spans in which to zero data
+                if True: use TimeSpans.from_eqs()
             plots (bool): plot results
         """
+        if eq_spans is True:
+            eq_spans = TimeSpans.from_eqs(trace)
+        elif eq_spans is False:
+            eq_spans = TimeSpans(None)
+
         slice_starttime = self._calc_slice_starttime(trace)
         if self.transient_starttime < trace.stats.starttime:
             print("\tshifting transient startime to first within data")
             self.transient_starttime = (
                 trace.stats.starttime + self._transient_offset(trace)
             )
+        filttrace = self._filtered_trace(trace)
         transient, dc, nG, tm, tp, cbuff = comb_calc(
-            trace, self, plots, eq_spans, slice_starttime
+            filttrace, self, plots, eq_spans, slice_starttime
         )
         transient.stats.channel = f"TR{trace.stats.channel[-1]}"
         if plots:
@@ -107,43 +165,41 @@ class PeriodicTransient:
         # print(f"calc_transient(): {cbuff=}")
         self.comb_buffer = cbuff
 
+    def _filtered_trace(self, tr, zerophase=True):
+        filt_trace = tr.copy()
+        if self.freq_HP is False:
+            filt_trace.filter("lowpass", freq=self.freq_LP, zerophase=zerophase)
+        elif self.freq_HP is True:
+            filt_trace.filter("bandpass", freqmin=1./self.period, freqmax=self.freq_LP, zerophase=zerophase)
+        else:
+            filt_trace.filter("bandpass", freqmin=self.freq_HP, freqmax=self.freq_LP, zerophase=zerophase)
+        return filt_trace
+
     def remove_transient(self, trace, match=True, plots=False):
         """
         Remove transient from trace
 
         Args:
             trace(:class:`obspy.Trace`): input data
-            match (bool): match each transient individually
+            match (bool): match each transient individually.  This is useful
+                if the transient dominates the trace, not if the transient is
+                subtle.
         Returns:
             (:class:`obspy.Trace`): output data
         """
         assert self.transient_model is not None
 
         slice_starttime = self._calc_slice_starttime(trace)
-        out, synth = comb_remove(trace, self, match, slice_starttime)
+        out, synth = comb_remove(trace, self._filtered_trace(trace),
+                                 self, match, slice_starttime)
         if plots:
+            # Change channel names for the plot
             out.stats.channel = "CLN"
             synth.stats.channel = "SYN"
             Stream([trace, out, synth]).plot(method="full")
+            # Revert output channel name
+            out.stats.channel=trace.stats.channel
         return out
-
-    def _verify(self, trace, eq_spans):
-        """
-        Interactively verify transient parameters
-
-        Args:
-            trace (~class `obspy.stream.Trace`): input data trace
-            eq_spans (:class:`TimeSpans`): times spans in which to zero data
-        """
-        slice_starttime = self._calc_slice_starttime(trace)
-
-        # Set/verify clip levels
-        self._ask_clips(trace, eq_spans, slice_starttime)
-
-        # SET/VERIFY TRANSIENT PERIOD
-        cliptrace = trace.copy()
-        cliptrace.data.clip(self.clips[0], self.clips[1], out=cliptrace.data)
-        self._ask_period(cliptrace, eq_spans, slice_starttime)
 
     def _ask_clips(self, trace, eq_spans, slice_starttime):
         """
@@ -151,14 +207,13 @@ class PeriodicTransient:
 
         Args:
             trace (~class `obspy.core.stream.Trace``): seismological trace
-            eq_spans (:class:`TimeSpans`): times spans in which to zero data
             slice_starttime (UTCDateTime): first slice starttime
-            testper (float): length of each slice (seconds)
-            clip (tuple): default clip values (lo, hi)
+            eq_spans (:class:`TimeSpans` or bool): times spans in which to
+                zero data
         """
         stt = trace.stats.starttime
         sps = trace.stats.sampling_rate
-        sta = trace.stats.station
+        seed_id = trace.id
 
         stack_trace = trace.copy()
         stack_trace = eq_spans.zero(stack_trace)
@@ -168,7 +223,7 @@ class PeriodicTransient:
         nrows, ncols = stack.shape
         time = np.arange(nrows) / sps
         # slicenums = np.arange(ncols)
-        title = "{} sliced at {:g}s, stacked".format(sta, self.period)
+        title = f"{seed_id}, sliced at {self.period:g}s, stacked, clips={self.clips}"
 
         # Show clip levels and verify that they are ok
         fig, ax = plt.subplots(1, 1, num="Select clip levels")
@@ -179,7 +234,7 @@ class PeriodicTransient:
         ax.set_xlabel("Time (seconds)")
         ax.set_title(title)
         ax.set_ylim((c1 - (c2 - c1) * 0.3, c2 + (c2 - c1) * 0.3))
-        ax.legend()
+        ax.legend(loc="upper left")
         plt.ion()
         plt.show()
         while True:
@@ -198,7 +253,7 @@ class PeriodicTransient:
         plt.close(fig)
         plt.ioff()
 
-    def _ask_period(self, trace, eq_spans, slice_starttime):
+    def _ask_period_or_time(self, trace, eq_spans, slice_starttime, ask_period=True):
         """
         Show transient alignment and ask to update period until acceptable
 
@@ -209,10 +264,11 @@ class PeriodicTransient:
             trace (~class obspy.core.stream.Trace): seismological trace
             eq_spans (:class:`TimeSpans`): times spans in which to zero data
             slice_starttime (UTCDateTime): first slice starttime
+            ask_period (bool): True: ask for period, False: ask for time
         """
         stt = trace.stats.starttime
         sps = trace.stats.sampling_rate
-        sta = trace.stats.station
+        seed_id = trace.id
 
         stack_trace = trace.copy()
         stack_trace = eq_spans.zero(stack_trace)
@@ -229,6 +285,11 @@ class PeriodicTransient:
         fig.autofmt_xdate()
         plt.ion()
         plt.show()
+        
+        if ask_period is True:
+            print('\nIf the slope is positive, INCREASE the period')
+        else:
+            print('\nIf the dotted line is beneath the transient, enter a POSTIVE offset')
         while True:
             stack = stack_data(stack_trace.data, self.period * sps)
             nrows, ncols = stack.shape
@@ -237,14 +298,11 @@ class PeriodicTransient:
             timex = (
                 stack_trace.stats.starttime.matplotlib_date + x_offset / 86400
             )
-            # slicenums = np.arange(ncols)
             ref_offs = self._transient_offset(stack_trace)
-            title = "{}, transient, data start={},{}, period={:g}s".format(
-                sta,
-                self.transient_starttime.strftime("%Y%m%dT%H%M%S"),
-                stt.strftime("%Y%m%dT%H%M%S"),
-                self.period,
-            )
+            if ask_period is True:
+                title = f"{seed_id}, period={self.period:g}s"
+            else:
+                title = f'{seed_id}, transient_starttime={self.transient_starttime.strftime("%Y%m%dT%H%M%S")}'
             # plot as pcolor
             ax.set_title(title, size="medium")
             # ax.pcolormesh(slicenums, time, stack, shading='auto')
@@ -252,16 +310,25 @@ class PeriodicTransient:
             hline.set_ydata([ref_offs, ref_offs])
             plt.draw()
 
-            # Ask for new test period, continue if current value accepted
-            newval = input_float("Enter new test period", self.period)
-            if newval == self.period:
-                break
+            if ask_period is True:
+                # Ask for new test period, continue if current value accepted
+                newval = input_float("Enter new test period", self.period)
+                if newval == self.period:
+                    break
+                else:
+                    self.period = newval
             else:
-                self.period = newval
+                # Ask for transient_starttime offset
+                print(f'transient_starttime = {self.transient_starttime}')
+                offset = input_float("Enter offset seconds", 0.)
+                if offset == 0:
+                    break
+                else:
+                    self.transient_starttime += offset
         plt.close(fig)
         plt.ioff()
 
-    def _calc_slice_starttime(self, trace):
+    def _calc_slice_starttime(self, trace, verbose=True):
         """
         Choose first "slice" starttime so that transients start no more
         than 1/3 of the way in
@@ -270,18 +337,21 @@ class PeriodicTransient:
         """
         slice_starttime = trace.stats.starttime
         transient_offset = self._transient_offset(trace)
-        if transient_offset > self.period / 3:
-            shift = transient_offset - self.period / 3.0
-            slice_starttime += shift
-            print(f"\t{slice_starttime=}")
-            print(f"\t{self.transient_starttime=}")
-            print(f"\t{self.period=}")
-            print(
-                "\tFirst transient starts {:.0f}% of period into data".format(
-                    100.0 * transient_offset / self.period
+        max_offset = self.period / 3
+        if transient_offset > max_offset:
+            if verbose:
+                print(f"\told {slice_starttime=}")
+            slice_starttime += transient_offset - max_offset
+            if verbose:
+                print(f"\t{self.transient_starttime=}")
+                print(f"\t{self.period=}")
+                print(
+                    "\tFirst transient starts {:.0f}% of period into data".format(
+                        100.0 * transient_offset / self.period
+                    )
                 )
-            )
-            print(f"\tReducing to 33% by shifting forward {shift:g}s")
+                print(f"\tReducing to 33% by shifting forward {transient_offset - max_offset:g}s")
+                print(f"\tnew {slice_starttime=}")
         return slice_starttime
 
     def _transient_offset(self, trace):

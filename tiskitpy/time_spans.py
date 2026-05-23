@@ -684,10 +684,11 @@ def _eq_filename(starttime, endtime, minmag):
     Returns:
         filename (string): includes startday to endday information
     """
+    ts_dir = Path('.time_spans')
+    ts_dir.mkdir(exist_ok=True)
     tfmt = "%Y%m%d"
-    return "{}-{}_MM{:g}_eqcat.qml".format(
-        starttime.strftime(tfmt), endtime.strftime(tfmt), minmag
-    )
+    return str(ts_dir /
+        f"{starttime.strftime(tfmt)}-{endtime.strftime(tfmt)}_MM{minmag:g}_eqcat.qml")
 
 
 def _span_overlap(span_1, span_2):

@@ -4,11 +4,13 @@
 Removing Periodic Transients
 =============================
 
-Some data has periodic transients (instrument relevels, disk drive writing...)
-that can interfere with signal processing.  The ``PeriodicTransient`` class
-allows one to minimize these transients, if they are truly periodic and always
-have the same shape.  This is a labor-intensive, manual module, so if you use it
-on a dataset, please share your results!  Properties and methods are:
+Some data have periodic transients (instrument relevels, disk drive writing...)
+that can interfere with signal processing.
+The ``PeriodicTransient`` class lets you calculate and remove these transients,
+if they are truly periodic and always have the same shape.
+This is a labor-intensive, manual module, so if you use it
+on a dataset, please share your results!
+Properties and methods are:
 
 Constructor
 ---------------------
@@ -23,7 +25,8 @@ Properties
     - ``name`` (str): name of this periodic transient (e.g., 'hourly')
     - ``period`` (float): seconds between each transient
     - ``dp`` (float): how many seconds to change the period by when testing for better values
-    - ``clips`` (tuple): clip values outside of this range (low, high). Should include the max range of the transient
+    - ``clips`` (tuple): clip values outside of this range (low, high).
+      Should include the max range of the transient
     - ``transient_starttime`` (`UTCDateTime``): onset time of earliest transient.
 - Calculated by ``PeriodicTransient.calc_transient()``
     - ``transient_model`` (): Model of the periodic transient.
@@ -36,11 +39,14 @@ Properties
 Methods
 ---------------------
 
-- :meth:`calc_timing <tiskitpy.PeriodTransient.calc_timing>`: Calculate the transient period
-- :meth:`calc_transient <tiskitpy.PeriodTransient.calc_timing>`: Calculate the shape of the transient
-- :meth:`calc_timing <tiskitpy.PeriodTransient.remove_transient>`: Remove the transient from a data trace
+- :meth:`calc_timing <tiskitpy.PeriodTransient.calc_timing>`: Interactively
+  calculate transient parameters
+- :meth:`calc_transient <tiskitpy.PeriodTransient.calc_transient>`: Calculate
+  the shape of the transient
+- :meth:`remove_transient <tiskitpy.PeriodTransient.remove_transient>`: Remove
+  the transient from a data trace
 
 Example
 ---------------------
 
-No example yet
+:ref:`tiskitpy.PeriodicTransient_example`

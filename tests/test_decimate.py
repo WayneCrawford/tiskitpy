@@ -92,6 +92,19 @@ class TestMethods(unittest.TestCase):
                 ff.plot()
                 plt.savefig(f'SAC_decim{decim}.png')
 
+    def test_decimate_init(self):
+        """Run decimation on data with a big earthquake"""
+        
+        decim = Decimator([2., 5.])
+        self.assertIsInstance(decim.decimation_factor, int)
+        for d in decim.decimates:
+            self.assertIsInstance(d, int)
+        with self.assertRaisesRegex(ValueError,
+                                   'decimates value 12 is not in \\(2, 3, 4, 5, 6, 7\\)'):
+            decim = Decimator([12])
+        with self.assertRaisesRegex(ValueError, 'decimates item 2\\.5 is not an integer'):
+            decim = Decimator([2.5])
+
     def test_decimate_data(self):
         """Run decimation on data with a big earthquake"""
         st = stream_read(str(self.test_path / 'XS.S10D.20161212T2053.mseed'))

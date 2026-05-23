@@ -27,8 +27,9 @@ keywords = ['oceanography', 'marine', 'OBS']
 dynamic = ["version"]
 
 [project.scripts]
-tiskitpy_decimate_SDS = "tiskitpy.scripts.decimate_SDS:main"
-tiskitpy_get_SDS_inventory = "tiskitpy.scripts.get_SDS_inventory:main"
+tiskitpy = "tiskitpy.console_scripts.argparser:main"
+tiskitpy_decimate_SDS = "tiskitpy.console_scripts.decimate_SDS:main"
+tiskitpy_get_SDS_inventory = "tiskitpy.console_scripts.get_SDS_inventory:main"
 
 [build-system]
 requires = ["setuptools"]

@@ -17,6 +17,8 @@ These codes and data can be found in the directory
    examples/6_time_spans
    examples/7_combined
    examples/8_combined_online
+   examples/9_fir_converter
    examples/9_decimate_SDS
    examples/10_compliance
    examples/11_compliance_noise
+   examples/12_periodic_transient

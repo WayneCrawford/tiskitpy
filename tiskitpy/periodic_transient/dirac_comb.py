@@ -39,12 +39,16 @@ def comb_calc(inp, tp, plots, noise_spans, slice_starttime):
             (np.array): transient starting one sample earlier
             (np.array): transient starting one sample later,
             (?): )dirac comb buffer
+            
+    A useful update would be to adjust the comb for each transient, so that
+    comb_remove would not need to try to match.  It's better to match here because
+    the comb is generally calculated on more heavily filtered data.
     """
     print(f"Running comb_calc({tp}")
     # c1, c2 = tp.clips[0], tp.clips[1]
     sps = inp.stats.sampling_rate
     dt = 1 / sps
-    noise_spans.append(
+    noise_spans.combine(
         _remove_noisy(inp, noise_spans, slice_starttime, tp.period, plot=plots)
     )
     # eq_template = _remove_noisy(inp, eq_template, slice_starttime,
@@ -72,19 +76,22 @@ def comb_calc(inp, tp, plots, noise_spans, slice_starttime):
     return transient, dirac_comb, nt, xm, xp, cbuff
 
 
-def comb_remove(inp, tp, match, slice_starttime, plots=False):
+def comb_remove(inp, inp_filt, tp, match, slice_starttime, plots=False):
     """
     Remove near-periodic transients from signal
 
-    :param inp: the data to be cleaned
-    :type inp: ~class `obspy.core.stream.Trace`
-    :param tp: PeriodicTransient object
-    :param match: match and cancel each pulse separately
-    :type match: bool
-    :param slice_starttime: first slice starttime
-    :param plots: plot stuff
-    :type plots: bool
-    :returns: cleaned signal, transient time series used to clean
+    Args: 
+        inp (:class: `obspy.core.Stream.Trace`): the data to be cleaned
+        inp_filt (:class: `obspy.core.Stream.Trace`): filtered version of the data to be cleaned
+        tp (:class: `PeriodicTransient`): object
+        match (bool): match and cancel each pulse separately
+        slice_starttime: first slice starttime
+        plots (bool): plot stuff
+    
+    Returns:
+        (tuple):
+            (:class: `obspy.core.Stream.Trace): the cleaned signal
+            (:class: `obspy.core.Stream.Trace): the transient time series used to clean
     :rtype: obspy.trace, obspy.trace
     """
     print(f"Running comb_clean({tp}, match={match}")
@@ -94,7 +101,11 @@ def comb_remove(inp, tp, match, slice_starttime, plots=False):
         inp, tp.dirac_comb, tp.transient_model, tp.comb_buffer, plots
     )
     if match:
-        out = _match_each(inp, out, synth, slice_starttime, tp, plots=plots)
+        out_filt, synth_filt = _comb_remove_all(
+            inp_filt, tp.dirac_comb, tp.transient_model, tp.comb_buffer, plots)
+        out = _match_each(inp, out, synth,
+                          inp_filt, out_filt, synth_filt,
+                          slice_starttime, tp, plots=plots)
 
     return out, synth
 
@@ -137,7 +148,7 @@ def _refine_period(tp, inp, noise_spans, slice_starttime):
 
 
 def _match_each(
-    inp, out, synth, slice_starttime, tp, adjust_limit=2, plots=False
+    inp, out, synth, inp_filt, out_filt, synth_filt, slice_starttime, tp, adjust_limit=2, plots=False
 ):
     """
     Individually shift each transient to best match data
@@ -145,6 +156,9 @@ def _match_each(
     :param inp: input waveform
     :param out: output waveform
     :param synth: synthetic transient waveform
+    :param inp_filt: input filtered waveform
+    :param out_filt: output filtered waveform
+    :param synth_filt: synthetic transient filtered waveform
     :param slice_starttime: starttime of first slice
     :param tp: PeriodicTransient object
 
@@ -164,7 +178,7 @@ def _match_each(
     # data_clipped = inp.data.clip(tp.clips[0], tp.clips[1])
     for i in range(k):  # 0,1...k-1   =1:k
         out = _match_one(
-            out, i, synth, slice_starttime, tp, adjust_limit, plots
+            i, out, synth, out_filt, synth_filt, slice_starttime, tp, adjust_limit, plots
         )
 
     # I COULD (SHOULD?) RECALCULATE THE TRANSIENT USING THE IMPROVED COMB
@@ -181,33 +195,41 @@ def _match_each(
     return out
 
 
-def _match_one(out, i, synth, slice_starttime, tp, adjust_limit=2, plot=False):
+def _match_one(i, out, synth, out_filt, synth_filt, slice_starttime, tp, adjust_limit=2, plot=False):
     """
     Find the best combination of the transient shifted one left and one right
 
-    Find [amp_left;amp_right] that minimize energy in the equation
+    Find [amp_left; amp_right] that minimize energy in the equation
         [transient_left(:) transient_right(:)]*[amp_left; amp_right] = out
 
-    :param out: data trace to be corrected
-    :param synth: synthetic transient waveform
-    :param slice_starttime: starttime of first slice
-    :param tp: PeriodicTransient object
+    Args:
+        out (:class: `obspy.core.Stream.Trace`): data to be corrected
+        synth (:class: `obspy.core.Stream.Trace`): synthetic transient waveform
+        out_filt (:class: `obspy.core.Stream.Trace`): filtered data to use
+            to calculate correction
+        synth_filt (:class: `obspy.core.Stream.Trace`): synthetic transient
+            filtered waveform
+        slice_starttime (:class: `obspy.UTCDateTime`): starttime of first slice
+        tp (:class: `tiskitpy.PeriodicTransient`): Periodic Transient
     """
     dt = 1 / out.stats.sampling_rate
     nx = tp.transient_model.data.size
-    # print(f'{nx=}')
     n = out.stats.npts
     # round to nearest integer
     n1 = M.floor((slice_starttime - out.stats.starttime + i * tp.period) / dt)
     n2 = n1 + nx
-    assert n1 > 0
-    assert n2 <= n, f"{n2=} is beyond end of data ({n=})"
+    if n1 < 0:
+        raise ValueError("window start {n1=} before start of data: {slice_starttime=}, trace starttime = {out.stats.starttime}")
+    if n2 > n:
+        raise ValueError(f"window end {n2=} is beyond end of data ({n=}): {slice_starttime+n2*dt}, trace endtime={out.stats.endtime}")
     # Find best combination of one before and one after to match transient
     g = np.zeros((nx, 1))
+    g_filt = np.zeros((nx, 1))
     g[:, 0] = out.data[n1:n2]  # Clipped version for calc
+    g_filt[:, 0] = out_filt.data[n1:n2]  # Clipped version for calc
     A = np.array([tp.tm, tp.tp]).T
     # Solve c for A*c = g
-    c, res, rank, s = np.linalg.lstsq(A, g, rcond=None)
+    c, res, rank, s = np.linalg.lstsq(A, g_filt, rcond=None)
     # IGNORE CORRECTIONS THAT ARE TOO LARGE
     if np.mean(abs(c)) > adjust_limit:
         print(f"Did not tune transient {i:d}: mean of adjustments > allowed:")
@@ -216,28 +238,30 @@ def _match_one(out, i, synth, slice_starttime, tp, adjust_limit=2, plot=False):
                 c[0, 0], c[1, 0], adjust_limit
             )
         )
+        return out
     res_transient = np.matmul(A, c)
+    gg_filt = g_filt - res_transient
     gg = g - res_transient
-
-    # The [:,0]s at the end reduce the arrays from Mx1 to one-dim
-    # M-length
-    comb = tp.dirac_comb.data
+    # The [:,0]s at the end reduce the arrays from Mx1 to 1D M-length
     out.data[n1:n2] = gg[:, 0]
-    synth.data[n1:n2] = synth.data[n1:n2] + res_transient[:, 0]
-    # Set up comb shifted one to right ("m") and one to left ("p")
-    # This seems contradictory, but using [n1-1:n2-1] ("minus") shifts
-    # delta to the right and is consistent with definitions of tp.tm & tp.tp
-    if n1 == 0:
-        comb_m = np.hstack((np.zeros(1), comb[n1: n2 - 1]))
-    else:
-        comb_m = comb[n1 - 1: n2 - 1]
-    if n2 == n:
-        comb_p = np.hstack((comb[n1 + 1: n2], np.zeros(1)))
-    else:
-        comb_p = comb[n1 + 1: n2 + 1]
-    comb_shifts = np.array([comb_m, comb_p]).T
-    shifted_comb = comb[n1: n2] + np.matmul(comb_shifts, c)[:, 0]
+
     if plot:
+        synth.data[n1:n2] = synth.data[n1:n2] + res_transient[:, 0]
+        # Set up comb shifted one to right ("m") and one to left ("p")
+        # This seems contradictory, but using [n1-1:n2-1] ("minus") shifts
+        # delta to the right and is consistent with definitions of tp.tm & tp.tp
+        comb = tp.dirac_comb.data
+        if n1 == 0:
+            comb_m = np.hstack((np.zeros(1), comb[n1: n2 - 1]))
+        else:
+            comb_m = comb[n1 - 1: n2 - 1]
+        if n2 == n:
+            comb_p = np.hstack((comb[n1 + 1: n2], np.zeros(1)))
+        else:
+            comb_p = comb[n1 + 1: n2 + 1]
+        comb_shifts = np.array([comb_m, comb_p]).T
+        shifted_comb = comb[n1: n2] + np.matmul(comb_shifts, c)[:, 0]
+
         plt.figure(51)
         nn = 10  # number of samples to plot on each side of peak
         iMax = comb[n1: n2].argmax()
