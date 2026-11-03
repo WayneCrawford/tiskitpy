@@ -11,8 +11,10 @@ from pathlib import Path  # , PurePath
 from argparse import ArgumentParser
 
 from .decimate_SDS import main as decimate_main
+from .decimate_SDS import add_arguments as add_decimate_arguments
 from .get_SDS_inventory import run as inventory_main
 from .fir_convert import main as fir_convert_main
+from .fir_convert import add_arguments as add_fir_convert_arguments
 
 warnings.simplefilter("once")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -50,25 +52,7 @@ def main():
         'decimate_SDS',
         description='Insert decimated channels and create a new StationXML file',
         help='decimate SDS data and update StationXML')
-    # flags
-    p.add_argument("SDS_root", help='SDS root directory')
-    p.add_argument("inv_file", help="StationXML file")
-    p.add_argument("input_sample_rate", type=float,
-                        help="Process channels having this sample rate")
-    p.add_argument("decim_factors", type=int, nargs="+",
-                        choices=[2,3,4,5,6,7],
-                        help="Sequence of decimation factors to use")
-    p.add_argument("--out_file", dest="output_file", default=None,
-                        help="Output StationXML filename "
-                             "(default = infile.replace('.xml', '_decim.xml')")
-    p.add_argument("--out_dir", dest="output_dir", default=None,
-                        help="Output data to a separate SDS directory")
-    p.add_argument("--station_only", action="store_true", default=False,
-                        help="Only create a new StationXML, not new data")
-    p.add_argument("--inv_dont_overwrite", action="store_true", default=False,
-                        help="Don't overwrite an existing inventory channel")
-    p.add_argument("-q", "--quiet", action="store_true",
-                        default=False, help="Suppress information messages")
+    add_decimate_arguments(p)
     p.set_defaults(func=decimate_main)
 
     # "SDS_inventory" subcommand
@@ -91,23 +75,18 @@ def main():
     p.set_defaults(func=inventory_main)
 
 
-    # "FIR_convert" subcommand
+    # "FIR_convert_SDS" subcommand
     p = subparsers.add_parser(
-        'FIR_convert',
-        description='Convert waveforms in an SDS directory from zero_phase to minimum phase reponse',
+        'FIR_convert_SDS',
+        description='Convert waveforms in an SDS directory from zero_phase '
+                    'to minimum phase response, and add the new channels to '
+                    'a StationXML file',
         epilog='You must enter one of --zeros_file, --conv_file, or --builtin. '
-               'If the output directory exists, you must specify an unused --loc_code.',
-        help='Convert waveforms to minimum phase equivalent')
-    # flags
-    p.add_argument("SDS_input", help='SDS input directory')
-    p.add_argument("SDS_output", help='SDS output directory')
-    group = p.add_mutually_exclusive_group()
-    group.add_argument('--zeros_file', help='specify a zero-phase filter zeros file')
-    group.add_argument('--conv_file', help='specify a zero-phase to minimum-phase conversion file')
-    group.add_argument('--builtin', help='specify a built-in conversion')
-    p.add_argument("--loc_code", help="Set the location code for output data")
-    p.add_argument("-q", "--quiet", action="store_true",
-                        default=False, help="Suppress information messages")
+               'Only channels in the StationXML file whose response contains '
+               'the corresponding FIR are converted.',
+        help='Convert SDS waveforms to minimum phase equivalent and update '
+             'StationXML')
+    add_fir_convert_arguments(p)
     p.set_defaults(func=fir_convert_main)
 
     args = parser.parse_args()

@@ -1,3 +1,40 @@
+## 2.4.0
+- Minor
+    - ``FIRConverter`` now handles consecutive data in separate files
+        - ``apply()`` takes preceding and following data (``prev_stream``,
+          ``next_stream``) and interpolates small gaps or accepts edge
+          effects (``gap_handling``)
+        - Neighbours offset from the sample grid by up to ``max_misalignment``
+          samples (default 0.5, e.g. clock-corrected day files) are treated
+          as consecutive
+        - ``pad_lengths()`` returns the number of neighbouring samples needed
+        - ``output_stage_values()`` and ``convert_response_stage()`` give the
+          FIR stage for the converted channels' metadata (minimum phase
+          coefficients, no symmetry, zero delay and correction)
+        - ``apply_SDS()`` fixed and tested: uses neighbouring day files
+          (including across years), writes output files with the new
+          location code and skips non-waveform files (e.g. ASCII logs)
+        - ``sps`` is now optional in ``from_zeros_file()`` (it is only
+          informational), which fixes ``tiskitpy FIR_convert_SDS --zeros_file``
+        - ``update_inventory()`` and ``convert_channel()`` add the converted
+          channels to an inventory
+    - New ``tiskitpy FIR_convert_SDS`` subcommand, with the same interface as
+      ``tiskitpy decimate_SDS``: takes both an SDS directory and a StationXML
+      file, converts only the channels whose response contains the converter
+      FIR, and writes an SDS and StationXML file with the new channels
+    - ``Decimator.decimate()`` takes neighbouring data (``prev_stream``,
+      ``next_stream``) and a decimation ``phase``, so that data decimated in
+      separate pieces are identical to data decimated in one piece
+    - ``decimate_SDS`` output is continuous across day files (including
+      across years)
+- Maintenance
+    - Fixed a bug in the comment text in compliance output CSV files
+    - ``decimate_SDS``: fixed ``tiskitpy decimate_SDS`` subcommand (crashed),
+      re-runs into an existing output directory, and decimated channels
+      that only change location code being rejected from the inventory
+    - Shared SDS and inventory tools in ``util_functions/sds_tools.py`` and
+      ``util_functions/inventory_tools.py``
+
 ### 2.3.1
 
 No change, just to avoid pip install conflict

@@ -15,5 +15,11 @@
          0.00251714466,  0.00298230513,        0.00155313976,        0.000288049545
     ],
     "type": "linear",
-    "timetag": 31.5
+    "timetag": 31.5,
+    "decimation_factor": 2,
+    "notes": [
+        "From Scherbaum's quant40Hz.prt (_old/coeffs/corr_coeffs/), whose format does not specify a decimation factor.",
+        "decimation_factor=2 is taken from Scherbaum's _old/coeffs/bin/corr_quanterra script, which always interpolates by 2 (20 Hz to 40 Hz) before applying quant40Hz.prt.",
+        "Scherbaum's scripts do not always use 2: quant320Hz.prt, mars88_f.prt and sil400Hz.prt use 4, reftekfir5.s.prt uses 5 and quant10Hz.prt uses 10."
+    ]
 }

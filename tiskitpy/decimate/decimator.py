@@ -24,6 +24,7 @@ import warnings
 import fnmatch
 # import logging
 
+import numpy as np
 from numpy import prod
 from obspy.core.stream import Stream, Trace
 from obspy.core.trace import Stats
@@ -32,6 +33,8 @@ from obspy.core.inventory import (FIRResponseStage,
 
 from .fir_filter import FIRFilter
 from ..logger import init_logger
+from ..util_functions.sds_tools import get_neighbour_pad
+from ..util_functions.inventory_tools import insert_channel
 
 logger = init_logger()
 
@@ -64,22 +67,122 @@ class Decimator:
         """Total decimation (product of `decimates`)"""
         return int(prod(self.decimates))
 
-    def decimate(self, data, keep_dtype=True):
+    @property
+    def reach(self):
+        """
+        Number of input samples on each side that an output sample depends on
+        """
+        reach, rate_factor = 0, 1
+        for d in self.decimates:
+            fir_filter = FIRFilter.from_SAC(d)
+            n_coeffs = len(fir_filter.coeffs)
+            reach += rate_factor * max(fir_filter.offset,
+                                       n_coeffs - 1 - fir_filter.offset)
+            rate_factor *= d
+        return reach
+
+    def decimate(self, data, keep_dtype=True, prev_stream=None,
+                 next_stream=None, phase=None, max_misalignment=0.5):
         """
         Apply decimator to data
+
+        If prev_stream, next_stream or phase is given, each trace is padded
+        with the `reach` samples of its consecutive neighbours (other traces
+        in data with the same id, prev_stream and next_stream) before
+        filtering, and the output starts at input sample `phase`, so that
+        data decimated in separate pieces are identical to data decimated in
+        one piece.  Otherwise, each trace is filtered alone (with edge
+        effects) and the output starts at the first input sample.
 
         Args:
             data (:class:`obspy.Stream` or :class:`obspy.Trace`): waveform data
             keep_dformat (bool): force output data format to be the same as
                 the input data_format
+            prev_stream (:class:`obspy.Stream`): data preceding data
+            next_stream (:class:`obspy.Stream`): data following data
+            phase (int or None): index of the first input sample to keep
+                (0 to decimation_factor - 1).  None is the same as 0
+            max_misalignment (float): largest offset (in samples) of a
+                neighbour from a trace's sample grid for which it is
+                considered consecutive (see `sds_tools.neighbour_gap()`)
         """
         self.keep_dtype = keep_dtype
-        if isinstance(data, Stream):
-            return self._run_stream(data)
-        if isinstance(data, Trace):
-            return self._run_trace(data)
-        else:
+        if prev_stream is None and next_stream is None and phase is None:
+            if isinstance(data, Stream):
+                return self._run_stream(data)
+            if isinstance(data, Trace):
+                return self._run_trace(data)
             raise TypeError("data is not a Stream or Trace")
+        if isinstance(data, Trace):
+            return self._run_trace_padded(
+                data, self._neighbours(data, Stream([data]), prev_stream,
+                                       next_stream),
+                phase or 0, max_misalignment)
+        if not isinstance(data, Stream):
+            raise TypeError("data is not a Stream or Trace")
+        st = data.copy()
+        st.traces = [self._run_trace_padded(
+                        tr, self._neighbours(tr, data, prev_stream,
+                                             next_stream),
+                        phase or 0, max_misalignment)
+                     for tr in data]
+        return st
+
+    @staticmethod
+    def _neighbours(trace, stream, prev_stream, next_stream):
+        """Traces with the same id as trace in the given streams"""
+        neighbours = [x for x in stream if x is not trace and x.id == trace.id]
+        for st in (prev_stream, next_stream):
+            if st is not None:
+                neighbours.extend(st.select(id=trace.id))
+        return [x for x in neighbours
+                if x.stats.sampling_rate == trace.stats.sampling_rate]
+
+    def _run_trace_padded(self, trace, neighbours, phase, max_misalignment):
+        """
+        Decimate an obspy Trace, padded with its consecutive neighbours
+
+        Args:
+            trace (:class:`obspy.Trace`): trace to decimate
+            neighbours (list): traces with the same id and sampling rate
+            phase (int): index of the first input sample to keep
+            max_misalignment (float): see `decimate()`
+        """
+        D = self.decimation_factor
+        if not 0 <= phase < D:
+            raise ValueError(f'{phase=} not in [0, {D})')
+        dtype = trace.data.dtype
+        npts = trace.stats.npts
+        sr = trace.stats.sampling_rate
+        n_pad = self.reach + D
+        pre = get_neighbour_pad(trace, neighbours, n_pad, 'before', 'edge', 0,
+                                max_misalignment)
+        post = get_neighbour_pad(trace, neighbours, n_pad, 'after', 'edge', 0,
+                                 max_misalignment)
+        pre = np.array([]) if pre is None else pre
+        post = np.array([]) if post is None else post
+        x = np.concatenate((pre, trace.data.astype(float), post))
+
+        # Filter and decimate each stage, starting at padded index q
+        q = (len(pre) + phase) % D
+        start = q
+        for d in self.decimates:
+            x = FIRFilter.from_SAC(d).convolve(x)
+            x = x[start % d::d]
+            start //= d
+        # x[m] is at padded index q + m*D: keep the samples within the trace
+        m_first = (len(pre) + phase - q) // D
+        n_out = len(range(phase, npts, D))
+
+        tr = trace.copy()
+        tr.stats.sampling_rate = sr / D
+        tr.stats.starttime = trace.stats.starttime + phase / sr
+        tr.data = x[m_first: m_first + n_out]
+        if self.keep_dtype is True and not tr.data.dtype == dtype:
+            tr.data = tr.data.astype(dtype)
+        tr.stats.channel, tr.stats.location = self._get_chan_loc(
+            tr.stats.channel, tr.stats.location, sr)
+        return tr
 
     def update_inventory(
         self, inv, st=None, normalize_firs=False, quiet=False,
@@ -134,34 +237,9 @@ class Decimator:
             self._modify_chan(
                 new_cha, net=stats.network, sta=stats.station, quiet=quiet
             )
-            seed_id = f'{stats.network}.{stats.station}.{stats.location}{new_cha.code}'
-            if new_cha.code == stats.channel:
-                # Do not overwrite mother channel
-                logger.error('New channel has same code as source channel '
-                             f'({seed_id}), rejected!')
-                continue
-            elif len(inv.select(network=stats.network, station=stats.station,
-                                location=stats.location, channel=new_cha.code)) > 0:
-                boilerplate = 'New channel has same seed_id as an existing channel'
-                if inv_force_overwrite is True:
-                    logger.warning(f'{boilerplate} ({seed_id}), overwriting!')
-                    inv = inv.remove(network=stats.network, station=stats.station,
-                                     location=stats.location, channel=new_cha.code)
-                else:
-                    logger.warning(f'{boilerplate} ({seed_id}), rejected!')
-                    continue
-            # Append new channel to inv
-            appended = False
-            for net in inv:
-                if not net.code == stats.network:
-                    continue
-                for sta in net:
-                    if sta.code == stats.station:
-                        sta.channels.append(new_cha)
-                        appended = True
-                        break
-            if appended is not True:
-                raise ValueError(f'Did not find a home for {seed_id}')        
+            inv, _ = insert_channel(inv, stats.network, stats.station,
+                                    new_cha, stats.location, stats.channel,
+                                    force_overwrite=inv_force_overwrite)
         return inv
 
     def update_inventory_from_nslc(self, inv, network="*", station="*",

@@ -170,22 +170,22 @@ we can run ``calc_transient()``:
 
 The first plot shows which traces were selected, which ones were rejected because
 of a known earthquake, and which ones were rejected because their variance was
-anomalously:
+anomalously high:
 
 .. image:: images/12_PeriodicTransient_calctransient_F1.png
 
-You have to close it manually, after which the code calculates the "dirac comb"
-it will multipy each transient by, testing periods from
-``transient_starttime - dp`` to ``transient_starttime + dp` for the best
+Close this window manually, after which the code calculates the "dirac comb"
+by which it will multipy each transient.  It tests periods between
+``transient_starttime - dp`` and ``transient_starttime + dp``, for the best
 overlap of transients.
-Once it has finished, it shows the "ideal" dirac comb, plus the one it will use
+Once it has finished, it shows the "ideal" dirac comb and "broken comb" it will use
 to calculate the transient (which lacks "teeth" around known earthquakes
 and high variance windows)
 
 .. image:: images/12_PeriodicTransient_calctransient_F2.png
 
-When you close this window, the code averages all aligned transients (using the
-"broken comb" and plots the result, next to a sample data window)
+When you close this window, the code stacks all aligned transients (using the
+"broken comb") and plots one example input window and the the averaged stack.
 
 .. code-block:: console
 
@@ -203,7 +203,7 @@ When you close this window, the code averages all aligned transients (using the
 
 .. image:: images/12_PeriodicTransient_calctransient_F3.png
 
-Finally, the code plots the best-fit transient, by itself
+Finally, the code plots the stacked transient, by itself
 
 .. image:: images/12_PeriodicTransient_calctransient_F4.png
 
@@ -221,14 +221,13 @@ and the synthetic transient that was removed from the data (channel code='SYN')
 
 .. image:: images/12_PeriodicTransient_removetransient.png
 
-We don't see any difference!  That is because the data are dominated by microseisms
-which are much stronger that the infragravity waves and therefore not strongly affected
-by the glitch.  ``calc_timing()`` and ``calc_transients()`` filter out, by
-default, the microseisms (parameters ``freq_HP`` and ``freq_LP`` )
+The top two plots (MHZ=original, CLN=cleaned) don't look different, because the
+signal is dominated by microseisms, which are much stronger that the
+infragravity waves and therefore not strongly affected
+by the glitch.
 
-If we want to see the effect of our work, we need to filter in a similar fashion.
-
-First, we import the corrected trace into ``stream``:
+If we want to see the effect of our work, we need to filter out the
+microseims. First, we replace ``stream``'s Z channel with the corrected trace:
 
 .. code-block:: python
 
@@ -239,9 +238,11 @@ First, we import the corrected trace into ``stream``:
             stream[i] = trace_after
             break
 
-Then we put the before and after traces in a stream, change the before stream's
-location code to 99 (so that we can tell which is which in the plot), lowpass filter
-the data at the same frequency as ``calc_timing`` and ``calc_transient``.
+Then we put the original and corrected traces into a new ``obspy`` Stream called
+``stream_compare``.  We change the original stream's location code to '99',
+so that we can tell which is which in the plot, and then we lowpass filter
+the data at the frequency which is used by
+PeriodicTransient for its ``calc_timing()`` and ``calc_transient()`` methods.
 
 .. code-block:: python
 

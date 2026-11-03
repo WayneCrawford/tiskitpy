@@ -1,8 +1,8 @@
+import copy
 import json
 import math
 from typing import Tuple
 from pathlib import Path
-import re
 
 # from pprint import pprint
 
@@ -11,9 +11,15 @@ from numpy.typing import ArrayLike
 # from numpy.fft import fft
 import matplotlib.pyplot as plt
 import scipy.signal as sig
-from obspy.core.stream import read as stream_read
 from obspy import UTCDateTime
 from obspy.clients.filesystem.sds import Client as SDS_Client
+from obspy.core.inventory import FIRResponseStage
+from obspy.core.inventory.util import FloatWithUncertaintiesAndUnit
+
+from ..util_functions.sds_tools import (sds_channel_files, sds_file_path,
+                                        sds_neighbour_streams,
+                                        get_neighbour_pad)
+from ..util_functions.inventory_tools import find_channel, insert_channel
 
 # from ..logger import init_logger
 
@@ -26,7 +32,9 @@ class FIRConverter:
 
     Parameters:
         firzeros (ArrayLike) Input FIR filter zeros (polynomial coefficients).
-        sps (float): Sampling rate in Hz.
+        sps (float or None): Sampling rate (Hz) at which the FIR runs
+            (before decimation).  Informational only (FDIG_EFF in
+            Scherbaum's .prt files): not used in the conversion.
         timetag (float): Time-tag correction in samples.
         input_type (str): 'linear' or 'minphase'
         output_type (str): 'minphase' or 'linear'
@@ -79,13 +87,13 @@ class FIRConverter:
         
         Args:
             firzeros: 
-            sps (float):
+            sps (float or None): FIR sampling rate (informational only)
             timetag (float)
             decimation_factor (int)
             input_type (str)
         """
         self.firzeros: np.ndarray = np.asarray(firzeros, dtype=float)
-        self.sps: float = float(sps)
+        self.sps = None if sps is None else float(sps)
         self.timetag: float = float(timetag)
         self.input_type: str = input_type
         self.decimation_factor: int = decimation_factor
@@ -147,12 +155,16 @@ class FIRConverter:
                    a, b)
 
     @classmethod
-    def from_zeros_file(cls, filename: str, sps: float):
+    def from_zeros_file(cls, filename: str, sps: float = None):
         """
         Read FIR coefficients from a JSON file, and calculate the conversion
 
         The JSON file must have the elements 'fir', 'timetag',
         'decimation_factor', and 'type'
+
+        Args:
+            filename (str): JSON file name
+            sps (float or None): FIR sampling rate (informational only)
         """
         with open(filename, "r") as f:
             book = json.load(f)
@@ -165,7 +177,7 @@ class FIRConverter:
             elif book['symmetry'] == 'ODD':
                 firzeros =  np.concatenate((firzeros, firzeros[-2::-1]))
             else:
-                return ValueError(f'{filename}: Unknown {book("symmetry")=}')
+                raise ValueError(f'{filename}: Unknown {book["symmetry"]=}')
         timetag = float(book["timetag"])
         decimation_factor = int(book["decimation_factor"])
         input_firtype = book["type"]
@@ -178,7 +190,7 @@ class FIRConverter:
         with open(filename, "r") as f:
             book = json.load(f)
         firzeros = np.array(book["firdata_eff"], dtype="double")
-        sps = float(book["sps"])
+        sps = book.get("sps")
         timetag = float(book["timetag"])
         input_type = book["input_type"]
         decimation_factor = int(book["decimation_factor"])
@@ -279,214 +291,375 @@ class FIRConverter:
     # ------------------------------------------------------------
     # Data conversion
     # ------------------------------------------------------------
-    def apply(self, stream, buffer=None, FIRdecim=None, new_loc_code='01'):
+    def apply(self, stream, prev_stream=None, FIRdecim=None,
+              new_loc_code='01', detrend=None, next_stream=None,
+              gap_handling='interpolate', max_interp_gap=None,
+              rel_tol=2.**-32, max_misalignment=0.5):
         """
         Convert a zero-phase stream to minimum-phase
         (if the object has the correct zero-phase information)
 
-        To keep the same starttime as the input stream, adds
-        self.timetag/2 samples to start and cuts off the same number of
-        samples at the end.  This is done by adding a self.timetag/2 - sample
-        buffer to the data before converting.  The buffer may be provided in
-        the function call (it should be data just preceding the current data:
-        this will be verified by comparing the buffer's endtime to the stream's
-        starttime): otherwise a buffer will be created with the same values as
-        the first sample in each stream trace
+        The prev_stream, next_stream, gap_handling, max_interp_gap and
+        rel_tol parameters are only used if you want to apply to consecutive
+        data contained in different streams (or in different traces of the
+        same stream).
+        Each output sample depends on input samples from n_before samples
+        before it to (in theory) infinitely after it, as the conversion
+        filter is an anti-causal IIR filter (see `pad_lengths()`).  To get
+        the same result as if the data had been converted in one piece,
+        provide the data preceding (`prev_stream`) and following
+        (`next_stream`) the input stream: the required number of samples
+        will be taken from each and the output will be cut to the same
+        samples as the input.  Other traces in `stream` with the same id are
+        also used as neighbours.
+
+        A neighbour whose samples are offset from the trace's sample grid by
+        no more than `max_misalignment` samples (for example, day files
+        whose start times were shifted by a clock correction) is shifted
+        onto the trace's grid, so that its samples are used unchanged.
+        If a neighbour is not consecutive (gap or misaligned samples), it is
+        either linearly interpolated across the gap
+        (`gap_handling='interpolate'` and the gap is no longer than
+        `max_interp_gap` samples) or ignored (`gap_handling='edge'`).
+        Without a valid neighbour, the start is padded with the first data
+        value and the end is not padded, giving edge effects.
 
         Args:
             stream (:class:`obspy.core.stream.Stream`): input waveforms
-            buffer (:class:`obspy.core.stream.Stream`): waveform preceding the
-                input (must have same trace_ids as stream)
+            prev_stream (:class:`obspy.core.stream.Stream`): waveforms
+                preceding the input (for example the buffer returned by a
+                previous call)
             FIRdecim (int): decimation factor associated with FIR to correct
                 If None, use self value
             new_loc_code (str or None): Use provided loc code for the output
                 traces
+            detrend (bool or None): detrend data before conversion.  The
+                trend is calculated over the padded data, so results only
+                match across neighbouring streams if the data are not
+                detrended.  If None, only detrend traces that have no valid
+                neighbour on either side
+            next_stream (:class:`obspy.core.stream.Stream`): waveforms
+                following the input
+            gap_handling (str): how to handle non-consecutive neighbours:
+                'interpolate' or 'edge'
+            max_interp_gap (int): longest gap (in samples) to interpolate.
+                If None, the FIR length divided by FIRdecim
+            rel_tol (float): tolerance used to calculate n_after (see
+                `pad_lengths()`)
+            max_misalignment (float): largest offset (in samples) of a
+                neighbour from the trace's sample grid for which it is
+                shifted onto the grid.  Larger offsets are resampled by
+                linear interpolation.
         Returns:
             :class:`obspy.core.stream.Stream`: output waveforms
-            :class:`obspy.core.stream.Stream`: buffer for the next stream
+            :class:`obspy.core.stream.Stream`: buffer to use as prev_stream
+                for the next stream
         """
-        ##################################################
-
+        if detrend not in (True, False, None):
+            raise ValueError(f'{detrend=} not in (True, False, None)')
+        if gap_handling not in ('interpolate', 'edge'):
+            raise ValueError(f'{gap_handling=} not in ("interpolate", "edge")')
         s = stream.copy()
-        newbuffer = stream.copy()
         if FIRdecim is None:
             FIRdecim = self.decimation_factor
-        buffer_size = int(math.ceil(self.timetag/FIRdecim))
-        for tr in s:
+        buffer_size = self._buffer_size(FIRdecim)
+        n_before, n_after = self.pad_lengths(FIRdecim, rel_tol)
+        if max_interp_gap is None:
+            max_interp_gap = int(math.ceil(len(self.firzeros) / FIRdecim))
+        for tr, tr_orig in zip(s, stream):
             original_dtype = tr.data.dtype
             sr_out = tr.stats.sampling_rate
 
-            # Extract data (1D numpy array) and add buffer
-            data = self._add_buffer(tr, buffer, buffer_size)
+            # Gather neighbours and add pads
+            neighbours = [x for x in stream
+                          if x is not tr_orig and x.id == tr.id]
+            for st in (prev_stream, next_stream):
+                if st is not None:
+                    neighbours.extend(st.select(id=tr.id))
+            for nb in neighbours:
+                if not nb.stats.sampling_rate == sr_out:
+                    raise ValueError(f'{tr.id}: trace and neighbour have '
+                                     'different sampling rates')
+            pre = get_neighbour_pad(tr, neighbours, n_before, 'before',
+                                gap_handling, max_interp_gap,
+                                max_misalignment)
+            post = get_neighbour_pad(tr, neighbours, n_after, 'after',
+                                 gap_handling, max_interp_gap,
+                                 max_misalignment)
+            if detrend is None:
+                # Only detrend isolated traces, to keep continuity
+                tr_detrend = pre is None and post is None
+            else:
+                tr_detrend = detrend
+            if pre is None:
+                pre = np.full(buffer_size, tr.data[0])
+            if post is None:
+                post = np.array([], dtype=original_dtype)
+            data = np.concatenate((pre, tr.data, post))
 
-            # DETREND AND INTERPOLATE
-            data = sig.detrend(data, type='linear')
-            if original_dtype == np.float32 and data.dtype != np.float32:
-                data = np.require(data, dtype=np.float32)
-            data_interp = Interpolator(FIRdecim).apply(data, False)
+            # Convert, cut to the input samples and force back to
+            # original dtype
+            data_corr = self._convert_array(data, len(pre), FIRdecim,
+                                            tr_detrend, original_dtype)
+            tr.data = np.array(data_corr[:tr.stats.npts],
+                               dtype=original_dtype)
 
-            # CHANGE FIR FROM ZERO PHASE TO MIN PHASE
-            data_interp_corr, offset_npts = self._firconvert(
-                data_interp, False)
-
-            # RESAMPLE TO ORIGINAL RATE and remove extras from end
-            data_corr = data_interp_corr[::FIRdecim]
-
-            # Force data back to original dtype and put back in trace
-            tr.data = np.array(data_corr[:-buffer_size], dtype=original_dtype)
-
-            # Adjust starttime if offset_npts/FIRdecim is not an integer
-            offset_samps = offset_npts/FIRdecim
+            # Adjust starttime if timetag/FIRdecim is not an integer
+            offset_samps = self.timetag/FIRdecim
             if offset_samps < buffer_size:
                 tr.stats.starttime -= (buffer_size - offset_samps) / sr_out
             elif offset_samps > buffer_size:
                 raise ValueError(f'f{offset_samps=} > {buffer_size=}')
-            
+
             if new_loc_code is not None:
                 tr.stats.location = new_loc_code
-
 
         # Create a new buffer from the end of the original stream traces
         newbuffer = stream.copy()
         for tr in newbuffer:
             tr.trim(starttime=tr.stats.endtime
-                              - (buffer_size+1)/tr.stats.sampling_rate,
+                              - (n_before-1)/tr.stats.sampling_rate,
                     nearest_sample=True)
         return s, newbuffer
 
-    def _add_buffer(self, trace, buffer, buffer_size):
+    def pad_lengths(self, FIRdecim=None, rel_tol=2.**-32):
         """
-        Add a buffer to data, so that it won't be shifted after converting
-        to minimum phase
+        Number of neighbouring samples needed to convert data exactly
+
+        The output sample at index j depends on input samples j - n_before
+        to infinity, because the conversion filter is an anti-causal IIR
+        filter whose impulse response decays as |p|^n, where p is its
+        largest pole (the reflected FIR zero closest to the unit circle).
+        n_before is therefore exact, whereas n_after is the smallest number
+        of samples for which the neglected impulse response sums to no more
+        than rel_tol, so that the error is at most rel_tol * max(|data|).
+        The default (2^-32) gives an error < 0.5 for any 32-bit integer data.
+
+        Both values are calculated from the impulse response of the full
+        conversion (interpolation, filtering and decimation), so they
+        adapt to any FIR length and decimation factor.
+
+        Args:
+            FIRdecim (int): decimation factor associated with FIR to correct
+                If None, use self value
+            rel_tol (float): maximum sum of the neglected impulse response
+        Returns:
+            (tuple):
+                n_before (int): number of samples needed before the data
+                n_after (int): number of samples needed after the data
         """
-        data = trace.data
-        if buffer is not None:
-            buffer = buffer.copy().select(id=trace.id)
-            if len(buffer) == 0:
-                buffer = None
-            elif len(buffer) > 1:
-                raise ValueError(f'more than one buffer trace matches {trace.id=}')
-            else:
-                buffer_trace = buffer[0]
-                sr = trace.stats.sampling_rate
-                if not sr == buffer_trace.stats.sampling_rate:
-                    raise ValueError('trace and buffer have different sampling rates')
-                if not math.abs(trace.stats.starttime
-                                - buffer_trace.stats.endtime
-                                - 1/sr) < 0.5/sr:
-                    print('trace and buffer are not continuous, '
-                          'using generic buffer')
-                    buffer = None
-                elif len(buffer_trace.data) < buffer_size:
-                    print(f'{len(buffer_trace.data)=} < {buffer_size=}, '
-                          'using generic buffer')
-                    buffer = None
-                else:
-                    buffer_data = buffer_trace.data[:buffer_size]
+        if FIRdecim is None:
+            FIRdecim = self.decimation_factor
+        buffer_size = self._buffer_size(FIRdecim)
+        p_max = np.max(np.abs(np.roots(np.insert(-self.a, 0, 1.))))
+        if p_max >= 1:
+            raise ValueError(f'conversion filter is unstable ({p_max=})')
+        # Probe far enough that the unprobed response is negligible
+        m = int(math.ceil(np.log(rel_tol * 1e-6) / np.log(p_max) / FIRdecim)
+                ) + buffer_size + 100
+        impulse = np.zeros(buffer_size + 2*m + 1)
+        impulse[buffer_size + m] = 1.
+        h = np.abs(self._convert_array(impulse, buffer_size, FIRdecim,
+                                       False, impulse.dtype))
+        n_before = max(int(np.nonzero(h)[0].max()) - m, buffer_size)
+        # h[m-k] is the weight of the input sample k samples after output
+        h_cum = np.cumsum(h)
+        i_ok = np.searchsorted(h_cum, rel_tol, side='right') - 1
+        if i_ok < 0:
+            raise ValueError('impulse response probe is too short')
+        n_after = max(m - 1 - i_ok, 0)
+        return n_before, n_after
 
-        if buffer is None:
-            buffer_data = np.full(buffer_size, data[0])
+    def _buffer_size(self, FIRdecim):
+        """Number of samples that conversion shifts the data"""
+        return int(math.ceil(self.timetag/FIRdecim))
 
-        data = np.concatenate((buffer_data, data))
-        return data
+    def _convert_array(self, data, n_pre, FIRdecim, detrend, original_dtype):
+        """
+        Convert a padded 1D array
+
+        Args:
+            data (np.ndarray): data, including n_pre samples of padding
+                at the start
+            n_pre (int): number of padding samples at the start (must be at
+                least self._buffer_size(FIRdecim))
+            FIRdecim (int): decimation factor associated with FIR to correct
+            detrend (bool): detrend data before conversion
+            original_dtype (np.dtype): dtype of the input data
+        Returns:
+            (np.ndarray): converted data, starting at data[n_pre]
+        """
+        buffer_size = self._buffer_size(FIRdecim)
+        if n_pre < buffer_size:
+            raise ValueError(f'{n_pre=} < {buffer_size=}')
+
+        # DETREND AND INTERPOLATE
+        if detrend is True:
+            data = sig.detrend(data, type='linear')
+        if original_dtype == np.float32 and data.dtype != np.float32:
+            data = np.require(data, dtype=np.float32)
+        data_interp = Interpolator(FIRdecim).apply(data, False)
+
+        # CHANGE FIR FROM ZERO PHASE TO MIN PHASE
+        data_interp_corr, _ = self._firconvert(data_interp, False)
+
+        # RESAMPLE TO ORIGINAL RATE and remove shift
+        data_corr = data_interp_corr[::FIRdecim]
+        return data_corr[n_pre - buffer_size: len(data) - buffer_size]
 
     # ------------------------------------------------------------
     # Data conversion
     # ------------------------------------------------------------
-    def apply_SDS(self, SDS_input, SDS_output, startdate=None, enddate=None,
-                  FIRdecim=None, loc_code='01'):
+    def apply_SDS(self, SDS_input, SDS_output=None, startdate=None,
+                  enddate=None, FIRdecim=None, loc_code='01', verbose=False,
+                  max_misalignment=0.5, channels=None):
         """
         Convert an entire SDS directory
 
-        UNTESTED!!!!!
+        Each file is converted using the previous and next day files of the
+        same channel, so that the output is continuous across files (see
+        `apply()`).  Neighbouring files are used even if they are outside
+        of the requested date range.
 
         Args:
             SDS_input (str or Path): input SDS filepath
-            SDS_output (str or Path): output SDS filepath
-            startdate (str, UTCDateTime or None): limit to files starting after
-                this date.  If string, must be ISO8601-standard
-            enddate (str, UTCDateTime or None): limit to files ending before
-                this date.  If string, must be ISO8601-standard
+            SDS_output (str, Path or None): output SDS filepath.  If None,
+                write to SDS_input
+            startdate (str, UTCDateTime or None): limit to files starting
+                at or after this date.  If string, must be ISO8601-standard
+            enddate (str, UTCDateTime or None): limit to files ending at or
+                before this date.  If string, must be ISO8601-standard
             FIRdecim (int): decimation factor associated with FIR to correct
                 If None, use self value
-            loc_code (char): location_code to give to output traces
+            loc_code (str or None): location code to give to output traces.
+                If None, keep the input location code
+            verbose (bool): print the name of each converted file
+            max_misalignment (float): largest offset (in samples) of a
+                neighbouring file from a file's sample grid for which it is
+                treated as on the grid (see `apply()`)
+            channels (list or None): only convert these channels, given as
+                (net, sta, loc, chan) tuples.  If None, convert all channels
+        Returns:
+            (list): (net, sta, loc, chan) of the converted channels
         Raises:
-            ValueError: if SDS_output directory exists already
+            ValueError: if SDS_output exists and loc_code is None or already
+                used in SDS_output
         """
-        if len(loc_code) > 2:
+        if loc_code is not None and len(loc_code) > 2:
             raise ValueError(f'{loc_code=} has more than two letters')
 
         SDS_input = Path(SDS_input)
-        SDS_output = Path(SDS_output)
+        SDS_output = SDS_input if SDS_output is None else Path(SDS_output)
         if startdate is not None:
             startdate = UTCDateTime(startdate)
         if enddate is not None:
             enddate = UTCDateTime(enddate)
         if SDS_output.exists():
-            self._check_output_dir_loc_validity(SDS_output, loc_code)
-        year_paths = [x for x in SDS_input.iterdir() if x.is_dir()]
-        for year_path in year_paths:
-            net_paths = [x for x in year_path.iterdir() if x.is_dir()]
-            for net_path in net_paths:
-                sta_paths = [x for x in net_path.iterdir() if x.is_dir()]
-                for sta_path in sta_paths:
-                    chan_paths = [x for x in sta_path.iterdir() if x.is_dir()]
-                    for chan_path in chan_paths:
-                        buffer = None
-                        # Must sort files, to pass buffer for next day
-                        file_paths = sorted(chan_path.iterdir(),
-                                            key=lambda x: x.name)
-                        for file_path in file_paths:
-                            buffer = self._read_write_SDS_data(file_path,
-                                                               startdate,
-                                                               enddate,
-                                                               SDS_input,
-                                                               SDS_output,
-                                                               buffer,
-                                                               loc_code)
+            self._check_output_valid(SDS_output, loc_code)
 
-    def _check_output_valid(self, SDS_output, loc_code):
+        converted = []
+        sds_channels = sds_channel_files(SDS_input)
+        for key in sorted(sds_channels):
+            if channels is not None and key[:4] not in channels:
+                continue
+            for m, prev_st, st, next_st in sds_neighbour_streams(
+                    sds_channels[key], startdate, enddate, verbose):
+                st_corr, _ = self.apply(st, prev_st, FIRdecim=FIRdecim,
+                                        new_loc_code=loc_code,
+                                        next_stream=next_st,
+                                        max_misalignment=max_misalignment)
+                # Write to output file, with the new location code
+                out_fpath = sds_file_path(SDS_output, m, loc=loc_code)
+                out_fpath.parent.mkdir(parents=True, exist_ok=True)
+                st_corr.write(str(out_fpath), format='MSEED')  # Retains encoding
+                if key[:4] not in converted:
+                    converted.append(key[:4])
+        return converted
+
+    def update_inventory(self, inv, channels, loc_code='01',
+                         inv_force_overwrite=False):
+        """
+        Add the converted channels to an inventory
+
+        Each new channel is a copy of its source channel, with the
+        converter's FIR stage replaced by its minimum phase equivalent
+        (see `convert_response_stage()`) and the location code changed.
+
+        Args:
+            inv (:class:`obspy.core.inventory.Inventory`): inventory
+            channels (list): source channels, as (net, sta, loc, chan) tuples
+                (for example, the output of `apply_SDS()`)
+            loc_code (str): location code of the converted channels
+            inv_force_overwrite (bool): If the new channel's seed_id already
+                exists, overwrite it
+        Returns:
+            (:class:`obspy.core.inventory.Inventory`): new inventory
+        Raises:
+            ValueError: if a channel is not in the inventory or has no FIR
+                stage matching the converter
+        """
+        inv = inv.copy()  # Don't overwrite input inventory
+        for net, sta, loc, chan in channels:
+            new_cha = self.convert_channel(
+                find_channel(inv, net, sta, loc, chan), loc_code)
+            inv, _ = insert_channel(inv, net, sta, new_cha, loc, chan,
+                                    force_overwrite=inv_force_overwrite)
+        return inv
+
+    def convert_channel(self, channel, loc_code='01'):
+        """
+        Return a copy of an inventory channel for the converted data
+
+        Args:
+            channel (:class:`obspy.core.inventory.Channel`): source channel
+            loc_code (str): location code of the converted channel
+        Returns:
+            (:class:`obspy.core.inventory.Channel`)
+        Raises:
+            ValueError: if no FIR stage of the channel matches the converter
+        """
+        new_cha = copy.deepcopy(channel)
+        stages = new_cha.response.response_stages
+        for i, stage in enumerate(stages):
+            if not isinstance(stage, FIRResponseStage):
+                continue
+            try:
+                stages[i] = self.convert_response_stage(stage)
+                break
+            except ValueError:
+                continue
+        else:
+            raise ValueError(f'No FIR stage of {channel.code} matches the '
+                             'converter FIR')
+        new_cha.location_code = loc_code
+        return new_cha
+
+    def matches_channel(self, channel):
+        """True if one of the channel's FIR stages is the converter FIR"""
+        try:
+            self.convert_channel(channel)
+        except ValueError:
+            return False
+        return True
+
+    @staticmethod
+    def _check_output_valid(SDS_output, loc_code):
         """
         Verify that a location code is specified and not in output_dir
         """
         # ERROR if no loc_code specified
-        if loc_code == None:
+        if loc_code is None:
             raise ValueError("No location code specified when writing to "
                              "an existing SDS directory")
         # ERROR if loc_code already exists in output_dir
-        client = SDS_Client(SDS_output)
+        client = SDS_Client(str(SDS_output))
         bad_ids = []
         for nslc in client.get_all_nslc():
             if nslc[2] == loc_code:
-                bad_ids.extend('.'.join(nslc))
+                bad_ids.append('.'.join(nslc))
         if not len(bad_ids) == 0:
             raise ValueError(f"{loc_code=} already exists in {SDS_output=}: {bad_ids}")
         return
-
-    def _read_write_SDS_data(self, file_path, startdate, enddate,
-                             SDS_input, SDS_output, buffer, loc_code='01'):
-        # VERIFY THAT IT'S AN SDS FILE AND IN THE DATA RANGE
-        if not re.match('\d{4}-\d{2}-\d{2}-\d{4}-\d{2}M\..........', file_path):
-            return None
-        filedate = UTCDateTime(file_path[:18])
-        # TEST AGAINST DATA BOUNDS
-        if startdate is not None:
-            if filedate < startdate:
-                return None
-        if enddate is not None:
-            if filedate > enddate:
-                return None
-        print(file_path)
-
-        # Read and convert
-        st = stream_read(file_path)
-        st_corr, buffer = self.apply(st, new_loc_code=loc_code)
-        # Create output file and write to it
-        out_fname = str(file_path).replace(SDS_input, SDS_output)
-        out_fpath = Path(out_fname)
-        out_fpath.parent.mkdir(parents=True, exist_ok=True)
-        st_corr.write(out_fname, format='MSEED')  # Retains encoding
-        return buffer
 
     def _firconvert(self, intrace, returnOrigDType=True, plot=False):
         """
@@ -526,6 +699,84 @@ class FIRConverter:
             y = np.array(y, dtype=original_dtype)
 
         return y, self.timetag
+
+    # ------------------------------------------------------------
+    # Response metadata
+    # ------------------------------------------------------------
+    def output_stage_values(self, FIRdecim=None):
+        """
+        FIR stage values describing the converted (minimum phase) data
+
+        `apply()` removes the time-tag shift, so the converted data are the
+        signal filtered by the causal minimum-phase FIR, starting at each
+        sample's time.  The FIR stage of the output channels should
+        therefore have the minimum-phase coefficients, no symmetry and no
+        delay or correction (whereas the input channels' linear-phase stage
+        has delay = correction = timetag / FIR sampling rate).
+
+        Args:
+            FIRdecim (int): decimation factor associated with the FIR.
+                If None, use self value
+        Returns:
+            (dict): 'coefficients' (list, normalized to sum to 1),
+                'symmetry' ('NONE'), 'delay' (0.), 'correction' (0.),
+                'decimation_factor' and 'input_sample_rate' (self.sps,
+                may be None)
+        """
+        if not self.input_type == 'linear':
+            raise ValueError('Output stage values are only defined for '
+                             'linear phase input FIRs')
+        if FIRdecim is None:
+            FIRdecim = self.decimation_factor
+        return {'coefficients': self.equivalent_zeros.tolist(),
+                'symmetry': 'NONE',
+                'delay': 0.,
+                'correction': 0.,
+                'decimation_factor': FIRdecim,
+                'input_sample_rate': self.sps}
+
+    def convert_response_stage(self, stage):
+        """
+        Return a copy of an input channel's FIR stage for the converted data
+
+        Replaces the coefficients by their minimum phase equivalent (scaled
+        to the same sum as the input coefficients, so that the stage gain is
+        unchanged), the symmetry by 'NONE' and the decimation delay and
+        correction by 0 (see `output_stage_values()`).
+
+        Args:
+            stage (:class:`obspy.core.inventory.response.FIRResponseStage`):
+                linear phase FIR stage of the input channel
+        Returns:
+            (:class:`obspy.core.inventory.response.FIRResponseStage`)
+        Raises:
+            ValueError: if the stage's coefficients are not this converter's
+                input FIR
+        """
+        values = self.output_stage_values()
+        coeffs = np.array([float(x) for x in stage.coefficients])
+        if stage.symmetry == 'EVEN':
+            coeffs = np.concatenate((coeffs, coeffs[::-1]))
+        elif stage.symmetry == 'ODD':
+            coeffs = np.concatenate((coeffs, coeffs[-2::-1]))
+        firzeros = self.firzeros / self.firzeros.sum()
+        if not (len(coeffs) == len(firzeros)
+                and np.allclose(coeffs / coeffs.sum(), firzeros,
+                                rtol=0, atol=1e-4 * np.abs(firzeros).max())):
+            raise ValueError(f'{stage.name=} coefficients do not match the '
+                             'converter FIR')
+        new_stage = copy.deepcopy(stage)
+        new_stage.coefficients = (np.array(values['coefficients'])
+                                  * coeffs.sum()).tolist()
+        new_stage.symmetry = values['symmetry']
+        # obspy needs these as FloatWithUncertaintiesAndUnit to write them
+        new_stage.decimation_delay = FloatWithUncertaintiesAndUnit(
+            values['delay'], unit='SECONDS')
+        new_stage.decimation_correction = FloatWithUncertaintiesAndUnit(
+            values['correction'], unit='SECONDS')
+        if new_stage.name is not None:
+            new_stage.name += ' (minimum phase)'
+        return new_stage
 
     # ------------------------------------------------------------
     # File writing
@@ -665,8 +916,8 @@ class PRTWriter:
             Output file path.
         firzeros : np.ndarray
             Original FIR zeros.
-        sps : float
-            Sampling rate.
+        sps : float or None
+            FIR sampling rate (informational only, written as 0 if None).
         timetag : float
             Time-tag correction.
         a : np.ndarray
@@ -681,7 +932,7 @@ class PRTWriter:
             fid.write("#NO_EFF:\n")
             fid.write(f"{len(firzeros)}\n")
             fid.write("#FDIG_EFF:\n")
-            fid.write(f"{sps}\n")
+            fid.write(f"{0 if sps is None else sps}\n")
             fid.write("#FIRDATA_EFF:\n")
             fid.write(" ".join(f"{x:19.12g}" for x in firzeros) + "\n\n")
 
@@ -713,7 +964,7 @@ class JSONWriter:
         Args:
             filename (str): Output file path.
             firzeros (np.ndarray): Original FIR zeros.
-            sps (float): Sampling rate.
+            sps (float or None): FIR sampling rate (informational only)
             timetag (float): Time-tag correction.
             input_type (str): input FIR type
             decimation_factor (int): the decimation factor associated with

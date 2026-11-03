@@ -78,6 +78,7 @@ class ResponseFunctions(object):
                 coords={
                     "input": [in_id],
                     "output": out_ids,
+                    # Make a list the length of out_ids, with noise_channel in each element
                     "noise_channel": ("output", [noise_channel for x in out_ids]),
                     "f": f
                 },
@@ -117,6 +118,7 @@ class ResponseFunctions(object):
                     "f": f,
                     "in_units": ("input", [in_units]),
                     "out_units": ("output", out_units),
+                    # Make a list the length of out_ids, with noise_channel in each element
                     "noise_channel": ("output", [noise_channel for x in out_ids]),
                 },
                 attrs={
@@ -419,9 +421,9 @@ class ResponseFunctions(object):
         Gyx = spect_density.crossspect(output, input)
         # Crawford et al. 1991 eqn 4,  from BP2010 eqn 9.90
         H_err = np.sqrt((np.ones(coh.shape) - coh) / (2*coh*self.n_windows))
-        noise_channels = ("output", "input", "equal", "unknown")
-        if not noise_channel in noise_channels:
-            raise ValueError(f"{noise_channel=} not in {noise_channels}")
+        possible_noise_channels = ("output", "input", "equal", "unknown")
+        if not noise_channel in possible_noise_channels:
+            raise ValueError(f"{noise_channel=} not in {possible_noise_channels}")
         if noise_channel == "output":
             H = Gxy / Gxx  # BP86 eqn 6.37
             corr_mult = np.ones(H.shape)  # No change

@@ -55,7 +55,9 @@ class Compliance(object):
             raise ValueError('uncertainties are not the same length as freqs')
         if coherence is not None:
             if not len(freqs) == len(coherence):
-                raise ValueError('coherences are not the same length as freqs')  
+                raise ValueError('coherences are not the same length as freqs') 
+        if noise_channel is not None and not isinstance(noise_channel, str):
+            raise ValueError(f'{noise_channel=} is not str or None')
 
         # Assign inputs       
         self.freqs = freqs
@@ -101,7 +103,7 @@ class Compliance(object):
                    Compliance._zp_to_ncompl(f, zp, wdepth, z_units),
                    Compliance._zp_to_ncompl(f, zp_uncert, wdepth, z_units),
                    wdepth,
-                   rfs.noise_channel,
+                   rfs.noise_channel(z_str),
                    coherence=coherence)
 
     @classmethod
@@ -176,7 +178,7 @@ class Compliance(object):
         s +=  "  {} frequencies, from {} to {} Hz\n".format(
             len(self.freqs), np.min(self.freqs), np.max(self.freqs))
         s += f"  water_depth='{self.water_depth}'\n"
-        s += f"  noise_channel={self.noise_channel}\n"
+        s += f"  noise_channel={str(self.noise_channel)}\n"
         s += f"  gravity_corrected={self.gravity_corrected}"
         return s
 

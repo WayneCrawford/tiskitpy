@@ -48,7 +48,7 @@ Get Methods
 - :meth:`coh_signif <tiskitpy.SpectralDensity.coh_signif>`: The coherence significance level
 - :meth:`clean_sequence <tiskitpy.SpectralDensity.clean_sequence>`: The clean sequence applied to a channel
 
-Other Methods
+Plot Methods
 ^^^^^^^^^^^^^^^^^^
 
 - :meth:`plot_autospectra <tiskitpy.SpectralDensity.plot_autospectra>`: plot autospectra
