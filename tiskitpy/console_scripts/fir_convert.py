@@ -7,7 +7,9 @@ import argparse
 from obspy.core.inventory import read_inventory
 
 from tiskitpy import FIRConverter
-from ..util_functions.sds_tools import sds_channel_files
+from ..util_functions.sds_tools import (sds_channel_files,
+                                        sds_inventory_comparison,
+                                        log_sds_inventory_comparison)
 from ..util_functions.inventory_tools import (find_channel,
                                               write_inventory_unique)
 from ..logger import init_logger, change_console_level
@@ -24,7 +26,10 @@ def add_arguments(p):
                        help='specify a zero-phase filter zeros file')
     group.add_argument('--conv_file',
                        help='specify a zero-phase to minimum-phase conversion file')
-    group.add_argument('--builtin', help='specify a built-in conversion')
+    builtins = FIRConverter.builtin_names()
+    group.add_argument('--builtin', choices=builtins, metavar='NAME',
+                       help='specify a built-in conversion: '
+                            + ', '.join(builtins))
     p.add_argument("--loc_code", default='01',
                    help="Location code for output data (default: %(default)s)")
     p.add_argument("--out_file", dest="output_file", default=None,
@@ -61,7 +66,10 @@ def FIR_convert_SDS(args, inv):
 
     # Select channels that are in the inventory and contain the FIR
     channels = []
-    for net, sta, loc, cha, _ in sorted(sds_channel_files(args.SDS_root)):
+    sds_channels = sds_channel_files(args.SDS_root)
+    comparison = sds_inventory_comparison(sds_channels, inv)
+    log_sds_inventory_comparison(comparison, logger)
+    for net, sta, loc, cha in comparison['both']:
         seed_id = f'{net}.{sta}.{loc}.{cha}'
         try:
             inv_cha = find_channel(inv, net, sta, loc, cha)
@@ -81,6 +89,7 @@ def FIR_convert_SDS(args, inv):
     if args.station_only is False:
         converter.apply_SDS(args.SDS_root, args.output_dir,
                             loc_code=args.loc_code, channels=channels,
+                            sds_channels=sds_channels,
                             verbose=not args.quiet)
     return converter.update_inventory(
         inv, channels, loc_code=args.loc_code,

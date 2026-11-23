@@ -11,7 +11,9 @@ from obspy.core.inventory import read_inventory
 
 from ..decimate import Decimator
 from ..util_functions.sds_tools import (sds_channel_files, sds_file_path,
-                                        sds_neighbour_streams, is_consecutive)
+                                        sds_neighbour_streams, is_consecutive,
+                                        sds_inventory_comparison,
+                                        log_sds_inventory_comparison)
 from ..util_functions.inventory_tools import write_inventory_unique
 from ..logger import init_logger, change_console_level
 
@@ -79,14 +81,15 @@ def decimate_SDS(args, inv):
         out_SDS_root = Path(args.output_dir)
 
     sds_channels = sds_channel_files(SDS_root)
+    comparison = sds_inventory_comparison(sds_channels, inv)
+    log_sds_inventory_comparison(comparison, logger)
     for key in sorted(sds_channels):
         net, sta, loc, cha, typ = key
         seed_id = f'{net}.{sta}.{loc}.{cha}'
-        if not cha[0] == in_band_code:
-            logger.info(f'{seed_id}: band_code != {in_band_code}, skipping')
+        if key[:4] not in comparison['both']:
             continue
-        elif not _channel_in_inv(inv, net, sta, loc, cha):
-            logger.warning(f'{seed_id}: not in inventory, skipping')
+        elif not cha[0] == in_band_code:
+            logger.info(f'{seed_id}: band_code != {in_band_code}, skipping')
             continue
         elif not _ch_sample_rate(inv, net, sta, loc, cha) == args.input_sample_rate:
             logger.info(f'{seed_id}: inv sampling rate != '
@@ -149,11 +152,6 @@ def _others(prev_st, st, tr):
     """prev_st plus the other traces of st (neighbours of tr)"""
     others = Stream([x for x in st if x is not tr])
     return others if prev_st is None else prev_st + others
-
-
-def _channel_in_inv(inv, net, sta, loc, cha):
-    return len(inv.select(network=net, station=sta, location=loc,
-                          channel=cha)) > 0
 
 
 def _ch_sample_rate(inv, net, sta, loc, cha):

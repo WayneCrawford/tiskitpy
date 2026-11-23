@@ -1,3 +1,19 @@
+## 2.5.0
+- BUGFIXES
+    - ``SpectralDensity.plots()`` handles ``dpi`` argument correctly
+- Minor
+    - New ``tiskitpy compare_SDS_XML`` subcommand: lists the NSLCs that are
+      in both an SDS directory and a StationXML file, only in the StationXML
+      file and only in the SDS directory
+- Maintenance
+    - ``decimate_SDS`` and ``FIR_convert_SDS`` use the same comparison
+      (``sds_tools.sds_inventory_comparison()``) to select channels, and list
+      the skipped SDS channels that are not in the StationXML file in one
+      warning
+    - ``FIRConverter.apply_SDS()`` takes an optional ``sds_channels`` (the
+      output of ``sds_channel_files()``), so ``FIR_convert_SDS`` scans the
+      SDS directory only once
+
 ## 2.4.0
 - Minor
     - ``FIRConverter`` now handles consecutive data in separate files
@@ -22,6 +38,9 @@
       ``tiskitpy decimate_SDS``: takes both an SDS directory and a StationXML
       file, converts only the channels whose response contains the converter
       FIR, and writes an SDS and StationXML file with the new channels
+    - ``FIRConverter.builtin_names()`` lists the built-in conversions; they are
+      shown by ``tiskitpy FIR_convert_SDS --help`` and when an unknown
+      ``--builtin`` is given
     - ``Decimator.decimate()`` takes neighbouring data (``prev_stream``,
       ``next_stream``) and a decimation ``phase``, so that data decimated in
       separate pieces are identical to data decimated in one piece

@@ -776,6 +776,7 @@ class SpectralDensity:
               outfile=None,
               title=None,
               line_kws=None,
+              dpi=None,
               **fig_kw):
         """
         Plot overlaid autospectra of multiple SpectralDensity objects
@@ -787,6 +788,7 @@ class SpectralDensity:
             x, overlay, plot_peterson, show, outfile, title: see `plot()`
             line_kws(list of dict): :class:`matplotlib.lines.Line2D` keywords
                 for each SpectralDensity function
+            dpi (int): passed to savefig
             **kwargs: any arguments used in plot_autospectra, except
                 overlay (always true)
         Returns:
@@ -836,7 +838,7 @@ class SpectralDensity:
             logger.error(f'No match for {channel=}, nothing plotted')
         plt.legend(fontsize='small')
         if outfile:
-            plt.savefig(outfile)
+            plt.savefig(outfile, dpi=dpi)
         if show:
             plt.show()
         return fig, axa

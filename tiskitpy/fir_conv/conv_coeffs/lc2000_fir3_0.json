@@ -3,6 +3,7 @@
    "firname": "lc2000.fir3",
    "fdig": 0,
    "input_type": "linear",
+   "decimation_factor": 2,
    "sps": "0",
    "firdata_eff": [
       "-26",

@@ -288,7 +288,7 @@ class SeafloorSynthetic(object):
         ncompl = Compliance.from_seafloor_synthetic(self, max_freq)
         ncompl.write(base_name, out_dir=out_dir)
 
-    def plot(self, fmin=0.001, fmax=0.1, fstep=0.001, outfile=None, show=True):
+    def plot(self, fmin=0.001, fmax=0.1, fstep=0.001, outfile=None, show=True, dpi=None):
         """
         Plot the spectral representation of the noise sources in dB
         """
@@ -316,7 +316,7 @@ class SeafloorSynthetic(object):
         axs[1].set_title('Seismometer')
         plt.suptitle('SeafloorSynthetic components')
         if outfile is not None:
-            plt.savefig(outfile)
+            plt.savefig(outfile, dpi=dpi)
         if show is True:
             plt.show()
         return axs

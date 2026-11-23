@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Test the SDS console scripts (decimate_SDS, FIR_convert_SDS)
+Test the SDS console scripts (decimate_SDS, FIR_convert_SDS, compare_SDS_XML)
 """
 import unittest
 import tempfile
@@ -14,7 +14,7 @@ from obspy.core.inventory import (Inventory, Network, Station, Channel, Site,
                                   Response, FIRResponseStage)
 
 from tiskitpy import FIRConverter, Decimator
-from tiskitpy.console_scripts import decimate_SDS, fir_convert
+from tiskitpy.console_scripts import decimate_SDS, fir_convert, compare_SDS_XML
 
 
 class TestSDSScripts(unittest.TestCase):
@@ -133,6 +133,27 @@ class TestSDSScripts(unittest.TestCase):
         decimate_SDS.main(self._args(decimate_SDS, [
             str(self.root / 'SDS'), self.inv_file, str(self.sr), '5',
             '--out_dir', str(self.root / 'SDS_decim'), '-q']))
+
+    def test_compare_SDS_XML(self):
+        # Add a channel only in the SDS and one only in the StationXML
+        tr = self.traces[0].copy()
+        tr.stats.channel = 'LHN'
+        fpath = (self.root / 'SDS' / '2015' / 'XX' / 'STA' / 'LHN.D'
+                 / 'XX.STA.00.LHN.D.2015.365')
+        fpath.parent.mkdir(parents=True, exist_ok=True)
+        tr.write(str(fpath), format='MSEED')
+        inv = read_inventory(self.inv_file)
+        sta = inv[0][0]
+        extra = sta.channels[0].copy()
+        extra.code = 'LHE'
+        sta.channels.append(extra)
+        sta.channels.append(sta.channels[0].copy())  # second epoch
+        inv.write(self.inv_file, format='STATIONXML')
+        comp = compare_SDS_XML.compare_SDS_XML(str(self.root / 'SDS'),
+                                               self.inv_file)
+        self.assertEqual(comp['both'], [('XX', 'STA', '00', 'LHZ')])
+        self.assertEqual(comp['inv_only'], [('XX', 'STA', '00', 'LHE')])
+        self.assertEqual(comp['sds_only'], [('XX', 'STA', '00', 'LHN')])
 
 
 def suite():

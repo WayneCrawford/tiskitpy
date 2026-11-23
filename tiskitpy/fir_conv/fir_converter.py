@@ -207,18 +207,32 @@ class FIRConverter:
         Args:
             name (str or None): if str, uses the specified builtin
                                 if None, prints a list of builtins
+        Raises:
+            ValueError: if name is not a builtin
         """
-        corr_dir = Path(__file__).parent.resolve() / 'conv_coeffs'
+        names = cls.builtin_names()
         if name is None:
-            children = list(corr_dir.glob('*.json'))
-            if len(children) == 0:
+            if len(names) == 0:
                 print('No built-in conversion coefficients')
             else:
                 print('Built-in conversion coefficients:')
-                for child in children:
-                    print('\t' + child.stem)
+                for x in names:
+                    print('\t' + x)
             return
-        return cls.from_conv_file(corr_dir / (name + '.json'))
+        if name not in names:
+            raise ValueError(f'Unknown built-in conversion "{name}", '
+                             f'choose from: {", ".join(names)}')
+        return cls.from_conv_file(cls._builtin_dir() / (name + '.json'))
+
+    @classmethod
+    def builtin_names(cls):
+        """Names of the builtin conversion coefficients (sorted)"""
+        return sorted(x.name[:-len('.json')]
+                      for x in cls._builtin_dir().glob('*.json'))
+
+    @staticmethod
+    def _builtin_dir():
+        return Path(__file__).parent.resolve() / 'conv_coeffs'
 
     # ------------------------------------------------------------
     # Computational methods
@@ -512,7 +526,7 @@ class FIRConverter:
     # ------------------------------------------------------------
     def apply_SDS(self, SDS_input, SDS_output=None, startdate=None,
                   enddate=None, FIRdecim=None, loc_code='01', verbose=False,
-                  max_misalignment=0.5, channels=None):
+                  max_misalignment=0.5, channels=None, sds_channels=None):
         """
         Convert an entire SDS directory
 
@@ -539,6 +553,9 @@ class FIRConverter:
                 treated as on the grid (see `apply()`)
             channels (list or None): only convert these channels, given as
                 (net, sta, loc, chan) tuples.  If None, convert all channels
+            sds_channels (dict or None): the output of
+                `sds_channel_files(SDS_input)`, if already available (saves
+                scanning SDS_input again).  If None, scan SDS_input
         Returns:
             (list): (net, sta, loc, chan) of the converted channels
         Raises:
@@ -558,7 +575,8 @@ class FIRConverter:
             self._check_output_valid(SDS_output, loc_code)
 
         converted = []
-        sds_channels = sds_channel_files(SDS_input)
+        if sds_channels is None:
+            sds_channels = sds_channel_files(SDS_input)
         for key in sorted(sds_channels):
             if channels is not None and key[:4] not in channels:
                 continue

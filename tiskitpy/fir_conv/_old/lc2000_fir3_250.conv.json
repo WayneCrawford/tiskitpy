@@ -4,7 +4,7 @@
     "fdig": "0",
     "input_type": "linear",
     "decimation_factor": 2,
-    "sps": "0",
+    "sps": 250.0,
     "firdata_eff": [
         -26.0,
         -247.0,
@@ -175,6 +175,5 @@
         -8.964676303122024,
         1.0
     ],
-    "sps": 250.0,
     "timetag": 50.0
 }

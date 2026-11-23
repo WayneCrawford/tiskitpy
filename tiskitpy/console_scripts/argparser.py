@@ -15,6 +15,8 @@ from .decimate_SDS import add_arguments as add_decimate_arguments
 from .get_SDS_inventory import run as inventory_main
 from .fir_convert import main as fir_convert_main
 from .fir_convert import add_arguments as add_fir_convert_arguments
+from .compare_SDS_XML import main as compare_SDS_XML_main
+from .compare_SDS_XML import add_arguments as add_compare_SDS_XML_arguments
 
 warnings.simplefilter("once")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -88,6 +90,16 @@ def main():
              'StationXML')
     add_fir_convert_arguments(p)
     p.set_defaults(func=fir_convert_main)
+
+    # "compare_SDS_XML" subcommand
+    p = subparsers.add_parser(
+        'compare_SDS_XML',
+        description='List the NSLCs (net.sta.loc.cha) that are in both an '
+                    'SDS directory and a StationXML file, only in the '
+                    'StationXML file, and only in the SDS directory',
+        help='Compare the channels in an SDS directory and a StationXML file')
+    add_compare_SDS_XML_arguments(p)
+    p.set_defaults(func=compare_SDS_XML_main)
 
     args = parser.parse_args()
     if not "func" in args:

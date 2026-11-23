@@ -213,3 +213,41 @@ def get_neighbour_pad(trace, neighbours, n, side, gap_handling='interpolate',
                   f'({gap=:g} samples), accepting edge effects')
             return None
     return np.interp(want, xp, fp)
+
+
+def sds_inventory_comparison(sds, inv):
+    """
+    Compare the channels (NSLCs) in an SDS archive and in an inventory
+
+    Args:
+        sds (str, Path or dict): SDS root directory, or the output of
+            `sds_channel_files()`
+        inv (:class:`obspy.core.inventory.Inventory`): inventory
+    Returns:
+        (dict): with keys 'both', 'inv_only' and 'sds_only', each a sorted
+            list of (net, sta, loc, cha) tuples.  Data types and channel
+            epochs are ignored
+    """
+    if not isinstance(sds, dict):
+        sds = sds_channel_files(sds)
+    sds_nslcs = {key[:4] for key in sds}
+    inv_nslcs = {(net.code, sta.code, cha.location_code, cha.code)
+                 for net in inv for sta in net for cha in sta}
+    return {'both': sorted(sds_nslcs & inv_nslcs),
+            'inv_only': sorted(inv_nslcs - sds_nslcs),
+            'sds_only': sorted(sds_nslcs - inv_nslcs)}
+
+
+def log_sds_inventory_comparison(comparison, logger):
+    """
+    Log the SDS channels that are not in the inventory (and will be skipped)
+
+    Args:
+        comparison (dict): output of `sds_inventory_comparison()`
+        logger (:class:`logging.Logger`): logger
+    """
+    if len(comparison['sds_only']) > 0:
+        logger.warning('{:d} SDS channels not in inventory, skipping: {}'
+                       .format(len(comparison['sds_only']),
+                               ', '.join('.'.join(x)
+                                         for x in comparison['sds_only'])))

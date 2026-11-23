@@ -45,7 +45,6 @@ class TestFirConvMethods(unittest.TestCase):
         print(self.stream_orig, self.stream_fir, stream_fir)
         self.assertListEqual(self.stream_fir[0].data.tolist(),
                              stream_fir[0].data.tolist())
-        stream_fir.write('example_FIR_LSVEI_20150827061217.mseed','MSEED')
         if plot is True:
             self.plot_oversampled([
                 [self.stream_orig[0], {'color': 'k', 'lw': 2, 'label': 'original'}],
@@ -64,7 +63,7 @@ class TestFirConvMethods(unittest.TestCase):
             plt.legend()
             plt.show()
 
-    def test_apply_buffer(self, plot=True):
+    def test_apply_buffer(self, plot=False):
         # Test applying the code to a local EQ with visible FIR effect
         # Compare working on the entire stream versus the entire stream
         # chopped in two
