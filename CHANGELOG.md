@@ -5,6 +5,16 @@
     - New ``tiskitpy compare_SDS_XML`` subcommand: lists the NSLCs that are
       in both an SDS directory and a StationXML file, only in the StationXML
       file and only in the SDS directory
+    - ``FIR_convert_SDS``:
+        - copies, by default, the channels that are not converted (no
+          FIR stage matches the converter, not in the StationXML file, or
+          several StationXML channel epochs) to the ``--out_dir`` directory.
+        - Refuses an existing ``--out_dir`` directory,  unless ``--out_dir_exists_ok`` is given
+        - Never overwrites an existing channel (NSLC) in the output SDS directory
+        - Prints a summary of the action for each SDS channel at the end of the run
+    - ``FIRConverter.apply_SDS()`` only refuses an existing output directory
+      if it already contains one of the output channels (it used to refuse
+      any channel with the output location code, or no location code)
 - Maintenance
     - ``decimate_SDS`` and ``FIR_convert_SDS`` use the same comparison
       (``sds_tools.sds_inventory_comparison()``) to select channels, and list

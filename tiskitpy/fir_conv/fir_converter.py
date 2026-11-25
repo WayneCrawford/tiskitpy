@@ -12,7 +12,6 @@ from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 import scipy.signal as sig
 from obspy import UTCDateTime
-from obspy.clients.filesystem.sds import Client as SDS_Client
 from obspy.core.inventory import FIRResponseStage
 from obspy.core.inventory.util import FloatWithUncertaintiesAndUnit
 
@@ -559,8 +558,8 @@ class FIRConverter:
         Returns:
             (list): (net, sta, loc, chan) of the converted channels
         Raises:
-            ValueError: if SDS_output exists and loc_code is None or already
-                used in SDS_output
+            ValueError: if an output channel (net, sta, loc_code, chan)
+                already exists in SDS_output
         """
         if loc_code is not None and len(loc_code) > 2:
             raise ValueError(f'{loc_code=} has more than two letters')
@@ -571,15 +570,15 @@ class FIRConverter:
             startdate = UTCDateTime(startdate)
         if enddate is not None:
             enddate = UTCDateTime(enddate)
-        if SDS_output.exists():
-            self._check_output_valid(SDS_output, loc_code)
-
-        converted = []
         if sds_channels is None:
             sds_channels = sds_channel_files(SDS_input)
-        for key in sorted(sds_channels):
-            if channels is not None and key[:4] not in channels:
-                continue
+        keys = [key for key in sorted(sds_channels)
+                if channels is None or key[:4] in channels]
+        if SDS_output.exists():
+            self._check_output_valid(SDS_output, keys, loc_code)
+
+        converted = []
+        for key in keys:
             for m, prev_st, st, next_st in sds_neighbour_streams(
                     sds_channels[key], startdate, enddate, verbose):
                 st_corr, _ = self.apply(st, prev_st, FIRdecim=FIRdecim,
@@ -661,23 +660,27 @@ class FIRConverter:
         return True
 
     @staticmethod
-    def _check_output_valid(SDS_output, loc_code):
+    def output_nslc(nslc, loc_code):
+        """(net, sta, loc, chan) of a converted channel"""
+        net, sta, loc, chan = nslc[:4]
+        return (net, sta, loc if loc_code is None else loc_code, chan)
+
+    @classmethod
+    def _check_output_valid(cls, SDS_output, keys, loc_code):
         """
-        Verify that a location code is specified and not in output_dir
+        Verify that none of the output channels already exist in SDS_output
+
+        Args:
+            SDS_output (Path): output SDS directory
+            keys (list): `sds_channel_files()` keys of the input channels
+            loc_code (str or None): output location code
         """
-        # ERROR if no loc_code specified
-        if loc_code is None:
-            raise ValueError("No location code specified when writing to "
-                             "an existing SDS directory")
-        # ERROR if loc_code already exists in output_dir
-        client = SDS_Client(str(SDS_output))
-        bad_ids = []
-        for nslc in client.get_all_nslc():
-            if nslc[2] == loc_code:
-                bad_ids.append('.'.join(nslc))
-        if not len(bad_ids) == 0:
-            raise ValueError(f"{loc_code=} already exists in {SDS_output=}: {bad_ids}")
-        return
+        existing = {key[:4] for key in sds_channel_files(SDS_output)}
+        bad_ids = sorted({'.'.join(cls.output_nslc(key, loc_code))
+                          for key in keys} & {'.'.join(x) for x in existing})
+        if len(bad_ids) > 0:
+            raise ValueError(f"Output channels already exist in "
+                             f"{SDS_output=}: {bad_ids}")
 
     def _firconvert(self, intrace, returnOrigDType=True, plot=False):
         """

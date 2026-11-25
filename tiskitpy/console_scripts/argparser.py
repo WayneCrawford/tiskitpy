@@ -83,9 +83,16 @@ def main():
         description='Convert waveforms in an SDS directory from zero_phase '
                     'to minimum phase response, and add the new channels to '
                     'a StationXML file',
-        epilog='You must enter one of --zeros_file, --conv_file, or --builtin. '
-               'Only channels in the StationXML file whose response contains '
-               'the corresponding FIR are converted.',
+        epilog='Only channels in the StationXML file whose response contains '
+               'the corresponding FIR are converted.  The other SDS channels '
+               '(no FIR stage matching the converter, not in the StationXML '
+               'file, or several StationXML epochs) are copied to --out_dir, '
+               'unless --no_copy is given or no channel is converted.  '
+               'Existing channels (NSLCs) in the output SDS directory are '
+               'never overwritten: their conversion or copy is aborted.  A '
+               'summary of the action for each SDS channel (converted, '
+               'copied, skipped or aborted) is printed at the end, unless -q '
+               'is given.',
         help='Convert SDS waveforms to minimum phase equivalent and update '
              'StationXML')
     add_fir_convert_arguments(p)

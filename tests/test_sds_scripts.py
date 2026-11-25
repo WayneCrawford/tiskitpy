@@ -115,6 +115,115 @@ class TestSDSScripts(unittest.TestCase):
             / inv.select(location='00')[0][0][0].response
             .instrument_sensitivity.value, 1.)
 
+    def _add_sds_channel(self, chan, loc='00'):
+        """Add a one-file channel to the SDS, return its path"""
+        tr = self.traces[0].copy()
+        tr.stats.channel = chan
+        tr.stats.location = loc
+        fpath = (self.root / 'SDS' / '2015' / 'XX' / 'STA' / f'{chan}.D'
+                 / f'XX.STA.{loc}.{chan}.D.2015.365')
+        fpath.parent.mkdir(parents=True, exist_ok=True)
+        tr.write(str(fpath), format='MSEED')
+        return fpath
+
+    def test_FIR_convert_SDS_copy(self):
+        # A channel without the FIR and a channel not in the StationXML,
+        # which should both be copied to out_dir
+        no_fir = self._add_sds_channel('LHN')
+        sds_only = self._add_sds_channel('LHE')
+        inv = read_inventory(self.inv_file)
+        extra = inv[0][0].channels[0].copy()
+        extra.code = 'LHN'
+        extra.response.response_stages = extra.response.response_stages[:1]
+        inv[0][0].channels.append(extra)
+        inv.write(self.inv_file, format='STATIONXML')
+        out_dir = self.root / 'SDS_conv'
+        base = [str(self.root / 'SDS'), self.inv_file,
+                '--builtin', 'lc2000_fir3_0', '-q', '--out_dir']
+        fir_convert.main(self._args(fir_convert, base + [str(out_dir)]))
+        self.assertEqual(
+            len(list(out_dir.glob('*/XX/STA/LHZ.D/XX.STA.01.*'))), self.ndays)
+        for fpath in (no_fir, sds_only):
+            copied = out_dir / fpath.relative_to(self.root / 'SDS')
+            self.assertTrue(copied.is_file())
+            self.assertEqual(copied.read_bytes(), fpath.read_bytes())
+        # The converted channel's source is not copied
+        self.assertEqual(list(out_dir.glob('*/XX/STA/LHZ.D/XX.STA.00.*')),
+                         [])
+        # out_dir must not exist, unless --out_dir_exists_ok
+        with self.assertRaises(ValueError):
+            fir_convert.main(self._args(fir_convert, base + [str(out_dir)]))
+        # With --out_dir_exists_ok, existing NSLCs are not overwritten
+        copied = out_dir / no_fir.relative_to(self.root / 'SDS')
+        copied.write_bytes(b'not overwritten')
+        with self.assertLogs('tiskitpy', 'INFO') as cm:
+            fir_convert.main(self._args(fir_convert, base + [
+                str(out_dir), '--out_dir_exists_ok', '--loc_code', '02']))
+        self.assertEqual(
+            len(list(out_dir.glob('*/XX/STA/LHZ.D/XX.STA.02.*'))), self.ndays)
+        self.assertEqual(copied.read_bytes(), b'not overwritten')
+        summary = self._summary(cm)
+        self.assertEqual(summary['XX.STA.00.LHZ'], 'converted')
+        self.assertEqual(summary['XX.STA.00.LHN'], 'aborted')
+        self.assertEqual(summary['XX.STA.00.LHE'], 'aborted')
+        # Same location code: the conversion is aborted
+        with self.assertLogs('tiskitpy', 'INFO') as cm:
+            fir_convert.main(self._args(fir_convert, base + [
+                str(out_dir), '--out_dir_exists_ok']))
+        self.assertEqual(self._summary(cm)['XX.STA.00.LHZ'], 'aborted')
+        # --no_copy
+        out_dir2 = self.root / 'SDS_conv2'
+        fir_convert.main(self._args(fir_convert, base + [str(out_dir2),
+                                                         '--no_copy']))
+        self.assertEqual(list(out_dir2.glob('*/XX/STA/LH[NE].D/*')), [])
+
+    @staticmethod
+    def _summary(cm):
+        """{seed_id: action} from the summary in captured log output"""
+        msg = [r.getMessage() for r in cm.records
+               if r.getMessage().startswith('Summary: ')][-1]
+        return {line.split(':')[0].strip(): line.split(':')[1].split()[0]
+                for line in msg.splitlines()[1:]}
+
+    def test_FIR_convert_SDS_existing_nslc(self):
+        # The converted channel's NSLC already exists in the SDS
+        existing = self._add_sds_channel('LHZ', loc='01')
+        before = existing.read_bytes()
+        # In place: the conversion is aborted
+        with self.assertLogs('tiskitpy', 'INFO') as cm:
+            inv = fir_convert.FIR_convert_SDS(self._args(fir_convert, [
+                str(self.root / 'SDS'), self.inv_file,
+                '--builtin', 'lc2000_fir3_0', '-q']),
+                read_inventory(self.inv_file))
+        summary = self._summary(cm)
+        self.assertEqual(summary['XX.STA.00.LHZ'], 'aborted')
+        self.assertEqual(summary['XX.STA.01.LHZ'], 'skipped')
+        self.assertEqual(existing.read_bytes(), before)
+        self.assertEqual(len(inv.select(location='01')), 0)
+        # To out_dir: XX.STA.01.LHZ is copied, so the conversion is aborted
+        out_dir = self.root / 'SDS_conv'
+        with self.assertLogs('tiskitpy', 'INFO') as cm:
+            fir_convert.main(self._args(fir_convert, [
+                str(self.root / 'SDS'), self.inv_file, '--builtin',
+                'lc2000_fir3_0', '-q', '--out_dir', str(out_dir)]))
+        summary = self._summary(cm)
+        self.assertEqual(summary['XX.STA.00.LHZ'], 'aborted')
+        # ...and as nothing is converted, nothing is copied
+        self.assertEqual(summary['XX.STA.01.LHZ'], 'skipped')
+        self.assertFalse(out_dir.exists())
+
+    def test_FIR_convert_SDS_nothing_to_convert(self):
+        # No channel has the FIR: nothing is converted or copied
+        inv = read_inventory(self.inv_file)
+        resp = inv[0][0].channels[0].response
+        resp.response_stages = resp.response_stages[:1]
+        inv.write(self.inv_file, format='STATIONXML')
+        out_dir = self.root / 'SDS_conv'
+        fir_convert.main(self._args(fir_convert, [
+            str(self.root / 'SDS'), self.inv_file, '--builtin',
+            'lc2000_fir3_0', '-q', '--out_dir', str(out_dir)]))
+        self.assertFalse(out_dir.exists())
+
     def test_decimate_SDS(self):
         decimate_SDS.main(self._args(decimate_SDS, [
             str(self.root / 'SDS'), self.inv_file, str(self.sr), '5',

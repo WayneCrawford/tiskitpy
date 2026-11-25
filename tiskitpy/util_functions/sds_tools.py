@@ -238,16 +238,17 @@ def sds_inventory_comparison(sds, inv):
             'sds_only': sorted(sds_nslcs - inv_nslcs)}
 
 
-def log_sds_inventory_comparison(comparison, logger):
+def log_sds_inventory_comparison(comparison, logger, action='skipping'):
     """
     Log the SDS channels that are not in the inventory (and will be skipped)
 
     Args:
         comparison (dict): output of `sds_inventory_comparison()`
         logger (:class:`logging.Logger`): logger
+        action (str): what is done with these channels
     """
     if len(comparison['sds_only']) > 0:
-        logger.warning('{:d} SDS channels not in inventory, skipping: {}'
-                       .format(len(comparison['sds_only']),
+        logger.warning('{:d} SDS channels not in inventory, {}: {}'
+                       .format(len(comparison['sds_only']), action,
                                ', '.join('.'.join(x)
                                          for x in comparison['sds_only'])))
